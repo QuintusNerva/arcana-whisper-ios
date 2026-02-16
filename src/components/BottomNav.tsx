@@ -1,7 +1,6 @@
+import React from 'react';
 import { HomeIcon } from './HomeIcon';
 import { DrawIcon } from './DrawIcon';
-import { MeaningsIcon } from './MeaningsIcon';
-import { HistoryIcon } from './HistoryIcon';
 import { ProfileIcon } from './ProfileIcon';
 
 interface BottomNavProps {
@@ -9,34 +8,63 @@ interface BottomNavProps {
     onTabChange: (tab: string) => void;
 }
 
-export function BottomNav({ currentTab, onTabChange }: BottomNavProps) {
-    const tabs = [
-        { id: 'home', label: 'Home', icon: HomeIcon },
-        { id: 'new', label: 'Draw', icon: DrawIcon },
-        { id: 'meanings', label: 'Meanings', icon: MeaningsIcon },
-        { id: 'history', label: 'History', icon: HistoryIcon },
-        { id: 'profile', label: 'Profile', icon: ProfileIcon }
-    ];
+const TABS = [
+    { id: 'home', label: 'Altar', icon: HomeIcon },
+    { id: 'new', label: 'Draw', icon: DrawIcon, promoted: true },
+    { id: 'profile', label: 'Self', icon: ProfileIcon },
+];
 
+export function BottomNav({ currentTab, onTabChange }: BottomNavProps) {
     return (
-        <nav className="fixed bottom-0 left-0 right-0 bg-black/30 backdrop-blur-md border-t border-white/10">
-            <div className="flex justify-around items-center py-2">
-                {tabs.map((tab) => {
+        <nav
+            style={{
+                flexShrink: 0,
+                width: '100%',
+                background: 'linear-gradient(to right, rgb(26, 11, 46), rgb(13, 6, 24), rgb(26, 11, 46))',
+                paddingBottom: 'env(safe-area-inset-bottom, 12px)',
+                borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                zIndex: 100,
+            }}
+        >
+            <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', padding: '4px 12px 2px', maxWidth: '600px', margin: '0 auto' }}>
+                {TABS.map((tab) => {
                     const IconComponent = tab.icon;
                     const isActive = currentTab === tab.id;
-                    
+                    const size = tab.promoted ? 28 : 22;
+
                     return (
                         <button
                             key={tab.id}
                             onClick={() => onTabChange(tab.id)}
-                            className={`flex flex-col items-center py-2 px-3 transition-colors ${
-                                isActive 
-                                    ? 'text-[#ffd700]' 
-                                    : 'text-white/60 hover:text-white/80'
-                            }`}
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: '2px',
+                                background: 'none',
+                                border: 'none',
+                                padding: '2px 20px',
+                                cursor: 'pointer',
+                                WebkitTapHighlightColor: 'transparent',
+                                opacity: isActive ? 1 : 0.5,
+                                transition: 'opacity 0.2s ease',
+                            }}
                         >
-                            <IconComponent className={tab.id === 'new' ? 'w-10 h-10' : 'w-8 h-8'} />
-                            <span className="text-xs mt-1 font-medium">{tab.label}</span>
+                            <div style={{ width: size, height: size }}>
+                                <IconComponent className="w-full h-full" />
+                            </div>
+                            <span
+                                style={{
+                                    fontSize: '10px',
+                                    fontFamily: 'var(--font-display, "Cinzel", serif)',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '1px',
+                                    fontWeight: '600',
+                                    color: isActive ? 'var(--color-altar-gold)' : 'rgba(255,255,255,0.7)',
+                                }}
+                            >
+                                {tab.label}
+                            </span>
                         </button>
                     );
                 })}

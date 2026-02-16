@@ -1,16 +1,196 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Google Fonts loaded via index.html link tag */
+@import "tailwindcss";
 
+/* ── Mystic Altar Theme ── */
+
+/* iOS Safe Areas & Native Feel — FLEXBOX LAYOUT
+   position:fixed is BROKEN in iOS WebViews / Capacitor.
+   Instead we use a full-height flex column:
+     page-frame  = flex column filling 100% of viewport
+     page-scroll  = flex:1, the ONLY element that scrolls
+     BottomNav    = flex-shrink:0, sits at the bottom naturally
+*/
+html,
 body {
+  padding: 0;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  background-color: var(--color-altar-deep);
+  /* iOS WKWebView: lock the viewport so native scroll view doesn't shift */
+  position: fixed;
+  touch-action: none;
 }
 
 #root {
-  min-height: 100vh;
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Flex wrapper for every page: column layout filling viewport */
+.page-frame {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Scrollable content area — the ONLY thing that scrolls */
+.page-scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: none;
+  min-height: 0;
+  /* required for flex children to scroll */
+  /* Hide the scrollbar but keep scrolling */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE / Edge */
+}
+
+.page-scroll::-webkit-scrollbar {
+  display: none;
+  /* Chrome / Safari / WebKit */
+}
+
+@theme {
+  --color-altar-deep: #0d0618;
+  --color-altar-dark: #1a0b2e;
+  --color-altar-mid: #2d1b4e;
+  --color-altar-bright: #432c7a;
+  --color-altar-gold-dim: #997d3d;
+  --color-altar-gold: #ffd700;
+  --color-altar-gold-light: #ffe55c;
+  --color-altar-text: #e2e8f0;
+  --color-altar-muted: #94a3b8;
+  --color-altar-border: rgba(255, 255, 255, 0.1);
+  --color-altar-purple: #3b0764;
+
+  --font-display: "Cinzel", serif;
+  --font-body: "Inter", sans-serif;
+
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-shimmer: shimmer 2.5s infinite linear;
+  --animate-fade-up: fade-up 0.8s ease-out forwards;
+  --animate-glow: glow 2s ease-in-out infinite alternate;
+
+  @keyframes float {
+    0% {
+      transform: translateY(0px);
+    }
+
+    50% {
+      transform: translateY(-10px);
+    }
+
+    100% {
+      transform: translateY(0px);
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% center;
+    }
+
+    100% {
+      background-position: 200% center;
+    }
+  }
+
+  @keyframes fade-up {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes glow {
+    from {
+      box-shadow: 0 0 5px #ffd700, 0 0 10px #ffd700;
+    }
+
+    to {
+      box-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700;
+    }
+  }
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+.text-altar-gold {
+  color: var(--color-altar-gold);
+}
+
+.bg-altar-deep {
+  background-color: var(--color-altar-deep);
+}
+
+/* Glassmorphism Utilities */
+.glass {
+  background: rgba(13, 6, 24, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 215, 0, 0.1);
+}
+
+.glass-panel {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.shimmer-text {
+  background: linear-gradient(to right, #ffd700 20%, #fff 40%, #fff 60%, #ffd700 80%);
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: shimmer 5s linear infinite;
+}
+
+.shimmer-skeleton {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 25%, rgba(255, 215, 0, 0.08) 50%, rgba(255, 255, 255, 0.04) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 999px;
+}
+
+.ai-response-text {
+  line-height: 1.7;
+  letter-spacing: 0.01em;
+  color: rgba(255, 255, 255, 0.82);
+  text-align: left;
 }

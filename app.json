@@ -14,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.ArcanaWhisperRN"
+      "bundleIdentifier": "com.arcanawhisper.app"
     },
     "android": {
       "adaptiveIcon": {
