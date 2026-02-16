@@ -440,28 +440,7 @@ function App() {
                     {/* Daily Horoscope Snippet */}
                     <HoroscopeSnippet onTap={() => handleTabChange('horoscope')} />
 
-                    {/* Quick Spreads */}
-                    <div className="mx-5 my-4 animate-fade-up" style={{ animationDelay: '0.7s', opacity: 0 }}>
-                        <h3 className="font-display text-sm uppercase tracking-[3px] text-altar-muted mb-3 flex items-center gap-2">
-                            <span className="text-lg">🃏</span> Quick Spreads
-                        </h3>
-                        <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
-                            {[
-                                { icon: '🔮', label: 'Single Card', spread: 'single' },
-                                { icon: '🌙', label: '3-Card', spread: 'three-card' },
-                                { icon: '💫', label: 'Yes / No', spread: 'yes-no' },
-                            ].map(q => (
-                                <button
-                                    key={q.spread}
-                                    onClick={() => handleTabChange('new')}
-                                    className="flex-shrink-0 glass rounded-xl px-4 py-3 flex items-center gap-2 hover:border-altar-gold/20 border border-white/5 transition-all hover:scale-[1.02] active:scale-[0.98]"
-                                >
-                                    <span className="text-xl">{q.icon}</span>
-                                    <span className="text-xs text-altar-text font-display whitespace-nowrap">{q.label}</span>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
+
 
                     {/* Daily Affirmation */}
                     <div className="mx-5 my-4 glass rounded-2xl p-5 animate-fade-up" style={{ animationDelay: '0.8s', opacity: 0 }}>
@@ -480,6 +459,7 @@ function App() {
                         </h3>
                         <div className="grid grid-cols-2 gap-2.5">
                             {[
+                                { icon: '🔮', label: 'Tarot', desc: 'Draw your cards', tab: 'new', gradient: 'from-violet-500/10 to-fuchsia-500/10 border-violet-500/20' },
                                 { icon: '🌙', label: 'Natal Chart', desc: 'Your cosmic blueprint', tab: 'natal', gradient: 'from-indigo-500/10 to-purple-500/10 border-indigo-500/20' },
                                 { icon: '🔢', label: 'Numerology', desc: 'Sacred numbers', tab: 'numerology', gradient: 'from-amber-500/10 to-orange-500/10 border-amber-500/20' },
                                 { icon: '♈', label: 'Horoscope', desc: 'Daily zodiac', tab: 'horoscope', gradient: 'from-cyan-500/10 to-blue-500/10 border-cyan-500/20' },
