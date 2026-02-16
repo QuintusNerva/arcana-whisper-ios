@@ -87,6 +87,32 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
         return () => timers.forEach(clearTimeout);
     }, [reading.cards]);
 
+    // Auto-fire spread reading once all cards are revealed
+    React.useEffect(() => {
+        if (!allRevealed || spreadInsight || spreadInsightLoading) return;
+        const ai = new AIService();
+        if (!ai.hasApiKey()) return;
+        (async () => {
+            setSpreadInsightLoading(true);
+            setAiError(null);
+            try {
+                const cards = reading.cards.map((c, i) => ({
+                    name: c.name,
+                    meaning: c.meaning,
+                    position: positions[i] || `Card ${i + 1}`,
+                }));
+                const insight = await ai.getSpreadInsight(
+                    cards, reading.spread, reading.theme, reading.question
+                );
+                setSpreadInsight(insight);
+            } catch (e: any) {
+                setAiError(e.message);
+            } finally {
+                setSpreadInsightLoading(false);
+            }
+        })();
+    }, [allRevealed]);
+
     const handleSave = () => {
         const tarotService = new TarotService();
         tarotService.saveReading(reading);
@@ -426,64 +452,35 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
                             </button>
                         </div>
 
-                        {/* AI Spread Reading / Premium upsell */}
-                        {isPremium ? (
-                            spreadInsight ? (
-                                <div className="glass-strong rounded-2xl p-5">
-                                    <h4 className="font-display text-sm text-altar-gold tracking-[2px] uppercase mb-3 flex items-center gap-2">
-                                        <span>🔮</span> Deep Spread Reading
-                                    </h4>
-                                    <AIResponseRenderer text={spreadInsight} />
+                        {/* Spread Reading — auto-loaded */}
+                        {spreadInsightLoading ? (
+                            <div className="glass-strong rounded-2xl p-5">
+                                <h4 className="font-display text-sm text-altar-gold tracking-[2px] uppercase mb-3 flex items-center gap-2">
+                                    <span>🔮</span> Reading Your Spread…
+                                </h4>
+                                <div className="space-y-2.5 py-1">
+                                    <div className="h-3 shimmer-skeleton w-full" />
+                                    <div className="h-3 shimmer-skeleton w-[90%]" />
+                                    <div className="h-3 shimmer-skeleton w-[78%]" />
+                                    <div className="h-3 shimmer-skeleton w-[85%]" />
+                                    <div className="h-3 shimmer-skeleton w-[60%]" />
                                 </div>
-                            ) : (
-                                <button
-                                    onClick={async () => {
-                                        setSpreadInsightLoading(true);
-                                        setAiError(null);
-                                        try {
-                                            const ai = new AIService();
-                                            const cards = reading.cards.map((c, i) => ({
-                                                name: c.name,
-                                                meaning: c.meaning,
-                                                position: positions[i] || `Card ${i + 1}`,
-                                            }));
-                                            const insight = await ai.getSpreadInsight(
-                                                cards, reading.spread, reading.theme, reading.question
-                                            );
-                                            setSpreadInsight(insight);
-                                        } catch (e: any) {
-                                            setAiError(e.message);
-                                        } finally {
-                                            setSpreadInsightLoading(false);
-                                        }
-                                    }}
-                                    disabled={spreadInsightLoading}
-                                    className="w-full py-3.5 rounded-xl bg-gradient-to-r from-altar-gold/10 to-altar-bright/10 border border-altar-gold/20 text-center transition-all hover:border-altar-gold/40 hover:scale-[1.01] active:scale-[0.99]"
-                                >
-                                    {spreadInsightLoading ? (
-                                        <div className="space-y-2.5 w-full px-4 py-1">
-                                            <div className="h-3 shimmer-skeleton w-full" />
-                                            <div className="h-3 shimmer-skeleton w-[85%]" />
-                                            <div className="h-3 shimmer-skeleton w-[65%]" />
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <span className="shimmer-text font-display text-sm font-semibold tracking-wide">
-                                                🔮 Get Deep Spread Reading
-                                            </span>
-                                            <p className="text-[10px] text-altar-muted mt-0.5">Deep interpretation of your full reading</p>
-                                        </>
-                                    )}
-                                </button>
-                            )
-                        ) : (
+                            </div>
+                        ) : spreadInsight ? (
+                            <div className="glass-strong rounded-2xl p-5">
+                                <h4 className="font-display text-sm text-altar-gold tracking-[2px] uppercase mb-3 flex items-center gap-2">
+                                    <span>🔮</span> Your Spread Reading
+                                </h4>
+                                <AIResponseRenderer text={spreadInsight} />
+                            </div>
+                        ) : !isPremium ? (
                             <button onClick={onShowPremium} className="w-full py-3.5 rounded-xl bg-gradient-to-r from-altar-gold/10 to-altar-bright/10 border border-altar-gold/20 text-center transition-all hover:border-altar-gold/40 hover:scale-[1.01] active:scale-[0.99]">
                                 <span className="shimmer-text font-display text-sm font-semibold tracking-wide">
                                     👑 Unlock Premium Insight
                                 </span>
                                 <p className="text-[10px] text-altar-muted mt-0.5">Deep personalized readings · $4.99/mo</p>
                             </button>
-                        )}
+                        ) : null}
                         {aiError && <p className="text-xs text-red-400 text-center mt-2">{aiError}</p>}
 
                         {/* Draw again */}
