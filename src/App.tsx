@@ -377,7 +377,7 @@ function App() {
                 {customReadingResult && (
                     <ReadingResult
                         reading={customReadingResult}
-                        onClose={() => setCustomReadingResult(null)}
+                        onClose={() => { setCustomReadingResult(null); setShowCustomReading(false); setCurrentTab('home'); }}
                         onTabChange={handleTabChange}
                         subscription={sub}
                         onShowPremium={() => setShowPremiumOverlay(true)}
