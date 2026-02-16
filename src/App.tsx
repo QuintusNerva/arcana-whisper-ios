@@ -215,11 +215,6 @@ function App() {
 
     const sub = userProfile?.subscription || 'free';
 
-    // ── Onboarding gate ──
-    if (!userProfile) {
-        return <Onboarding onComplete={handleOnboardingComplete} />;
-    }
-
     const handleTabChange = (tab: string) => {
         // Close all pages first
         setShowCustomReading(false);
@@ -251,6 +246,7 @@ function App() {
     };
 
     React.useEffect(() => {
+        if (!userProfile) return; // Don't initialize until onboarding is done
         const initializeApp = async () => {
             setIsLoading(true);
             if (isInitialLoad) {
@@ -263,7 +259,12 @@ function App() {
             fireReminder();
         };
         initializeApp();
-    }, [loadCard, isInitialLoad]);
+    }, [loadCard, isInitialLoad, userProfile]);
+
+    // ── Onboarding gate ──
+    if (!userProfile) {
+        return <Onboarding onComplete={handleOnboardingComplete} />;
+    }
 
     // ── Loading ──
     if (isLoading) {
