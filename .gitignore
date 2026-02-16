@@ -1,47 +1,45 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
-
 # dependencies
 node_modules/
 
-# Expo
-.expo/
+# build output
 dist/
-web-build/
-expo-env.d.ts
 
-# Native
-.kotlin/
-*.orig.*
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
+# environment variables
+.env
+.env*.local
 
-# Metro
-.metro-health-check*
+# native iOS/Android (managed by Capacitor, rebuilt from source)
+/ios
+/android
+
+# macOS
+.DS_Store
 
 # debug
 npm-debug.*
 yarn-debug.*
 yarn-error.*
 
-# macOS
-.DS_Store
-*.pem
-
-# local env files
-.env
-.env*.local
-
 # typescript
 *.tsbuildinfo
-
-# generated native folders
-/ios
-/android
 
 # iOS build artifacts
 *.ipa
 *.dSYM
 *.xcarchive
+
+# signing
+*.p8
+*.p12
+*.key
+*.pem
+*.mobileprovision
+*.jks
+
+# IDE
+.vscode/
+.idea/
+
+# agent config
+.agent/
+.expo/
