@@ -10,13 +10,14 @@ interface CardDetailProps {
     currentTab: string;
     onTabChange: (tab: string) => void;
     subscription: string;
+    onShowPremium: () => void;
 }
 
 const ELEMENT_ICONS: Record<string, string> = {
     Fire: '🔥', Water: '💧', Air: '💨', Earth: '🌿',
 };
 
-export function CardDetail({ card, onClose, currentTab, onTabChange, subscription }: CardDetailProps) {
+export function CardDetail({ card, onClose, currentTab, onTabChange, subscription, onShowPremium }: CardDetailProps) {
     const [showReversed, setShowReversed] = React.useState(false);
     const [aiInsight, setAiInsight] = React.useState<string | null>(null);
     const [aiLoading, setAiLoading] = React.useState(false);
@@ -212,7 +213,7 @@ export function CardDetail({ card, onClose, currentTab, onTabChange, subscriptio
                                 <span className="text-lg block mb-1">👑</span>
                                 <p className="shimmer-text font-display text-sm font-semibold mb-1">Deep Reading</p>
                                 <p className="text-xs text-altar-muted mb-3">Get personalized insights for {card.name}</p>
-                                <button className="px-5 py-2 rounded-full bg-altar-gold/10 border border-altar-gold/20 text-xs text-altar-gold font-display tracking-wide hover:border-altar-gold/40 transition-colors">
+                                <button onClick={onShowPremium} className="px-5 py-2 rounded-full bg-altar-gold/10 border border-altar-gold/20 text-xs text-altar-gold font-display tracking-wide hover:border-altar-gold/40 transition-colors">
                                     Unlock Premium →
                                 </button>
                             </div>

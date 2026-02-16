@@ -286,6 +286,7 @@ function App() {
                 currentTab={currentTab}
                 onTabChange={handleTabChange}
                 subscription={sub}
+                onShowPremium={() => setShowPremiumOverlay(true)}
             />
         );
     }
@@ -379,6 +380,7 @@ function App() {
                         onClose={() => setCustomReadingResult(null)}
                         onTabChange={handleTabChange}
                         subscription={sub}
+                        onShowPremium={() => setShowPremiumOverlay(true)}
                     />
                 )}
 

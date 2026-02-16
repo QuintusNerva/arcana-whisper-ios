@@ -14,6 +14,7 @@ interface ReadingResultProps {
     onClose: () => void;
     onTabChange: (tab: string) => void;
     subscription: string;
+    onShowPremium: () => void;
 }
 
 const POSITION_LABELS: Record<string, string[]> = {
@@ -53,7 +54,7 @@ function getYesNoVerdict(cardId: string): 'yes' | 'no' | 'maybe' {
     return 'maybe';
 }
 
-export function ReadingResult({ reading, onClose, onTabChange, subscription }: ReadingResultProps) {
+export function ReadingResult({ reading, onClose, onTabChange, subscription, onShowPremium }: ReadingResultProps) {
     const [revealedCards, setRevealedCards] = React.useState<Set<number>>(new Set());
     const [allRevealed, setAllRevealed] = React.useState(false);
     const [saved, setSaved] = React.useState(false);
@@ -350,7 +351,7 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription }: R
                                         <p className="text-xs text-altar-muted mb-2">
                                             <span className="text-altar-gold">✦</span> Reversed meaning: <span className="italic text-white/50">{reading.cards[selectedCardIdx].reversed?.slice(0, 30)}…</span>
                                         </p>
-                                        <button className="text-xs text-altar-gold font-display tracking-wide hover:underline">
+                                        <button onClick={onShowPremium} className="text-xs text-altar-gold font-display tracking-wide hover:underline">
                                             Unlock Premium Insight →
                                         </button>
                                     </div>
@@ -468,7 +469,7 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription }: R
                                     ) : (
                                         <>
                                             <span className="shimmer-text font-display text-sm font-semibold tracking-wide">
-                                                🔮 Get AI Spread Reading
+                                                🔮 Get Deep Spread Reading
                                             </span>
                                             <p className="text-[10px] text-altar-muted mt-0.5">Deep interpretation of your full reading</p>
                                         </>
@@ -476,7 +477,7 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription }: R
                                 </button>
                             )
                         ) : (
-                            <button className="w-full py-3.5 rounded-xl bg-gradient-to-r from-altar-gold/10 to-altar-bright/10 border border-altar-gold/20 text-center transition-all hover:border-altar-gold/40 hover:scale-[1.01] active:scale-[0.99]">
+                            <button onClick={onShowPremium} className="w-full py-3.5 rounded-xl bg-gradient-to-r from-altar-gold/10 to-altar-bright/10 border border-altar-gold/20 text-center transition-all hover:border-altar-gold/40 hover:scale-[1.01] active:scale-[0.99]">
                                 <span className="shimmer-text font-display text-sm font-semibold tracking-wide">
                                     👑 Unlock Premium Insight
                                 </span>
