@@ -58,7 +58,7 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
             aiCacheRef.current[cacheKey] = result;
             setAiMeaning(result);
         } catch (err: any) {
-            setAiError(err.message || 'Could not generate AI insight');
+            setAiError(err.message || 'Could not generate insight');
         } finally {
             setAiLoading(false);
         }
@@ -221,7 +221,7 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
                                         <span className="text-xs text-altar-text">{triad.rising.element}</span>
                                     </div>
                                 </div>
-                                <p className="text-[8px] text-altar-gold/40 mt-3 font-display text-center">Tap for AI chart synthesis ✦</p>
+                                <p className="text-[8px] text-altar-gold/40 mt-3 font-display text-center">Tap for chart synthesis ✦</p>
                             </button>
 
                             {/* Suggested Spreads */}
@@ -300,11 +300,11 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
                                     </div>
                                 ) : cosmicSynthesis ? (
                                     <>
-                                        <p className="text-[9px] font-display text-altar-gold/60 tracking-[2px] uppercase mb-2">✦ AI Chart Synthesis</p>
+                                        <p className="text-[9px] font-display text-altar-gold/60 tracking-[2px] uppercase mb-2">✦ Cosmic Chart Synthesis</p>
                                         <AIResponseRenderer text={cosmicSynthesis} />
                                     </>
                                 ) : (
-                                    <p className="text-xs text-altar-muted text-center py-2">No API key configured — add one in Settings for AI synthesis</p>
+                                    <p className="text-xs text-altar-muted text-center py-2">No API key configured — add one in Settings for cosmic synthesis</p>
                                 )}
                             </div>
 
@@ -342,7 +342,7 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
                                 {(aiLoading || aiMeaning) && (
                                     <div className="flex items-center justify-center gap-1.5 mb-3">
                                         <span className="text-[9px] font-display tracking-[2px] uppercase text-altar-gold/50">
-                                            {aiLoading ? '✦ Channeling the stars…' : '✦ AI Interpretation'}
+                                            {aiLoading ? '✦ Channeling the stars…' : '✦ Mystic Interpretation'}
                                         </span>
                                         {aiLoading && <span className="inline-block w-3 h-3 border-2 border-altar-gold/30 border-t-altar-gold rounded-full animate-spin" />}
                                     </div>

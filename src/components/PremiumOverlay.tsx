@@ -6,7 +6,7 @@ interface PremiumOverlayProps {
 }
 
 const FEATURES = [
-    { icon: '🔮', text: 'Unlimited AI Insights' },
+    { icon: '🔮', text: 'Unlimited Deep Insights' },
     { icon: '♾️', text: 'Unlimited Daily Readings' },
     { icon: '🚫', text: 'Ad-Free Experience' },
     { icon: '📊', text: 'Advanced Spreads & Analytics' },

@@ -87,7 +87,7 @@ export function HeroCard({ card, onShare, subscription }: HeroCardProps) {
                     >
                         <span className="text-2xl mb-2 shrink-0">🔮</span>
                         <h3 className="font-display text-base text-altar-gold mb-2 shrink-0">
-                            {isPremium ? '✨ AI Insight' : 'AI Insight'}
+                            {isPremium ? '✨ Tap for Insight' : 'Tap for Insight'}
                         </h3>
                         <div className="flex-1 overflow-y-auto min-h-0 w-full mb-2">
                             {aiLoading ? (

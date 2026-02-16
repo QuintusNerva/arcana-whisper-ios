@@ -255,7 +255,7 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
                                         {subscription === 'premium' ? 'Premium Active' : 'Free Plan'}
                                     </h3>
                                     <p className="text-[10px] text-altar-muted">
-                                        {subscription === 'premium' ? 'Full access to all features' : 'Upgrade for AI insights & unlimited readings'}
+                                        {subscription === 'premium' ? 'Full access to all features' : 'Upgrade for deep insights & unlimited readings'}
                                     </p>
                                 </div>
                             </div>
@@ -350,7 +350,7 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
                                 <div className="h-[1px] bg-white/5" />
                                 <div className="flex justify-between">
                                     <span className="text-xs text-altar-muted">Includes</span>
-                                    <span className="text-xs text-altar-text">AI insights · Unlimited readings</span>
+                                    <span className="text-xs text-altar-text">Deep insights · Unlimited readings</span>
                                 </div>
                                 {isCancelled && (
                                     <>

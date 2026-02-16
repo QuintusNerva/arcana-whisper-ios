@@ -165,15 +165,15 @@ export function CardDetail({ card, onClose, currentTab, onTabChange, subscriptio
                                 {aiInsight ? (
                                     <>
                                         <p className="text-[10px] font-display text-altar-gold tracking-[2px] uppercase mb-2 flex items-center gap-1">
-                                            <span className="text-lg">🔮</span> AI Deep Reading
+                                            <span className="text-lg">🔮</span> Deep Reading
                                         </p>
                                         <AIResponseRenderer text={aiInsight} />
                                     </>
                                 ) : (
                                     <div className="text-center">
                                         <span className="text-lg block mb-1">🔮</span>
-                                        <p className="shimmer-text font-display text-sm font-semibold mb-1">AI Deep Reading</p>
-                                        <p className="text-xs text-altar-muted mb-3">Get personalized AI insights for {card.name}</p>
+                                        <p className="shimmer-text font-display text-sm font-semibold mb-1">Deep Reading</p>
+                                        <p className="text-xs text-altar-muted mb-3">Get personalized insights for {card.name}</p>
                                         <button
                                             onClick={async () => {
                                                 setAiLoading(true);
@@ -198,7 +198,7 @@ export function CardDetail({ card, onClose, currentTab, onTabChange, subscriptio
                                                     <div className="h-2.5 shimmer-skeleton w-[60%]" />
                                                 </div>
                                             ) : (
-                                                <>✨ Get AI Insight</>
+                                                <>✨ Get Insight</>
                                             )}
                                         </button>
                                         {aiError && <p className="text-xs text-red-400 mt-2">{aiError}</p>}

@@ -170,7 +170,7 @@ Weave their astrology into the numerology reading — how does their Life Path $
                                         </ul>
                                     </div>
                                 </div>
-                                <p className="text-[8px] text-altar-gold/40 mt-3 font-display text-center">Tap for AI-powered reading ✦</p>
+                                <p className="text-[8px] text-altar-gold/40 mt-3 font-display text-center">Tap for deep reading ✦</p>
                             </button>
 
                             {/* Personal Year — tappable */}
@@ -229,7 +229,7 @@ Life Path: ${lifePathNum} (${lifePathMeaning?.title || ''})`;
                                                 <p className="text-sm text-altar-text/80 mt-1 leading-relaxed">{yearDesc}</p>
                                             </div>
                                         </div>
-                                        <p className="text-[8px] text-altar-gold/40 mt-3 font-display text-center">Tap for AI year reading ✦</p>
+                                        <p className="text-[8px] text-altar-gold/40 mt-3 font-display text-center">Tap for year reading ✦</p>
                                     </button>
                                 );
                             })()}
@@ -253,7 +253,7 @@ Life Path: ${lifePathNum} (${lifePathMeaning?.title || ''})`;
                             {(aiYearLoading || aiYear) && (
                                 <div className="flex items-center justify-center gap-1.5 mb-3">
                                     <span className="text-[9px] font-display tracking-[2px] uppercase text-altar-gold/50">
-                                        {aiYearLoading ? '✦ Reading your year…' : '✦ AI Year Reading'}
+                                        {aiYearLoading ? '✦ Reading your year…' : '✦ Year Reading'}
                                     </span>
                                     {aiYearLoading && <span className="inline-block w-3 h-3 border-2 border-altar-gold/30 border-t-altar-gold rounded-full animate-spin" />}
                                 </div>
@@ -282,7 +282,7 @@ Life Path: ${lifePathNum} (${lifePathMeaning?.title || ''})`;
                                 ) : aiYear ? (
                                     <AIResponseRenderer text={aiYear} />
                                 ) : (
-                                    <p className="text-xs text-altar-muted text-center py-2">No API key configured — add one in Settings for AI readings</p>
+                                    <p className="text-xs text-altar-muted text-center py-2">No API key configured — add one in Settings for deep readings</p>
                                 )}
                             </div>
 
@@ -312,7 +312,7 @@ Life Path: ${lifePathNum} (${lifePathMeaning?.title || ''})`;
                             {(aiPathLoading || aiPath) && (
                                 <div className="flex items-center justify-center gap-1.5 mb-3">
                                     <span className="text-[9px] font-display tracking-[2px] uppercase text-altar-gold/50">
-                                        {aiPathLoading ? '✦ Consulting the numbers…' : '✦ AI Interpretation'}
+                                        {aiPathLoading ? '✦ Consulting the numbers…' : '✦ Deep Interpretation'}
                                     </span>
                                     {aiPathLoading && <span className="inline-block w-3 h-3 border-2 border-altar-gold/30 border-t-altar-gold rounded-full animate-spin" />}
                                 </div>

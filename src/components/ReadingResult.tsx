@@ -308,7 +308,7 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription }: R
                                         </p>
                                         {cardInsight ? (
                                             <div className="bg-altar-gold/5 border border-altar-gold/15 rounded-xl p-3 mt-2">
-                                                <p className="text-[10px] font-display text-altar-gold tracking-[2px] uppercase mb-1">✨ AI Insight</p>
+                                                <p className="text-[10px] font-display text-altar-gold tracking-[2px] uppercase mb-1">✨ Mystic Insight</p>
                                                 <AIResponseRenderer text={cardInsight} compact />
                                             </div>
                                         ) : (
@@ -339,7 +339,7 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription }: R
                                                         <div className="h-2.5 shimmer-skeleton w-[75%]" />
                                                     </div>
                                                 ) : (
-                                                    <>✨ Get AI Insight</>
+                                                    <>✨ Get Insight</>
                                                 )}
                                             </button>
                                         )}
@@ -480,7 +480,7 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription }: R
                                 <span className="shimmer-text font-display text-sm font-semibold tracking-wide">
                                     👑 Unlock Premium Insight
                                 </span>
-                                <p className="text-[10px] text-altar-muted mt-0.5">AI-powered deep reading · $4.99/mo</p>
+                                <p className="text-[10px] text-altar-muted mt-0.5">Deep personalized readings · $4.99/mo</p>
                             </button>
                         )}
                         {aiError && <p className="text-xs text-red-400 text-center mt-2">{aiError}</p>}

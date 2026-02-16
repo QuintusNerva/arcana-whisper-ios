@@ -137,7 +137,7 @@ function PremiumBanner({ onClick }: { onClick: () => void }) {
                         <span className="text-2xl">👑</span>
                         <div className="text-left">
                             <span className="shimmer-text font-display text-sm font-semibold">Unlock Premium</span>
-                            <p className="text-xs text-altar-muted mt-0.5">AI Insights · Unlimited Readings</p>
+                            <p className="text-xs text-altar-muted mt-0.5">Deep Insights · Unlimited Readings</p>
                         </div>
                     </div>
                     <div className="px-3 py-1.5 rounded-full bg-altar-gold/10 border border-altar-gold/30 text-xs text-altar-gold font-medium group-hover:border-altar-gold/60 transition-colors">
