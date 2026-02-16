@@ -127,7 +127,7 @@ export function HeroCard({ card, onShare, subscription }: HeroCardProps) {
                     onClick={(e) => { e.stopPropagation(); handleTapInsight(); }}
                     className="px-5 py-2.5 rounded-full bg-gradient-to-r from-altar-mid to-altar-bright text-white text-sm font-medium border border-altar-gold/30 hover:border-altar-gold/60 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
                 >
-                    <span>✨</span> Tap for AI Insight
+                    <span>✨</span> Tap for Insight
                 </button>
                 <button
                     onClick={(e) => { e.stopPropagation(); onShare(); }}

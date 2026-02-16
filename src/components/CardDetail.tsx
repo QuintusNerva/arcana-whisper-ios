@@ -210,8 +210,8 @@ export function CardDetail({ card, onClose, currentTab, onTabChange, subscriptio
                         <div className="rounded-2xl p-[1px] bg-gradient-to-r from-altar-gold/30 via-altar-bright/20 to-altar-gold/30 mb-4 animate-fade-up" style={{ animationDelay: '0.6s', opacity: 0 }}>
                             <div className="rounded-2xl bg-altar-dark/95 p-4 text-center">
                                 <span className="text-lg block mb-1">👑</span>
-                                <p className="shimmer-text font-display text-sm font-semibold mb-1">AI Deep Reading</p>
-                                <p className="text-xs text-altar-muted mb-3">Get personalized AI insights for {card.name}</p>
+                                <p className="shimmer-text font-display text-sm font-semibold mb-1">Deep Reading</p>
+                                <p className="text-xs text-altar-muted mb-3">Get personalized insights for {card.name}</p>
                                 <button className="px-5 py-2 rounded-full bg-altar-gold/10 border border-altar-gold/20 text-xs text-altar-gold font-display tracking-wide hover:border-altar-gold/40 transition-colors">
                                     Unlock Premium →
                                 </button>

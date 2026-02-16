@@ -430,7 +430,7 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription }: R
                             spreadInsight ? (
                                 <div className="glass-strong rounded-2xl p-5">
                                     <h4 className="font-display text-sm text-altar-gold tracking-[2px] uppercase mb-3 flex items-center gap-2">
-                                        <span>🔮</span> AI Spread Reading
+                                        <span>🔮</span> Deep Spread Reading
                                     </h4>
                                     <AIResponseRenderer text={spreadInsight} />
                                 </div>
