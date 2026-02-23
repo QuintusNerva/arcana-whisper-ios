@@ -2,7 +2,12 @@
  * Astrology Service — Natal Chart, Numerology & Horoscope engine.
  * All calculations are deterministic and offline — no external APIs.
  * Birth data stored in localStorage under 'arcana_birth'.
+ *
+ * Moon & Rising signs use real astronomical calculations (Jean Meeus algorithms)
+ * via the ephemeris engine. Sun sign uses standard date ranges.
  */
+
+import { calculateEphemeris } from './ephemeris';
 
 const BIRTH_KEY = 'arcana_birth';
 
@@ -29,6 +34,9 @@ export interface BirthData {
     birthday: string;   // YYYY-MM-DD
     birthTime?: string; // HH:MM (24h)
     location?: string;
+    utcOffset?: number;   // hours from UTC (e.g. -5 for EST)
+    latitude?: number;    // degrees, north positive
+    longitude?: number;   // degrees, east positive
 }
 
 export function saveBirthData(data: BirthData): void {
@@ -52,6 +60,7 @@ export function getSunSign(dateStr: string): typeof ZODIAC_SIGNS[number] {
     const d = new Date(dateStr + 'T12:00:00');
     const month = d.getMonth() + 1; // 1-12
     const day = d.getDate();
+    console.log('[SUN] getSunSign input:', dateStr, '→ month:', month, 'day:', day);
 
     // Explicit date ranges — the only way to be sure
     if ((month === 3 && day >= 21) || (month === 4 && day <= 19)) return ZODIAC_SIGNS[0];  // Aries
@@ -68,7 +77,7 @@ export function getSunSign(dateStr: string): typeof ZODIAC_SIGNS[number] {
     return ZODIAC_SIGNS[11]; // Pisces (Feb 19 – Mar 20)
 }
 
-// ── Moon Sign (deterministic from birth date hash) ──
+// ── Moon Sign (real astronomical calculation) ──
 
 function hashString(s: string): number {
     let hash = 0;
@@ -80,17 +89,70 @@ function hashString(s: string): number {
     return Math.abs(hash);
 }
 
-export function getMoonSign(dateStr: string): typeof ZODIAC_SIGNS[number] {
-    const hash = hashString('moon_' + dateStr);
-    return ZODIAC_SIGNS[hash % 12];
+/**
+ * Parse a date string and optional time into components.
+ */
+function parseBirthDateTime(dateStr: string, timeStr?: string) {
+    const d = new Date(dateStr + 'T12:00:00');
+    const year = d.getFullYear();
+    const month = d.getMonth() + 1;
+    const day = d.getDate();
+
+    let hour = 12;
+    let minute = 0;
+    if (timeStr) {
+        const parts = timeStr.split(':');
+        hour = parseInt(parts[0]) || 12;
+        minute = parseInt(parts[1]) || 0;
+    }
+
+    return { year, month, day, hour, minute };
 }
 
-// ── Rising Sign (from date + time) ──
+/**
+ * Calculate Moon sign using real lunar ephemeris (Meeus Ch. 47).
+ * Uses birth date, time, and UTC offset for accurate positioning.
+ */
+export function getMoonSign(dateStr: string, timeStr?: string, utcOffset?: number): typeof ZODIAC_SIGNS[number] {
+    const { year, month, day, hour, minute } = parseBirthDateTime(dateStr, timeStr);
+    const input = { year, month, day, hour, minute, utcOffset: utcOffset || 0 };
+    console.log('[EPHEMERIS] getMoonSign input:', JSON.stringify(input));
+    const result = calculateEphemeris(input);
+    console.log('[EPHEMERIS] Moon result:', result.moonSignId, result.moonLongitude.toFixed(2) + '°');
+    const sign = ZODIAC_SIGNS.find(z => z.id === result.moonSignId);
+    return sign || ZODIAC_SIGNS[0];
+}
 
-export function getRisingSign(dateStr: string, timeStr?: string): typeof ZODIAC_SIGNS[number] {
-    const seed = 'rising_' + dateStr + '_' + (timeStr || '12:00');
-    const hash = hashString(seed);
-    return ZODIAC_SIGNS[hash % 12];
+// ── Rising Sign (real Ascendant calculation) ──
+
+/**
+ * Calculate Rising sign (Ascendant) using real astronomical calculation.
+ * Requires birth time and geographic coordinates for accuracy.
+ * Falls back to Sun sign if no coordinates available (common astrological convention).
+ */
+export function getRisingSign(
+    dateStr: string,
+    timeStr?: string,
+    utcOffset?: number,
+    latitude?: number,
+    longitude?: number
+): typeof ZODIAC_SIGNS[number] {
+    // If we have coordinates, calculate the real Ascendant
+    if (latitude !== undefined && longitude !== undefined && timeStr) {
+        const { year, month, day, hour, minute } = parseBirthDateTime(dateStr, timeStr);
+        const result = calculateEphemeris({
+            year, month, day, hour, minute,
+            utcOffset: utcOffset || 0,
+            latitude, longitude
+        });
+        if (result.risingSignId) {
+            const sign = ZODIAC_SIGNS.find(z => z.id === result.risingSignId);
+            if (sign) return sign;
+        }
+    }
+
+    // Fallback: use Sun sign as Ascendant approximation (whole-sign convention)
+    return getSunSign(dateStr);
 }
 
 // ── Natal Triad ──
@@ -102,11 +164,18 @@ export interface NatalTriad {
 }
 
 export function getNatalTriad(data: BirthData): NatalTriad {
-    return {
+    console.log('[NATAL] BirthData:', JSON.stringify({
+        birthday: data.birthday, birthTime: data.birthTime,
+        location: data.location, utcOffset: data.utcOffset,
+        latitude: data.latitude, longitude: data.longitude
+    }));
+    const result = {
         sun: getSunSign(data.birthday),
-        moon: getMoonSign(data.birthday),
-        rising: getRisingSign(data.birthday, data.birthTime),
+        moon: getMoonSign(data.birthday, data.birthTime, data.utcOffset),
+        rising: getRisingSign(data.birthday, data.birthTime, data.utcOffset, data.latitude, data.longitude),
     };
+    console.log('[NATAL] Triad:', result.sun.name, '/', result.moon.name, '/', result.rising.name);
+    return result;
 }
 
 // ── Sign-in-Position Interpretations ──

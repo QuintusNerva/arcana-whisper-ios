@@ -5,6 +5,7 @@ import {
 } from '../services/astrology.service';
 import { AIService } from '../services/ai.service';
 import { AIResponseRenderer } from './AIResponseRenderer';
+import { searchPlaces, resolvePlace, PlaceSuggestion } from '../services/geocoding.service';
 
 interface NatalChartProps {
     onClose: () => void;
@@ -16,6 +17,13 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
     const [birthday, setBirthday] = React.useState(birthData?.birthday || '');
     const [birthTime, setBirthTime] = React.useState(birthData?.birthTime || '');
     const [location, setLocation] = React.useState(birthData?.location || '');
+    const [utcOffset, setUtcOffset] = React.useState<number>(birthData?.utcOffset ?? 0);
+    const [latitude, setLatitude] = React.useState<number | undefined>(birthData?.latitude);
+    const [longitude, setLongitude] = React.useState<number | undefined>(birthData?.longitude);
+    const [cityQuery, setCityQuery] = React.useState('');
+    const [citySuggestions, setCitySuggestions] = React.useState<PlaceSuggestion[]>([]);
+    const [showCitySuggestions, setShowCitySuggestions] = React.useState(false);
+    const [resolving, setResolving] = React.useState(false);
     const [editing, setEditing] = React.useState(!birthData);
     const [saved, setSaved] = React.useState(false);
     const [selectedPlacement, setSelectedPlacement] = React.useState<{ position: 'sun' | 'moon' | 'rising'; sign: typeof ZODIAC_SIGNS[number]; icon: string } | null>(null);
@@ -26,6 +34,56 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
     const [showCosmicModal, setShowCosmicModal] = React.useState(false);
     const [cosmicSynthesis, setCosmicSynthesis] = React.useState<string | null>(null);
     const [cosmicLoading, setCosmicLoading] = React.useState(false);
+    const cityDropdownRef = React.useRef<HTMLDivElement>(null);
+    const searchTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Close city dropdown on outside click
+    React.useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (cityDropdownRef.current && !cityDropdownRef.current.contains(e.target as Node)) {
+                setShowCitySuggestions(false);
+            }
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
+    const handleCitySearch = (query: string) => {
+        setCityQuery(query);
+        setLocation(query);
+        // Clear previous coordinates when typing a new query
+        setLatitude(undefined);
+        setLongitude(undefined);
+
+        // Debounce the API call
+        if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+        if (query.length < 2) {
+            setCitySuggestions([]);
+            setShowCitySuggestions(false);
+            return;
+        }
+        searchTimeoutRef.current = setTimeout(async () => {
+            const results = await searchPlaces(query);
+            setCitySuggestions(results);
+            setShowCitySuggestions(results.length > 0);
+        }, 300);
+    };
+
+    const handleCitySelect = async (place: PlaceSuggestion) => {
+        setShowCitySuggestions(false);
+        setCityQuery(place.description);
+        setLocation(place.description);
+        setResolving(true);
+
+        const resolved = await resolvePlace(place, birthday, birthTime || undefined);
+        setResolving(false);
+
+        if (resolved) {
+            setLatitude(resolved.latitude);
+            setLongitude(resolved.longitude);
+            setUtcOffset(resolved.utcOffset);
+        }
+    };
 
     const handleCardTap = async (position: 'sun' | 'moon' | 'rising', sign: typeof ZODIAC_SIGNS[number], icon: string) => {
         setSelectedPlacement({ position, sign, icon });
@@ -66,7 +124,14 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
 
     const handleSave = () => {
         if (!birthday) return;
-        const data: BirthData = { birthday, birthTime: birthTime || undefined, location: location || undefined };
+        const data: BirthData = {
+            birthday,
+            birthTime: birthTime || undefined,
+            location: location || undefined,
+            utcOffset,
+            latitude,
+            longitude,
+        };
         saveBirthData(data);
         setBirthData(data);
         setEditing(false);
@@ -75,6 +140,12 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
     };
 
     const triad = birthData ? getNatalTriad(birthData) : null;
+
+    // Accuracy indicators
+    const hasBirthTime = !!birthData?.birthTime;
+    const hasCoordinates = birthData?.latitude !== undefined && birthData?.longitude !== undefined;
+    const moonAccuracy = hasBirthTime ? 'precise' : 'approximate';
+    const risingAccuracy = hasBirthTime && hasCoordinates ? 'precise' : hasCoordinates ? 'needs-time' : 'approximate';
 
     const ELEMENT_COLORS: Record<string, string> = {
         Fire: 'from-red-500/20 to-orange-500/20 border-red-500/30',
@@ -128,15 +199,41 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
                                     <p className="text-[10px] text-altar-muted/60 mt-1 italic">Needed for accurate Rising sign</p>
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] text-altar-muted font-display tracking-[2px] uppercase mb-1">Birth Location (optional)</label>
-                                    <input
-                                        type="text"
-                                        value={location}
-                                        onChange={e => setLocation(e.target.value)}
-                                        placeholder="City, Country"
-                                        className="w-full bg-altar-deep/50 text-sm text-altar-text placeholder-altar-muted/50 rounded-lg px-3 py-2.5 border border-white/10 focus:border-altar-gold/30 focus:outline-none transition-colors"
-                                    />
+                                    <label className="block text-[10px] text-altar-muted font-display tracking-[2px] uppercase mb-1">Birth Location</label>
+                                    <div className="relative" ref={cityDropdownRef}>
+                                        <input
+                                            type="text"
+                                            value={cityQuery || location}
+                                            onChange={e => handleCitySearch(e.target.value)}
+                                            onFocus={() => { if (citySuggestions.length > 0) setShowCitySuggestions(true); }}
+                                            placeholder="Search any city worldwide..."
+                                            className="w-full bg-altar-deep/50 text-sm text-altar-text placeholder-altar-muted/50 rounded-lg px-3 py-2.5 border border-white/10 focus:border-altar-gold/30 focus:outline-none transition-colors"
+                                        />
+                                        {/* Google Places dropdown */}
+                                        {showCitySuggestions && (
+                                            <div className="absolute top-full left-0 right-0 mt-1 bg-altar-dark/95 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden z-30 max-h-48 overflow-y-auto shadow-2xl">
+                                                {citySuggestions.map((place, i) => (
+                                                    <button
+                                                        key={place.placeId}
+                                                        onClick={() => handleCitySelect(place)}
+                                                        className="w-full text-left px-3 py-2.5 text-xs text-altar-text hover:bg-altar-gold/10 transition-colors border-b border-white/5 last:border-0"
+                                                    >
+                                                        <span className="font-medium">{place.mainText}</span>
+                                                        {place.secondaryText && <span className="text-altar-muted ml-1">{place.secondaryText}</span>}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                    {resolving && (
+                                        <p className="text-[10px] text-altar-gold/60 mt-1 animate-pulse">✦ Resolving coordinates & timezone...</p>
+                                    )}
+                                    {!resolving && latitude !== undefined && (
+                                        <p className="text-[10px] text-green-400/60 mt-1">✓ {latitude.toFixed(2)}°{latitude >= 0 ? 'N' : 'S'} {Math.abs(longitude!).toFixed(2)}°{longitude! >= 0 ? 'E' : 'W'} · UTC{utcOffset >= 0 ? '+' : ''}{utcOffset}</p>
+                                    )}
+                                    <p className="text-[10px] text-altar-muted/60 mt-1 italic">Needed for accurate Moon & Rising signs</p>
                                 </div>
+
                                 <div className="flex gap-2 pt-2">
                                     {birthData && (
                                         <button onClick={() => setEditing(false)} className="flex-1 py-2.5 rounded-lg glass text-xs text-altar-muted font-display border border-white/5 hover:border-white/15 transition-colors">Cancel</button>
@@ -178,7 +275,16 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
                                         <p className="text-3xl mb-1">{item.data.glyph}</p>
                                         <p className="font-display text-sm text-altar-gold font-semibold">{item.data.name}</p>
                                         <p className="text-[9px] text-altar-muted mt-1">{item.desc}</p>
-                                        <p className="text-[8px] text-altar-gold/40 mt-2 font-display">Tap to explore ✦</p>
+                                        {/* Accuracy indicator */}
+                                        {item.position === 'moon' && moonAccuracy === 'approximate' && (
+                                            <p className="text-[7px] text-amber-400/50 mt-1 font-display">~approx</p>
+                                        )}
+                                        {item.position === 'rising' && risingAccuracy !== 'precise' && (
+                                            <p className="text-[7px] text-amber-400/50 mt-1 font-display">
+                                                {risingAccuracy === 'needs-time' ? 'needs birth time' : '~approx'}
+                                            </p>
+                                        )}
+                                        <p className="text-[8px] text-altar-gold/40 mt-1 font-display">Tap to explore ✦</p>
                                     </button>
                                 ))}
                             </div>
