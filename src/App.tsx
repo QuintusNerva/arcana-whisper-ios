@@ -477,7 +477,7 @@ function App() {
                                 </div>
                             </div>
 
-                            {/* Triad pills — floating on right */}
+                            {/* Triad pills — compact, floating right */}
                             {(() => {
                                 const birthData = getBirthData();
                                 if (!birthData) return null;
@@ -486,19 +486,19 @@ function App() {
                                 const moonSign = ZODIAC_SIGNS.find(z => z.id === triad.moon.id);
                                 const risingSign = ZODIAC_SIGNS.find(z => z.id === triad.rising.id);
                                 return (
-                                    <div className="flex flex-col gap-2 ml-3">
+                                    <div className="flex flex-col gap-2.5 ml-4 self-center">
                                         {[
-                                            { symbol: '☉', sign: triad.sun.name, glyph: sunSign?.glyph, bg: 'bg-gradient-to-r from-amber-800/40 to-amber-700/20', border: 'border-amber-500/30' },
-                                            { symbol: '☽', sign: triad.moon.name, glyph: moonSign?.glyph, bg: 'bg-gradient-to-r from-slate-600/40 to-slate-500/20', border: 'border-slate-400/30' },
-                                            { symbol: '↑', sign: triad.rising.name, glyph: risingSign?.glyph, bg: 'bg-gradient-to-r from-orange-800/40 to-red-700/20', border: 'border-orange-500/30' },
+                                            { symbol: '☉', sign: triad.sun.name, glyph: sunSign?.glyph, bg: 'bg-gradient-to-r from-amber-700/50 to-amber-600/30', border: 'border-amber-500/40' },
+                                            { symbol: '☽', sign: triad.moon.name, glyph: moonSign?.glyph, bg: 'bg-gradient-to-r from-slate-500/40 to-slate-400/20', border: 'border-slate-400/30' },
+                                            { symbol: '↑', sign: triad.rising.name, glyph: risingSign?.glyph, bg: 'bg-gradient-to-r from-orange-700/50 to-red-600/30', border: 'border-orange-500/40' },
                                         ].map(pill => (
                                             <div
                                                 key={pill.symbol}
-                                                className={`${pill.bg} ${pill.border} border px-3.5 py-2 rounded-full flex items-center gap-2 whitespace-nowrap shadow-md`}
+                                                className={`${pill.bg} ${pill.border} border px-3 py-1.5 rounded-full flex items-center gap-1.5 whitespace-nowrap shadow-lg w-fit`}
                                             >
-                                                <span className="text-xs opacity-80">{pill.symbol}</span>
-                                                <span className="text-xs">{pill.glyph}</span>
-                                                <span className="text-[12px] text-white/90 font-display font-medium tracking-wide">{pill.sign}</span>
+                                                <span className="text-[11px] opacity-70">{pill.symbol}</span>
+                                                <span className="text-[12px] text-white/90 font-display font-semibold tracking-wide">{pill.sign}</span>
+                                                <span className="text-[11px] opacity-70">{pill.glyph}</span>
                                             </div>
                                         ))}
                                     </div>
