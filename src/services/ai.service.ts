@@ -299,7 +299,7 @@ Personal Year: ${personalYear.number} (current cycle, year ${new Date().getFullY
 
 Follow the four-section structure. For every insight: name the energy, ground it in a relatable life scenario, then reframe it. Make them feel like you truly see them.`;
 
-        return this.chat(systemPrompt, userPrompt);
+        return this.chat(systemPrompt, userPrompt, 1200);
     }
 
     /**
@@ -324,7 +324,7 @@ Their compatibility score is ${score}/100 — "${tier}". Weave this naturally in
         return this.chat(systemPrompt, userPrompt);
     }
 
-    async chat(systemPrompt: string, userPrompt: string): Promise<string> {
+    async chat(systemPrompt: string, userPrompt: string, maxTokens = 600): Promise<string> {
         if (!this.apiKey) {
             throw new Error('No API key configured. Add your OpenRouter key in Settings.');
         }
@@ -343,7 +343,7 @@ Their compatibility score is ${score}/100 — "${tier}". Weave this naturally in
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: userPrompt },
                 ],
-                max_tokens: 600,
+                max_tokens: maxTokens,
                 temperature: 0.8,
             }),
         });
