@@ -21,7 +21,7 @@ import { Onboarding } from './components/Onboarding';
 import { TransitFeed } from './components/TransitFeed';
 import { JournalTab } from './components/JournalTab';
 import { JournalWidget } from './components/JournalWidget';
-import { canDoReading, incrementReadingCount, getRemainingReadings } from './services/ai.service';
+import { canDoReading, incrementReadingCount, getRemainingReadings, AIService, dailyCache } from './services/ai.service';
 import { recordReading } from './services/memory.service';
 import { fireReminder } from './services/reminder.service';
 import { fireTransitNotification, getTransitFeed } from './services/transit.service';
@@ -129,6 +129,76 @@ function HoroscopeSnippet({ onTap }: { onTap: () => void }) {
         </div>
     );
 }
+
+/* ── Energy Interpretation — AI-powered daily energy reading ── */
+function EnergyInterpretation({ cards }: { cards: Card[] }) {
+    const [interpretation, setInterpretation] = React.useState<string | null>(null);
+    const [loading, setLoading] = React.useState(false);
+    const CACHE_KEY = 'energy_interpretation';
+
+    React.useEffect(() => {
+        if (cards.length < 3) return;
+
+        // Check daily cache first
+        const cached = dailyCache.get(CACHE_KEY);
+        if (cached) {
+            setInterpretation(cached);
+            return;
+        }
+
+        const ai = new AIService();
+        if (!ai.hasApiKey()) return;
+
+        setLoading(true);
+        const cardData = cards.map((c, i) => ({
+            name: c.name,
+            meaning: c.meaning || c.description,
+            position: ['Mind', 'Body', 'Spirit'][i],
+        }));
+
+        ai.getSpreadInsight(cardData, 'three-card', 'daily energy', 'What energy does today hold?')
+            .then((result: string) => {
+                // Extract just the first 2-3 sentences for a brief summary
+                const brief = result
+                    .replace(/##.*?\n/g, '') // strip headers
+                    .replace(/- .*/g, '')    // strip bullets
+                    .replace(/\*\*/g, '')    // strip bold markers
+                    .trim()
+                    .split(/[.!?]\s+/)
+                    .filter((s: string) => s.trim().length > 10)
+                    .slice(0, 3)
+                    .join('. ') + '.';
+
+                dailyCache.set(CACHE_KEY, brief);
+                setInterpretation(brief);
+            })
+            .catch(() => {
+                // Fallback — generate a simple non-AI interpretation
+                const fallback = `${cards[0].name} guides your thoughts, ${cards[1].name} moves your body, and ${cards[2].name} lifts your spirit. Let today's energy flow through you.`;
+                setInterpretation(fallback);
+            })
+            .finally(() => setLoading(false));
+    }, [cards]);
+
+    if (!interpretation && !loading) return null;
+
+    return (
+        <div className="mt-1 px-1">
+            {loading ? (
+                <div className="flex items-center justify-center gap-2 py-2">
+                    <div className="w-1 h-1 bg-altar-gold/50 rounded-full animate-pulse" />
+                    <span className="text-[10px] text-altar-muted/60 italic">Reading the energy...</span>
+                    <div className="w-1 h-1 bg-altar-gold/50 rounded-full animate-pulse" style={{ animationDelay: '0.3s' }} />
+                </div>
+            ) : (
+                <p className="text-[11px] text-altar-text/60 leading-relaxed text-center italic">
+                    "{interpretation}"
+                </p>
+            )}
+        </div>
+    );
+}
+
 
 /* ── Inline Premium CTA Banner ── */
 function PremiumBanner({ onClick }: { onClick: () => void }) {
@@ -455,56 +525,78 @@ function App() {
                 {/* ── Main Content ── */}
                 <main className="relative z-10 max-w-[500px] mx-auto">
 
-                    {/* ── Hero: Card + Triad Pills ── */}
-                    <div className="relative mx-5 mt-2 mb-5 animate-fade-up" style={{ opacity: 0 }}>
-                        {/* Ambient glow */}
-                        <div className="absolute top-1/2 left-[40%] -translate-x-1/2 -translate-y-1/2 w-[250px] h-[350px] rounded-full bg-altar-gold/8 blur-[80px] pointer-events-none" />
-
-                        <div className="relative flex items-center">
-                            {/* Card — large, prominent */}
-                            <div
-                                className="relative w-[200px] h-[310px] rounded-2xl overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.5)] cursor-pointer border border-white/10 shrink-0"
-                                onClick={() => handleTabChange('new')}
-                            >
-                                <img
-                                    src={currentCard.image}
-                                    alt={currentCard.name}
-                                    className="w-full h-full object-cover"
-                                />
-                                <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black/85 to-transparent" />
-                                <div className="absolute bottom-3 left-3.5 right-3.5">
-                                    <h2 className="font-display text-base text-white font-semibold tracking-wide">{currentCard.name}</h2>
-                                </div>
-                            </div>
-
-                            {/* Triad pills — compact, floating right */}
-                            {(() => {
-                                const birthData = getBirthData();
-                                if (!birthData) return null;
-                                const triad = getNatalTriad(birthData);
-                                const sunSign = ZODIAC_SIGNS.find(z => z.id === triad.sun.id);
-                                const moonSign = ZODIAC_SIGNS.find(z => z.id === triad.moon.id);
-                                const risingSign = ZODIAC_SIGNS.find(z => z.id === triad.rising.id);
-                                return (
-                                    <div className="flex flex-col gap-2.5 ml-4 self-center">
-                                        {[
-                                            { symbol: '☉', sign: triad.sun.name, glyph: sunSign?.glyph, bg: 'bg-gradient-to-r from-amber-700/50 to-amber-600/30', border: 'border-amber-500/40' },
-                                            { symbol: '☽', sign: triad.moon.name, glyph: moonSign?.glyph, bg: 'bg-gradient-to-r from-slate-500/40 to-slate-400/20', border: 'border-slate-400/30' },
-                                            { symbol: '↑', sign: triad.rising.name, glyph: risingSign?.glyph, bg: 'bg-gradient-to-r from-orange-700/50 to-red-600/30', border: 'border-orange-500/40' },
-                                        ].map(pill => (
-                                            <div
-                                                key={pill.symbol}
-                                                className={`${pill.bg} ${pill.border} border px-3 py-1.5 rounded-full flex items-center gap-1.5 whitespace-nowrap shadow-lg w-fit`}
-                                            >
-                                                <span className="text-[11px] opacity-70">{pill.symbol}</span>
-                                                <span className="text-[12px] text-white/90 font-display font-semibold tracking-wide">{pill.sign}</span>
-                                                <span className="text-[11px] opacity-70">{pill.glyph}</span>
-                                            </div>
-                                        ))}
+                    {/* ── Triad Pills — horizontal labeled row ── */}
+                    {(() => {
+                        const birthData = getBirthData();
+                        if (!birthData) return null;
+                        const triad = getNatalTriad(birthData);
+                        const sunSign = ZODIAC_SIGNS.find(z => z.id === triad.sun.id);
+                        const moonSign = ZODIAC_SIGNS.find(z => z.id === triad.moon.id);
+                        const risingSign = ZODIAC_SIGNS.find(z => z.id === triad.rising.id);
+                        return (
+                            <div className="flex justify-center gap-2 mx-5 mt-1 mb-4 animate-fade-up" style={{ opacity: 0 }}>
+                                {[
+                                    { symbol: '☉', label: 'Sun', sign: triad.sun.name, glyph: sunSign?.glyph, bg: 'from-amber-700/50 to-amber-600/25', border: 'border-amber-500/35' },
+                                    { symbol: '☽', label: 'Moon', sign: triad.moon.name, glyph: moonSign?.glyph, bg: 'from-slate-500/40 to-slate-400/15', border: 'border-slate-400/25' },
+                                    { symbol: '↑', label: 'Rising', sign: triad.rising.name, glyph: risingSign?.glyph, bg: 'from-orange-700/50 to-red-600/25', border: 'border-orange-500/35' },
+                                ].map(pill => (
+                                    <div
+                                        key={pill.label}
+                                        className={`bg-gradient-to-r ${pill.bg} ${pill.border} border px-2.5 py-1 rounded-full flex items-center gap-1 whitespace-nowrap shadow-md`}
+                                    >
+                                        <span className="text-[10px] opacity-60">{pill.symbol}</span>
+                                        <span className="text-[10px] text-white/50 font-display">{pill.label}:</span>
+                                        <span className="text-[11px] text-white/90 font-display font-semibold">{pill.sign}</span>
+                                        <span className="text-[10px] opacity-50">{pill.glyph}</span>
                                     </div>
-                                );
-                            })()}
-                        </div>
+                                ))}
+                            </div>
+                        );
+                    })()}
+
+                    {/* ── Hero: Today's Energy (Mind / Body / Spirit) ── */}
+                    <div className="mx-5 mb-5 animate-fade-up" style={{ animationDelay: '0.15s', opacity: 0 }}>
+                        <h3 className="font-display text-center text-sm tracking-[4px] text-altar-muted uppercase mb-4">
+                            <span className="text-altar-gold">✧</span> Today's Energy <span className="text-altar-gold">✧</span>
+                        </h3>
+
+                        {energyCards.length >= 3 ? (
+                            <>
+                                {/* Three cards */}
+                                <div className="flex justify-center gap-3 mb-4">
+                                    {energyCards.slice(0, 3).map((card, idx) => (
+                                        <div
+                                            key={card.id}
+                                            className="flex flex-col items-center cursor-pointer group"
+                                            onClick={() => setSelectedCard(card)}
+                                        >
+                                            <div className="relative w-[105px] h-[155px] rounded-xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.4)] border border-white/10 transition-all duration-300 group-hover:scale-105 group-hover:shadow-[0_0_25px_rgba(139,95,191,0.3)]">
+                                                <img
+                                                    src={card.image}
+                                                    alt={card.name}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-40" />
+                                            </div>
+                                            <div className="mt-2 flex flex-col items-center">
+                                                <span className="text-base">{['🧠', '💫', '🕊️'][idx]}</span>
+                                                <span className="text-[9px] text-altar-muted font-display tracking-[2px] uppercase mt-0.5">
+                                                    {['Mind', 'Body', 'Spirit'][idx]}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* AI Energy Interpretation */}
+                                <EnergyInterpretation cards={energyCards.slice(0, 3)} />
+                            </>
+                        ) : (
+                            <div className="text-center py-6">
+                                <div className="animate-pulse text-altar-gold text-2xl mb-2">✦</div>
+                                <p className="text-xs text-altar-muted">Drawing your energy cards...</p>
+                            </div>
+                        )}
                     </div>
 
                     {/* ── Journal Widget — Teal Aurora ── */}
@@ -601,15 +693,8 @@ function App() {
                         </div>
                     </div>
 
-                    {/* ── Below the fold: Blueprint, Mind/Body/Spirit, etc ── */}
+                    {/* ── Below the fold: Blueprint only (MBS & Horoscope removed) ── */}
                     <CosmicBlueprint onTabChange={handleTabChange} />
-
-                    <MindBodySpiritFloat
-                        cards={energyCards}
-                        onCardClick={(card) => setSelectedCard(card)}
-                    />
-
-                    <HoroscopeSnippet onTap={() => handleTabChange('horoscope')} />
 
                     {/* Premium Banner — only for free users */}
                     {sub !== 'premium' && (
