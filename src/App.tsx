@@ -20,12 +20,13 @@ import { Compatibility } from './components/Compatibility';
 import { Onboarding } from './components/Onboarding';
 import { TransitFeed } from './components/TransitFeed';
 import { JournalTab } from './components/JournalTab';
+import { JournalWidget } from './components/JournalWidget';
 import { canDoReading, incrementReadingCount, getRemainingReadings } from './services/ai.service';
 import { recordReading } from './services/memory.service';
 import { fireReminder } from './services/reminder.service';
-import { fireTransitNotification } from './services/transit.service';
+import { fireTransitNotification, getTransitFeed } from './services/transit.service';
 import { fireJournalReminder } from './services/journal.service';
-import { getBirthData, getSunSign, getDailyHoroscope } from './services/astrology.service';
+import { getBirthData, getSunSign, getDailyHoroscope, getNatalTriad, ZODIAC_SIGNS } from './services/astrology.service';
 
 /* ── Ambient particle backdrop ── */
 function AltarParticles() {
@@ -430,25 +431,69 @@ function App() {
                     />
                 )}
 
-                {/* ── Header ── */}
-                <header className="relative text-center py-6 z-10 safe-top">
+                {/* ── Header — Compact with Greeting ── */}
+                <header className="relative text-center pt-5 pb-2 z-10 safe-top">
                     <div className="absolute inset-0 bg-gradient-to-b from-altar-deep to-transparent" />
-                    <h1 className="relative font-display text-2xl tracking-[5px] font-semibold">
+                    <h1 className="relative font-display text-lg tracking-[5px] font-semibold">
                         <span className="text-altar-gold animate-pulse">✦</span>
                         <span className="shimmer-text mx-2">ARCANA WHISPER</span>
                         <span className="text-altar-gold animate-pulse">✦</span>
                     </h1>
-                    <p className="relative text-xs text-altar-muted tracking-[3px] mt-1 uppercase">The Mystic Altar</p>
+                    {(() => {
+                        const now = new Date();
+                        const greeting = now.getHours() < 12 ? 'Good morning' : now.getHours() < 17 ? 'Good afternoon' : 'Good evening';
+                        const userName = userProfile?.name || '';
+                        const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+                        return (
+                            <p className="relative text-xs text-altar-text/60 mt-1.5">
+                                {greeting}{userName ? `, ${userName}` : ''} · {dateStr}
+                            </p>
+                        );
+                    })()}
                 </header>
 
                 {/* ── Main Content ── */}
                 <main className="relative z-10 max-w-[500px] mx-auto">
-                    {/* Hero Card */}
-                    <HeroCard
-                        card={currentCard}
-                        onShare={() => setShowShareCard(true)}
-                        subscription={sub}
-                    />
+
+                    {/* ── Hero Section: Card + Triad Pills ── */}
+                    <div className="mx-5 mt-2 mb-3 flex gap-3 items-start animate-fade-up" style={{ opacity: 0 }}>
+                        {/* Hero Card — left side */}
+                        <div className="flex-1">
+                            <HeroCard
+                                card={currentCard}
+                                onShare={() => setShowShareCard(true)}
+                                subscription={sub}
+                            />
+                        </div>
+
+                        {/* Natal Triad — right side pills */}
+                        {(() => {
+                            const birthData = getBirthData();
+                            if (!birthData) return null;
+                            const triad = getNatalTriad(birthData);
+                            const sunSign = ZODIAC_SIGNS.find(z => z.id === triad.sun.id);
+                            const moonSign = ZODIAC_SIGNS.find(z => z.id === triad.moon.id);
+                            const risingSign = ZODIAC_SIGNS.find(z => z.id === triad.rising.id);
+                            return (
+                                <div className="flex flex-col gap-1.5 pt-3 shrink-0">
+                                    {[
+                                        { label: '☉', value: triad.sun.name, glyph: sunSign?.glyph, color: 'from-amber-500/15 to-yellow-500/10 border-amber-500/20' },
+                                        { label: '☽', value: triad.moon.name, glyph: moonSign?.glyph, color: 'from-blue-500/15 to-indigo-500/10 border-blue-500/20' },
+                                        { label: '↑', value: triad.rising.name, glyph: risingSign?.glyph, color: 'from-orange-500/15 to-red-500/10 border-orange-500/20' },
+                                    ].map(pill => (
+                                        <div
+                                            key={pill.label}
+                                            className={`px-3 py-1.5 rounded-full bg-gradient-to-r ${pill.color} border text-[11px] text-altar-text/80 font-display flex items-center gap-1.5 whitespace-nowrap`}
+                                        >
+                                            <span className="text-xs">{pill.label}</span>
+                                            {pill.glyph && <span>{pill.glyph}</span>}
+                                            <span>{pill.value}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            );
+                        })()}
+                    </div>
 
                     {/* Premium Banner — only for free users */}
                     {sub !== 'premium' && (
@@ -464,7 +509,7 @@ function App() {
                         </div>
                     )}
 
-                    {/* Mind / Body / Spirit Float */}
+                    {/* ── Mind / Body / Spirit ── */}
                     <MindBodySpiritFloat
                         cards={energyCards}
                         onCardClick={(card) => setSelectedCard(card)}
@@ -473,59 +518,79 @@ function App() {
                     {/* Daily Horoscope Snippet */}
                     <HoroscopeSnippet onTap={() => handleTabChange('horoscope')} />
 
-
-
-                    {/* Daily Affirmation */}
-                    <div className="mx-5 my-4 glass rounded-2xl p-5 animate-fade-up" style={{ animationDelay: '0.8s', opacity: 0 }}>
-                        <h3 className="font-display text-sm uppercase tracking-[3px] text-altar-muted mb-3 flex items-center gap-2">
-                            <span className="text-lg">✨</span> Daily Affirmation
+                    {/* ── Today's Focus: Journal + Blueprint (twin features) ── */}
+                    <div className="mx-5 my-4 animate-fade-up" style={{ animationDelay: '0.5s', opacity: 0 }}>
+                        <h3 className="font-display text-[10px] text-altar-muted/50 tracking-[3px] uppercase mb-2.5 flex items-center gap-1.5">
+                            Today's Focus
                         </h3>
-                        <div className="italic text-sm leading-relaxed p-4 bg-altar-gold/5 border-l-[3px] border-altar-gold rounded-lg text-altar-text/90">
-                            "I trust in the natural flow of my life. I embrace patience and know that everything unfolds in perfect timing."
+                        <div className="space-y-2.5">
+                            {/* Journal Widget */}
+                            <JournalWidget onTap={() => handleTabChange('journal')} />
+
+                            {/* Cosmic Blueprint */}
+                            <CosmicBlueprint onTabChange={handleTabChange} />
                         </div>
                     </div>
 
-                    {/* Discovery Grid */}
-                    <div className="mx-5 my-4 animate-fade-up" style={{ animationDelay: '0.9s', opacity: 0 }}>
-                        <h3 className="font-display text-sm uppercase tracking-[3px] text-altar-muted mb-3 flex items-center gap-2">
-                            <span className="text-lg">🌌</span> Explore
+                    {/* ── Cosmic Weather Preview ── */}
+                    {(() => {
+                        try {
+                            const feed = getTransitFeed();
+                            if (!feed.hasBirthData || feed.active.length === 0) return null;
+                            return (
+                                <div className="mx-5 mb-4 animate-fade-up" style={{ animationDelay: '0.7s', opacity: 0 }}>
+                                    <button
+                                        onClick={() => handleTabChange('cosmos')}
+                                        className="w-full text-left glass rounded-2xl p-4 border border-indigo-500/15 bg-gradient-to-br from-indigo-900/10 to-violet-900/8 transition-all hover:border-indigo-400/25 active:scale-[0.99]"
+                                    >
+                                        <div className="flex items-center justify-between mb-1.5">
+                                            <h3 className="text-xs text-altar-text/80 font-display flex items-center gap-1.5">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+                                                {feed.active.length} active transit{feed.active.length !== 1 ? 's' : ''}
+                                            </h3>
+                                            <span className="text-[9px] text-altar-gold font-display">View all →</span>
+                                        </div>
+                                        <p className="text-[10px] text-altar-muted/50 truncate">
+                                            {feed.active.slice(0, 3).map(t =>
+                                                `${t.transitPlanet.name} ${t.aspect.symbol} ${t.natalPlanet.name}`
+                                            ).join(' · ')}
+                                        </p>
+                                    </button>
+                                </div>
+                            );
+                        } catch { return null; }
+                    })()}
+
+                    {/* ── Explore — Horizontal Scroll Circles ── */}
+                    <div className="mx-5 my-4 animate-fade-up" style={{ animationDelay: '0.8s', opacity: 0 }}>
+                        <h3 className="font-display text-[10px] text-altar-muted/50 tracking-[3px] uppercase mb-2.5">
+                            Explore
                         </h3>
-                        <div className="grid grid-cols-2 gap-2.5">
+                        <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
                             {[
-                                { icon: '🔮', label: 'Tarot', desc: 'Draw your cards', tab: 'new', gradient: 'from-violet-500/10 to-fuchsia-500/10 border-violet-500/20' },
-                                { icon: '🌙', label: 'Natal Chart', desc: 'Your cosmic blueprint', tab: 'natal', gradient: 'from-indigo-500/10 to-purple-500/10 border-indigo-500/20' },
-                                { icon: '🔢', label: 'Numerology', desc: 'Sacred numbers', tab: 'numerology', gradient: 'from-amber-500/10 to-orange-500/10 border-amber-500/20' },
-                                { icon: '♈', label: 'Horoscope', desc: 'Daily zodiac', tab: 'horoscope', gradient: 'from-cyan-500/10 to-blue-500/10 border-cyan-500/20' },
-                                { icon: '🌌', label: 'Cosmic Weather', desc: 'Transit alerts', tab: 'cosmos', gradient: 'from-blue-500/10 to-indigo-500/10 border-blue-500/20' },
-                                { icon: '📓', label: 'Cosmic Journal', desc: 'Your space', tab: 'journal', gradient: 'from-teal-500/10 to-cyan-500/10 border-teal-500/20' },
-                                { icon: '💞', label: 'Compatibility', desc: 'Couple charts', tab: 'compatibility', gradient: 'from-pink-500/10 to-rose-500/10 border-pink-500/20' },
-                                { icon: '📜', label: 'Past Readings', desc: 'Your history', tab: 'history', gradient: 'from-emerald-500/10 to-green-500/10 border-emerald-500/20' },
+                                { icon: '🔮', label: 'Tarot', tab: 'new', bg: 'from-violet-500/15 to-fuchsia-500/10 border-violet-500/20' },
+                                { icon: '🌌', label: 'Cosmos', tab: 'cosmos', bg: 'from-blue-500/15 to-indigo-500/10 border-blue-500/20' },
+                                { icon: '♈', label: 'Horoscope', tab: 'horoscope', bg: 'from-cyan-500/15 to-blue-500/10 border-cyan-500/20' },
+                                { icon: '🔢', label: 'Numbers', tab: 'numerology', bg: 'from-amber-500/15 to-orange-500/10 border-amber-500/20' },
+                                { icon: '💞', label: 'Love', tab: 'compatibility', bg: 'from-pink-500/15 to-rose-500/10 border-pink-500/20' },
+                                { icon: '📜', label: 'History', tab: 'history', bg: 'from-emerald-500/15 to-green-500/10 border-emerald-500/20' },
                             ].map(item => (
                                 <button
                                     key={item.tab}
                                     onClick={() => handleTabChange(item.tab)}
-                                    className={`rounded-2xl p-4 text-left border bg-gradient-to-br ${item.gradient} transition-all hover:scale-[1.02] active:scale-[0.98]`}
+                                    className={`shrink-0 flex flex-col items-center gap-1.5 transition-all hover:scale-105 active:scale-95`}
                                 >
-                                    <span className="text-2xl block mb-2">{item.icon}</span>
-                                    <p className="font-display text-sm text-altar-text font-semibold">{item.label}</p>
-                                    <p className="text-[10px] text-altar-muted mt-0.5">{item.desc}</p>
+                                    <div className={`w-14 h-14 rounded-full bg-gradient-to-br ${item.bg} border flex items-center justify-center text-xl`}>
+                                        {item.icon}
+                                    </div>
+                                    <span className="text-[9px] text-altar-muted/60 font-display">{item.label}</span>
                                 </button>
                             ))}
                         </div>
                     </div>
 
-                    {/* Cosmic Blueprint */}
-                    <CosmicBlueprint onTabChange={handleTabChange} />
-
-                    {/* Draw Another Card */}
-                    <div className="mx-5 my-4 animate-fade-up" style={{ animationDelay: '1.1s', opacity: 0 }}>
-                        <button
-                            className="w-full py-4 rounded-2xl bg-gradient-to-br from-altar-mid to-altar-bright border border-altar-gold/20 text-center cursor-pointer transition-all hover:translate-y-[-2px] hover:shadow-[0_6px_20px_rgba(255,215,0,0.2)] hover:border-altar-gold/40 text-base font-display font-semibold tracking-wide active:scale-[0.98]"
-                            onClick={() => handleTabChange('new')}
-                        >
-                            ✦ Draw Another Card ✦
-                        </button>
-                    </div>
+                    {/* Spacer for bottom nav */}
+                    <div className="h-4" />
                 </main>
             </div>
             <BottomNav currentTab={currentTab} onTabChange={handleTabChange} />
