@@ -151,8 +151,9 @@ Use this context to make the reading more personalized — how does this placeme
         const raw = await this.chat(systemPrompt, userPrompt);
 
         try {
-            // Extract JSON from response (handle potential markdown wrapping)
-            const jsonMatch = raw.match(/\{[\s\S]*\}/);
+            // Strip markdown code fences before extracting JSON
+            const cleaned = raw.replace(/```(?:json)?\s*/g, '').replace(/```\s*/g, '');
+            const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
                 return JSON.parse(jsonMatch[0]);
             }
