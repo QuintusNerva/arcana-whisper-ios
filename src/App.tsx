@@ -455,44 +455,72 @@ function App() {
                 {/* ── Main Content ── */}
                 <main className="relative z-10 max-w-[500px] mx-auto">
 
-                    {/* ── Hero Section: Card + Triad Pills ── */}
-                    <div className="mx-5 mt-2 mb-3 flex gap-3 items-start animate-fade-up" style={{ opacity: 0 }}>
-                        {/* Hero Card — left side */}
-                        <div className="flex-1">
-                            <HeroCard
-                                card={currentCard}
-                                onShare={() => setShowShareCard(true)}
-                                subscription={sub}
-                            />
-                        </div>
-
-                        {/* Natal Triad — right side pills */}
-                        {(() => {
-                            const birthData = getBirthData();
-                            if (!birthData) return null;
-                            const triad = getNatalTriad(birthData);
-                            const sunSign = ZODIAC_SIGNS.find(z => z.id === triad.sun.id);
-                            const moonSign = ZODIAC_SIGNS.find(z => z.id === triad.moon.id);
-                            const risingSign = ZODIAC_SIGNS.find(z => z.id === triad.rising.id);
-                            return (
-                                <div className="flex flex-col gap-1.5 pt-3 shrink-0">
-                                    {[
-                                        { label: '☉', value: triad.sun.name, glyph: sunSign?.glyph, color: 'from-amber-500/15 to-yellow-500/10 border-amber-500/20' },
-                                        { label: '☽', value: triad.moon.name, glyph: moonSign?.glyph, color: 'from-blue-500/15 to-indigo-500/10 border-blue-500/20' },
-                                        { label: '↑', value: triad.rising.name, glyph: risingSign?.glyph, color: 'from-orange-500/15 to-red-500/10 border-orange-500/20' },
-                                    ].map(pill => (
-                                        <div
-                                            key={pill.label}
-                                            className={`px-3 py-1.5 rounded-full bg-gradient-to-r ${pill.color} border text-[11px] text-altar-text/80 font-display flex items-center gap-1.5 whitespace-nowrap`}
-                                        >
-                                            <span className="text-xs">{pill.label}</span>
-                                            {pill.glyph && <span>{pill.glyph}</span>}
-                                            <span>{pill.value}</span>
-                                        </div>
-                                    ))}
+                    {/* ── Hero Section: Compact Card + Triad Pills ── */}
+                    <div className="mx-5 mt-3 mb-4 animate-fade-up" style={{ opacity: 0 }}>
+                        <div className="flex gap-3 items-start">
+                            {/* Card image — compact left side */}
+                            <div className="relative shrink-0">
+                                <div className="absolute -inset-4 bg-altar-gold/8 blur-[40px] rounded-full pointer-events-none" />
+                                <div
+                                    className="relative w-[150px] h-[230px] rounded-2xl overflow-hidden shadow-lg cursor-pointer border border-white/10"
+                                    onClick={() => handleTabChange('new')}
+                                >
+                                    <img
+                                        src={currentCard.image}
+                                        alt={currentCard.name}
+                                        className="w-full h-full object-cover"
+                                    />
+                                    <div className="absolute bottom-0 left-0 right-0 h-2/5 bg-gradient-to-t from-black/80 to-transparent" />
+                                    <div className="absolute bottom-2.5 left-3 right-3">
+                                        <h2 className="font-display text-sm text-white font-semibold tracking-wide leading-tight">{currentCard.name}</h2>
+                                        <p className="text-[9px] text-white/60 mt-0.5 line-clamp-2">{currentCard.description}</p>
+                                    </div>
                                 </div>
-                            );
-                        })()}
+                            </div>
+
+                            {/* Right side — Triad pills + quick actions */}
+                            <div className="flex-1 flex flex-col gap-2 pt-1">
+                                {/* Natal Triad pills */}
+                                {(() => {
+                                    const birthData = getBirthData();
+                                    if (!birthData) return null;
+                                    const triad = getNatalTriad(birthData);
+                                    return (
+                                        <div className="flex flex-col gap-1.5">
+                                            {[
+                                                { label: '☉', value: triad.sun.name, color: 'from-amber-500/15 to-yellow-500/10 border-amber-500/20' },
+                                                { label: '☽', value: triad.moon.name, color: 'from-blue-500/15 to-indigo-500/10 border-blue-500/20' },
+                                                { label: '↑', value: triad.rising.name, color: 'from-orange-500/15 to-red-500/10 border-orange-500/20' },
+                                            ].map(pill => (
+                                                <div
+                                                    key={pill.label}
+                                                    className={`px-3 py-1.5 rounded-full bg-gradient-to-r ${pill.color} border text-[11px] text-altar-text/80 font-display flex items-center gap-1.5`}
+                                                >
+                                                    <span className="text-xs opacity-70">{pill.label}</span>
+                                                    <span>{pill.value}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    );
+                                })()}
+
+                                {/* Compact action buttons */}
+                                <div className="flex gap-2 mt-1">
+                                    <button
+                                        onClick={() => handleTabChange('new')}
+                                        className="flex-1 py-2 rounded-xl bg-gradient-to-r from-altar-mid to-altar-bright border border-altar-gold/20 text-[10px] text-altar-gold font-display tracking-wide hover:border-altar-gold/40 transition-all active:scale-95 flex items-center justify-center gap-1"
+                                    >
+                                        <span>✨</span> Insight
+                                    </button>
+                                    <button
+                                        onClick={() => setShowShareCard(true)}
+                                        className="py-2 px-3 rounded-xl glass border border-white/5 text-[10px] text-altar-muted hover:text-white transition-all active:scale-95 flex items-center gap-1"
+                                    >
+                                        <span>📤</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Premium Banner — only for free users */}
