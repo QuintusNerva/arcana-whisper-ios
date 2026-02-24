@@ -124,7 +124,17 @@ export function getAscendant(
     const y = -Math.cos(lstRad);
     const x = Math.sin(lstRad) * Math.cos(oblRad) + Math.tan(latRad) * Math.sin(oblRad);
 
-    return norm360(Math.atan2(y, x) * 180 / Math.PI);
+    const ascendant = norm360(Math.atan2(y, x) * 180 / Math.PI);
+    console.log('[EPHEMERIS] Ascendant:', {
+        utcDate: date.toISOString(),
+        gmstDeg: Math.round(gmstDeg * 100) / 100,
+        lstDeg: Math.round(lst * 100) / 100,
+        obliquity: Math.round(obliquity * 1000) / 1000,
+        ascendantDeg: Math.round(ascendant * 100) / 100,
+        sign: SIGN_NAMES[Math.floor(ascendant / 30)],
+        degInSign: Math.round((ascendant % 30) * 100) / 100,
+    });
+    return ascendant;
 }
 
 // ══════════════════════════════════════
