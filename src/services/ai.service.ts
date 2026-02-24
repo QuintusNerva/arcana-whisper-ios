@@ -347,6 +347,49 @@ Their compatibility score is ${score}/100 — "${tier}". Weave this naturally in
         return this.chat(systemPrompt, userPrompt);
     }
 
+    /**
+     * Get an AI-powered transit interpretation — personalized to the user's chart.
+     */
+    async getTransitInterpretation(
+        transitPlanet: { name: string; glyph: string; signId: string; degreeInSign: number },
+        natalPlanet: { name: string; glyph: string; signId: string; degreeInSign: number },
+        aspect: { name: string; symbol: string; nature: string },
+        orb: number,
+        isApplying: boolean,
+        triadContext?: { sun?: string; moon?: string; rising?: string },
+    ): Promise<string> {
+        const tSign = transitPlanet.signId.charAt(0).toUpperCase() + transitPlanet.signId.slice(1);
+        const nSign = natalPlanet.signId.charAt(0).toUpperCase() + natalPlanet.signId.slice(1);
+
+        const systemPrompt = `You are a personal astrologer interpreting a transit for your client.
+You speak directly to them ("you"), warm but honest. Be specific and actionable.
+No generic astrology — this is about THEIR specific chart activation.
+Write 2-3 sentences. No headers, no bullet points, no markdown. Just flowing prose.
+Be practical: suggest a specific action, mindset, or thing to watch for TODAY.`;
+
+        const orbDesc = orb < 1 ? 'EXACT TODAY — peak intensity'
+            : isApplying ? `Orb: ${orb}° and tightening — building in intensity`
+                : `Orb: ${orb}° and separating — intensity is fading`;
+
+        let userPrompt = `TRANSIT: ${transitPlanet.name} (currently at ${tSign} ${transitPlanet.degreeInSign}°) is forming a ${aspect.name} to their natal ${natalPlanet.name} (${nSign} ${natalPlanet.degreeInSign}°).
+${orbDesc}
+NATURE: ${aspect.nature}`;
+
+        if (triadContext) {
+            const parts = [];
+            if (triadContext.sun) parts.push(`Sun in ${triadContext.sun}`);
+            if (triadContext.moon) parts.push(`Moon in ${triadContext.moon}`);
+            if (triadContext.rising) parts.push(`Rising in ${triadContext.rising}`);
+            if (parts.length > 0) {
+                userPrompt += `\n\nTheir natal chart context: ${parts.join(', ')}.`;
+            }
+        }
+
+        userPrompt += `\n\nWrite a personalized 2-3 sentence interpretation. Be specific about what they might FEEL or EXPERIENCE today because of this transit. End with one actionable suggestion.`;
+
+        return this.chat(systemPrompt, userPrompt, 200);
+    }
+
     async chat(systemPrompt: string, userPrompt: string, maxTokens = 600): Promise<string> {
         if (!this.apiKey) {
             throw new Error('No API key configured. Add your OpenRouter key in Settings.');

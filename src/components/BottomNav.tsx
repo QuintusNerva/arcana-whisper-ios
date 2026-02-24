@@ -2,6 +2,7 @@ import React from 'react';
 import { HomeIcon } from './HomeIcon';
 import { DrawIcon } from './DrawIcon';
 import { ProfileIcon } from './ProfileIcon';
+import { CosmicWeatherIcon } from './CosmicWeatherIcon';
 
 interface BottomNavProps {
     currentTab: string;
@@ -11,6 +12,7 @@ interface BottomNavProps {
 const TABS = [
     { id: 'home', label: 'Altar', icon: HomeIcon },
     { id: 'new', label: 'Draw', icon: DrawIcon, promoted: true },
+    { id: 'cosmos', label: 'Cosmos', icon: CosmicWeatherIcon },
     { id: 'profile', label: 'Self', icon: ProfileIcon },
 ];
 

@@ -18,9 +18,11 @@ import { Numerology } from './components/Numerology';
 import { Horoscope } from './components/Horoscope';
 import { Compatibility } from './components/Compatibility';
 import { Onboarding } from './components/Onboarding';
+import { TransitFeed } from './components/TransitFeed';
 import { canDoReading, incrementReadingCount, getRemainingReadings } from './services/ai.service';
 import { recordReading } from './services/memory.service';
 import { fireReminder } from './services/reminder.service';
+import { fireTransitNotification } from './services/transit.service';
 import { getBirthData, getSunSign, getDailyHoroscope } from './services/astrology.service';
 
 /* ── Ambient particle backdrop ── */
@@ -170,6 +172,7 @@ function App() {
     const [showNumerology, setShowNumerology] = React.useState(false);
     const [showHoroscope, setShowHoroscope] = React.useState(false);
     const [showCompatibility, setShowCompatibility] = React.useState(false);
+    const [showTransitFeed, setShowTransitFeed] = React.useState(false);
 
     const [userProfile, setUserProfile] = React.useState<any>(() => {
         try {
@@ -228,6 +231,7 @@ function App() {
         setShowNumerology(false);
         setShowHoroscope(false);
         setShowCompatibility(false);
+        setShowTransitFeed(false);
 
         setCurrentTab(tab);
         if (tab === 'new') {
@@ -244,6 +248,7 @@ function App() {
         else if (tab === 'numerology') setShowNumerology(true);
         else if (tab === 'horoscope') setShowHoroscope(true);
         else if (tab === 'compatibility') setShowCompatibility(true);
+        else if (tab === 'cosmos') setShowTransitFeed(true);
     };
 
     React.useEffect(() => {
@@ -258,6 +263,8 @@ function App() {
             setIsLoading(false);
             // Check and fire daily reminder
             fireReminder();
+            // Check for transit alerts
+            fireTransitNotification();
         };
         initializeApp();
     }, [loadCard, isInitialLoad, userProfile]);
@@ -355,6 +362,15 @@ function App() {
         return (
             <Compatibility
                 onClose={() => { setShowCompatibility(false); setCurrentTab('home'); }}
+                onTabChange={handleTabChange}
+            />
+        );
+    }
+
+    if (showTransitFeed) {
+        return (
+            <TransitFeed
+                onClose={() => { setShowTransitFeed(false); setCurrentTab('home'); }}
                 onTabChange={handleTabChange}
             />
         );
@@ -464,6 +480,7 @@ function App() {
                                 { icon: '🌙', label: 'Natal Chart', desc: 'Your cosmic blueprint', tab: 'natal', gradient: 'from-indigo-500/10 to-purple-500/10 border-indigo-500/20' },
                                 { icon: '🔢', label: 'Numerology', desc: 'Sacred numbers', tab: 'numerology', gradient: 'from-amber-500/10 to-orange-500/10 border-amber-500/20' },
                                 { icon: '♈', label: 'Horoscope', desc: 'Daily zodiac', tab: 'horoscope', gradient: 'from-cyan-500/10 to-blue-500/10 border-cyan-500/20' },
+                                { icon: '🌌', label: 'Cosmic Weather', desc: 'Transit alerts', tab: 'cosmos', gradient: 'from-blue-500/10 to-indigo-500/10 border-blue-500/20' },
                                 { icon: '💞', label: 'Compatibility', desc: 'Couple charts', tab: 'compatibility', gradient: 'from-pink-500/10 to-rose-500/10 border-pink-500/20' },
                                 { icon: '📜', label: 'Past Readings', desc: 'Your history', tab: 'history', gradient: 'from-emerald-500/10 to-green-500/10 border-emerald-500/20' },
                             ].map(item => (
