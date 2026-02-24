@@ -320,7 +320,7 @@ Personal Year: ${personalYear.number} (current cycle, year ${new Date().getFullY
 
 Follow the four-section structure. For every insight: name the energy, ground it in a relatable life scenario, then reframe it. Make them feel like you truly see them.`;
 
-        return this.chatPremium(systemPrompt, userPrompt, 1200);
+        return this.chatPremium(systemPrompt, userPrompt);
     }
 
     /**
@@ -389,7 +389,7 @@ Their compatibility score is ${score}/100 — "${tier}". Weave this naturally in
     }
 
     /** Premium model chat — uses Gemini 2.5 Pro for deep, once-a-day readings */
-    async chatPremium(systemPrompt: string, userPrompt: string, maxTokens = 1200): Promise<string> {
+    async chatPremium(systemPrompt: string, userPrompt: string, maxTokens = 8192): Promise<string> {
         if (!this.apiKey) {
             throw new Error('No API key configured. Add your OpenRouter key in Settings.');
         }
