@@ -278,16 +278,16 @@ Never be leading or prescriptive. You're holding up a mirror so THEY recognize t
 
 STRUCTURE — Follow these four sections exactly, using these headers:
 
-**✦ Who You Are at Your Core**
+**✦ Who You Are at Your Core** (150-200 words)
 Weave Sun sign + Life Path number together. Show how they reinforce or create interesting tension. Ground with a relatable scenario about how they make decisions or move through the world.
 
-**✦ The Energies Shaping You**
+**✦ The Energies Shaping You** (150-200 words)
 Moon, Rising, key planets, and the most important aspects. Explain what these energies feel like from the INSIDE. Use specific "you might notice..." examples — like walking into a room and sensing tension, or the push-pull of getting excited then second-guessing yourself.
 
-**✦ Where You Are Right Now**
+**✦ Where You Are Right Now** (100-150 words)
 Personal Year number in the context of their chart. Connect it to what they might currently be feeling — restlessness, transition, consolidation, whatever fits. Make them feel seen in their current moment.
 
-**✦ The Gift You Don't See Yet**
+**✦ The Gift You Don't See Yet** (100-150 words)
 Name something in their chart that is likely their greatest strength but that they've probably been told is "too much" or have dismissed about themselves. Prove it with a relatable example, then reframe it powerfully. End on this high note.
 
 FORMATTING RULES (follow strictly):
@@ -318,7 +318,9 @@ Life Path Number: ${lifePath.number} — "${lifePath.title}"
 ${lifePath.desc}
 Personal Year: ${personalYear.number} (current cycle, year ${new Date().getFullYear()})
 
-Follow the four-section structure. For every insight: name the energy, ground it in a relatable life scenario, then reframe it. Make them feel like you truly see them.`;
+Follow the four-section structure. For every insight: name the energy, ground it in a relatable life scenario, then reframe it. Make them feel like you truly see them.
+
+IMPORTANT: You MUST include ALL FOUR sections. Keep each section to 150-200 words max. The total reading should be approximately 600-800 words. Do NOT write long essays — be precise and impactful.`;
 
         return this.chatPremium(systemPrompt, userPrompt);
     }
@@ -389,7 +391,7 @@ Their compatibility score is ${score}/100 — "${tier}". Weave this naturally in
     }
 
     /** Premium model chat — uses Gemini 2.5 Pro for deep, once-a-day readings */
-    async chatPremium(systemPrompt: string, userPrompt: string, maxTokens = 1500): Promise<string> {
+    async chatPremium(systemPrompt: string, userPrompt: string, maxTokens = 3000): Promise<string> {
         if (!this.apiKey) {
             throw new Error('No API key configured. Add your OpenRouter key in Settings.');
         }
