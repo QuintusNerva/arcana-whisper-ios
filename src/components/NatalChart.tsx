@@ -140,6 +140,12 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
         setEditing(false);
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
+
+        // Clear all AI caches so stale readings from previous chart don't persist
+        aiCacheRef.current = {};
+        setAiMeaning(null);
+        setCosmicSynthesis(null);
+        setChartSummary(null);
     };
 
     const triad = birthData ? getNatalTriad(birthData) : null;
