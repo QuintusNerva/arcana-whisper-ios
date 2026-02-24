@@ -230,6 +230,53 @@ What are the dominant themes? What makes this chart unique? What should this per
     }
 
     /**
+     * Cosmic Blueprint — synthesizes natal chart + numerology into a unified life reading.
+     */
+    async getCosmicBlueprint(
+        triad: { sun: string; moon: string; rising: string },
+        planets: Array<{ name: string; signId: string; degreeInSign: number }>,
+        aspects: Array<{ planet1Name: string; planet2Name: string; type: string; orb: number }>,
+        lifePath: { number: number; title: string; desc: string },
+        personalYear: { number: number },
+    ): Promise<string> {
+        const systemPrompt = `You are a master spiritual counselor who synthesizes astrology AND numerology into a single, powerful life reading.
+You weave both systems together seamlessly — showing how planetary placements reinforce, challenge, or complement the numerological vibrations.
+Focus on PRACTICAL life advice: career direction, relationship patterns, current year focus, and the person's unique gifts.
+Be specific. Don't just describe traits — give actionable guidance.
+Use a warm, empowering, mystical tone.${TEACHING_FORMAT}`;
+
+        const planetLines = planets.slice(0, 10).map(p =>
+            `${p.name}: ${p.degreeInSign.toFixed(1)}° ${p.signId.charAt(0).toUpperCase() + p.signId.slice(1)}`
+        ).join('\n');
+
+        const aspectLines = aspects.slice(0, 8).map(a =>
+            `${a.planet1Name} ${a.type} ${a.planet2Name} (orb: ${a.orb}°)`
+        ).join('\n');
+
+        const userPrompt = `Create a comprehensive Cosmic Blueprint — a unified reading that weaves astrology and numerology together into practical life guidance.
+
+ASTROLOGY:
+Sun: ${triad.sun} | Moon: ${triad.moon} | Rising: ${triad.rising}
+${planetLines}
+
+KEY ASPECTS:
+${aspectLines}
+
+NUMEROLOGY:
+Life Path Number: ${lifePath.number} — "${lifePath.title}"
+${lifePath.desc}
+Personal Year: ${personalYear.number} (current cycle)
+
+Synthesize BOTH systems into one cohesive reading. How does the Life Path number interact with the natal chart? What does the Personal Year mean in the context of their planetary placements? Give specific, practical advice for:
+1. Career & purpose
+2. Relationships & emotional patterns  
+3. This year's focus & opportunities
+4. Their unique cosmic superpower`;
+
+        return this.chat(systemPrompt, userPrompt);
+    }
+
+    /**
      * Get an AI-generated relationship synthesis for a couple compatibility reading.
      * Returns a flowing prose reading about the couple dynamic.
      */

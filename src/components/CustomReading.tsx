@@ -233,6 +233,16 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange }
                                 );
                             })}
                         </div>
+
+                        {/* Card Codex link */}
+                        <button
+                            onClick={() => onTabChange('meanings')}
+                            className="w-full mt-5 py-3 rounded-2xl glass border border-white/5 text-center hover:border-altar-gold/20 transition-all flex items-center justify-center gap-2"
+                        >
+                            <span className="text-lg">📖</span>
+                            <span className="text-sm font-display text-altar-muted tracking-wide">Card Codex</span>
+                            <span className="text-altar-muted/50">→</span>
+                        </button>
                     </div>
                 )}
 

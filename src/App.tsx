@@ -13,6 +13,7 @@ import { BottomNav } from './components/BottomNav';
 import { CardLibrary } from './components/CardLibrary';
 import { CardDetail } from './components/CardDetail';
 import { NatalChart } from './components/NatalChart';
+import { CosmicBlueprint } from './components/CosmicBlueprint';
 import { Numerology } from './components/Numerology';
 import { Horoscope } from './components/Horoscope';
 import { Compatibility } from './components/Compatibility';
@@ -479,17 +480,8 @@ function App() {
                         </div>
                     </div>
 
-                    {/* Card Codex link */}
-                    <div className="mx-5 my-4 animate-fade-up" style={{ animationDelay: '1s', opacity: 0 }}>
-                        <button
-                            onClick={() => handleTabChange('meanings')}
-                            className="w-full py-3.5 rounded-2xl glass border border-white/5 text-center hover:border-altar-gold/20 transition-all flex items-center justify-center gap-2"
-                        >
-                            <span className="text-lg">📖</span>
-                            <span className="text-sm font-display text-altar-muted tracking-wide">Card Codex</span>
-                            <span className="text-altar-muted/50">→</span>
-                        </button>
-                    </div>
+                    {/* Cosmic Blueprint */}
+                    <CosmicBlueprint onTabChange={handleTabChange} />
 
                     {/* Draw Another Card */}
                     <div className="mx-5 my-4 animate-fade-up" style={{ animationDelay: '1.1s', opacity: 0 }}>
