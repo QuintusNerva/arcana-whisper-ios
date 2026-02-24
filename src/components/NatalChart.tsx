@@ -1,12 +1,11 @@
 import React from 'react';
 import { BottomNav } from './BottomNav';
 import {
-    getBirthData, saveBirthData, getNatalTriad, getFullChart, getPlacementMeaning, BirthData, ZODIAC_SIGNS,
+    getBirthData, getNatalTriad, getFullChart, getPlacementMeaning, BirthData, ZODIAC_SIGNS,
     FullChartData,
 } from '../services/astrology.service';
 import { AIService } from '../services/ai.service';
 import { AIResponseRenderer } from './AIResponseRenderer';
-import { searchPlaces, resolvePlace, PlaceSuggestion } from '../services/geocoding.service';
 
 interface NatalChartProps {
     onClose: () => void;
@@ -14,19 +13,7 @@ interface NatalChartProps {
 }
 
 export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
-    const [birthData, setBirthData] = React.useState<BirthData | null>(getBirthData);
-    const [birthday, setBirthday] = React.useState(birthData?.birthday || '');
-    const [birthTime, setBirthTime] = React.useState(birthData?.birthTime || '');
-    const [location, setLocation] = React.useState(birthData?.location || '');
-    const [utcOffset, setUtcOffset] = React.useState<number>(birthData?.utcOffset ?? 0);
-    const [latitude, setLatitude] = React.useState<number | undefined>(birthData?.latitude);
-    const [longitude, setLongitude] = React.useState<number | undefined>(birthData?.longitude);
-    const [cityQuery, setCityQuery] = React.useState('');
-    const [citySuggestions, setCitySuggestions] = React.useState<PlaceSuggestion[]>([]);
-    const [showCitySuggestions, setShowCitySuggestions] = React.useState(false);
-    const [resolving, setResolving] = React.useState(false);
-    const [editing, setEditing] = React.useState(!birthData);
-    const [saved, setSaved] = React.useState(false);
+    const [birthData] = React.useState<BirthData | null>(getBirthData);
     const [selectedPlacement, setSelectedPlacement] = React.useState<{ position: 'sun' | 'moon' | 'rising'; sign: typeof ZODIAC_SIGNS[number]; icon: string } | null>(null);
     const [aiMeaning, setAiMeaning] = React.useState<{ title: string; overview: string; strengths: string; challenges: string; advice: string } | null>(null);
     const [aiLoading, setAiLoading] = React.useState(false);
@@ -37,56 +24,7 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
     const [cosmicLoading, setCosmicLoading] = React.useState(false);
     const [chartSummary, setChartSummary] = React.useState<string | null>(null);
     const [chartSummaryLoading, setChartSummaryLoading] = React.useState(false);
-    const cityDropdownRef = React.useRef<HTMLDivElement>(null);
-    const searchTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    // Close city dropdown on outside click
-    React.useEffect(() => {
-        const handler = (e: MouseEvent) => {
-            if (cityDropdownRef.current && !cityDropdownRef.current.contains(e.target as Node)) {
-                setShowCitySuggestions(false);
-            }
-        };
-        document.addEventListener('mousedown', handler);
-        return () => document.removeEventListener('mousedown', handler);
-    }, []);
-
-    const handleCitySearch = (query: string) => {
-        setCityQuery(query);
-        setLocation(query);
-        // Clear previous coordinates when typing a new query
-        setLatitude(undefined);
-        setLongitude(undefined);
-
-        // Debounce the API call
-        if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-        if (query.length < 2) {
-            setCitySuggestions([]);
-            setShowCitySuggestions(false);
-            return;
-        }
-        searchTimeoutRef.current = setTimeout(async () => {
-            const results = await searchPlaces(query);
-            setCitySuggestions(results);
-            setShowCitySuggestions(results.length > 0);
-        }, 300);
-    };
-
-    const handleCitySelect = async (place: PlaceSuggestion) => {
-        setShowCitySuggestions(false);
-        setCityQuery(place.description);
-        setLocation(place.description);
-        setResolving(true);
-
-        const resolved = await resolvePlace(place, birthday, birthTime || undefined);
-        setResolving(false);
-
-        if (resolved) {
-            setLatitude(resolved.latitude);
-            setLongitude(resolved.longitude);
-            setUtcOffset(resolved.utcOffset);
-        }
-    };
 
     const handleCardTap = async (position: 'sun' | 'moon' | 'rising', sign: typeof ZODIAC_SIGNS[number], icon: string) => {
         setSelectedPlacement({ position, sign, icon });
@@ -125,28 +63,8 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
         }
     };
 
-    const handleSave = () => {
-        if (!birthday) return;
-        const data: BirthData = {
-            birthday,
-            birthTime: birthTime || undefined,
-            location: location || undefined,
-            utcOffset,
-            latitude,
-            longitude,
-        };
-        saveBirthData(data);
-        setBirthData(data);
-        setEditing(false);
-        setSaved(true);
-        setTimeout(() => setSaved(false), 2000);
 
-        // Clear all AI caches so stale readings from previous chart don't persist
-        aiCacheRef.current = {};
-        setAiMeaning(null);
-        setCosmicSynthesis(null);
-        setChartSummary(null);
-    };
+
 
     const triad = birthData ? getNatalTriad(birthData) : null;
     const fullChart: FullChartData | null = React.useMemo(() => birthData ? getFullChart(birthData) : null, [birthData]);
@@ -184,86 +102,47 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
                         <p className="text-sm text-altar-muted mt-2">Discover your celestial triad</p>
                     </div>
 
-                    {/* Birth Data Form */}
-                    {editing ? (
-                        <div className="glass-strong rounded-2xl p-5 mb-5 animate-fade-up">
-                            <h3 className="font-display text-xs text-altar-muted tracking-[3px] uppercase mb-4">Birth Data</h3>
-                            <div className="space-y-3">
-                                <div>
-                                    <label className="block text-[10px] text-altar-muted font-display tracking-[2px] uppercase mb-1">Birthday *</label>
-                                    <input
-                                        type="date"
-                                        value={birthday}
-                                        onChange={e => setBirthday(e.target.value)}
-                                        className="w-full bg-altar-deep/50 text-sm text-altar-text rounded-lg px-3 py-2.5 border border-white/10 focus:border-altar-gold/30 focus:outline-none transition-colors"
-                                    />
+                    {/* Birth Data — read only, edit in Profile */}
+                    {birthData ? (
+                        <div className="glass rounded-2xl p-4 mb-5 animate-fade-up">
+                            <div className="flex items-center justify-between mb-2">
+                                <h3 className="font-display text-xs text-altar-muted tracking-[3px] uppercase">Birth Data</h3>
+                                <button onClick={() => onTabChange('profile')} className="text-xs text-altar-gold font-display hover:underline">
+                                    Edit in Profile →
+                                </button>
+                            </div>
+                            <div className="space-y-1.5">
+                                <div className="flex justify-between py-1">
+                                    <span className="text-[11px] text-altar-muted">Birthday</span>
+                                    <span className="text-[11px] text-altar-text">
+                                        {new Date(birthData.birthday + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                    </span>
                                 </div>
-                                <div>
-                                    <label className="block text-[10px] text-altar-muted font-display tracking-[2px] uppercase mb-1">Birth Time (optional)</label>
-                                    <input
-                                        type="time"
-                                        value={birthTime}
-                                        onChange={e => setBirthTime(e.target.value)}
-                                        className="w-full bg-altar-deep/50 text-sm text-altar-text rounded-lg px-3 py-2.5 border border-white/10 focus:border-altar-gold/30 focus:outline-none transition-colors"
-                                    />
-                                    <p className="text-[10px] text-altar-muted/60 mt-1 italic">Needed for accurate Rising sign</p>
-                                </div>
-                                <div>
-                                    <label className="block text-[10px] text-altar-muted font-display tracking-[2px] uppercase mb-1">Birth Location</label>
-                                    <div className="relative" ref={cityDropdownRef}>
-                                        <input
-                                            type="text"
-                                            value={cityQuery || location}
-                                            onChange={e => handleCitySearch(e.target.value)}
-                                            onFocus={() => { if (citySuggestions.length > 0) setShowCitySuggestions(true); }}
-                                            placeholder="Search any city worldwide..."
-                                            className="w-full bg-altar-deep/50 text-sm text-altar-text placeholder-altar-muted/50 rounded-lg px-3 py-2.5 border border-white/10 focus:border-altar-gold/30 focus:outline-none transition-colors"
-                                        />
-                                        {/* Google Places dropdown */}
-                                        {showCitySuggestions && (
-                                            <div className="absolute top-full left-0 right-0 mt-1 bg-altar-dark/95 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden z-30 max-h-48 overflow-y-auto shadow-2xl">
-                                                {citySuggestions.map((place, i) => (
-                                                    <button
-                                                        key={place.placeId}
-                                                        onClick={() => handleCitySelect(place)}
-                                                        className="w-full text-left px-3 py-2.5 text-xs text-altar-text hover:bg-altar-gold/10 transition-colors border-b border-white/5 last:border-0"
-                                                    >
-                                                        <span className="font-medium">{place.mainText}</span>
-                                                        {place.secondaryText && <span className="text-altar-muted ml-1">{place.secondaryText}</span>}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        )}
+                                {birthData.birthTime && (
+                                    <div className="flex justify-between py-1">
+                                        <span className="text-[11px] text-altar-muted">Birth Time</span>
+                                        <span className="text-[11px] text-altar-text">{birthData.birthTime}</span>
                                     </div>
-                                    {resolving && (
-                                        <p className="text-[10px] text-altar-gold/60 mt-1 animate-pulse">✦ Resolving coordinates & timezone...</p>
-                                    )}
-                                    {!resolving && latitude !== undefined && (
-                                        <p className="text-[10px] text-green-400/60 mt-1">✓ {latitude.toFixed(2)}°{latitude >= 0 ? 'N' : 'S'} {Math.abs(longitude!).toFixed(2)}°{longitude! >= 0 ? 'E' : 'W'} · UTC{utcOffset >= 0 ? '+' : ''}{utcOffset}</p>
-                                    )}
-                                    <p className="text-[10px] text-altar-muted/60 mt-1 italic">Needed for accurate Moon & Rising signs</p>
-                                </div>
-
-                                <div className="flex gap-2 pt-2">
-                                    {birthData && (
-                                        <button onClick={() => setEditing(false)} className="flex-1 py-2.5 rounded-lg glass text-xs text-altar-muted font-display border border-white/5 hover:border-white/15 transition-colors">Cancel</button>
-                                    )}
-                                    <button
-                                        onClick={handleSave}
-                                        disabled={!birthday}
-                                        className={`flex-1 py-2.5 rounded-lg text-xs font-display transition-all ${birthday ? 'bg-altar-gold/15 text-altar-gold border border-altar-gold/20 hover:border-altar-gold/40' : 'bg-white/5 text-white/30 cursor-not-allowed border border-white/5'}`}
-                                    >
-                                        ✦ Calculate Chart
-                                    </button>
-                                </div>
+                                )}
+                                {birthData.location && (
+                                    <div className="flex justify-between py-1">
+                                        <span className="text-[11px] text-altar-muted">Location</span>
+                                        <span className="text-[11px] text-altar-text truncate max-w-[180px]">{birthData.location}</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ) : (
-                        <button onClick={() => setEditing(true)} className="w-full mb-4 text-xs text-altar-gold/70 font-display hover:text-altar-gold transition-colors text-right">
-                            Edit birth data →
-                        </button>
+                        <div className="glass rounded-2xl p-5 mb-5 text-center animate-fade-up">
+                            <p className="text-sm text-altar-muted mb-3">Set your birth data to reveal your natal chart</p>
+                            <button
+                                onClick={() => onTabChange('profile')}
+                                className="px-5 py-2.5 rounded-xl bg-altar-gold/15 text-sm text-altar-gold font-display border border-altar-gold/20 hover:border-altar-gold/40 transition-all"
+                            >
+                                Set Up in Profile →
+                            </button>
+                        </div>
                     )}
-                    {saved && <p className="text-xs text-green-400 text-center mb-3 animate-fade-up">✓ Birth data saved</p>}
 
                     {/* Natal Triad Display */}
                     {triad && (

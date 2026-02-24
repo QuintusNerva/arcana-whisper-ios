@@ -6,6 +6,10 @@ import {
     REMINDER_TIMES, formatTime
 } from '../services/reminder.service';
 import { getMemoryStats, clearMemory } from '../services/memory.service';
+import {
+    getBirthData, saveBirthData, getNatalTriad, getSunSign, ZODIAC_SIGNS, BirthData,
+} from '../services/astrology.service';
+import { searchPlaces, resolvePlace, PlaceSuggestion } from '../services/geocoding.service';
 
 interface ProfileModalProps {
     onClose: () => void;
@@ -15,10 +19,37 @@ interface ProfileModalProps {
 
 export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModalProps) {
     const [name, setName] = React.useState(userProfile?.name || '');
-    const [zodiac, setZodiac] = React.useState(userProfile?.zodiac || '');
     const [editing, setEditing] = React.useState(false);
     const [saved, setSaved] = React.useState(false);
     const [showManageSub, setShowManageSub] = React.useState(false);
+
+    // ── Birth Data State ──
+    const [birthData, setBirthDataState] = React.useState<BirthData | null>(getBirthData);
+    const [birthday, setBirthday] = React.useState(birthData?.birthday || '');
+    const [birthTime, setBirthTime] = React.useState(birthData?.birthTime || '');
+    const [location, setLocation] = React.useState(birthData?.location || '');
+    const [utcOffset, setUtcOffset] = React.useState<number>(birthData?.utcOffset ?? 0);
+    const [latitude, setLatitude] = React.useState<number | undefined>(birthData?.latitude);
+    const [longitude, setLongitude] = React.useState<number | undefined>(birthData?.longitude);
+    const [cityQuery, setCityQuery] = React.useState('');
+    const [citySuggestions, setCitySuggestions] = React.useState<PlaceSuggestion[]>([]);
+    const [showCitySuggestions, setShowCitySuggestions] = React.useState(false);
+    const [resolving, setResolving] = React.useState(false);
+    const [editingBirth, setEditingBirth] = React.useState(!birthData);
+    const [birthSaved, setBirthSaved] = React.useState(false);
+    const cityDropdownRef = React.useRef<HTMLDivElement>(null);
+    const searchTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Close city dropdown on outside click
+    React.useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (cityDropdownRef.current && !cityDropdownRef.current.contains(e.target as Node)) {
+                setShowCitySuggestions(false);
+            }
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
 
     // Stats
     const stats = React.useMemo(() => {
@@ -51,37 +82,81 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
     const daysLeft = endsAtDate ? Math.max(0, Math.ceil((endsAtDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))) : null;
     const endsAtFormatted = endsAtDate ? endsAtDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : null;
 
-    // Calculate next renewal date from subscription start
     const getNextRenewalDate = () => {
         const startedAt = userProfile?.subscriptionStartedAt;
-        if (!startedAt) {
-            // Fallback: 30 days from now
-            const d = new Date(); d.setDate(d.getDate() + 30); return d;
-        }
+        if (!startedAt) { const d = new Date(); d.setDate(d.getDate() + 30); return d; }
         const start = new Date(startedAt);
         const now = new Date();
-        // Walk forward month by month from start until we pass today
-        while (start <= now) {
-            start.setMonth(start.getMonth() + 1);
-        }
+        while (start <= now) { start.setMonth(start.getMonth() + 1); }
         return start;
     };
 
-    const ZODIAC_SIGNS = [
-        { sign: '♈', name: 'Aries' }, { sign: '♉', name: 'Taurus' }, { sign: '♊', name: 'Gemini' },
-        { sign: '♋', name: 'Cancer' }, { sign: '♌', name: 'Leo' }, { sign: '♍', name: 'Virgo' },
-        { sign: '♎', name: 'Libra' }, { sign: '♏', name: 'Scorpio' }, { sign: '♐', name: 'Sagittarius' },
-        { sign: '♑', name: 'Capricorn' }, { sign: '♒', name: 'Aquarius' }, { sign: '♓', name: 'Pisces' },
-    ];
+    // Derived zodiac from birthday — getSunSign returns the full zodiac object
+    const zodiacSign = birthday ? getSunSign(birthday) : null;
 
-    const handleSave = () => {
-        const profile = { ...userProfile, name, zodiac };
+    // Triad from birth data
+    const triad = birthData ? getNatalTriad(birthData) : null;
+
+    // ── Handlers ──
+    const handleSaveProfile = () => {
+        const profile = { ...userProfile, name, zodiac: zodiacSign?.name ?? '' };
         try {
             localStorage.setItem('userProfile', JSON.stringify(profile));
             setSaved(true);
             setEditing(false);
             setTimeout(() => setSaved(false), 2000);
         } catch { /* */ }
+    };
+
+    const handleCitySearch = (query: string) => {
+        setCityQuery(query);
+        setLocation(query);
+        setLatitude(undefined);
+        setLongitude(undefined);
+        if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+        if (query.length < 2) { setCitySuggestions([]); setShowCitySuggestions(false); return; }
+        searchTimeoutRef.current = setTimeout(async () => {
+            const results = await searchPlaces(query);
+            setCitySuggestions(results);
+            setShowCitySuggestions(results.length > 0);
+        }, 300);
+    };
+
+    const handleCitySelect = async (place: PlaceSuggestion) => {
+        setShowCitySuggestions(false);
+        setCityQuery(place.description);
+        setLocation(place.description);
+        setResolving(true);
+        const resolved = await resolvePlace(place, birthday, birthTime || undefined);
+        setResolving(false);
+        if (resolved) {
+            setLatitude(resolved.latitude);
+            setLongitude(resolved.longitude);
+            setUtcOffset(resolved.utcOffset);
+        }
+    };
+
+    const handleSaveBirthData = () => {
+        if (!birthday) return;
+        const data: BirthData = {
+            birthday,
+            birthTime: birthTime || undefined,
+            location: location || undefined,
+            utcOffset,
+            latitude,
+            longitude,
+        };
+        saveBirthData(data);
+        setBirthDataState(data);
+        setEditingBirth(false);
+        setBirthSaved(true);
+        setTimeout(() => setBirthSaved(false), 2000);
+        // Also update zodiac in profile
+        const sunSign = getSunSign(birthday);
+        if (sunSign) {
+            const profile = { ...userProfile, name, zodiac: sunSign.name };
+            localStorage.setItem('userProfile', JSON.stringify(profile));
+        }
     };
 
     const handleClearData = () => {
@@ -109,11 +184,11 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
                 </header>
 
                 <div className="max-w-[500px] mx-auto px-4">
-                    {/* Avatar + Name */}
+                    {/* ── Avatar + Name ── */}
                     <div className="text-center mt-6 mb-6 animate-fade-up">
                         <div className="relative inline-block mb-3">
                             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-altar-mid to-altar-bright flex items-center justify-center text-3xl shadow-[0_0_30px_rgba(139,95,191,0.3)]">
-                                {zodiac ? ZODIAC_SIGNS.find(z => z.name === zodiac)?.sign || '✦' : '✦'}
+                                {zodiacSign?.glyph || '✦'}
                             </div>
                             <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-altar-dark border-2 border-altar-gold/30 flex items-center justify-center">
                                 <span className="text-[10px]">{subscription === 'premium' ? '👑' : '⭐'}</span>
@@ -121,11 +196,11 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
                         </div>
                         <h2 className="font-display text-xl text-altar-text">{name || 'Seeker'}</h2>
                         <p className="text-xs text-altar-muted mt-1">
-                            {zodiac || 'No zodiac set'} · {subscription === 'premium' ? 'Premium Member' : 'Free Plan'}
+                            {zodiacSign ? `${zodiacSign.glyph} ${zodiacSign.name}` : 'No birth data set'} · {subscription === 'premium' ? 'Premium Member' : 'Free Plan'}
                         </p>
                     </div>
 
-                    {/* Stats grid */}
+                    {/* ── Stats Grid ── */}
                     <div className="grid grid-cols-3 gap-2.5 mb-5 animate-fade-up" style={{ animationDelay: '0.15s', opacity: 0 }}>
                         <div className="glass rounded-xl p-3 text-center">
                             <p className="font-display text-xl text-altar-gold">{stats.totalReadings}</p>
@@ -141,29 +216,12 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
                         </div>
                     </div>
 
-                    {/* Collection progress */}
-                    <div className="glass rounded-xl p-4 mb-5 animate-fade-up" style={{ animationDelay: '0.25s', opacity: 0 }}>
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs font-display text-altar-muted tracking-[2px] uppercase">Arcana Collection</span>
-                            <span className="text-xs text-altar-gold font-display">{stats.uniqueCards}/{stats.totalCards}</span>
-                        </div>
-                        <div className="w-full h-2 bg-altar-purple/50 rounded-full overflow-hidden">
-                            <div
-                                className="h-full bg-gradient-to-r from-altar-gold to-altar-bright rounded-full transition-all duration-1000"
-                                style={{ width: `${stats.collectionPct}%` }}
-                            />
-                        </div>
-                        {stats.favoriteSpread && (
-                            <p className="text-[10px] text-altar-muted mt-2">
-                                Favorite spread: <span className="text-altar-text">{stats.favoriteSpread}</span>
-                            </p>
-                        )}
-                    </div>
-
-                    {/* Edit Profile */}
-                    <div className="glass-strong rounded-xl p-4 mb-5 animate-fade-up" style={{ animationDelay: '0.35s', opacity: 0 }}>
+                    {/* ── Profile (Name) ── */}
+                    <div className="glass-strong rounded-xl p-4 mb-4 animate-fade-up" style={{ animationDelay: '0.25s', opacity: 0 }}>
                         <div className="flex items-center justify-between mb-3">
-                            <h3 className="font-display text-xs text-altar-muted tracking-[3px] uppercase">Profile</h3>
+                            <h3 className="font-display text-xs text-altar-muted tracking-[3px] uppercase flex items-center gap-1.5">
+                                <span>👤</span> Profile
+                            </h3>
                             {!editing && (
                                 <button onClick={() => setEditing(true)} className="text-xs text-altar-gold font-display hover:underline">
                                     Edit
@@ -183,24 +241,6 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
                                         className="w-full bg-altar-deep/50 text-sm text-altar-text placeholder-altar-muted/50 rounded-lg px-3 py-2.5 border border-white/10 focus:border-altar-gold/30 focus:outline-none transition-colors"
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-[10px] text-altar-muted font-display tracking-[2px] uppercase mb-1">Zodiac Sign</label>
-                                    <div className="grid grid-cols-4 gap-1.5">
-                                        {ZODIAC_SIGNS.map(z => (
-                                            <button
-                                                key={z.name}
-                                                onClick={() => setZodiac(z.name)}
-                                                className={`py-2 rounded-lg text-center transition-all text-xs ${zodiac === z.name
-                                                    ? 'bg-altar-gold/15 border border-altar-gold/30 text-altar-gold'
-                                                    : 'bg-altar-deep/30 border border-white/5 text-altar-muted hover:text-white'
-                                                    }`}
-                                            >
-                                                <span className="text-base block">{z.sign}</span>
-                                                <span className="text-[8px] font-display tracking-wide">{z.name}</span>
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
                                 <div className="flex gap-2 pt-1">
                                     <button
                                         onClick={() => setEditing(false)}
@@ -209,7 +249,7 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
                                         Cancel
                                     </button>
                                     <button
-                                        onClick={handleSave}
+                                        onClick={handleSaveProfile}
                                         className="flex-1 py-2.5 rounded-lg bg-altar-gold/15 text-xs text-altar-gold font-display border border-altar-gold/20 hover:border-altar-gold/40 transition-colors"
                                     >
                                         Save
@@ -217,27 +257,9 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
                                 </div>
                             </div>
                         ) : (
-                            <div className="space-y-2">
-                                <div className="flex justify-between py-1.5">
-                                    <span className="text-xs text-altar-muted">Name</span>
-                                    <span className="text-xs text-altar-text">{name || 'Not set'}</span>
-                                </div>
-                                <div className="h-[1px] bg-white/5" />
-                                <div className="flex justify-between py-1.5">
-                                    <span className="text-xs text-altar-muted">Birthday</span>
-                                    <span className="text-xs text-altar-text">
-                                        {userProfile?.birthday
-                                            ? new Date(userProfile.birthday + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-                                            : 'Not set'}
-                                    </span>
-                                </div>
-                                <div className="h-[1px] bg-white/5" />
-                                <div className="flex justify-between py-1.5">
-                                    <span className="text-xs text-altar-muted">Zodiac</span>
-                                    <span className="text-xs text-altar-text">
-                                        {zodiac ? `${ZODIAC_SIGNS.find(z => z.name === zodiac)?.sign} ${zodiac}` : 'Not set'}
-                                    </span>
-                                </div>
+                            <div className="flex justify-between py-1">
+                                <span className="text-xs text-altar-muted">Name</span>
+                                <span className="text-xs text-altar-text">{name || 'Not set'}</span>
                             </div>
                         )}
                         {saved && (
@@ -245,8 +267,158 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
                         )}
                     </div>
 
-                    {/* Subscription */}
-                    <div className="rounded-xl p-[1px] bg-gradient-to-r from-altar-gold/30 via-altar-bright/20 to-altar-gold/30 mb-5 animate-fade-up" style={{ animationDelay: '0.45s', opacity: 0 }}>
+                    {/* ── Birth Data ── */}
+                    <div className="glass-strong rounded-xl p-4 mb-4 animate-fade-up" style={{ animationDelay: '0.35s', opacity: 0 }}>
+                        <div className="flex items-center justify-between mb-3">
+                            <h3 className="font-display text-xs text-altar-muted tracking-[3px] uppercase flex items-center gap-1.5">
+                                <span>🌙</span> Birth Data
+                            </h3>
+                            {!editingBirth && birthData && (
+                                <button onClick={() => setEditingBirth(true)} className="text-xs text-altar-gold font-display hover:underline">
+                                    Edit
+                                </button>
+                            )}
+                        </div>
+
+                        {editingBirth ? (
+                            <div className="space-y-3">
+                                <div>
+                                    <label className="block text-[10px] text-altar-muted font-display tracking-[2px] uppercase mb-1">Birthday *</label>
+                                    <input
+                                        type="date"
+                                        value={birthday}
+                                        onChange={e => setBirthday(e.target.value)}
+                                        className="w-full bg-altar-deep/50 text-sm text-altar-text rounded-lg px-3 py-2.5 border border-white/10 focus:border-altar-gold/30 focus:outline-none transition-colors"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] text-altar-muted font-display tracking-[2px] uppercase mb-1">Birth Time (optional)</label>
+                                    <input
+                                        type="time"
+                                        value={birthTime}
+                                        onChange={e => setBirthTime(e.target.value)}
+                                        className="w-full bg-altar-deep/50 text-sm text-altar-text rounded-lg px-3 py-2.5 border border-white/10 focus:border-altar-gold/30 focus:outline-none transition-colors"
+                                    />
+                                    <p className="text-[10px] text-altar-muted/60 mt-1 italic">Needed for accurate Rising sign</p>
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] text-altar-muted font-display tracking-[2px] uppercase mb-1">Birth City</label>
+                                    <div className="relative" ref={cityDropdownRef}>
+                                        <input
+                                            type="text"
+                                            value={cityQuery || location}
+                                            onChange={e => handleCitySearch(e.target.value)}
+                                            onFocus={() => { if (citySuggestions.length > 0) setShowCitySuggestions(true); }}
+                                            placeholder="Search any city worldwide..."
+                                            className="w-full bg-altar-deep/50 text-sm text-altar-text placeholder-altar-muted/50 rounded-lg px-3 py-2.5 border border-white/10 focus:border-altar-gold/30 focus:outline-none transition-colors"
+                                        />
+                                        {showCitySuggestions && (
+                                            <div className="absolute top-full left-0 right-0 mt-1 bg-altar-dark/95 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden z-30 max-h-48 overflow-y-auto shadow-2xl">
+                                                {citySuggestions.map((place) => (
+                                                    <button
+                                                        key={place.placeId}
+                                                        onClick={() => handleCitySelect(place)}
+                                                        className="w-full text-left px-3 py-2.5 text-xs text-altar-text hover:bg-altar-gold/10 transition-colors border-b border-white/5 last:border-0"
+                                                    >
+                                                        <span className="font-medium">{place.mainText}</span>
+                                                        {place.secondaryText && <span className="text-altar-muted ml-1">{place.secondaryText}</span>}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                    {resolving && (
+                                        <p className="text-[10px] text-altar-gold/60 mt-1 animate-pulse">✦ Resolving coordinates & timezone...</p>
+                                    )}
+                                    {!resolving && latitude !== undefined && (
+                                        <p className="text-[10px] text-green-400/60 mt-1">✓ {latitude.toFixed(2)}°{latitude >= 0 ? 'N' : 'S'} {Math.abs(longitude!).toFixed(2)}°{longitude! >= 0 ? 'E' : 'W'} · UTC{utcOffset >= 0 ? '+' : ''}{utcOffset}</p>
+                                    )}
+                                    <p className="text-[10px] text-altar-muted/60 mt-1 italic">Needed for accurate Moon & Rising signs</p>
+                                </div>
+
+                                <div className="flex gap-2 pt-2">
+                                    {birthData && (
+                                        <button onClick={() => setEditingBirth(false)} className="flex-1 py-2.5 rounded-lg glass text-xs text-altar-muted font-display border border-white/5 hover:border-white/15 transition-colors">Cancel</button>
+                                    )}
+                                    <button
+                                        onClick={handleSaveBirthData}
+                                        disabled={!birthday}
+                                        className={`flex-1 py-2.5 rounded-lg text-xs font-display transition-all ${birthday ? 'bg-altar-gold/15 text-altar-gold border border-altar-gold/20 hover:border-altar-gold/40' : 'bg-white/5 text-white/30 cursor-not-allowed border border-white/5'}`}
+                                    >
+                                        ✦ Save Birth Data
+                                    </button>
+                                </div>
+                            </div>
+                        ) : birthData ? (
+                            <div className="space-y-2">
+                                <div className="flex justify-between py-1.5">
+                                    <span className="text-xs text-altar-muted">Birthday</span>
+                                    <span className="text-xs text-altar-text">
+                                        {new Date(birthday + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                                    </span>
+                                </div>
+                                <div className="h-[1px] bg-white/5" />
+                                <div className="flex justify-between py-1.5">
+                                    <span className="text-xs text-altar-muted">Birth Time</span>
+                                    <span className="text-xs text-altar-text">{birthData.birthTime || 'Not set'}</span>
+                                </div>
+                                <div className="h-[1px] bg-white/5" />
+                                <div className="flex justify-between py-1.5">
+                                    <span className="text-xs text-altar-muted">Birth City</span>
+                                    <span className="text-xs text-altar-text truncate max-w-[180px]">{birthData.location || 'Not set'}</span>
+                                </div>
+
+                                {/* Triad summary */}
+                                {triad && (
+                                    <>
+                                        <div className="h-[1px] bg-white/5 my-1" />
+                                        <div className="grid grid-cols-3 gap-1.5 mt-2">
+                                            {[
+                                                { label: 'Sun', value: triad.sun.name, glyph: triad.sun.glyph },
+                                                { label: 'Moon', value: triad.moon.name, glyph: triad.moon.glyph },
+                                                { label: 'Rising', value: triad.rising.name, glyph: triad.rising.glyph },
+                                            ].map(item => (
+                                                <div key={item.label} className="rounded-lg p-2 bg-white/[0.03] text-center">
+                                                    <p className="text-[8px] text-altar-muted font-display tracking-[2px] uppercase">{item.label}</p>
+                                                    <p className="text-xs text-altar-text mt-0.5">{item.glyph} {item.value}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="text-center py-3">
+                                <p className="text-xs text-altar-muted mb-2">No birth data set yet</p>
+                                <p className="text-[10px] text-altar-muted/60">Birth data powers your natal chart, cosmic blueprint, and personalized readings</p>
+                            </div>
+                        )}
+                        {birthSaved && (
+                            <p className="text-xs text-green-400 text-center mt-2 animate-fade-up">✓ Birth data saved — chart updated across the app</p>
+                        )}
+                    </div>
+
+                    {/* ── Collection Progress ── */}
+                    <div className="glass rounded-xl p-4 mb-4 animate-fade-up" style={{ animationDelay: '0.4s', opacity: 0 }}>
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs font-display text-altar-muted tracking-[2px] uppercase">Arcana Collection</span>
+                            <span className="text-xs text-altar-gold font-display">{stats.uniqueCards}/{stats.totalCards}</span>
+                        </div>
+                        <div className="w-full h-2 bg-altar-purple/50 rounded-full overflow-hidden">
+                            <div
+                                className="h-full bg-gradient-to-r from-altar-gold to-altar-bright rounded-full transition-all duration-1000"
+                                style={{ width: `${stats.collectionPct}%` }}
+                            />
+                        </div>
+                        {stats.favoriteSpread && (
+                            <p className="text-[10px] text-altar-muted mt-2">
+                                Favorite spread: <span className="text-altar-text">{stats.favoriteSpread}</span>
+                            </p>
+                        )}
+                    </div>
+
+                    {/* ── Subscription ── */}
+                    <div className="rounded-xl p-[1px] bg-gradient-to-r from-altar-gold/30 via-altar-bright/20 to-altar-gold/30 mb-4 animate-fade-up" style={{ animationDelay: '0.45s', opacity: 0 }}>
                         <div className="rounded-xl bg-altar-dark/95 p-4">
                             <div className="flex items-center gap-3 mb-3">
                                 <span className="text-2xl">{subscription === 'premium' ? '👑' : '⭐'}</span>
@@ -278,23 +450,24 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
                                     Unlock Premium — $4.99/mo
                                 </button>
                             )}
-
                         </div>
                     </div>
 
-                    {/* Settings */}
-                    <div className="glass rounded-xl overflow-hidden mb-5 animate-fade-up" style={{ animationDelay: '0.55s', opacity: 0 }}>
+                    {/* ── Settings ── */}
+                    <div className="glass rounded-xl overflow-hidden mb-4 animate-fade-up" style={{ animationDelay: '0.5s', opacity: 0 }}>
                         <h3 className="font-display text-xs text-altar-muted tracking-[3px] uppercase px-4 pt-4 pb-2">Settings</h3>
 
-                        {/* Daily Reminders — interactive */}
+                        {/* Daily Reminders */}
                         <ReminderSettingsRow />
 
-                        {/* Static items */}
+                        {/* Theme */}
                         <div className="flex items-center gap-3 px-4 py-3 border-b border-white/5">
                             <span className="text-lg">🎨</span>
                             <div className="flex-1"><p className="text-sm text-altar-text">Theme</p></div>
                             <span className="text-xs text-altar-muted">Mystic Altar</span>
                         </div>
+
+                        {/* App Version */}
                         <div className="flex items-center gap-3 px-4 py-3">
                             <span className="text-lg">📱</span>
                             <div className="flex-1"><p className="text-sm text-altar-text">App Version</p></div>
@@ -302,11 +475,11 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
                         </div>
                     </div>
 
-                    {/* Memory — The Cards Remember */}
+                    {/* Memory */}
                     <MemoryStatsCard />
 
                     {/* Danger zone */}
-                    <div className="mb-8 space-y-2.5 animate-fade-up" style={{ animationDelay: '0.65s', opacity: 0 }}>
+                    <div className="mb-8 space-y-2.5 animate-fade-up" style={{ animationDelay: '0.6s', opacity: 0 }}>
                         <button
                             onClick={handleClearData}
                             className="w-full py-3 rounded-xl border border-red-500/15 text-red-400/60 hover:text-red-400 hover:border-red-500/30 text-xs font-display tracking-wide transition-all"
@@ -318,86 +491,84 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
             </div>
             <BottomNav currentTab="profile" onTabChange={onTabChange} />
 
-            {/* Manage Sub Modal — rendered at top level for correct stacking */}
-            {
-                showManageSub && (
-                    <div className="fixed inset-0 z-[200] flex items-center justify-center px-4" onClick={() => setShowManageSub(false)}>
-                        <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
-                        <div className="relative w-full max-w-[400px] rounded-3xl bg-gradient-to-b from-altar-dark to-altar-deep border border-white/10 p-6 animate-fade-up" onClick={e => e.stopPropagation()}>
-                            <div className="w-10 h-1 rounded-full bg-white/20 mx-auto mb-5" />
-                            <div className="text-center mb-5">
-                                <span className="text-3xl block mb-2">👑</span>
-                                <h3 className="font-display text-lg text-altar-gold tracking-[3px]">PREMIUM</h3>
-                                <p className="text-xs text-altar-muted mt-1">Your current plan</p>
+            {/* Manage Sub Modal */}
+            {showManageSub && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center px-4" onClick={() => setShowManageSub(false)}>
+                    <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+                    <div className="relative w-full max-w-[400px] rounded-3xl bg-gradient-to-b from-altar-dark to-altar-deep border border-white/10 p-6 animate-fade-up" onClick={e => e.stopPropagation()}>
+                        <div className="w-10 h-1 rounded-full bg-white/20 mx-auto mb-5" />
+                        <div className="text-center mb-5">
+                            <span className="text-3xl block mb-2">👑</span>
+                            <h3 className="font-display text-lg text-altar-gold tracking-[3px]">PREMIUM</h3>
+                            <p className="text-xs text-altar-muted mt-1">Your current plan</p>
+                        </div>
+                        <div className="glass rounded-xl p-4 mb-5 space-y-2">
+                            <div className="flex justify-between">
+                                <span className="text-xs text-altar-muted">Plan</span>
+                                <span className="text-xs text-altar-gold">Premium</span>
                             </div>
-                            <div className="glass rounded-xl p-4 mb-5 space-y-2">
-                                <div className="flex justify-between">
-                                    <span className="text-xs text-altar-muted">Plan</span>
-                                    <span className="text-xs text-altar-gold">Premium</span>
-                                </div>
-                                <div className="h-[1px] bg-white/5" />
-                                <div className="flex justify-between">
-                                    <span className="text-xs text-altar-muted">Price</span>
-                                    <span className="text-xs text-altar-text">$4.99/mo</span>
-                                </div>
-                                <div className="h-[1px] bg-white/5" />
-                                <div className="flex justify-between">
-                                    <span className="text-xs text-altar-muted">Status</span>
-                                    <span className={`text-xs ${isCancelled ? 'text-amber-400' : 'text-green-400'}`}>
-                                        {isCancelled ? `Ends ${endsAtFormatted}` : 'Active ✓'}
-                                    </span>
-                                </div>
-                                <div className="h-[1px] bg-white/5" />
-                                <div className="flex justify-between">
-                                    <span className="text-xs text-altar-muted">Includes</span>
-                                    <span className="text-xs text-altar-text">Deep insights · Unlimited readings</span>
-                                </div>
-                                {isCancelled && (
-                                    <>
-                                        <div className="h-[1px] bg-white/5" />
-                                        <div className="flex justify-between">
-                                            <span className="text-xs text-altar-muted">Time left</span>
-                                            <span className="text-xs text-amber-400">{daysLeft} day{daysLeft !== 1 ? 's' : ''} remaining</span>
-                                        </div>
-                                    </>
-                                )}
+                            <div className="h-[1px] bg-white/5" />
+                            <div className="flex justify-between">
+                                <span className="text-xs text-altar-muted">Price</span>
+                                <span className="text-xs text-altar-text">$4.99/mo</span>
                             </div>
-                            <div className="flex gap-2">
+                            <div className="h-[1px] bg-white/5" />
+                            <div className="flex justify-between">
+                                <span className="text-xs text-altar-muted">Status</span>
+                                <span className={`text-xs ${isCancelled ? 'text-amber-400' : 'text-green-400'}`}>
+                                    {isCancelled ? `Ends ${endsAtFormatted}` : 'Active ✓'}
+                                </span>
+                            </div>
+                            <div className="h-[1px] bg-white/5" />
+                            <div className="flex justify-between">
+                                <span className="text-xs text-altar-muted">Includes</span>
+                                <span className="text-xs text-altar-text">Deep insights · Unlimited readings</span>
+                            </div>
+                            {isCancelled && (
+                                <>
+                                    <div className="h-[1px] bg-white/5" />
+                                    <div className="flex justify-between">
+                                        <span className="text-xs text-altar-muted">Time left</span>
+                                        <span className="text-xs text-amber-400">{daysLeft} day{daysLeft !== 1 ? 's' : ''} remaining</span>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setShowManageSub(false)}
+                                className="flex-1 py-3 rounded-xl glass border border-white/10 text-sm text-altar-muted font-display hover:border-white/20 transition-colors"
+                            >
+                                Close
+                            </button>
+                            {isCancelled ? (
                                 <button
-                                    onClick={() => setShowManageSub(false)}
-                                    className="flex-1 py-3 rounded-xl glass border border-white/10 text-sm text-altar-muted font-display hover:border-white/20 transition-colors"
+                                    onClick={() => {
+                                        const updated = { ...userProfile, subscriptionEndsAt: null };
+                                        localStorage.setItem('userProfile', JSON.stringify(updated));
+                                        window.location.reload();
+                                    }}
+                                    className="flex-1 py-3 rounded-xl bg-green-500/10 border border-green-500/20 text-sm text-green-400 font-display hover:bg-green-500/20 transition-colors"
                                 >
-                                    Close
+                                    Reactivate
                                 </button>
-                                {isCancelled ? (
-                                    <button
-                                        onClick={() => {
-                                            const updated = { ...userProfile, subscriptionEndsAt: null };
-                                            localStorage.setItem('userProfile', JSON.stringify(updated));
-                                            window.location.reload();
-                                        }}
-                                        className="flex-1 py-3 rounded-xl bg-green-500/10 border border-green-500/20 text-sm text-green-400 font-display hover:bg-green-500/20 transition-colors"
-                                    >
-                                        Reactivate
-                                    </button>
-                                ) : (
-                                    <button
-                                        onClick={() => {
-                                            const endsAt = getNextRenewalDate();
-                                            const updated = { ...userProfile, subscriptionEndsAt: endsAt.toISOString() };
-                                            localStorage.setItem('userProfile', JSON.stringify(updated));
-                                            window.location.reload();
-                                        }}
-                                        className="flex-1 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-sm text-red-400 font-display hover:bg-red-500/20 transition-colors"
-                                    >
-                                        Cancel Plan
-                                    </button>
-                                )}
-                            </div>
+                            ) : (
+                                <button
+                                    onClick={() => {
+                                        const endsAt = getNextRenewalDate();
+                                        const updated = { ...userProfile, subscriptionEndsAt: endsAt.toISOString() };
+                                        localStorage.setItem('userProfile', JSON.stringify(updated));
+                                        window.location.reload();
+                                    }}
+                                    className="flex-1 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-sm text-red-400 font-display hover:bg-red-500/20 transition-colors"
+                                >
+                                    Cancel Plan
+                                </button>
+                            )}
                         </div>
                     </div>
-                )
-            }
+                </div>
+            )}
         </div>
     );
 }
@@ -418,7 +589,6 @@ function MemoryStatsCard() {
 
     if (memStats.readingCount === 0 && !cleared) return null;
 
-    // Progress toward next tier
     const tierThresholds = [5, 15, 30];
     const nextThreshold = tierThresholds.find(t => memStats.readingCount < t) || 30;
     const prevThreshold = tierThresholds[tierThresholds.indexOf(nextThreshold) - 1] || 0;
@@ -427,7 +597,7 @@ function MemoryStatsCard() {
         : Math.round(((memStats.readingCount - prevThreshold) / (nextThreshold - prevThreshold)) * 100);
 
     return (
-        <div className="glass-strong rounded-xl p-4 mb-5 animate-fade-up" style={{ animationDelay: '0.6s', opacity: 0 }}>
+        <div className="glass-strong rounded-xl p-4 mb-4 animate-fade-up" style={{ animationDelay: '0.55s', opacity: 0 }}>
             <div className="flex items-center justify-between mb-3">
                 <h3 className="font-display text-xs text-altar-muted tracking-[3px] uppercase flex items-center gap-1.5">
                     <span>{memStats.tierIcon}</span> The Cards Remember
@@ -437,7 +607,6 @@ function MemoryStatsCard() {
                 </span>
             </div>
 
-            {/* Stats row */}
             <div className="grid grid-cols-3 gap-2 mb-3">
                 <div className="text-center p-2 rounded-lg bg-altar-deep/40">
                     <p className="font-display text-lg text-altar-gold">{memStats.readingCount}</p>
@@ -457,7 +626,6 @@ function MemoryStatsCard() {
                 </div>
             </div>
 
-            {/* Tier progress */}
             <div className="mb-3">
                 <div className="flex items-center justify-between mb-1">
                     <span className="text-[9px] text-altar-muted">Bond progress</span>
@@ -471,7 +639,6 @@ function MemoryStatsCard() {
                 </div>
             </div>
 
-            {/* Delete memory */}
             <button
                 onClick={handleDeleteMemory}
                 className="w-full py-2 rounded-lg border border-red-500/10 text-red-400/50 hover:text-red-400 hover:border-red-500/25 text-[10px] font-display tracking-wide transition-all"
@@ -517,7 +684,6 @@ function ReminderSettingsRow() {
                         <p className="text-[10px] text-red-400 mt-0.5">Notifications blocked — enable in browser settings</p>
                     )}
                 </div>
-                {/* Toggle */}
                 <button
                     onClick={handleToggle}
                     className={`relative w-10 h-5 rounded-full transition-colors duration-300 ${settings.enabled
@@ -532,7 +698,6 @@ function ReminderSettingsRow() {
                 </button>
             </div>
 
-            {/* Time picker — shows when enabled */}
             {settings.enabled && (
                 <div className="px-4 pb-3 flex items-center gap-2">
                     <span className="text-[10px] text-altar-muted">Remind at</span>
@@ -545,7 +710,6 @@ function ReminderSettingsRow() {
                 </div>
             )}
 
-            {/* Time dropdown */}
             {showTimePicker && (
                 <div className="px-4 pb-3">
                     <div className="grid grid-cols-4 gap-1.5 max-h-32 overflow-y-auto rounded-lg bg-altar-dark/80 p-2 border border-purple-500/15">
@@ -569,22 +733,17 @@ function ReminderSettingsRow() {
 }
 
 // ── Helper functions ──
-
 function calculateStreak(dates: Date[]): number {
     if (dates.length === 0) return 0;
     const sorted = [...dates].sort((a, b) => b.getTime() - a.getTime());
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
     let streak = 0;
     let checkDate = new Date(today);
-
-    // Check if there's a reading today or yesterday
     const latestDate = new Date(sorted[0]);
     latestDate.setHours(0, 0, 0, 0);
     const diffDays = Math.floor((today.getTime() - latestDate.getTime()) / (1000 * 60 * 60 * 24));
     if (diffDays > 1) return 0;
-
     for (const date of sorted) {
         const d = new Date(date);
         d.setHours(0, 0, 0, 0);
