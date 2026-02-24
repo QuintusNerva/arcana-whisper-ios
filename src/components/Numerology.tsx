@@ -4,7 +4,7 @@ import {
     getBirthData, getLifePathNumber, getLifePathMeaning, getPersonalYearNumber,
     getNatalTriad,
 } from '../services/astrology.service';
-import { AIService } from '../services/ai.service';
+import { AIService, dailyCache } from '../services/ai.service';
 import { AIResponseRenderer } from './AIResponseRenderer';
 
 interface NumerologyProps {
@@ -36,6 +36,12 @@ export function Numerology({ onClose, onTabChange }: NumerologyProps) {
         setShowPathModal(true);
         if (aiPath || aiPathLoading) return;
 
+        // Check daily cache first
+        const cached = dailyCache.get(`lifepath_${lifePathNum}`);
+        if (cached) {
+            try { setAiPath(JSON.parse(cached)); return; } catch { }
+        }
+
         const ai = new AIService();
         if (!ai.hasApiKey()) return;
 
@@ -66,11 +72,13 @@ Rising: ${triad.rising.name} (${triad.rising.element})
 Weave their astrology into the numerology reading — how does their Life Path ${lifePathNum} interact with their ${triad.sun.name} Sun? What unique strengths and challenges emerge from this specific combination?`;
             }
 
-            const raw = await ai.chat(systemPrompt, userPrompt);
+            const raw = await ai.chatPremium(systemPrompt, userPrompt);
             try {
                 const jsonMatch = raw.match(/\{[\s\S]*\}/);
                 if (jsonMatch) {
-                    setAiPath(JSON.parse(jsonMatch[0]));
+                    const parsed = JSON.parse(jsonMatch[0]);
+                    setAiPath(parsed);
+                    dailyCache.set(`lifepath_${lifePathNum}`, JSON.stringify(parsed));
                 }
             } catch { /* use static fallback */ }
         } catch { /* use static fallback */ }
@@ -192,6 +200,11 @@ Weave their astrology into the numerology reading — how does their Life Path $
                                         onClick={async () => {
                                             setShowYearModal(true);
                                             if (aiYear || aiYearLoading) return;
+
+                                            // Check daily cache first
+                                            const cached = dailyCache.get(`personalyear_${personalYear}`);
+                                            if (cached) { setAiYear(cached); return; }
+
                                             const ai = new AIService();
                                             if (!ai.hasApiKey()) return;
                                             setAiYearLoading(true);
@@ -213,8 +226,9 @@ Life Path: ${lifePathNum} (${lifePathMeaning?.title || ''})`;
                                                     userPrompt += `\nSun: ${triad.sun.name} (${triad.sun.element})\nMoon: ${triad.moon.name} (${triad.moon.element})\nRising: ${triad.rising.name} (${triad.rising.element})`;
                                                     userPrompt += `\n\nHow does Personal Year ${personalYear} interact with their ${triad.sun.name} Sun and Life Path ${lifePathNum}? What should they specifically do this year?`;
                                                 }
-                                                const result = await ai.chat(sysPrompt, userPrompt);
+                                                const result = await ai.chatPremium(sysPrompt, userPrompt);
                                                 setAiYear(result);
+                                                dailyCache.set(`personalyear_${personalYear}`, result);
                                             } catch { /* fallback */ }
                                             finally { setAiYearLoading(false); }
                                         }}

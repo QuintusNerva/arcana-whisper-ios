@@ -3,7 +3,7 @@ import {
     getBirthData, getNatalTriad, getFullChart, getLifePathNumber, getLifePathMeaning,
     getPersonalYearNumber, ZODIAC_SIGNS, FullChartData,
 } from '../services/astrology.service';
-import { AIService } from '../services/ai.service';
+import { AIService, dailyCache } from '../services/ai.service';
 import { AIResponseRenderer } from './AIResponseRenderer';
 
 interface CosmicBlueprintProps {
@@ -14,6 +14,12 @@ export function CosmicBlueprint({ onTabChange }: CosmicBlueprintProps) {
     const [reading, setReading] = React.useState<string | null>(null);
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
+
+    // Check daily cache on mount
+    React.useEffect(() => {
+        const cached = dailyCache.get('blueprint');
+        if (cached) setReading(cached);
+    }, []);
 
     const birthData = getBirthData();
     if (!birthData) {
@@ -57,6 +63,7 @@ export function CosmicBlueprint({ onTabChange }: CosmicBlueprintProps) {
                 { number: personalYear },
             );
             setReading(result);
+            dailyCache.set('blueprint', result);
         } catch (err: any) {
             setError('Failed to generate blueprint. Try again.');
         } finally {

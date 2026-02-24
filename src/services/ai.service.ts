@@ -7,7 +7,28 @@ import { getMemoryContextForAI } from './memory.service';
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const MODEL = 'google/gemini-2.0-flash-001';
+const PREMIUM_MODEL = 'google/gemini-2.5-pro-preview-05-06';
 const STORAGE_KEY = 'openrouter_api_key';
+
+/**
+ * Daily cache utility — stores a value keyed to today's date.
+ * Returns cached value if generated today, otherwise null.
+ */
+export const dailyCache = {
+    get(key: string): string | null {
+        const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+        const raw = localStorage.getItem(`daily_${key}`);
+        if (!raw) return null;
+        try {
+            const { date, value } = JSON.parse(raw);
+            return date === today ? value : null;
+        } catch { return null; }
+    },
+    set(key: string, value: string): void {
+        const today = new Date().toISOString().slice(0, 10);
+        localStorage.setItem(`daily_${key}`, JSON.stringify({ date: today, value }));
+    },
+};
 
 /** Shared formatting instruction appended to all AI system prompts */
 const TEACHING_FORMAT = `
@@ -299,7 +320,7 @@ Personal Year: ${personalYear.number} (current cycle, year ${new Date().getFullY
 
 Follow the four-section structure. For every insight: name the energy, ground it in a relatable life scenario, then reframe it. Make them feel like you truly see them.`;
 
-        return this.chat(systemPrompt, userPrompt, 1200);
+        return this.chatPremium(systemPrompt, userPrompt, 1200);
     }
 
     /**
@@ -357,6 +378,46 @@ Their compatibility score is ${score}/100 — "${tier}". Weave this naturally in
                 throw new Error('Rate limited. Please wait a moment and try again.');
             }
             throw new Error(`AI service error: ${response.status} — ${error}`);
+        }
+
+        const data = await response.json();
+        const content = data.choices?.[0]?.message?.content;
+        if (!content) {
+            throw new Error('No response from AI. Please try again.');
+        }
+        return content.trim();
+    }
+
+    /** Premium model chat — uses Gemini 2.5 Pro for deep, once-a-day readings */
+    async chatPremium(systemPrompt: string, userPrompt: string, maxTokens = 1200): Promise<string> {
+        if (!this.apiKey) {
+            throw new Error('No API key configured. Add your OpenRouter key in Settings.');
+        }
+
+        const response = await fetch(OPENROUTER_URL, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${this.apiKey}`,
+                'Content-Type': 'application/json',
+                'HTTP-Referer': window.location.origin,
+                'X-Title': 'Arcana Whisper',
+            },
+            body: JSON.stringify({
+                model: PREMIUM_MODEL,
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: userPrompt },
+                ],
+                max_tokens: maxTokens,
+                temperature: 0.8,
+            }),
+        });
+
+        if (!response.ok) {
+            const error = await response.text();
+            // Fallback to Flash model if premium fails
+            console.warn('Premium model failed, falling back to Flash:', error);
+            return this.chat(systemPrompt, userPrompt, maxTokens);
         }
 
         const data = await response.json();
