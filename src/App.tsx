@@ -19,10 +19,12 @@ import { Horoscope } from './components/Horoscope';
 import { Compatibility } from './components/Compatibility';
 import { Onboarding } from './components/Onboarding';
 import { TransitFeed } from './components/TransitFeed';
+import { JournalTab } from './components/JournalTab';
 import { canDoReading, incrementReadingCount, getRemainingReadings } from './services/ai.service';
 import { recordReading } from './services/memory.service';
 import { fireReminder } from './services/reminder.service';
 import { fireTransitNotification } from './services/transit.service';
+import { fireJournalReminder } from './services/journal.service';
 import { getBirthData, getSunSign, getDailyHoroscope } from './services/astrology.service';
 
 /* ── Ambient particle backdrop ── */
@@ -173,6 +175,7 @@ function App() {
     const [showHoroscope, setShowHoroscope] = React.useState(false);
     const [showCompatibility, setShowCompatibility] = React.useState(false);
     const [showTransitFeed, setShowTransitFeed] = React.useState(false);
+    const [showJournal, setShowJournal] = React.useState(false);
 
     const [userProfile, setUserProfile] = React.useState<any>(() => {
         try {
@@ -232,6 +235,7 @@ function App() {
         setShowHoroscope(false);
         setShowCompatibility(false);
         setShowTransitFeed(false);
+        setShowJournal(false);
 
         setCurrentTab(tab);
         if (tab === 'new') {
@@ -249,6 +253,7 @@ function App() {
         else if (tab === 'horoscope') setShowHoroscope(true);
         else if (tab === 'compatibility') setShowCompatibility(true);
         else if (tab === 'cosmos') setShowTransitFeed(true);
+        else if (tab === 'journal') setShowJournal(true);
     };
 
     React.useEffect(() => {
@@ -265,6 +270,8 @@ function App() {
             fireReminder();
             // Check for transit alerts
             fireTransitNotification();
+            // Check for journal reminder
+            fireJournalReminder();
         };
         initializeApp();
     }, [loadCard, isInitialLoad, userProfile]);
@@ -376,6 +383,15 @@ function App() {
         );
     }
 
+    if (showJournal) {
+        return (
+            <JournalTab
+                onClose={() => { setShowJournal(false); setCurrentTab('home'); }}
+                onTabChange={handleTabChange}
+            />
+        );
+    }
+
     // ── MYSTIC ALTAR — Main Screen ──
     return (
         <div className="page-frame">
@@ -481,6 +497,7 @@ function App() {
                                 { icon: '🔢', label: 'Numerology', desc: 'Sacred numbers', tab: 'numerology', gradient: 'from-amber-500/10 to-orange-500/10 border-amber-500/20' },
                                 { icon: '♈', label: 'Horoscope', desc: 'Daily zodiac', tab: 'horoscope', gradient: 'from-cyan-500/10 to-blue-500/10 border-cyan-500/20' },
                                 { icon: '🌌', label: 'Cosmic Weather', desc: 'Transit alerts', tab: 'cosmos', gradient: 'from-blue-500/10 to-indigo-500/10 border-blue-500/20' },
+                                { icon: '📓', label: 'Cosmic Journal', desc: 'Your space', tab: 'journal', gradient: 'from-teal-500/10 to-cyan-500/10 border-teal-500/20' },
                                 { icon: '💞', label: 'Compatibility', desc: 'Couple charts', tab: 'compatibility', gradient: 'from-pink-500/10 to-rose-500/10 border-pink-500/20' },
                                 { icon: '📜', label: 'Past Readings', desc: 'Your history', tab: 'history', gradient: 'from-emerald-500/10 to-green-500/10 border-emerald-500/20' },
                             ].map(item => (

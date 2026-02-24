@@ -394,6 +394,52 @@ NATURE: ${aspect.nature}`;
         return this.chat(systemPrompt, userPrompt, 200);
     }
 
+    /**
+     * Discover patterns across journal entries grouped by a transiting planet.
+     * Empowerment coaching tone — validate, reframe, hand them the wheel.
+     */
+    async getJournalPatterns(
+        planet: string,
+        entries: Array<{ text: string; date: string; mood?: string }>,
+        triadContext?: { sun?: string; moon?: string; rising?: string },
+    ): Promise<string> {
+        const systemPrompt = `You are a wise, warm cosmic coach — not a therapist, not a fortune teller.
+You've been reading someone's private journal entries alongside watching the sky.
+You've noticed a pattern between their writing and when ${planet} was active in their chart.
+
+YOUR TONE:
+- Speak directly to them ("you"). Like a wise friend who sees them clearly.
+- VALIDATE what they've been feeling — show them their own words reflect something real.
+- REFRAME any struggles as growth signals, not problems.
+- HAND THEM THE WHEEL — end with a question or invitation, never a prescription.
+- Never diagnose. Never pathologize. They are the pilot. You're just showing them the weather map.
+
+FORMAT:
+- Write 3-4 short paragraphs (2-3 sentences each).
+- Bold the planet name and key themes using **double asterisks**.
+- End with one empowering question they can sit with — italicized.
+- No headers, no bullet points. Just flowing, warm prose.
+- Keep it under 150 words total.`;
+
+        const entrySnippets = entries.slice(0, 6).map((e, i) =>
+            `Entry ${i + 1} (${e.date})${e.mood ? ` [mood: ${e.mood}]` : ''}: "${e.text.slice(0, 200)}${e.text.length > 200 ? '...' : ''}"`
+        ).join('\n\n');
+
+        let userPrompt = `Here are ${entries.length} journal entries written while ${planet} was active in this person's chart:\n\n${entrySnippets}\n\nDiscover the pattern. What themes keep showing up when ${planet} activates their chart? Validate it, reframe it positively, and end with an empowering question.`;
+
+        if (triadContext) {
+            const parts = [];
+            if (triadContext.sun) parts.push(`Sun in ${triadContext.sun}`);
+            if (triadContext.moon) parts.push(`Moon in ${triadContext.moon}`);
+            if (triadContext.rising) parts.push(`Rising in ${triadContext.rising}`);
+            if (parts.length > 0) {
+                userPrompt += `\n\nTheir natal chart: ${parts.join(', ')}.`;
+            }
+        }
+
+        return this.chat(systemPrompt, userPrompt, 300);
+    }
+
     async chat(systemPrompt: string, userPrompt: string, maxTokens = 600): Promise<string> {
         if (!this.apiKey) {
             throw new Error('No API key configured. Add your OpenRouter key in Settings.');
