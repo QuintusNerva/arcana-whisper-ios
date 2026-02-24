@@ -7,7 +7,7 @@ import { getMemoryContextForAI } from './memory.service';
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const MODEL = 'google/gemini-2.0-flash-001';
-const PREMIUM_MODEL = 'google/gemini-2.5-pro-preview-05-06';
+const PREMIUM_MODEL = 'anthropic/claude-3.5-sonnet';
 const STORAGE_KEY = 'openrouter_api_key';
 
 /**
@@ -389,7 +389,7 @@ Their compatibility score is ${score}/100 — "${tier}". Weave this naturally in
     }
 
     /** Premium model chat — uses Gemini 2.5 Pro for deep, once-a-day readings */
-    async chatPremium(systemPrompt: string, userPrompt: string, maxTokens = 8192): Promise<string> {
+    async chatPremium(systemPrompt: string, userPrompt: string, maxTokens = 1500): Promise<string> {
         if (!this.apiKey) {
             throw new Error('No API key configured. Add your OpenRouter key in Settings.');
         }
