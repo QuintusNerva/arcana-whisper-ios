@@ -115,14 +115,18 @@ export function getAscendant(
     // Obliquity of the ecliptic
     const obliquity = getObliquity(time);
 
-    // Ascendant formula:
-    // ASC = atan2(-cos(LST), sin(LST)*cos(ε) + tan(φ)*sin(ε))
+    // Ascendant formula (Jean Meeus, "Astronomical Algorithms"):
+    //   tan(ASC) = cos(RAMC) / -(sin(RAMC)*cos(ε) + tan(φ)*sin(ε))
+    //
+    // Using atan2 for correct quadrant:
+    //   y = cos(RAMC)
+    //   x = -(sin(RAMC)*cos(ε) + tan(φ)*sin(ε))
     const lstRad = rad(lst);
     const oblRad = rad(obliquity);
     const latRad = rad(latitude);
 
-    const y = -Math.cos(lstRad);
-    const x = Math.sin(lstRad) * Math.cos(oblRad) + Math.tan(latRad) * Math.sin(oblRad);
+    const y = Math.cos(lstRad);
+    const x = -(Math.sin(lstRad) * Math.cos(oblRad) + Math.tan(latRad) * Math.sin(oblRad));
 
     const ascendant = norm360(Math.atan2(y, x) * 180 / Math.PI);
     console.log('[EPHEMERIS] Ascendant:', {
