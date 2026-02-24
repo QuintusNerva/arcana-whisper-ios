@@ -101,6 +101,14 @@ function parseBlocks(raw: string): Block[] {
             continue;
         }
 
+        // **✦ Bold Section Header** or **Bold Header**
+        const boldHeadingMatch = trimmed.match(/^\*\*[✦✧⊹✶☆·]?\s*(.+?)\*\*$/);
+        if (boldHeadingMatch) {
+            flushBullets();
+            blocks.push({ type: 'heading', content: boldHeadingMatch[1].trim() });
+            continue;
+        }
+
         // - Bullet or * Bullet
         const bulletMatch = trimmed.match(/^[-*•]\s+(.+)$/);
         if (bulletMatch) {
