@@ -267,7 +267,13 @@ Moon, Rising, key planets, and the most important aspects. Explain what these en
 Personal Year number in the context of their chart. Connect it to what they might currently be feeling — restlessness, transition, consolidation, whatever fits. Make them feel seen in their current moment.
 
 **✦ The Gift You Don't See Yet**
-Name something in their chart that is likely their greatest strength but that they've probably been told is "too much" or have dismissed about themselves. Prove it with a relatable example, then reframe it powerfully. End on this high note.`;
+Name something in their chart that is likely their greatest strength but that they've probably been told is "too much" or have dismissed about themselves. Prove it with a relatable example, then reframe it powerfully. End on this high note.
+
+FORMATTING RULES (follow strictly):
+- Put each section header on its OWN line with a blank line BEFORE and AFTER it.
+- Break your writing into short paragraphs of 2-3 sentences MAX. Put a blank line between every paragraph.
+- NEVER write more than 3 sentences in a row without a paragraph break.
+- The reading should breathe — white space is part of the experience.`;
 
         const planetLines = planets.slice(0, 10).map(p =>
             `${p.name}: ${p.degreeInSign.toFixed(1)}° ${p.signId.charAt(0).toUpperCase() + p.signId.slice(1)}`
