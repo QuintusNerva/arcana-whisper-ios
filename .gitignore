@@ -43,3 +43,4 @@ yarn-error.*
 # agent config
 .agent/
 .expo/
+.vercel
