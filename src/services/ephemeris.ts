@@ -1,10 +1,11 @@
 /**
- * Ephemeris Engine — Accurate astronomical calculations for natal charts.
- * Uses the astronomy-engine library (cosinekitty) for sub-arcsecond accuracy.
+ * Ephemeris Engine — Full natal chart calculations using astronomy-engine.
  *
  * Provides:
- *  - Moon ecliptic longitude → zodiac sign
+ *  - All 10 planetary positions (Sun through Pluto) as ecliptic longitudes
+ *  - Moon ecliptic longitude (sub-arcsecond accuracy)
  *  - Ascendant (Rising sign) calculation
+ *  - Aspect detection between all planet pairs
  *  - Ecliptic longitude → Zodiac sign mapping
  */
 
@@ -12,6 +13,10 @@ import {
     MakeTime,
     EclipticGeoMoon,
     SiderealTime,
+    SunPosition,
+    GeoVector,
+    Ecliptic as AstroEcliptic,
+    Body,
 } from 'astronomy-engine';
 
 // ══════════════════════════════════════
@@ -46,57 +51,167 @@ export function longitudeToDegreeInSign(degrees: number): number {
 // HELPER: Build a UTC Date for astronomy-engine
 // ══════════════════════════════════════
 
-/**
- * Create a JavaScript Date in UTC from local birth time + UTC offset.
- * astronomy-engine's MakeTime() expects a Date object (not year/month/day args).
- */
 function makeUTCDate(
     year: number, month: number, day: number,
     hour: number, minute: number, utcOffset: number
 ): Date {
-    // Date.UTC uses 0-indexed months
     const utcMs = Date.UTC(year, month - 1, day, hour, minute, 0);
-    // Subtract the UTC offset to convert local → UTC
-    // utcOffset is in hours (e.g. -5 for EST), so local + (-offset) = UTC
-    // Actually: UTC = local - offset, so we subtract offset*hours in ms
     const offsetMs = utcOffset * 60 * 60 * 1000;
     return new Date(utcMs - offsetMs);
 }
 
 // ══════════════════════════════════════
-// MOON ECLIPTIC LONGITUDE
+// PLANET DEFINITIONS
 // ══════════════════════════════════════
 
-/**
- * Calculate the Moon's ecliptic longitude using astronomy-engine.
- * Accuracy: sub-arcsecond (< 0.001°).
- */
-export function getMoonLongitude(
-    year: number, month: number, day: number,
-    hour: number = 12, minute: number = 0,
-    utcOffset: number = 0
-): number {
-    const date = makeUTCDate(year, month, day, hour, minute, utcOffset);
+export interface PlanetInfo {
+    id: string;
+    name: string;
+    glyph: string;
+    body: Body | 'Sun' | 'Moon';
+}
+
+export const PLANETS: PlanetInfo[] = [
+    { id: 'sun', name: 'Sun', glyph: '☉', body: 'Sun' },
+    { id: 'moon', name: 'Moon', glyph: '☽', body: 'Moon' },
+    { id: 'mercury', name: 'Mercury', glyph: '☿', body: Body.Mercury },
+    { id: 'venus', name: 'Venus', glyph: '♀', body: Body.Venus },
+    { id: 'mars', name: 'Mars', glyph: '♂', body: Body.Mars },
+    { id: 'jupiter', name: 'Jupiter', glyph: '♃', body: Body.Jupiter },
+    { id: 'saturn', name: 'Saturn', glyph: '♄', body: Body.Saturn },
+    { id: 'uranus', name: 'Uranus', glyph: '♅', body: Body.Uranus },
+    { id: 'neptune', name: 'Neptune', glyph: '♆', body: Body.Neptune },
+    { id: 'pluto', name: 'Pluto', glyph: '♇', body: Body.Pluto },
+];
+
+// ══════════════════════════════════════
+// PLANET ECLIPTIC LONGITUDES
+// ══════════════════════════════════════
+
+export interface PlanetPosition {
+    id: string;
+    name: string;
+    glyph: string;
+    longitude: number;      // 0-360
+    signId: string;         // 'aries', 'taurus', etc.
+    degreeInSign: number;   // 0-30
+}
+
+function getPlanetLongitude(planet: PlanetInfo, date: Date): number {
     const time = MakeTime(date);
-    const moon = EclipticGeoMoon(time);
-    return norm360(moon.lon);
+
+    if (planet.body === 'Sun') {
+        const sun = SunPosition(time);
+        return norm360(sun.elon);
+    }
+
+    if (planet.body === 'Moon') {
+        const moon = EclipticGeoMoon(time);
+        return norm360(moon.lon);
+    }
+
+    // All other planets: geocentric vector → ecliptic conversion
+    const geo = GeoVector(planet.body as Body, time, true);
+    const ecl = AstroEcliptic(geo);
+    return norm360(ecl.elon);
+}
+
+function getAllPlanetPositions(date: Date): PlanetPosition[] {
+    return PLANETS.map(planet => {
+        const longitude = getPlanetLongitude(planet, date);
+        return {
+            id: planet.id,
+            name: planet.name,
+            glyph: planet.glyph,
+            longitude,
+            signId: longitudeToSignId(longitude),
+            degreeInSign: Math.round(longitudeToDegreeInSign(longitude) * 10) / 10,
+        };
+    });
+}
+
+// ══════════════════════════════════════
+// ASPECT DETECTION
+// ══════════════════════════════════════
+
+export interface Aspect {
+    planet1: string;      // planet id
+    planet1Name: string;
+    planet1Glyph: string;
+    planet2: string;
+    planet2Name: string;
+    planet2Glyph: string;
+    type: string;         // 'conjunction', 'sextile', etc.
+    symbol: string;       // ☌, ⚹, □, △, ☍
+    angle: number;        // exact angle between them
+    orb: number;          // how far from exact (degrees)
+    nature: 'harmonious' | 'challenging' | 'neutral';
+}
+
+interface AspectDef {
+    name: string;
+    symbol: string;
+    angle: number;
+    orb: number;
+    nature: 'harmonious' | 'challenging' | 'neutral';
+}
+
+const ASPECT_DEFINITIONS: AspectDef[] = [
+    { name: 'Conjunction', symbol: '☌', angle: 0, orb: 8, nature: 'neutral' },
+    { name: 'Sextile', symbol: '⚹', angle: 60, orb: 4, nature: 'harmonious' },
+    { name: 'Square', symbol: '□', angle: 90, orb: 7, nature: 'challenging' },
+    { name: 'Trine', symbol: '△', angle: 120, orb: 7, nature: 'harmonious' },
+    { name: 'Opposition', symbol: '☍', angle: 180, orb: 8, nature: 'challenging' },
+];
+
+function detectAspects(planets: PlanetPosition[]): Aspect[] {
+    const aspects: Aspect[] = [];
+
+    for (let i = 0; i < planets.length; i++) {
+        for (let j = i + 1; j < planets.length; j++) {
+            const p1 = planets[i];
+            const p2 = planets[j];
+
+            // Angular separation (shortest arc)
+            let diff = Math.abs(p1.longitude - p2.longitude);
+            if (diff > 180) diff = 360 - diff;
+
+            // Check each aspect type
+            for (const aspect of ASPECT_DEFINITIONS) {
+                const orb = Math.abs(diff - aspect.angle);
+                if (orb <= aspect.orb) {
+                    aspects.push({
+                        planet1: p1.id,
+                        planet1Name: p1.name,
+                        planet1Glyph: p1.glyph,
+                        planet2: p2.id,
+                        planet2Name: p2.name,
+                        planet2Glyph: p2.glyph,
+                        type: aspect.name,
+                        symbol: aspect.symbol,
+                        angle: Math.round(diff * 10) / 10,
+                        orb: Math.round(orb * 10) / 10,
+                        nature: aspect.nature,
+                    });
+                    break; // Only match the first (closest) aspect
+                }
+            }
+        }
+    }
+
+    // Sort by tightest orb first (most significant)
+    return aspects.sort((a, b) => a.orb - b.orb);
 }
 
 // ══════════════════════════════════════
 // ASCENDANT (RISING SIGN)
 // ══════════════════════════════════════
 
-/**
- * Mean obliquity of the ecliptic in degrees.
- */
 function getObliquity(time: any): number {
     const T = time.tt / 36525.0;
     return 23.4392911 - 0.0130042 * T - 0.00000016 * T * T + 0.000000504 * T * T * T;
 }
 
-/**
- * Calculate the Ascendant (Rising sign) degree on the ecliptic.
- */
 export function getAscendant(
     year: number, month: number, day: number,
     hour: number, minute: number, utcOffset: number,
@@ -105,20 +220,12 @@ export function getAscendant(
     const date = makeUTCDate(year, month, day, hour, minute, utcOffset);
     const time = MakeTime(date);
 
-    // Greenwich Mean Sidereal Time in sidereal hours → convert to degrees
     const gmstHours = SiderealTime(time);
     const gmstDeg = gmstHours * 15.0;
-
-    // Local Sidereal Time
     const lst = norm360(gmstDeg + longitude);
-
-    // Obliquity of the ecliptic
     const obliquity = getObliquity(time);
 
-    // Ascendant formula (Jean Meeus, "Astronomical Algorithms"):
-    //   tan(ASC) = cos(RAMC) / -(sin(RAMC)*cos(ε) + tan(φ)*sin(ε))
-    //
-    // Using atan2 for correct quadrant:
+    // Ascendant formula (Jean Meeus):
     //   y = cos(RAMC)
     //   x = -(sin(RAMC)*cos(ε) + tan(φ)*sin(ε))
     const lstRad = rad(lst);
@@ -128,17 +235,22 @@ export function getAscendant(
     const y = Math.cos(lstRad);
     const x = -(Math.sin(lstRad) * Math.cos(oblRad) + Math.tan(latRad) * Math.sin(oblRad));
 
-    const ascendant = norm360(Math.atan2(y, x) * 180 / Math.PI);
-    console.log('[EPHEMERIS] Ascendant:', {
-        utcDate: date.toISOString(),
-        gmstDeg: Math.round(gmstDeg * 100) / 100,
-        lstDeg: Math.round(lst * 100) / 100,
-        obliquity: Math.round(obliquity * 1000) / 1000,
-        ascendantDeg: Math.round(ascendant * 100) / 100,
-        sign: SIGN_NAMES[Math.floor(ascendant / 30)],
-        degInSign: Math.round((ascendant % 30) * 100) / 100,
-    });
-    return ascendant;
+    return norm360(Math.atan2(y, x) * 180 / Math.PI);
+}
+
+// ══════════════════════════════════════
+// MOON ECLIPTIC LONGITUDE (legacy API)
+// ══════════════════════════════════════
+
+export function getMoonLongitude(
+    year: number, month: number, day: number,
+    hour: number = 12, minute: number = 0,
+    utcOffset: number = 0
+): number {
+    const date = makeUTCDate(year, month, day, hour, minute, utcOffset);
+    const time = MakeTime(date);
+    const moon = EclipticGeoMoon(time);
+    return norm360(moon.lon);
 }
 
 // ══════════════════════════════════════
@@ -157,21 +269,31 @@ export interface EphemerisInput {
 }
 
 export interface EphemerisResult {
+    // Legacy fields (Moon + Rising for Big Three)
     moonSignId: string;
     moonDegree: number;
     moonLongitude: number;
     risingSignId: string | null;
     risingDegree: number | null;
     risingLongitude: number | null;
+
+    // Extended: all planet positions
+    planets: PlanetPosition[];
+
+    // Extended: detected aspects
+    aspects: Aspect[];
 }
 
 export function calculateEphemeris(input: EphemerisInput): EphemerisResult {
     const { year, month, day, hour = 12, minute = 0, utcOffset = 0, latitude, longitude } = input;
 
-    // Moon
-    const moonLong = getMoonLongitude(year, month, day, hour, minute, utcOffset);
-    const moonSignId = longitudeToSignId(moonLong);
-    const moonDegree = Math.round(longitudeToDegreeInSign(moonLong) * 10) / 10;
+    const date = makeUTCDate(year, month, day, hour, minute, utcOffset);
+
+    // All planet positions
+    const planets = getAllPlanetPositions(date);
+
+    // Extract Moon from the planet array
+    const moonPos = planets.find(p => p.id === 'moon')!;
 
     // Rising (Ascendant)
     let risingSignId: string | null = null;
@@ -185,8 +307,15 @@ export function calculateEphemeris(input: EphemerisInput): EphemerisResult {
         risingLongitude = ascLong;
     }
 
+    // Detect aspects between all planets
+    const aspects = detectAspects(planets);
+
     return {
-        moonSignId, moonDegree, moonLongitude: moonLong,
+        moonSignId: moonPos.signId,
+        moonDegree: moonPos.degreeInSign,
+        moonLongitude: moonPos.longitude,
         risingSignId, risingDegree, risingLongitude,
+        planets,
+        aspects,
     };
 }

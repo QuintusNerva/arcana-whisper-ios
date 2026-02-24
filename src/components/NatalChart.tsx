@@ -1,7 +1,8 @@
 import React from 'react';
 import { BottomNav } from './BottomNav';
 import {
-    getBirthData, saveBirthData, getNatalTriad, getPlacementMeaning, BirthData, ZODIAC_SIGNS,
+    getBirthData, saveBirthData, getNatalTriad, getFullChart, getPlacementMeaning, BirthData, ZODIAC_SIGNS,
+    FullChartData,
 } from '../services/astrology.service';
 import { AIService } from '../services/ai.service';
 import { AIResponseRenderer } from './AIResponseRenderer';
@@ -34,6 +35,8 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
     const [showCosmicModal, setShowCosmicModal] = React.useState(false);
     const [cosmicSynthesis, setCosmicSynthesis] = React.useState<string | null>(null);
     const [cosmicLoading, setCosmicLoading] = React.useState(false);
+    const [chartSummary, setChartSummary] = React.useState<string | null>(null);
+    const [chartSummaryLoading, setChartSummaryLoading] = React.useState(false);
     const cityDropdownRef = React.useRef<HTMLDivElement>(null);
     const searchTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -140,6 +143,7 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
     };
 
     const triad = birthData ? getNatalTriad(birthData) : null;
+    const fullChart: FullChartData | null = React.useMemo(() => birthData ? getFullChart(birthData) : null, [birthData]);
 
     // Accuracy indicators
     const hasBirthTime = !!birthData?.birthTime;
@@ -329,6 +333,104 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
                                 </div>
                                 <p className="text-[8px] text-altar-gold/40 mt-3 font-display text-center">Tap for chart synthesis ✦</p>
                             </button>
+
+                            {/* 🪐 Planetary Placements */}
+                            {fullChart && fullChart.planets.length > 0 && (
+                                <div className="glass rounded-2xl p-4">
+                                    <h3 className="font-display text-xs text-altar-muted tracking-[3px] uppercase mb-3">🪐 Planetary Placements</h3>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {fullChart.planets.map(planet => {
+                                            const zodiac = ZODIAC_SIGNS.find(z => z.id === planet.signId);
+                                            return (
+                                                <div key={planet.id} className="flex items-center gap-2.5 py-2 px-3 rounded-xl bg-white/[0.03] border border-white/5">
+                                                    <span className="text-lg w-6 text-center" title={planet.name}>{planet.glyph}</span>
+                                                    <div className="min-w-0">
+                                                        <p className="text-[10px] text-altar-muted font-display tracking-wider uppercase">{planet.name}</p>
+                                                        <p className="text-xs text-altar-text font-medium">
+                                                            {zodiac?.glyph} {zodiac?.name} <span className="text-altar-muted">{planet.degreeInSign}°</span>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* ✦ Notable Aspects */}
+                            {fullChart && fullChart.aspects.length > 0 && (
+                                <div className="glass rounded-2xl p-4">
+                                    <h3 className="font-display text-xs text-altar-muted tracking-[3px] uppercase mb-3">✦ Notable Aspects</h3>
+                                    <div className="space-y-1.5">
+                                        {fullChart.aspects.slice(0, 10).map((aspect, i) => {
+                                            const natureColors = {
+                                                harmonious: 'text-green-400/80 bg-green-500/10 border-green-500/15',
+                                                challenging: 'text-red-400/80 bg-red-500/10 border-red-500/15',
+                                                neutral: 'text-blue-400/80 bg-blue-500/10 border-blue-500/15',
+                                            };
+                                            return (
+                                                <div key={i} className={`flex items-center justify-between py-2 px-3 rounded-xl border ${natureColors[aspect.nature]}`}>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-sm font-mono">{aspect.planet1Glyph}</span>
+                                                        <span className="text-base font-bold">{aspect.symbol}</span>
+                                                        <span className="text-sm font-mono">{aspect.planet2Glyph}</span>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className="text-[11px] font-display tracking-wide">
+                                                            {aspect.planet1Name} {aspect.type} {aspect.planet2Name}
+                                                        </p>
+                                                        <p className="text-[9px] text-altar-muted">orb: {aspect.orb}°</p>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* ✨ Full Chart Summary */}
+                            {fullChart && (
+                                <div className="glass rounded-2xl p-4">
+                                    <h3 className="font-display text-xs text-altar-muted tracking-[3px] uppercase mb-3">✨ Chart Summary</h3>
+                                    {chartSummary ? (
+                                        <AIResponseRenderer text={chartSummary} />
+                                    ) : chartSummaryLoading ? (
+                                        <div className="space-y-2.5 py-1">
+                                            <div className="h-3 shimmer-skeleton w-full" />
+                                            <div className="h-3 shimmer-skeleton w-[90%]" />
+                                            <div className="h-3 shimmer-skeleton w-[75%]" />
+                                            <div className="h-3 shimmer-skeleton w-[60%]" />
+                                        </div>
+                                    ) : (
+                                        <button
+                                            onClick={async () => {
+                                                const ai = new AIService();
+                                                if (!ai.hasApiKey()) return;
+                                                setChartSummaryLoading(true);
+                                                try {
+                                                    const result = await ai.getFullChartSummary(
+                                                        fullChart.planets,
+                                                        fullChart.aspects,
+                                                        {
+                                                            sun: fullChart.triad.sun.name,
+                                                            moon: fullChart.triad.moon.name,
+                                                            rising: fullChart.triad.rising.name,
+                                                        }
+                                                    );
+                                                    setChartSummary(result);
+                                                } catch (err: any) {
+                                                    setChartSummary(null);
+                                                } finally {
+                                                    setChartSummaryLoading(false);
+                                                }
+                                            }}
+                                            className="w-full py-3 rounded-xl bg-gradient-to-r from-altar-mid/40 to-altar-bright/40 border border-altar-gold/15 text-sm text-altar-gold font-display tracking-wide hover:border-altar-gold/30 transition-all flex items-center justify-center gap-2"
+                                        >
+                                            <span>✨</span> Reveal Full Chart Reading
+                                        </button>
+                                    )}
+                                </div>
+                            )}
 
                             {/* Suggested Spreads */}
                             <div className="glass rounded-2xl p-4">

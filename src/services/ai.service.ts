@@ -193,6 +193,43 @@ What is rare or special about this exact combination? What can they do that almo
     }
 
     /**
+     * Get a comprehensive AI summary of the full natal chart.
+     */
+    async getFullChartSummary(
+        planets: Array<{ name: string; signId: string; degreeInSign: number }>,
+        aspects: Array<{ planet1Name: string; planet2Name: string; type: string; orb: number }>,
+        triad: { sun: string; moon: string; rising: string }
+    ): Promise<string> {
+        const systemPrompt = `You are a master astrologer providing a comprehensive natal chart reading.
+Synthesize all planetary placements and aspects into a cohesive narrative.
+Highlight the most significant patterns: stelliums, grand trines, T-squares, element balance, etc.
+Be specific about how the planets interact through their aspects.
+Use a warm, insightful, mystical tone.${TEACHING_FORMAT}`;
+
+        const planetLines = planets.map(p =>
+            `${p.name}: ${p.degreeInSign.toFixed(1)}° ${p.signId.charAt(0).toUpperCase() + p.signId.slice(1)}`
+        ).join('\n');
+
+        const aspectLines = aspects.slice(0, 12).map(a =>
+            `${a.planet1Name} ${a.type} ${a.planet2Name} (orb: ${a.orb}°)`
+        ).join('\n');
+
+        const userPrompt = `Provide a comprehensive natal chart reading:
+
+BIG THREE: Sun in ${triad.sun}, Moon in ${triad.moon}, Rising in ${triad.rising}
+
+ALL PLANETARY PLACEMENTS:
+${planetLines}
+
+KEY ASPECTS:
+${aspectLines}
+
+What are the dominant themes? What makes this chart unique? What should this person know about their cosmic blueprint?`;
+
+        return this.chat(systemPrompt, userPrompt);
+    }
+
+    /**
      * Get an AI-generated relationship synthesis for a couple compatibility reading.
      * Returns a flowing prose reading about the couple dynamic.
      */

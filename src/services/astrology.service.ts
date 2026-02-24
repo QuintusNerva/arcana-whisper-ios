@@ -178,6 +178,37 @@ export function getNatalTriad(data: BirthData): NatalTriad {
     return result;
 }
 
+// ── Full Chart (Triad + Planets + Aspects) ──
+
+import { PlanetPosition, Aspect } from './ephemeris';
+
+export interface FullChartData {
+    triad: NatalTriad;
+    planets: PlanetPosition[];
+    aspects: Aspect[];
+}
+
+export function getFullChart(data: BirthData): FullChartData | null {
+    if (!data.birthday) return null;
+
+    const triad = getNatalTriad(data);
+
+    // Get full ephemeris with all planets + aspects in one call
+    const { year, month, day, hour, minute } = parseBirthDateTime(data.birthday, data.birthTime);
+    const result = calculateEphemeris({
+        year, month, day, hour, minute,
+        utcOffset: data.utcOffset || 0,
+        latitude: data.latitude,
+        longitude: data.longitude,
+    });
+
+    return {
+        triad,
+        planets: result.planets,
+        aspects: result.aspects,
+    };
+}
+
 // ── Sign-in-Position Interpretations ──
 
 interface PlacementMeaning {
