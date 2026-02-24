@@ -14,6 +14,7 @@ export function CosmicBlueprint({ onTabChange }: CosmicBlueprintProps) {
     const [reading, setReading] = React.useState<string | null>(null);
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
+    const [collapsed, setCollapsed] = React.useState(true);
 
     // Check daily cache on mount
     React.useEffect(() => {
@@ -123,7 +124,18 @@ export function CosmicBlueprint({ onTabChange }: CosmicBlueprintProps) {
                     {reading ? (
                         <div className="rounded-xl bg-white/[0.02] border border-white/5 p-4">
                             <p className="text-[9px] font-display text-altar-gold/60 tracking-[2px] uppercase mb-2">✦ Your Cosmic Blueprint</p>
-                            <AIResponseRenderer text={reading} />
+                            <div className={collapsed ? 'max-h-[100px] overflow-hidden relative' : ''}>
+                                <AIResponseRenderer text={reading} />
+                                {collapsed && (
+                                    <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-altar-dark/95 to-transparent" />
+                                )}
+                            </div>
+                            <button
+                                onClick={() => setCollapsed(!collapsed)}
+                                className="mt-2 text-[10px] text-altar-gold/70 font-display hover:text-altar-gold transition-colors"
+                            >
+                                {collapsed ? '▾ Read more' : '▴ Collapse'}
+                            </button>
                         </div>
                     ) : loading ? (
                         <div className="rounded-xl bg-white/[0.02] border border-white/5 p-4">
