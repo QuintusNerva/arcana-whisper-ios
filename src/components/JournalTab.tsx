@@ -215,8 +215,8 @@ export function JournalTab({ onClose, onTabChange }: JournalTabProps) {
                                         }`}
                                 >
                                     <div className={`w-4 h-4 rounded-full transition-all ${reminderSettings.enabled
-                                            ? 'bg-altar-gold translate-x-5'
-                                            : 'bg-altar-muted/40 translate-x-0.5'
+                                        ? 'bg-altar-gold translate-x-5'
+                                        : 'bg-altar-muted/40 translate-x-0.5'
                                         }`} />
                                 </button>
                             </div>
@@ -238,6 +238,46 @@ export function JournalTab({ onClose, onTabChange }: JournalTabProps) {
                             <span className="text-lg">✦</span> New Entry
                         </button>
                     </div>
+
+                    {/* How It Works — collapsible guide */}
+                    {(() => {
+                        const [showGuide, setShowGuide] = React.useState(false);
+                        return (
+                            <div className="mb-4 animate-fade-up" style={{ animationDelay: '0.1s', opacity: 0 }}>
+                                <button
+                                    onClick={() => setShowGuide(!showGuide)}
+                                    className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all"
+                                >
+                                    <span className="text-[10px] text-altar-muted/50 font-display tracking-[2px] uppercase">How It Works</span>
+                                    <span className={`text-[10px] text-altar-muted/30 transition-transform ${showGuide ? 'rotate-180' : ''}`}>▾</span>
+                                </button>
+
+                                {showGuide && (
+                                    <div className="mt-2 glass rounded-xl p-4 border border-white/5 animate-fade-up space-y-3">
+                                        {[
+                                            { step: '1', icon: '✍️', title: 'Write what\'s real', desc: 'Tap "New Entry" and jot down how you feel, what happened, or what\'s on your mind. No judgment, no rules — just honesty.' },
+                                            { step: '2', icon: '🌌', title: 'Track the cosmos', desc: 'Each entry is automatically tagged with the active cosmic transits. Over time, you\'ll build a map of how the planets move through your life.' },
+                                            { step: '3', icon: '✨', title: 'Discover patterns', desc: `After ${progress.target} entries, we analyze your words against your cosmic transits and surface hidden patterns — themes you might not notice otherwise.` },
+                                        ].map(item => (
+                                            <div key={item.step} className="flex gap-3">
+                                                <div className="w-7 h-7 rounded-full bg-altar-gold/10 border border-altar-gold/15 flex items-center justify-center shrink-0">
+                                                    <span className="text-xs">{item.icon}</span>
+                                                </div>
+                                                <div>
+                                                    <p className="text-[11px] text-altar-text/80 font-semibold">{item.title}</p>
+                                                    <p className="text-[10px] text-altar-muted/50 leading-relaxed mt-0.5">{item.desc}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+
+                                        <p className="text-[9px] text-altar-muted/30 text-center pt-1 italic">
+                                            The stars don't control you — they show you the weather. You decide where to fly.
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })()}
 
                     {/* ── PATTERNS SECTION ── */}
                     <div className="mb-5 animate-fade-up" style={{ animationDelay: '0.15s', opacity: 0 }}>
