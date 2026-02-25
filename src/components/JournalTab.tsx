@@ -1,3 +1,4 @@
+import { safeStorage } from "../services/storage.service";
 import React from 'react';
 import { BottomNav } from './BottomNav';
 import { JournalEntryView } from './JournalEntry';
@@ -40,7 +41,7 @@ export function JournalTab({ onClose, onTabChange }: JournalTabProps) {
         refreshData();
         // Show onboarding if first time
         if (getJournalEntryCount() === 0) {
-            const seen = localStorage.getItem('journal_onboarding_seen');
+            const seen = safeStorage.getItem('journal_onboarding_seen');
             if (!seen) setShowOnboarding(true);
         }
     }, []);
@@ -130,7 +131,7 @@ export function JournalTab({ onClose, onTabChange }: JournalTabProps) {
 
     const handleDismissOnboarding = () => {
         setShowOnboarding(false);
-        localStorage.setItem('journal_onboarding_seen', 'true');
+        safeStorage.setItem('journal_onboarding_seen', 'true');
     };
 
     const handleToggleReminder = () => {

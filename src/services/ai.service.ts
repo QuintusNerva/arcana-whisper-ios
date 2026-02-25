@@ -1,3 +1,4 @@
+import { safeStorage } from "./storage.service";
 /**
  * AI Interpretation Service — OpenRouter Integration
  * Uses Gemini 2.0 Flash via OpenRouter for tarot card interpretations.
@@ -17,7 +18,7 @@ const STORAGE_KEY = 'openrouter_api_key';
 export const dailyCache = {
     get(key: string): string | null {
         const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-        const raw = localStorage.getItem(`daily_${key}`);
+        const raw = safeStorage.getItem(`daily_${key}`);
         if (!raw) return null;
         try {
             const { date, value } = JSON.parse(raw);
@@ -26,7 +27,7 @@ export const dailyCache = {
     },
     set(key: string, value: string): void {
         const today = new Date().toISOString().slice(0, 10);
-        localStorage.setItem(`daily_${key}`, JSON.stringify({ date: today, value }));
+        safeStorage.setItem(`daily_${key}`, JSON.stringify({ date: today, value }));
     },
 };
 
@@ -45,7 +46,7 @@ export class AIService {
 
     constructor() {
         // Prefer env var (set in .env), fall back to localStorage
-        this.apiKey = import.meta.env.VITE_OPENROUTER_API_KEY || localStorage.getItem(STORAGE_KEY) || null;
+        this.apiKey = import.meta.env.VITE_OPENROUTER_API_KEY || safeStorage.getItem(STORAGE_KEY) || null;
     }
 
     /** Check if a valid API key is configured */
@@ -540,7 +541,7 @@ function getTodayKey(): string {
 
 function getDailyData(): DailyCount {
     try {
-        const raw = localStorage.getItem(DAILY_LIMIT_KEY);
+        const raw = safeStorage.getItem(DAILY_LIMIT_KEY);
         if (raw) {
             const data = JSON.parse(raw) as DailyCount;
             if (data.date === getTodayKey()) return data;
@@ -565,7 +566,7 @@ export function canDoReading(subscription: string): boolean {
 export function incrementReadingCount() {
     const data = getDailyData();
     data.count += 1;
-    localStorage.setItem(DAILY_LIMIT_KEY, JSON.stringify(data));
+    safeStorage.setItem(DAILY_LIMIT_KEY, JSON.stringify(data));
 }
 
 /** Get total readings done today */

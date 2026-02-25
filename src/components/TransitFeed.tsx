@@ -1,3 +1,4 @@
+import { safeStorage } from "../services/storage.service";
 import React from 'react';
 import { BottomNav } from './BottomNav';
 import { AIResponseRenderer } from './AIResponseRenderer';
@@ -117,7 +118,7 @@ export function TransitFeed({ onClose, onTabChange }: TransitFeedProps) {
         // Check localStorage cache first
         const cacheKey = `transit_ai_${today.toISOString().slice(0, 10)}_${key}`;
         try {
-            const cached = localStorage.getItem(cacheKey);
+            const cached = safeStorage.getItem(cacheKey);
             if (cached) {
                 setInterpretations(prev => ({ ...prev, [key]: cached }));
                 return;
@@ -148,7 +149,7 @@ export function TransitFeed({ onClose, onTabChange }: TransitFeedProps) {
 
             const cleaned = result.replace(/^["']|["']$/g, '').trim();
             setInterpretations(prev => ({ ...prev, [key]: cleaned }));
-            try { localStorage.setItem(cacheKey, cleaned); } catch { /* */ }
+            try { safeStorage.setItem(cacheKey, cleaned); } catch { /* */ }
         } catch (err) {
             console.error('Transit AI error:', err);
         } finally {

@@ -1,3 +1,4 @@
+import { safeStorage } from "./storage.service";
 /**
  * Transit Detection Engine — "Cosmic Weather for YOU"
  * ────────────────────────────────────────────────────
@@ -319,7 +320,7 @@ const TRANSIT_NOTIFIED_KEY = 'arcana_transit_notified';
  */
 function hasNotifiedTransit(transitKey: string): boolean {
     try {
-        const raw = localStorage.getItem(TRANSIT_NOTIFIED_KEY);
+        const raw = safeStorage.getItem(TRANSIT_NOTIFIED_KEY);
         if (!raw) return false;
         const data = JSON.parse(raw);
         const today = new Date().toISOString().slice(0, 10);
@@ -335,11 +336,11 @@ function hasNotifiedTransit(transitKey: string): boolean {
 function markTransitNotified(transitKey: string): void {
     try {
         const today = new Date().toISOString().slice(0, 10);
-        const raw = localStorage.getItem(TRANSIT_NOTIFIED_KEY);
+        const raw = safeStorage.getItem(TRANSIT_NOTIFIED_KEY);
         let data = raw ? JSON.parse(raw) : { date: today, keys: [] };
         if (data.date !== today) data = { date: today, keys: [] };
         if (!data.keys.includes(transitKey)) data.keys.push(transitKey);
-        localStorage.setItem(TRANSIT_NOTIFIED_KEY, JSON.stringify(data));
+        safeStorage.setItem(TRANSIT_NOTIFIED_KEY, JSON.stringify(data));
     } catch { /* */ }
 }
 

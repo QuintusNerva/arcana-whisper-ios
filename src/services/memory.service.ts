@@ -1,3 +1,4 @@
+import { safeStorage } from "./storage.service";
 /**
  * Personal Memory Agent — localStorage-based user pattern tracking.
  * Learns reading themes, question keywords, and card patterns to
@@ -73,7 +74,7 @@ const THEME_LABELS: Record<string, string> = {
 
 function getMemory(): UserMemory {
     try {
-        const raw = localStorage.getItem(MEMORY_KEY);
+        const raw = safeStorage.getItem(MEMORY_KEY);
         if (raw) return JSON.parse(raw) as UserMemory;
     } catch { /* corrupted data — start fresh */ }
     return {
@@ -87,7 +88,7 @@ function getMemory(): UserMemory {
 }
 
 function saveMemory(memory: UserMemory): void {
-    localStorage.setItem(MEMORY_KEY, JSON.stringify(memory));
+    safeStorage.setItem(MEMORY_KEY, JSON.stringify(memory));
 }
 
 function extractKeywords(text: string): string[] {
@@ -271,5 +272,5 @@ export function getMemoryStats(): MemoryStats {
  * Clear all memory data. Privacy control.
  */
 export function clearMemory(): void {
-    localStorage.removeItem(MEMORY_KEY);
+    safeStorage.removeItem(MEMORY_KEY);
 }

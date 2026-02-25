@@ -1,3 +1,4 @@
+import { safeStorage } from "../services/storage.service";
 import React from 'react';
 import { BottomNav } from './BottomNav';
 import {
@@ -98,7 +99,7 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
     // Saved partner data
     const savedPartner = React.useMemo(() => {
         try {
-            const raw = localStorage.getItem('arcana_partner');
+            const raw = safeStorage.getItem('arcana_partner');
             return raw ? JSON.parse(raw) : null;
         } catch { return null; }
     }, []);
@@ -122,7 +123,7 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
         const r = getCoupleCompatibility(birthData, partnerBirthday);
         setReport(r);
         // Save partner data
-        localStorage.setItem('arcana_partner', JSON.stringify({ name: partnerName.trim(), birthday: partnerBirthday }));
+        safeStorage.setItem('arcana_partner', JSON.stringify({ name: partnerName.trim(), birthday: partnerBirthday }));
     };
 
     // Fire AI reading when report is generated
@@ -130,7 +131,7 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
         if (!report) return;
         const cacheKey = `ai_couple_${report.userTriad.sun.id}_${report.partnerTriad.sun.id}`;
         try {
-            const cached = localStorage.getItem(cacheKey);
+            const cached = safeStorage.getItem(cacheKey);
             if (cached) { setAiReading(cached); return; }
         } catch { /* */ }
 
@@ -149,7 +150,7 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
                 if (!cancelled) {
                     const cleaned = result.replace(/^["']|["']$/g, '').trim();
                     setAiReading(cleaned);
-                    try { localStorage.setItem(cacheKey, cleaned); } catch { /* */ }
+                    try { safeStorage.setItem(cacheKey, cleaned); } catch { /* */ }
                 }
             } catch { /* fallback to static */ }
             finally { if (!cancelled) setAiLoading(false); }
@@ -351,7 +352,7 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
 
                             {/* Try another partner */}
                             <button
-                                onClick={() => { setReport(null); setAiReading(null); setPartnerName(''); setPartnerBirthday(''); localStorage.removeItem('arcana_partner'); }}
+                                onClick={() => { setReport(null); setAiReading(null); setPartnerName(''); setPartnerBirthday(''); safeStorage.removeItem('arcana_partner'); }}
                                 className="w-full py-3 rounded-2xl glass border border-white/5 text-center hover:border-altar-gold/20 transition-all text-sm font-display text-altar-muted tracking-wide mb-5"
                             >
                                 Try Another Match →

@@ -1,3 +1,4 @@
+import { safeStorage } from "./services/storage.service";
 import React from 'react';
 import { TarotService } from './services/tarot.service';
 import { Card, Reading } from './models/card.model';
@@ -250,7 +251,7 @@ function App() {
 
     const [userProfile, setUserProfile] = React.useState<any>(() => {
         try {
-            const profile = localStorage.getItem('userProfile');
+            const profile = safeStorage.getItem('userProfile');
             return profile ? JSON.parse(profile) : null;
         } catch (error) {
             console.error('Error parsing user profile:', error);
@@ -287,7 +288,7 @@ function App() {
 
     const handleOnboardingComplete = (profile: { name: string; birthday: string; zodiac: string }) => {
         const newProfile = { ...profile, subscription: 'free' };
-        localStorage.setItem('userProfile', JSON.stringify(newProfile));
+        safeStorage.setItem('userProfile', JSON.stringify(newProfile));
         setUserProfile(newProfile);
     };
 
@@ -494,7 +495,7 @@ function App() {
                         onSubscribe={() => {
                             // Activate premium
                             const updated = { ...userProfile, subscription: 'premium' };
-                            localStorage.setItem('userProfile', JSON.stringify(updated));
+                            safeStorage.setItem('userProfile', JSON.stringify(updated));
                             setUserProfile(updated);
                             setShowPremiumOverlay(false);
                         }}

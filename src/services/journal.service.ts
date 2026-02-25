@@ -1,3 +1,4 @@
+import { safeStorage } from "./storage.service";
 /**
  * Cosmic Journal Service
  * ──────────────────────
@@ -64,7 +65,7 @@ function generateId(): string {
 /** Get all journal entries, newest first */
 export function getJournalEntries(): JournalEntry[] {
     try {
-        const raw = localStorage.getItem(ENTRIES_KEY);
+        const raw = safeStorage.getItem(ENTRIES_KEY);
         if (!raw) return [];
         const entries: JournalEntry[] = JSON.parse(raw);
         return entries.sort((a, b) => b.timestamp - a.timestamp);
@@ -105,7 +106,7 @@ export function saveJournalEntry(text: string, mood?: string): JournalEntry {
     };
 
     entries.push(entry);
-    localStorage.setItem(ENTRIES_KEY, JSON.stringify(entries));
+    safeStorage.setItem(ENTRIES_KEY, JSON.stringify(entries));
     return entry;
 }
 
@@ -117,7 +118,7 @@ export function updateJournalEntry(id: string, text: string, mood?: string): Jou
 
     entries[idx].text = text.trim();
     if (mood !== undefined) entries[idx].mood = mood;
-    localStorage.setItem(ENTRIES_KEY, JSON.stringify(entries));
+    safeStorage.setItem(ENTRIES_KEY, JSON.stringify(entries));
     return entries[idx];
 }
 
@@ -126,7 +127,7 @@ export function deleteJournalEntry(id: string): boolean {
     const entries = getJournalEntries();
     const filtered = entries.filter(e => e.id !== id);
     if (filtered.length === entries.length) return false;
-    localStorage.setItem(ENTRIES_KEY, JSON.stringify(filtered));
+    safeStorage.setItem(ENTRIES_KEY, JSON.stringify(filtered));
     return true;
 }
 
@@ -162,7 +163,7 @@ function captureTransitSnapshot(): TransitSnapshot[] {
 /** Get stored pattern insights */
 export function getPatternInsights(): PatternInsight[] {
     try {
-        const raw = localStorage.getItem(PATTERNS_KEY);
+        const raw = safeStorage.getItem(PATTERNS_KEY);
         if (!raw) return [];
         return JSON.parse(raw);
     } catch {
@@ -172,7 +173,7 @@ export function getPatternInsights(): PatternInsight[] {
 
 /** Save pattern insights */
 export function savePatternInsights(patterns: PatternInsight[]): void {
-    localStorage.setItem(PATTERNS_KEY, JSON.stringify(patterns));
+    safeStorage.setItem(PATTERNS_KEY, JSON.stringify(patterns));
 }
 
 /** Mark all patterns as read */
@@ -193,7 +194,7 @@ export function isPatternAnalysisDue(): boolean {
     if (entries.length < 10) return false;
 
     try {
-        const lastAnalysis = localStorage.getItem(LAST_ANALYSIS_KEY);
+        const lastAnalysis = safeStorage.getItem(LAST_ANALYSIS_KEY);
         if (!lastAnalysis) return true;
 
         const lastDate = new Date(lastAnalysis);
@@ -207,7 +208,7 @@ export function isPatternAnalysisDue(): boolean {
 
 /** Mark pattern analysis as completed today */
 export function markPatternAnalysisDone(): void {
-    localStorage.setItem(LAST_ANALYSIS_KEY, new Date().toISOString());
+    safeStorage.setItem(LAST_ANALYSIS_KEY, new Date().toISOString());
 }
 
 /**
@@ -255,7 +256,7 @@ export interface JournalReminderSettings {
 /** Get journal reminder settings */
 export function getJournalReminderSettings(): JournalReminderSettings {
     try {
-        const raw = localStorage.getItem(REMINDER_KEY);
+        const raw = safeStorage.getItem(REMINDER_KEY);
         if (raw) return JSON.parse(raw);
     } catch { /* */ }
     return { enabled: false, time: '20:00' };
@@ -263,7 +264,7 @@ export function getJournalReminderSettings(): JournalReminderSettings {
 
 /** Save journal reminder settings */
 export function saveJournalReminderSettings(settings: JournalReminderSettings): void {
-    localStorage.setItem(REMINDER_KEY, JSON.stringify(settings));
+    safeStorage.setItem(REMINDER_KEY, JSON.stringify(settings));
 }
 
 // Rotating reminder messages — warm, zero pressure
@@ -285,7 +286,7 @@ export function fireJournalReminder(): boolean {
 
     // Check if we already reminded today
     const today = new Date().toISOString().slice(0, 10);
-    const lastReminder = localStorage.getItem('journal_last_reminder');
+    const lastReminder = safeStorage.getItem('journal_last_reminder');
     if (lastReminder === today) return false;
 
     // Check if it's past the reminder time
@@ -311,7 +312,7 @@ export function fireJournalReminder(): boolean {
         });
     }
 
-    localStorage.setItem('journal_last_reminder', today);
+    safeStorage.setItem('journal_last_reminder', today);
     return true;
 }
 

@@ -1,3 +1,4 @@
+import { safeStorage } from "./storage.service";
 /*
  * Daily Reminder Service
  * ──────────────────────
@@ -22,7 +23,7 @@ const DEFAULT_SETTINGS: ReminderSettings = {
 
 export function getReminderSettings(): ReminderSettings {
     try {
-        const raw = localStorage.getItem(STORAGE_KEY);
+        const raw = safeStorage.getItem(STORAGE_KEY);
         if (!raw) return DEFAULT_SETTINGS;
         return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
     } catch {
@@ -33,7 +34,7 @@ export function getReminderSettings(): ReminderSettings {
 export function saveReminderSettings(settings: Partial<ReminderSettings>): ReminderSettings {
     const current = getReminderSettings();
     const updated = { ...current, ...settings };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    safeStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     return updated;
 }
 

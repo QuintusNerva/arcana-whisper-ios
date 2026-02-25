@@ -1,3 +1,4 @@
+import { safeStorage } from "../services/storage.service";
 import React from 'react';
 import { BottomNav } from './BottomNav';
 import {
@@ -17,7 +18,7 @@ export function Horoscope({ onClose, onTabChange, subscription }: HoroscopeProps
     const birthData = getBirthData();
     const profileZodiac = React.useMemo(() => {
         try {
-            const p = localStorage.getItem('userProfile');
+            const p = safeStorage.getItem('userProfile');
             if (p) {
                 const parsed = JSON.parse(p);
                 if (parsed?.zodiac) {
@@ -56,7 +57,7 @@ export function Horoscope({ onClose, onTabChange, subscription }: HoroscopeProps
         }
         // Check localStorage cache
         try {
-            const stored = localStorage.getItem('ai_daily_' + cacheKey);
+            const stored = safeStorage.getItem('ai_daily_' + cacheKey);
             if (stored) {
                 setAiDaily(stored);
                 aiDailyCacheRef.current[cacheKey] = stored;
@@ -96,7 +97,7 @@ Expand on that theme with practical guidance, emotional insight, and a sense of 
                     const cleaned = result.replace(/^["']|["']$/g, '').trim();
                     setAiDaily(cleaned);
                     aiDailyCacheRef.current[cacheKey] = cleaned;
-                    try { localStorage.setItem('ai_daily_' + cacheKey, cleaned); } catch { /* */ }
+                    try { safeStorage.setItem('ai_daily_' + cacheKey, cleaned); } catch { /* */ }
                 }
             } catch { /* use static fallback */ }
             finally { if (!cancelled) setAiDailyLoading(false); }

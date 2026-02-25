@@ -1,3 +1,4 @@
+import { safeStorage } from "../services/storage.service";
 import React from 'react';
 import { TarotService } from '../services/tarot.service';
 import { BottomNav } from './BottomNav';
@@ -72,7 +73,7 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
         const endsAt = userProfile?.subscriptionEndsAt;
         if (sub === 'premium' && endsAt && new Date(endsAt) < new Date()) {
             const updated = { ...userProfile, subscription: 'free', subscriptionEndsAt: null, wasPremium: true };
-            localStorage.setItem('userProfile', JSON.stringify(updated));
+            safeStorage.setItem('userProfile', JSON.stringify(updated));
             return 'free';
         }
         return sub;
@@ -101,7 +102,7 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
     const handleSaveProfile = () => {
         const profile = { ...userProfile, name, zodiac: zodiacSign?.name ?? '' };
         try {
-            localStorage.setItem('userProfile', JSON.stringify(profile));
+            safeStorage.setItem('userProfile', JSON.stringify(profile));
             setSaved(true);
             setEditing(false);
             setTimeout(() => setSaved(false), 2000);
@@ -155,15 +156,15 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
         const sunSign = getSunSign(birthday);
         if (sunSign) {
             const profile = { ...userProfile, name, zodiac: sunSign.name };
-            localStorage.setItem('userProfile', JSON.stringify(profile));
+            safeStorage.setItem('userProfile', JSON.stringify(profile));
         }
     };
 
     const handleClearData = () => {
         if (confirm('This will delete all your readings, preferences, and memory. Continue?')) {
-            localStorage.removeItem('tarot_readings');
-            localStorage.removeItem('userProfile');
-            localStorage.removeItem('arcane_tab_usage');
+            safeStorage.removeItem('tarot_readings');
+            safeStorage.removeItem('userProfile');
+            safeStorage.removeItem('arcane_tab_usage');
             clearMemory();
             window.location.reload();
         }
@@ -442,7 +443,7 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
                                 <button
                                     onClick={() => {
                                         const updated = { ...userProfile, subscription: 'premium', subscriptionEndsAt: null, subscriptionStartedAt: new Date().toISOString() };
-                                        localStorage.setItem('userProfile', JSON.stringify(updated));
+                                        safeStorage.setItem('userProfile', JSON.stringify(updated));
                                         window.location.reload();
                                     }}
                                     className="w-full py-3 rounded-xl bg-gradient-to-r from-altar-gold via-altar-gold-dim to-altar-gold text-altar-deep font-display font-bold text-sm tracking-wide hover:shadow-[0_0_20px_rgba(255,215,0,0.3)] transition-all hover:scale-[1.01] active:scale-[0.99]"
@@ -545,7 +546,7 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
                                 <button
                                     onClick={() => {
                                         const updated = { ...userProfile, subscriptionEndsAt: null };
-                                        localStorage.setItem('userProfile', JSON.stringify(updated));
+                                        safeStorage.setItem('userProfile', JSON.stringify(updated));
                                         window.location.reload();
                                     }}
                                     className="flex-1 py-3 rounded-xl bg-green-500/10 border border-green-500/20 text-sm text-green-400 font-display hover:bg-green-500/20 transition-colors"
@@ -557,7 +558,7 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
                                     onClick={() => {
                                         const endsAt = getNextRenewalDate();
                                         const updated = { ...userProfile, subscriptionEndsAt: endsAt.toISOString() };
-                                        localStorage.setItem('userProfile', JSON.stringify(updated));
+                                        safeStorage.setItem('userProfile', JSON.stringify(updated));
                                         window.location.reload();
                                     }}
                                     className="flex-1 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-sm text-red-400 font-display hover:bg-red-500/20 transition-colors"

@@ -1,3 +1,4 @@
+import { safeStorage } from "../services/storage.service";
 import React from 'react';
 import { Reading } from '../models/card.model';
 import { TarotService } from '../services/tarot.service';
@@ -68,14 +69,14 @@ export function ReadingHistory({ onClose, onViewReading, onTabChange }: ReadingH
         const updated = readings.filter(r => r.id !== id);
         setReadings(updated);
         try {
-            localStorage.setItem('tarot_readings', JSON.stringify(updated));
+            safeStorage.setItem('tarot_readings', JSON.stringify(updated));
         } catch { /* */ }
     };
 
     const handleClearAll = () => {
         setReadings([]);
         try {
-            localStorage.removeItem('tarot_readings');
+            safeStorage.removeItem('tarot_readings');
         } catch { /* */ }
     };
 

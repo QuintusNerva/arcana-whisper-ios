@@ -1,3 +1,4 @@
+import { safeStorage } from "./storage.service";
 import { Card, Reading, SpreadType } from '../models/card.model';
 
 /* ── Rider-Waite-Smith public domain images ──
@@ -838,7 +839,7 @@ export class TarotService {
 
     getSavedReadings(): Reading[] {
         try {
-            const saved = localStorage.getItem('tarot_readings');
+            const saved = safeStorage.getItem('tarot_readings');
             return saved ? JSON.parse(saved) : [];
         } catch (error) {
             console.error('Error loading saved readings:', error);
@@ -854,7 +855,7 @@ export class TarotService {
             if (saved.length > 50) {
                 saved.splice(50);
             }
-            localStorage.setItem('tarot_readings', JSON.stringify(saved));
+            safeStorage.setItem('tarot_readings', JSON.stringify(saved));
         } catch (error) {
             console.error('Error saving reading:', error);
         }

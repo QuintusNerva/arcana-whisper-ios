@@ -1,3 +1,4 @@
+import { safeStorage } from "./storage.service";
 /**
  * Astrology Service — Natal Chart, Numerology & Horoscope engine.
  * All calculations are deterministic and offline — no external APIs.
@@ -40,18 +41,18 @@ export interface BirthData {
 }
 
 export function saveBirthData(data: BirthData): void {
-    localStorage.setItem(BIRTH_KEY, JSON.stringify(data));
+    safeStorage.setItem(BIRTH_KEY, JSON.stringify(data));
 }
 
 export function getBirthData(): BirthData | null {
     try {
-        const raw = localStorage.getItem(BIRTH_KEY);
+        const raw = safeStorage.getItem(BIRTH_KEY);
         return raw ? JSON.parse(raw) : null;
     } catch { return null; }
 }
 
 export function clearBirthData(): void {
-    localStorage.removeItem(BIRTH_KEY);
+    safeStorage.removeItem(BIRTH_KEY);
 }
 
 // ── Sun Sign ──
