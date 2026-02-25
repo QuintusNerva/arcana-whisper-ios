@@ -678,6 +678,7 @@ function App() {
                                 { icon: '♈', label: 'Horoscope', tab: 'horoscope', bg: 'from-red-500/20 to-orange-500/15 border-red-500/25' },
                                 { icon: '🌙', label: 'Natal', tab: 'natal', bg: 'from-indigo-500/20 to-purple-500/15 border-indigo-500/25' },
                                 { icon: '🔢', label: 'Numbers', tab: 'numerology', bg: 'from-amber-600/20 to-yellow-500/15 border-amber-500/25' },
+                                { icon: '💞', label: 'Synastry', tab: 'compatibility', bg: 'from-rose-500/20 to-pink-500/15 border-rose-500/25' },
                             ].map(item => (
                                 <button
                                     key={item.tab}
