@@ -1,9 +1,6 @@
 import React from 'react';
 import { HomeIcon } from './HomeIcon';
-import { DrawIcon } from './DrawIcon';
 import { ProfileIcon } from './ProfileIcon';
-import { CosmicWeatherIcon } from './CosmicWeatherIcon';
-import { JournalIcon } from './JournalIcon';
 
 interface BottomNavProps {
     currentTab: string;
@@ -12,9 +9,6 @@ interface BottomNavProps {
 
 const TABS = [
     { id: 'home', label: 'Altar', icon: HomeIcon },
-    { id: 'new', label: 'Draw', icon: DrawIcon, promoted: true },
-    { id: 'cosmos', label: 'Cosmos', icon: CosmicWeatherIcon },
-    { id: 'journal', label: 'Journal', icon: JournalIcon },
     { id: 'profile', label: 'Self', icon: ProfileIcon },
 ];
 
@@ -34,7 +28,7 @@ export function BottomNav({ currentTab, onTabChange }: BottomNavProps) {
                 {TABS.map((tab) => {
                     const IconComponent = tab.icon;
                     const isActive = currentTab === tab.id;
-                    const size = tab.promoted ? 28 : 22;
+                    const size = 22;
 
                     return (
                         <button
