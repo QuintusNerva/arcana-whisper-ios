@@ -286,7 +286,7 @@ function App() {
         setShowCustomReading(false);
     };
 
-    const handleOnboardingComplete = (profile: { name: string; birthday: string; zodiac: string }) => {
+    const handleOnboardingComplete = (profile: { name: string; birthday: string; zodiac: string; birthTime?: string; birthCity?: string; latitude?: number; longitude?: number; utcOffset?: number }) => {
         const newProfile = { ...profile, subscription: 'free' };
         safeStorage.setItem('userProfile', JSON.stringify(newProfile));
         setUserProfile(newProfile);

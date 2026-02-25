@@ -1,8 +1,9 @@
 import React from 'react';
 import { saveBirthData, getSunSign } from '../services/astrology.service';
+import { searchCities, CityData } from '../data/cities';
 
 interface OnboardingProps {
-    onComplete: (profile: { name: string; birthday: string; zodiac: string }) => void;
+    onComplete: (profile: { name: string; birthday: string; zodiac: string; birthTime?: string; birthCity?: string; latitude?: number; longitude?: number; utcOffset?: number }) => void;
 }
 
 /* ── Eye of Providence / Third Eye SVG ── */
@@ -48,33 +49,62 @@ function EyeOfProvidence({ size = 80, className = '' }: { size?: number; classNa
     );
 }
 
-const STEPS = ['welcome', 'name', 'birthday', 'reveal'] as const;
+const STEPS = ['welcome', 'name', 'birthday', 'birthdetails', 'reveal'] as const;
 
 export function Onboarding({ onComplete }: OnboardingProps) {
     const [step, setStep] = React.useState<typeof STEPS[number]>('welcome');
     const [name, setName] = React.useState('');
     const [birthday, setBirthday] = React.useState('');
+    const [birthTime, setBirthTime] = React.useState('');
+    const [cityQuery, setCityQuery] = React.useState('');
+    const [selectedCity, setSelectedCity] = React.useState<CityData | null>(null);
+    const [cityResults, setCityResults] = React.useState<CityData[]>([]);
     const [revealReady, setRevealReady] = React.useState(false);
 
     const sunSign = birthday ? getSunSign(birthday) : null;
 
+    // City search
+    React.useEffect(() => {
+        if (cityQuery.length >= 2) {
+            setCityResults(searchCities(cityQuery, 6));
+        } else {
+            setCityResults([]);
+        }
+    }, [cityQuery]);
+
     const handleFinish = () => {
-        // Save birth data for astrology features
-        saveBirthData({ birthday });
+        // Save birth data with full coordinates for accurate rising sign
+        saveBirthData({
+            birthday,
+            birthTime: birthTime || undefined,
+            location: selectedCity?.name,
+            utcOffset: selectedCity?.utcOffset,
+            latitude: selectedCity?.lat,
+            longitude: selectedCity?.lng,
+        });
 
         // Build profile
-        const profile = {
+        const profile: any = {
             name: name.trim(),
             birthday,
             zodiac: sunSign?.name || '',
         };
+        if (birthTime) profile.birthTime = birthTime;
+        if (selectedCity) {
+            profile.birthCity = selectedCity.name;
+            profile.latitude = selectedCity.lat;
+            profile.longitude = selectedCity.lng;
+            profile.utcOffset = selectedCity.utcOffset;
+        }
         onComplete(profile);
     };
 
-    const handleBirthdayNext = () => {
+    const handleDetailsNext = () => {
         setStep('reveal');
         setTimeout(() => setRevealReady(true), 1200);
     };
+
+    const stepIndex = STEPS.indexOf(step);
 
     return (
         <div className="fixed inset-0 bg-gradient-to-b from-altar-deep via-altar-dark to-altar-purple text-altar-text flex flex-col items-center justify-center relative overflow-hidden px-6" style={{ height: '100dvh' }}>
@@ -162,17 +192,94 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                     )}
 
                     <button
-                        onClick={handleBirthdayNext}
+                        onClick={() => setStep('birthdetails')}
                         disabled={!birthday}
                         className={`w-full mt-5 py-3.5 rounded-xl font-display tracking-wide transition-all ${birthday
                             ? 'bg-altar-gold/15 text-altar-gold border border-altar-gold/25 hover:border-altar-gold/50'
                             : 'bg-white/5 text-white/25 border border-white/5 cursor-not-allowed'
                             }`}
                     >
-                        Reveal My Stars →
+                        Continue →
                     </button>
 
                     <button onClick={() => setStep('name')} className="mt-3 text-xs text-altar-muted/50 hover:text-altar-muted transition-colors">← Back</button>
+                </div>
+            )}
+
+            {/* ── Birth Time & City ── */}
+            {step === 'birthdetails' && (
+                <div className="text-center max-w-[380px] animate-fade-up w-full">
+                    <div className="text-4xl mb-4">🔮</div>
+                    <h2 className="font-display text-xl text-altar-gold tracking-[3px] mb-2">BIRTH DETAILS</h2>
+                    <p className="text-sm text-altar-muted mb-6">
+                        Your birth time and city unlock your <span className="text-altar-gold">Rising sign</span> — how the world sees you.
+                    </p>
+
+                    {/* Birth Time */}
+                    <div className="mb-4">
+                        <label className="text-xs text-altar-muted/60 font-display tracking-wider block mb-2">BIRTH TIME</label>
+                        <input
+                            type="time"
+                            value={birthTime}
+                            onChange={e => setBirthTime(e.target.value)}
+                            className="w-full bg-altar-deep/60 text-center text-lg text-altar-text rounded-xl px-4 py-3.5 border border-white/10 focus:border-altar-gold/30 focus:outline-none transition-colors"
+                        />
+                    </div>
+
+                    {/* Birth City */}
+                    <div className="mb-4 relative">
+                        <label className="text-xs text-altar-muted/60 font-display tracking-wider block mb-2">BIRTH CITY</label>
+                        <input
+                            type="text"
+                            value={selectedCity ? selectedCity.name : cityQuery}
+                            onChange={e => {
+                                setSelectedCity(null);
+                                setCityQuery(e.target.value);
+                            }}
+                            placeholder="Search your birth city..."
+                            className="w-full bg-altar-deep/60 text-center text-base text-altar-text placeholder-altar-muted/40 rounded-xl px-4 py-3.5 border border-white/10 focus:border-altar-gold/30 focus:outline-none transition-colors"
+                        />
+
+                        {/* City dropdown */}
+                        {cityResults.length > 0 && !selectedCity && (
+                            <div className="absolute left-0 right-0 top-full mt-1 bg-altar-deep/95 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden z-50 shadow-2xl max-h-52 overflow-y-auto">
+                                {cityResults.map(city => (
+                                    <button
+                                        key={city.name}
+                                        onClick={() => {
+                                            setSelectedCity(city);
+                                            setCityQuery('');
+                                            setCityResults([]);
+                                        }}
+                                        className="w-full text-left px-4 py-3 text-sm text-altar-text hover:bg-altar-gold/10 transition-colors border-b border-white/5 last:border-0"
+                                    >
+                                        <span className="text-altar-gold/80">📍</span> {city.name}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
+                        {selectedCity && (
+                            <div className="mt-2 flex items-center justify-center gap-2 animate-fade-up">
+                                <span className="text-altar-gold/60">📍</span>
+                                <span className="text-xs text-altar-gold">{selectedCity.name}</span>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Info about optional */}
+                    <p className="text-[10px] text-altar-muted/40 mb-4">
+                        These are optional but give you the most accurate natal chart.
+                    </p>
+
+                    <button
+                        onClick={handleDetailsNext}
+                        className="w-full py-3.5 rounded-xl font-display tracking-wide transition-all bg-altar-gold/15 text-altar-gold border border-altar-gold/25 hover:border-altar-gold/50"
+                    >
+                        Reveal My Stars →
+                    </button>
+
+                    <button onClick={() => setStep('birthday')} className="mt-3 text-xs text-altar-muted/50 hover:text-altar-muted transition-colors">← Back</button>
                 </div>
             )}
 
@@ -216,10 +323,10 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             {/* Step indicator */}
             {step !== 'welcome' && (
                 <div className="absolute bottom-8 flex gap-2">
-                    {['name', 'birthday', 'reveal'].map((s, i) => (
+                    {['name', 'birthday', 'birthdetails', 'reveal'].map((s) => (
                         <div
                             key={s}
-                            className={`h-1 rounded-full transition-all duration-500 ${step === s || STEPS.indexOf(step) > STEPS.indexOf(s as any)
+                            className={`h-1 rounded-full transition-all duration-500 ${step === s || stepIndex > STEPS.indexOf(s as any)
                                 ? 'w-6 bg-altar-gold/60'
                                 : 'w-2 bg-white/15'
                                 }`}
