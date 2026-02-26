@@ -1,6 +1,6 @@
 import React from 'react';
 import { saveBirthData, getSunSign } from '../services/astrology.service';
-import { searchCities, CityData } from '../data/cities';
+import { searchPlaces, resolvePlace, PlaceSuggestion } from '../services/geocoding.service';
 
 interface OnboardingProps {
     onComplete: (profile: { name: string; birthday: string; zodiac: string; birthTime?: string; birthCity?: string; latitude?: number; longitude?: number; utcOffset?: number }) => void;
@@ -57,20 +57,46 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     const [birthday, setBirthday] = React.useState('');
     const [birthTime, setBirthTime] = React.useState('');
     const [cityQuery, setCityQuery] = React.useState('');
-    const [selectedCity, setSelectedCity] = React.useState<CityData | null>(null);
-    const [cityResults, setCityResults] = React.useState<CityData[]>([]);
+    const [selectedCity, setSelectedCity] = React.useState<{ name: string; lat: number; lng: number; utcOffset: number } | null>(null);
+    const [cityResults, setCityResults] = React.useState<PlaceSuggestion[]>([]);
+    const [resolving, setResolving] = React.useState(false);
     const [revealReady, setRevealReady] = React.useState(false);
+    const searchTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const sunSign = birthday ? getSunSign(birthday) : null;
 
-    // City search
-    React.useEffect(() => {
-        if (cityQuery.length >= 2) {
-            setCityResults(searchCities(cityQuery, 6));
-        } else {
+    // City search — debounced async via Nominatim
+    const handleCitySearch = (query: string) => {
+        setCityQuery(query);
+        setSelectedCity(null);
+        if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+        if (query.length < 3) {
             setCityResults([]);
+            return;
         }
-    }, [cityQuery]);
+        searchTimeoutRef.current = setTimeout(async () => {
+            const results = await searchPlaces(query);
+            setCityResults(results);
+        }, 300);
+    };
+
+    const handleCitySelect = async (suggestion: PlaceSuggestion) => {
+        setResolving(true);
+        setCityResults([]);
+        setCityQuery(suggestion.description);
+        try {
+            const resolved = await resolvePlace(suggestion, birthday || '2000-01-01', birthTime || undefined);
+            if (resolved) {
+                setSelectedCity({
+                    name: suggestion.description,
+                    lat: resolved.latitude,
+                    lng: resolved.longitude,
+                    utcOffset: resolved.utcOffset,
+                });
+            }
+        } catch { /* ignore */ }
+        setResolving(false);
+    };
 
     const handleFinish = () => {
         // Save birth data with full coordinates for accurate rising sign
@@ -231,11 +257,8 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                         <label className="text-xs text-altar-muted/60 font-display tracking-wider block mb-2">BIRTH CITY</label>
                         <input
                             type="text"
-                            value={selectedCity ? selectedCity.name : cityQuery}
-                            onChange={e => {
-                                setSelectedCity(null);
-                                setCityQuery(e.target.value);
-                            }}
+                            value={cityQuery}
+                            onChange={e => handleCitySearch(e.target.value)}
                             placeholder="Search your birth city..."
                             className="w-full bg-altar-deep/60 text-center text-base text-altar-text placeholder-altar-muted/40 rounded-xl px-4 py-3.5 border border-white/10 focus:border-altar-gold/30 focus:outline-none transition-colors"
                         />
@@ -243,20 +266,20 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                         {/* City dropdown */}
                         {cityResults.length > 0 && !selectedCity && (
                             <div className="absolute left-0 right-0 top-full mt-1 bg-altar-deep/95 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden z-50 shadow-2xl max-h-52 overflow-y-auto">
-                                {cityResults.map(city => (
+                                {cityResults.map((city, i) => (
                                     <button
-                                        key={city.name}
-                                        onClick={() => {
-                                            setSelectedCity(city);
-                                            setCityQuery('');
-                                            setCityResults([]);
-                                        }}
+                                        key={city.placeId || i}
+                                        onClick={() => handleCitySelect(city)}
                                         className="w-full text-left px-4 py-3 text-sm text-altar-text hover:bg-altar-gold/10 transition-colors border-b border-white/5 last:border-0"
                                     >
-                                        <span className="text-altar-gold/80">📍</span> {city.name}
+                                        <span className="text-altar-gold/80">📍</span> {city.description}
                                     </button>
                                 ))}
                             </div>
+                        )}
+
+                        {resolving && (
+                            <p className="mt-2 text-xs text-altar-gold/60 animate-pulse">Resolving location…</p>
                         )}
 
                         {selectedCity && (
