@@ -23,6 +23,7 @@ import { TransitFeed } from './components/TransitFeed';
 import { JournalTab } from './components/JournalTab';
 import { YearAhead } from './components/YearAhead';
 import { FamilyCircle } from './components/FamilyCircle';
+import { CosmicInvite, parseInviteParams } from './components/CosmicInvite';
 import { JournalWidget } from './components/JournalWidget';
 import { canDoReading, incrementReadingCount, getRemainingReadings, AIService, dailyCache } from './services/ai.service';
 import { recordReading } from './services/memory.service';
@@ -253,6 +254,45 @@ function App() {
     const [showYearAhead, setShowYearAhead] = React.useState(false);
     const [showFamily, setShowFamily] = React.useState(false);
 
+    // ── Cosmic Card Invite detection ──
+    const [inviteData, setInviteData] = React.useState(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('invite') === '1') {
+            return parseInviteParams(window.location.search);
+        }
+        return null;
+    });
+
+    const handleInviteImport = () => {
+        if (!inviteData) return;
+        // Save as family member
+        const FAMILY_KEY = 'arcana_family_members';
+        let family = [];
+        try { family = JSON.parse(safeStorage.getItem(FAMILY_KEY) || '[]'); } catch { /* */ }
+        const newMember = {
+            id: Date.now().toString(),
+            name: inviteData.name,
+            relationship: 'other' as const,
+            birthday: inviteData.birthday,
+            birthTime: inviteData.birthTime || '',
+            location: inviteData.location || '',
+            latitude: inviteData.lat,
+            longitude: inviteData.lng,
+            utcOffset: inviteData.utcOffset || 0,
+        };
+        // Don't add duplicates
+        const exists = family.some((m: any) => m.name === newMember.name && m.birthday === newMember.birthday);
+        if (!exists) {
+            family.push(newMember);
+            safeStorage.setItem(FAMILY_KEY, JSON.stringify(family));
+        }
+        // Clear invite and clean URL
+        setInviteData(null);
+        window.history.replaceState({}, '', window.location.pathname);
+        // Navigate to Family tab
+        handleTabChange('family');
+    };
+
     const [userProfile, setUserProfile] = React.useState<any>(() => {
         try {
             const profile = safeStorage.getItem('userProfile');
@@ -355,6 +395,29 @@ function App() {
         };
         initializeApp();
     }, [loadCard, isInitialLoad, userProfile]);
+
+    // ── Invite landing page (shows even without onboarding) ──
+    if (inviteData) {
+        return (
+            <CosmicInvite
+                data={inviteData}
+                onImport={() => {
+                    if (!userProfile) {
+                        // Not onboarded yet — dismiss invite and start onboarding
+                        // After onboarding completes, they can still import from Family tab
+                        setInviteData(null);
+                        window.history.replaceState({}, '', window.location.pathname);
+                        return;
+                    }
+                    handleInviteImport();
+                }}
+                onDismiss={() => {
+                    setInviteData(null);
+                    window.history.replaceState({}, '', window.location.pathname);
+                }}
+            />
+        );
+    }
 
     // ── Onboarding gate ──
     if (!userProfile) {

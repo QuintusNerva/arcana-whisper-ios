@@ -17,6 +17,7 @@ import {
 import { AIService } from '../services/ai.service';
 import { searchPlaces, resolvePlace, PlaceSuggestion } from '../services/geocoding.service';
 import { AIResponseRenderer } from './AIResponseRenderer';
+import { generateShareURL } from './CosmicInvite';
 
 // ══════════════════════════════════════
 // TYPES
@@ -135,6 +136,7 @@ export function FamilyCircle({ onClose, onTabChange }: FamilyCircleProps) {
     const [readingContent, setReadingContent] = React.useState<string | null>(null);
     const [readingLoading, setReadingLoading] = React.useState(false);
     const [readingLabel, setReadingLabel] = React.useState('');
+    const [shareStatus, setShareStatus] = React.useState<'idle' | 'done'>('idle');
 
     // Editing
     const [editingId, setEditingId] = React.useState<string | null>(null);
@@ -429,7 +431,7 @@ export function FamilyCircle({ onClose, onTabChange }: FamilyCircleProps) {
 
                         {/* Add member button */}
                         {parentData && (
-                            <div className="mx-5 mt-6 mb-8 animate-fade-up" style={{ animationDelay: `${Math.min(family.length, 5) * 0.1 + 0.2}s`, opacity: 0 }}>
+                            <div className="mx-5 mt-6 animate-fade-up" style={{ animationDelay: `${Math.min(family.length, 5) * 0.1 + 0.2}s`, opacity: 0 }}>
                                 <button
                                     onClick={() => { resetForm(); setViewState('add'); }}
                                     className="w-full py-4 rounded-2xl font-display text-sm tracking-[3px] uppercase transition-all active:scale-[0.98] border"
@@ -441,6 +443,33 @@ export function FamilyCircle({ onClose, onTabChange }: FamilyCircleProps) {
                                 >
                                     + ADD FAMILY MEMBER
                                 </button>
+                            </div>
+                        )}
+
+                        {/* Share My Cosmic Card */}
+                        {parentData && (
+                            <div className="mx-5 mt-3 mb-8 animate-fade-up" style={{ animationDelay: `${Math.min(family.length, 5) * 0.1 + 0.35}s`, opacity: 0 }}>
+                                <button
+                                    onClick={async () => {
+                                        const baseUrl = window.location.origin;
+                                        const profile = JSON.parse(safeStorage.getItem('userProfile') || '{}');
+                                        const url = generateShareURL(profile.name || 'A Friend', parentData, baseUrl);
+                                        const shareText = `✨ ${profile.name || 'I'} shared their cosmic blueprint with you! Discover our cosmic bond ✨`;
+                                        if (navigator.share) {
+                                            try {
+                                                await navigator.share({ title: '✨ My Cosmic Card — Arcana Whisper', text: shareText, url });
+                                            } catch { /* cancelled */ }
+                                        } else {
+                                            await navigator.clipboard.writeText(`${shareText}\n${url}`);
+                                            setShareStatus('done');
+                                            setTimeout(() => setShareStatus('idle'), 2500);
+                                        }
+                                    }}
+                                    className="w-full py-3.5 rounded-2xl font-display text-xs tracking-[2px] uppercase transition-all active:scale-[0.98] bg-white/5 border border-white/10 text-altar-muted hover:text-altar-text hover:border-white/20"
+                                >
+                                    {shareStatus === 'done' ? '✅ LINK COPIED!' : '📤 SHARE MY COSMIC CARD'}
+                                </button>
+                                <p className="text-[10px] text-altar-muted/40 text-center mt-2">Invite family to see your stars — they can add you instantly</p>
                             </div>
                         )}
                     </>
