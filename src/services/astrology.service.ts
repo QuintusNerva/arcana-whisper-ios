@@ -573,3 +573,177 @@ export function getCoupleCompatibility(userBirthData: BirthData, partnerBirthday
         strengths, growthEdges: edges,
     };
 }
+
+// ══════════════════════════════════════
+// SYNASTRY — CROSS-CHART ASPECT ENGINE
+// ══════════════════════════════════════
+
+const SYNASTRY_ASPECT_DEFS = [
+    { name: 'Conjunction', symbol: '☌', angle: 0, orb: 8, nature: 'neutral' as const },
+    { name: 'Sextile', symbol: '⚹', angle: 60, orb: 4, nature: 'harmonious' as const },
+    { name: 'Square', symbol: '□', angle: 90, orb: 7, nature: 'challenging' as const },
+    { name: 'Trine', symbol: '△', angle: 120, orb: 7, nature: 'harmonious' as const },
+    { name: 'Opposition', symbol: '☍', angle: 180, orb: 8, nature: 'challenging' as const },
+];
+
+export type SynastryCategory = 'chemistry' | 'emotional' | 'friction' | 'growth' | 'karmic' | 'communication';
+
+export interface SynastryAspect {
+    planet1: PlanetPosition;       // Person A's planet
+    planet2: PlanetPosition;       // Person B's planet
+    person1Label: string;          // "You" or name
+    person2Label: string;          // Partner name
+    type: string;                  // Conjunction, Trine, etc.
+    symbol: string;
+    orb: number;
+    nature: 'harmonious' | 'challenging' | 'neutral';
+    category: SynastryCategory;
+    significance: number;          // 0-100, higher = more important
+}
+
+export interface SynastryReport {
+    userPlanets: PlanetPosition[];
+    partnerPlanets: PlanetPosition[];
+    aspects: SynastryAspect[];
+    chemistry: SynastryAspect[];
+    emotional: SynastryAspect[];
+    friction: SynastryAspect[];
+    growth: SynastryAspect[];
+    karmic: SynastryAspect[];
+    communication: SynastryAspect[];
+}
+
+// Planet significance weights for synastry (higher = more significant in relationships)
+const PLANET_WEIGHT: Record<string, number> = {
+    sun: 10, moon: 10, venus: 9, mars: 9,
+    mercury: 6, jupiter: 7, saturn: 8,
+    uranus: 5, neptune: 5, pluto: 7,
+};
+
+// Categorize a synastry aspect based on which planets are involved
+function categorizeSynastryAspect(p1Id: string, p2Id: string, nature: string): SynastryCategory {
+    const pair = new Set([p1Id, p2Id]);
+
+    // Chemistry: Venus-Mars, Venus-Pluto, Mars-Pluto, Venus-Venus, Mars-Mars
+    if ((pair.has('venus') && pair.has('mars')) ||
+        (pair.has('venus') && pair.has('pluto')) ||
+        (pair.has('mars') && pair.has('pluto')) ||
+        (p1Id === 'venus' && p2Id === 'venus') ||
+        (p1Id === 'mars' && p2Id === 'mars')) {
+        return 'chemistry';
+    }
+
+    // Emotional: Moon aspects, Sun-Moon, Moon-Venus, Moon-Neptune
+    if (pair.has('moon') && (pair.has('sun') || pair.has('venus') || pair.has('neptune') ||
+        p1Id === 'moon' && p2Id === 'moon')) {
+        return 'emotional';
+    }
+
+    // Friction: Saturn hard aspects, Pluto-Moon, Pluto-Sun, Saturn-Moon, Saturn-Sun
+    if (nature === 'challenging' && (pair.has('saturn') || pair.has('pluto'))) {
+        return 'friction';
+    }
+
+    // Growth: Jupiter aspects, Sun-Jupiter, Moon-Jupiter
+    if (pair.has('jupiter')) {
+        return 'growth';
+    }
+
+    // Karmic: Saturn conjunctions/trines, Pluto conjunctions, Neptune-Moon
+    if (pair.has('saturn') && nature !== 'challenging') {
+        return 'karmic';
+    }
+    if (pair.has('neptune') || pair.has('pluto')) {
+        return 'karmic';
+    }
+
+    // Communication: Mercury aspects, Sun-Mercury, Mercury-Moon
+    if (pair.has('mercury')) {
+        return 'communication';
+    }
+
+    // Default: if Moon is involved, emotional; Sun = growth; else communication
+    if (pair.has('moon')) return 'emotional';
+    if (pair.has('sun')) return 'growth';
+    return 'communication';
+}
+
+function norm360(deg: number): number {
+    deg = deg % 360;
+    return deg < 0 ? deg + 360 : deg;
+}
+
+/**
+ * Calculate cross-chart synastry aspects between two people's natal charts.
+ * Compares every planet of Person A against every planet of Person B.
+ */
+export function getSynastryChart(
+    userBirthData: BirthData,
+    partnerBirthData: BirthData,
+    userName?: string,
+    partnerName?: string,
+): SynastryReport {
+    const userChart = getFullChart(userBirthData);
+    const partnerChart = getFullChart(partnerBirthData);
+
+    if (!userChart || !partnerChart) {
+        return {
+            userPlanets: [], partnerPlanets: [],
+            aspects: [], chemistry: [], emotional: [],
+            friction: [], growth: [], karmic: [], communication: [],
+        };
+    }
+
+    const person1 = userName || 'You';
+    const person2 = partnerName || 'Partner';
+    const aspects: SynastryAspect[] = [];
+
+    // Compare every planet of Person A against every planet of Person B
+    for (const p1 of userChart.planets) {
+        for (const p2 of partnerChart.planets) {
+            let diff = Math.abs(p1.longitude - p2.longitude);
+            if (diff > 180) diff = 360 - diff;
+
+            for (const aspectDef of SYNASTRY_ASPECT_DEFS) {
+                const orb = Math.abs(diff - aspectDef.angle);
+                if (orb <= aspectDef.orb) {
+                    const category = categorizeSynastryAspect(p1.id, p2.id, aspectDef.nature);
+                    const w1 = PLANET_WEIGHT[p1.id] || 5;
+                    const w2 = PLANET_WEIGHT[p2.id] || 5;
+                    // Significance: weighted by planet importance and tightness of orb
+                    const orbFactor = 1 - (orb / aspectDef.orb); // 1 = exact, 0 = at limit
+                    const significance = Math.round(((w1 + w2) / 20) * 100 * orbFactor);
+
+                    aspects.push({
+                        planet1: p1,
+                        planet2: p2,
+                        person1Label: person1,
+                        person2Label: person2,
+                        type: aspectDef.name,
+                        symbol: aspectDef.symbol,
+                        orb: Math.round(orb * 10) / 10,
+                        nature: aspectDef.nature,
+                        category,
+                        significance,
+                    });
+                    break; // Only match closest aspect type
+                }
+            }
+        }
+    }
+
+    // Sort by significance (highest first)
+    aspects.sort((a, b) => b.significance - a.significance);
+
+    return {
+        userPlanets: userChart.planets,
+        partnerPlanets: partnerChart.planets,
+        aspects,
+        chemistry: aspects.filter(a => a.category === 'chemistry'),
+        emotional: aspects.filter(a => a.category === 'emotional'),
+        friction: aspects.filter(a => a.category === 'friction'),
+        growth: aspects.filter(a => a.category === 'growth'),
+        karmic: aspects.filter(a => a.category === 'karmic'),
+        communication: aspects.filter(a => a.category === 'communication'),
+    };
+}

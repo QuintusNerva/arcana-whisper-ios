@@ -353,6 +353,108 @@ Their compatibility score is ${score}/100 — "${tier}". Weave this naturally in
     }
 
     /**
+     * Get a relatable, scenario-based AI interpretation for a single synastry aspect.
+     * Returns 3-4 sentences describing what this aspect feels like in the relationship.
+     */
+    async getSynastryAspectReading(
+        planet1Name: string,
+        planet1Sign: string,
+        planet2Name: string,
+        planet2Sign: string,
+        aspectType: string,
+        aspectNature: string,
+        category: string,
+        person1Label: string,
+        person2Label: string,
+    ): Promise<string> {
+        const systemPrompt = `You are a relationship astrologer who explains synastry aspects in FELT EXPERIENCE, not jargon.
+
+YOUR RULES:
+- Speak directly: use "${person1Label}" and "${person2Label}" (or "you" and "they").
+- Describe what this aspect FEELS like in daily life. Use "you probably notice…" or "think about how…".
+- 3-4 sentences MAX. No headers, no bullets, no markdown. Flowing prose only.
+- End with one "the key is…" growth tip.
+- NEVER use words like "natal", "aspect", "orb", "transit" — speak in human terms.
+- Sound like a wise friend over coffee, not an astrology textbook.`;
+
+        const userPrompt = `Explain this synastry connection between ${person1Label} and ${person2Label}:
+
+${person1Label}'s ${planet1Name} in ${planet1Sign} forms a ${aspectType} with ${person2Label}'s ${planet2Name} in ${planet2Sign}.
+This is a ${aspectNature} connection in the "${category}" area of their relationship.
+
+Describe what this feels like in their actual relationship — concrete scenarios, not abstract astrology.`;
+
+        return this.chat(systemPrompt, userPrompt, 250);
+    }
+
+    /**
+     * Full synastry deep dive — comprehensive AI reading covering all aspects of the relationship.
+     * Uses premium model for depth and quality.
+     */
+    async getSynastryDeepDive(
+        aspects: Array<{
+            planet1Name: string; planet1Sign: string;
+            planet2Name: string; planet2Sign: string;
+            type: string; nature: string; category: string;
+            person1Label: string; person2Label: string;
+        }>,
+        userTriad: { sun: string; moon: string; rising: string },
+        partnerTriad: { sun: string; moon: string; rising: string },
+        partnerName: string,
+    ): Promise<string> {
+        const systemPrompt = `You are a gifted relationship astrologer sitting across from a couple, reading their synastry chart.
+
+YOUR VOICE:
+- Warm, knowing, direct. Like a wise friend who truly sees the relationship.
+- Use "you" and "${partnerName}" (or "they/them") throughout.
+- Explain every astrological concept in FELT EXPERIENCE — "you probably notice how…" "think about the last time…"
+- Sound like a therapist who happens to know astrology, not an astrologer pretending to be a therapist.
+
+STRUCTURE — Follow these sections using ** bold headers **:
+
+**🔥 Chemistry & Attraction** (80-120 words)
+What draws them together magnetically. Venus-Mars dynamics, what they find irresistible about each other.
+
+**🧲 Emotional Bond** (80-120 words)
+How they connect emotionally. Moon aspects, what comfort/safety looks like between them.
+
+**⚡ Friction Points** (80-120 words)
+Where they clash. Saturn/Pluto hard aspects. Be honest but compassionate — frame as growth, not doom.
+
+**🌱 Your Couple Superpower** (60-80 words)
+Name ONE unique strength that THIS specific combination has. Something no other couple has quite the same way.
+
+FORMATTING:
+- Short paragraphs (2-3 sentences max).
+- Bold the planet names and signs with **double asterisks**.
+- No bullet points, no numbered lists. Flowing prose only.
+- Keep total to 350-500 words.`;
+
+        const grouped: Record<string, string[]> = {};
+        for (const a of aspects.slice(0, 15)) {
+            const cat = a.category;
+            if (!grouped[cat]) grouped[cat] = [];
+            grouped[cat].push(`${a.person1Label}'s ${a.planet1Name} (${a.planet1Sign}) ${a.type} ${a.person2Label}'s ${a.planet2Name} (${a.planet2Sign}) — ${a.nature}`);
+        }
+
+        const aspectBlock = Object.entries(grouped).map(([cat, items]) =>
+            `${cat.toUpperCase()}:\n${items.join('\n')}`
+        ).join('\n\n');
+
+        const userPrompt = `Read this couple's synastry chart:
+
+PERSON A: Sun ${userTriad.sun}, Moon ${userTriad.moon}, Rising ${userTriad.rising}
+${partnerName.toUpperCase()}: Sun ${partnerTriad.sun}, Moon ${partnerTriad.moon}, Rising ${partnerTriad.rising}
+
+SYNASTRY ASPECTS:
+${aspectBlock}
+
+Write a flowing, personal deep dive. For every insight: describe what it FEELS like, ground it in a scenario, then give one growth tip.`;
+
+        return this.chatPremium(systemPrompt, userPrompt, 1500);
+    }
+
+    /**
      * Get an AI-powered transit interpretation — personalized to the user's chart.
      */
     async getTransitInterpretation(
