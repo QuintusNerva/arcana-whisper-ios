@@ -10,6 +10,7 @@ import { AIService } from '../services/ai.service';
 import { AIResponseRenderer } from './AIResponseRenderer';
 import { SynastryWheel } from './SynastryWheel';
 import { AspectCard, AspectListItem } from './AspectCard';
+import { searchPlaces, resolvePlace, PlaceSuggestion } from '../services/geocoding.service';
 
 interface CompatibilityProps {
     onClose: () => void;
@@ -136,6 +137,15 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
     const [partnerBirthday, setPartnerBirthday] = React.useState(savedPartner?.birthday || '');
     const [partnerBirthTime, setPartnerBirthTime] = React.useState(savedPartner?.birthTime || '');
     const [partnerBirthLocation, setPartnerBirthLocation] = React.useState(savedPartner?.location || '');
+    const [partnerLatitude, setPartnerLatitude] = React.useState<number | undefined>(savedPartner?.latitude);
+    const [partnerLongitude, setPartnerLongitude] = React.useState<number | undefined>(savedPartner?.longitude);
+    const [partnerUtcOffset, setPartnerUtcOffset] = React.useState<number>(savedPartner?.utcOffset ?? 0);
+    const [cityQuery, setCityQuery] = React.useState('');
+    const [citySuggestions, setCitySuggestions] = React.useState<PlaceSuggestion[]>([]);
+    const [showCitySuggestions, setShowCitySuggestions] = React.useState(false);
+    const [resolving, setResolving] = React.useState(false);
+    const cityDropdownRef = React.useRef<HTMLDivElement>(null);
+    const searchTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
     const [report, setReport] = React.useState<CoupleReport | null>(null);
     const [synastry, setSynastry] = React.useState<SynastryReport | null>(null);
     const [aiReading, setAiReading] = React.useState<string | null>(null);
@@ -144,6 +154,17 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
     const [deepDiveLoading, setDeepDiveLoading] = React.useState(false);
     const [activeTab, setActiveTab] = React.useState<SubTab>('overview');
     const [selectedAspect, setSelectedAspect] = React.useState<SynastryAspect | null>(null);
+
+    // Close city dropdown on outside click
+    React.useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (cityDropdownRef.current && !cityDropdownRef.current.contains(e.target as Node)) {
+                setShowCitySuggestions(false);
+            }
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
 
     // Auto-show results if partner data was saved
     React.useEffect(() => {
@@ -155,6 +176,9 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
                 birthday: savedPartner.birthday,
                 birthTime: savedPartner.birthTime,
                 location: savedPartner.location,
+                latitude: savedPartner.latitude,
+                longitude: savedPartner.longitude,
+                utcOffset: savedPartner.utcOffset,
             };
             const syn = getSynastryChart(birthData, partnerData, undefined, savedPartner.name || 'Partner');
             setSynastry(syn);
@@ -171,12 +195,18 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
             birthday: partnerBirthday,
             birthTime: partnerBirthTime || undefined,
             location: partnerBirthLocation.trim() || undefined,
+            latitude: partnerLatitude,
+            longitude: partnerLongitude,
+            utcOffset: partnerUtcOffset,
         }));
         // Calculate synastry chart
         const partnerData: BirthData = {
             birthday: partnerBirthday,
             birthTime: partnerBirthTime || undefined,
             location: partnerBirthLocation.trim() || undefined,
+            latitude: partnerLatitude,
+            longitude: partnerLongitude,
+            utcOffset: partnerUtcOffset,
         };
         const syn = getSynastryChart(birthData, partnerData, undefined, partnerName.trim() || 'Partner');
         setSynastry(syn);
@@ -332,13 +362,61 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
                                 <label className="block font-display text-xs text-altar-muted tracking-[2px] uppercase mb-3">
                                     Place of Birth <span className="text-altar-muted/40">(optional — improves accuracy)</span>
                                 </label>
-                                <input
-                                    type="text"
-                                    value={partnerBirthLocation}
-                                    onChange={(e) => setPartnerBirthLocation(e.target.value)}
-                                    placeholder="City, State or Country…"
-                                    className="w-full bg-transparent text-altar-text placeholder-altar-muted/50 text-sm focus:outline-none border-b border-altar-gold/20 focus:border-altar-gold/50 transition-colors pb-3 [color-scheme:dark]"
-                                />
+                                <div className="relative" ref={cityDropdownRef}>
+                                    <input
+                                        type="text"
+                                        value={cityQuery || partnerBirthLocation}
+                                        onChange={(e) => {
+                                            const q = e.target.value;
+                                            setCityQuery(q);
+                                            setPartnerBirthLocation(q);
+                                            setPartnerLatitude(undefined);
+                                            setPartnerLongitude(undefined);
+                                            if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+                                            if (q.length < 2) { setCitySuggestions([]); setShowCitySuggestions(false); return; }
+                                            searchTimeoutRef.current = setTimeout(async () => {
+                                                const results = await searchPlaces(q);
+                                                setCitySuggestions(results);
+                                                setShowCitySuggestions(results.length > 0);
+                                            }, 300);
+                                        }}
+                                        onFocus={() => { if (citySuggestions.length > 0) setShowCitySuggestions(true); }}
+                                        placeholder="Search any city worldwide…"
+                                        className="w-full bg-transparent text-altar-text placeholder-altar-muted/50 text-sm focus:outline-none border-b border-altar-gold/20 focus:border-altar-gold/50 transition-colors pb-3 [color-scheme:dark]"
+                                    />
+                                    {showCitySuggestions && (
+                                        <div className="absolute top-full left-0 right-0 mt-1 bg-altar-dark/95 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden z-30 max-h-48 overflow-y-auto shadow-2xl">
+                                            {citySuggestions.map((place) => (
+                                                <button
+                                                    key={place.placeId}
+                                                    onClick={async () => {
+                                                        setShowCitySuggestions(false);
+                                                        setCityQuery(place.description);
+                                                        setPartnerBirthLocation(place.description);
+                                                        setResolving(true);
+                                                        const resolved = await resolvePlace(place, partnerBirthday, partnerBirthTime || undefined);
+                                                        setResolving(false);
+                                                        if (resolved) {
+                                                            setPartnerLatitude(resolved.latitude);
+                                                            setPartnerLongitude(resolved.longitude);
+                                                            setPartnerUtcOffset(resolved.utcOffset);
+                                                        }
+                                                    }}
+                                                    className="w-full text-left px-3 py-2.5 text-xs text-altar-text hover:bg-altar-gold/10 transition-colors border-b border-white/5 last:border-0"
+                                                >
+                                                    <span className="font-medium">{place.mainText}</span>
+                                                    {place.secondaryText && <span className="text-altar-muted ml-1">{place.secondaryText}</span>}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                                {resolving && (
+                                    <p className="text-[10px] text-altar-gold/60 mt-1 animate-pulse">✦ Resolving coordinates & timezone...</p>
+                                )}
+                                {!resolving && partnerLatitude !== undefined && (
+                                    <p className="text-[10px] text-green-400/60 mt-1">✓ {partnerLatitude.toFixed(2)}°{partnerLatitude >= 0 ? 'N' : 'S'} {Math.abs(partnerLongitude!).toFixed(2)}°{partnerLongitude! >= 0 ? 'E' : 'W'} · UTC{partnerUtcOffset >= 0 ? '+' : ''}{partnerUtcOffset}</p>
+                                )}
                             </div>
 
                             {/* Partner sign preview */}
@@ -620,6 +698,11 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
                                     setPartnerBirthday('');
                                     setPartnerBirthTime('');
                                     setPartnerBirthLocation('');
+                                    setPartnerLatitude(undefined);
+                                    setPartnerLongitude(undefined);
+                                    setPartnerUtcOffset(0);
+                                    setCityQuery('');
+                                    setCitySuggestions([]);
                                     setActiveTab('overview');
                                     safeStorage.removeItem('arcana_partner');
                                 }}
