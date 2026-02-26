@@ -22,6 +22,7 @@ import { Onboarding } from './components/Onboarding';
 import { TransitFeed } from './components/TransitFeed';
 import { JournalTab } from './components/JournalTab';
 import { YearAhead } from './components/YearAhead';
+import { FamilyCircle } from './components/FamilyCircle';
 import { JournalWidget } from './components/JournalWidget';
 import { canDoReading, incrementReadingCount, getRemainingReadings, AIService, dailyCache } from './services/ai.service';
 import { recordReading } from './services/memory.service';
@@ -250,6 +251,7 @@ function App() {
     const [showTransitFeed, setShowTransitFeed] = React.useState(false);
     const [showJournal, setShowJournal] = React.useState(false);
     const [showYearAhead, setShowYearAhead] = React.useState(false);
+    const [showFamily, setShowFamily] = React.useState(false);
 
     const [userProfile, setUserProfile] = React.useState<any>(() => {
         try {
@@ -311,6 +313,7 @@ function App() {
         setShowTransitFeed(false);
         setShowJournal(false);
         setShowYearAhead(false);
+        setShowFamily(false);
 
         setCurrentTab(tab);
         if (tab === 'new') {
@@ -330,6 +333,7 @@ function App() {
         else if (tab === 'cosmos') setShowTransitFeed(true);
         else if (tab === 'journal') setShowJournal(true);
         else if (tab === 'yearahead') setShowYearAhead(true);
+        else if (tab === 'family') setShowFamily(true);
     };
 
     React.useEffect(() => {
@@ -454,6 +458,15 @@ function App() {
         return (
             <TransitFeed
                 onClose={() => { setShowTransitFeed(false); setCurrentTab('home'); }}
+                onTabChange={handleTabChange}
+            />
+        );
+    }
+
+    if (showFamily) {
+        return (
+            <FamilyCircle
+                onClose={() => { setShowFamily(false); setCurrentTab('home'); }}
                 onTabChange={handleTabChange}
             />
         );
@@ -694,6 +707,7 @@ function App() {
                                 { icon: '🌙', label: 'Natal', tab: 'natal', bg: 'from-indigo-500/20 to-purple-500/15 border-indigo-500/25' },
                                 { icon: '🔢', label: 'Numbers', tab: 'numerology', bg: 'from-amber-600/20 to-yellow-500/15 border-amber-500/25' },
                                 { icon: '🌟', label: 'Year Ahead', tab: 'yearahead', bg: 'from-yellow-500/20 to-amber-500/15 border-yellow-500/25' },
+                                { icon: '👨‍👩‍👧‍👦', label: 'Family', tab: 'family', bg: 'from-pink-500/20 to-rose-500/15 border-pink-500/25' },
                             ].map(item => (
                                 <button
                                     key={item.tab}

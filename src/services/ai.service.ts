@@ -544,6 +544,109 @@ FORMAT:
     }
 
     /**
+     * Family Reading — parent↔child synastry with age-aware interpretations.
+     */
+    async getFamilyReading(data: {
+        parentTriad: { sun: string; moon: string; rising: string };
+        childName: string;
+        childTriad: { sun: string; moon: string; rising: string };
+        childAge: number;
+        childAgeLabel: string;
+        relationship: string;
+        synastryHighlights: Array<{ planet1: string; planet2: string; aspect: string; nature: string; category: string }>;
+    }): Promise<string> {
+        const systemPrompt = `You are a deeply empathetic, wise astrologer who specializes in family dynamics and conscious parenting through astrology. Your tone is warm, validating, and practical — like a trusted mentor who helps parents UNDERSTAND their children through the stars.
+
+You MUST format your response with these ## headers:
+
+## ☉ Who ${data.childName} Is
+2-3 paragraphs about the child's Sun/Moon/Rising and what it means for their personality at their CURRENT AGE (${data.childAge} years old, ${data.childAgeLabel}). Be specific to how these placements manifest at this developmental stage.
+
+## 💫 Your Cosmic Bond
+The parent-child synastry — 3-4 key aspects explained through real parenting moments. Frame each one with a specific situation example:
+"When they do [behavior], that's [aspect] in action."
+
+## ⚡ The Growth Edges
+2-3 friction points from the synastry — framed NOT as problems but as growth opportunities. Help the parent understand WHY certain conflicts happen and give them compassion for both sides.
+
+## 🌱 Parenting Through the Stars
+3-4 concrete, actionable parenting tips specifically tailored to this unique parent-child combination. What works best for THIS child given THEIR chart and YOUR chart together.
+
+Rules:
+- Bold all astrological terms (**Scorpio Moon**, **Square**, etc.)
+- Frame everything through the lens of a ${data.childAgeLabel} (age ${data.childAge})
+- Never be judgmental — validate the parent's experience
+- Give specific behavioral examples, not abstract astrology
+- Total length: 600-900 words
+- Do NOT use code blocks, links, or images${TEACHING_FORMAT}`;
+
+        const aspectSummary = data.synastryHighlights
+            .map(a => `Your ${a.planet1} ${a.aspect} their ${a.planet2} (${a.nature}, ${a.category})`)
+            .join('\n');
+
+        const userPrompt = `Generate a parent↔child reading.
+
+PARENT: Sun in ${data.parentTriad.sun}, Moon in ${data.parentTriad.moon}, Rising in ${data.parentTriad.rising}
+CHILD (${data.childName}): Sun in ${data.childTriad.sun}, Moon in ${data.childTriad.moon}, Rising in ${data.childTriad.rising}
+RELATIONSHIP: ${data.relationship}
+AGE: ${data.childAge} years old (${data.childAgeLabel})
+
+KEY SYNASTRY ASPECTS:
+${aspectSummary || 'Basic compatibility only — no exact aspects detected.'}`;
+
+        return this.chatPremium(systemPrompt, userPrompt, 2500);
+    }
+
+    /**
+     * Sibling Reading — child↔child dynamics.
+     */
+    async getSiblingReading(data: {
+        child1Name: string;
+        child1Triad: { sun: string; moon: string; rising: string };
+        child1Age: number;
+        child2Name: string;
+        child2Triad: { sun: string; moon: string; rising: string };
+        child2Age: number;
+        synastryHighlights: Array<{ planet1: string; planet2: string; aspect: string; nature: string }>;
+    }): Promise<string> {
+        const systemPrompt = `You are a wise, warm astrologer specializing in sibling dynamics. You help parents understand why their children interact the way they do through the lens of astrological synastry.
+
+You MUST format your response with these ## headers:
+
+## 👫 Their Bond at a Glance
+1-2 paragraphs summarizing the overall sibling dynamic. Are they natural allies, competitive rivals, or complementary opposites?
+
+## ✨ Where They Click
+2-3 harmonious aspects explained through real sibling moments. "This is why they can play together for hours doing [specific activity]."
+
+## ⚡ Where They Clash
+2-3 friction points explained with compassion. "The arguing about [specific thing] is really [aspect] in action."
+
+## 🌱 Helping Them Thrive Together
+3-4 actionable tips for parents to nurture this specific sibling relationship.
+
+Rules:
+- Bold all astrological terms
+- Use age-appropriate examples (ages ${data.child1Age} and ${data.child2Age})
+- Be warm and practical
+- Total length: 500-700 words${TEACHING_FORMAT}`;
+
+        const aspectSummary = data.synastryHighlights
+            .map(a => `${data.child1Name}'s ${a.planet1} ${a.aspect} ${data.child2Name}'s ${a.planet2} (${a.nature})`)
+            .join('\n');
+
+        const userPrompt = `Generate a sibling dynamics reading.
+
+${data.child1Name} (age ${data.child1Age}): Sun in ${data.child1Triad.sun}, Moon in ${data.child1Triad.moon}, Rising in ${data.child1Triad.rising}
+${data.child2Name} (age ${data.child2Age}): Sun in ${data.child2Triad.sun}, Moon in ${data.child2Triad.moon}, Rising in ${data.child2Triad.rising}
+
+KEY SYNASTRY ASPECTS:
+${aspectSummary || 'Basic compatibility only — no exact aspects detected.'}`;
+
+        return this.chatPremium(systemPrompt, userPrompt, 2000);
+    }
+
+    /**
      * Year Ahead Report — comprehensive yearly forecast using transits, eclipses, and numerology.
      */
     async getYearAheadReading(report: {
