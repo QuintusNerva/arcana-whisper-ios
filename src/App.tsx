@@ -21,6 +21,7 @@ import { Compatibility } from './components/Compatibility';
 import { Onboarding } from './components/Onboarding';
 import { TransitFeed } from './components/TransitFeed';
 import { JournalTab } from './components/JournalTab';
+import { YearAhead } from './components/YearAhead';
 import { JournalWidget } from './components/JournalWidget';
 import { canDoReading, incrementReadingCount, getRemainingReadings, AIService, dailyCache } from './services/ai.service';
 import { recordReading } from './services/memory.service';
@@ -248,6 +249,7 @@ function App() {
     const [showCompatibility, setShowCompatibility] = React.useState(false);
     const [showTransitFeed, setShowTransitFeed] = React.useState(false);
     const [showJournal, setShowJournal] = React.useState(false);
+    const [showYearAhead, setShowYearAhead] = React.useState(false);
 
     const [userProfile, setUserProfile] = React.useState<any>(() => {
         try {
@@ -308,6 +310,7 @@ function App() {
         setShowCompatibility(false);
         setShowTransitFeed(false);
         setShowJournal(false);
+        setShowYearAhead(false);
 
         setCurrentTab(tab);
         if (tab === 'new') {
@@ -326,6 +329,7 @@ function App() {
         else if (tab === 'compatibility') setShowCompatibility(true);
         else if (tab === 'cosmos') setShowTransitFeed(true);
         else if (tab === 'journal') setShowJournal(true);
+        else if (tab === 'yearahead') setShowYearAhead(true);
     };
 
     React.useEffect(() => {
@@ -450,6 +454,15 @@ function App() {
         return (
             <TransitFeed
                 onClose={() => { setShowTransitFeed(false); setCurrentTab('home'); }}
+                onTabChange={handleTabChange}
+            />
+        );
+    }
+
+    if (showYearAhead) {
+        return (
+            <YearAhead
+                onClose={() => { setShowYearAhead(false); setCurrentTab('home'); }}
                 onTabChange={handleTabChange}
             />
         );
@@ -680,6 +693,7 @@ function App() {
                                 { icon: '♈', label: 'Horoscope', tab: 'horoscope', bg: 'from-red-500/20 to-orange-500/15 border-red-500/25' },
                                 { icon: '🌙', label: 'Natal', tab: 'natal', bg: 'from-indigo-500/20 to-purple-500/15 border-indigo-500/25' },
                                 { icon: '🔢', label: 'Numbers', tab: 'numerology', bg: 'from-amber-600/20 to-yellow-500/15 border-amber-500/25' },
+                                { icon: '🌟', label: 'Year Ahead', tab: 'yearahead', bg: 'from-yellow-500/20 to-amber-500/15 border-yellow-500/25' },
                             ].map(item => (
                                 <button
                                     key={item.tab}

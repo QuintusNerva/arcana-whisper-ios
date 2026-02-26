@@ -543,6 +543,99 @@ FORMAT:
         return this.chat(systemPrompt, userPrompt, 300);
     }
 
+    /**
+     * Year Ahead Report — comprehensive yearly forecast using transits, eclipses, and numerology.
+     */
+    async getYearAheadReading(report: {
+        solarYear: { start: string; end: string; startFormatted: string };
+        personalYear: number;
+        lifePathNumber: number;
+        majorTransits: Array<{ transitPlanet: string; natalPlanet: string; aspectName: string; nature: string; peakMonth: string; transitSign: string; significance: string }>;
+        eclipses: Array<{ type: string; kind: string; formattedDate: string; signId: string; natalAspects: Array<{ planet: string; aspect: string }> }>;
+        months: Array<{ month: string; year: number; dominantTransits: Array<{ transit: string; natal: string; aspect: string; nature: string }>; eclipseThisMonth: boolean }>;
+        keyDates: Array<{ formattedDate: string; description: string; nature: string }>;
+        year: number;
+    }, triad?: { sun?: string; moon?: string; rising?: string }): Promise<string> {
+        const systemPrompt = `You are a master astrologer writing a deeply personal Year Ahead report. Your style is warm, insightful, and empowering — like a wise mentor revealing the cosmic roadmap for someone's most important year.
+
+You MUST format your response using these exact sections with ## headers:
+
+## 🌟 Your Year Theme
+2-3 paragraphs synthesizing the major transits and Personal Year number into a cohesive narrative about what this year is ABOUT for them. Make them feel seen.
+
+## ⚡ Major Cosmic Shifts
+For each major transit, write 2-3 sentences about what it means personally. Use their natal planet placements for specificity. Bold the transit names.
+
+## 🌑 Eclipse Activations
+What the eclipses stir up in their chart. 1-2 paragraphs. If eclipses aspect natal planets, explain what gets activated.
+
+## 📅 Month-by-Month Guidance
+For EACH month, write 2-3 sentences with the dominant energy and practical advice. Format as:
+**January**: [guidance]
+**February**: [guidance]
+...and so on for all 12 months.
+
+## ⭐ Key Dates to Watch
+List the most important dates with one-line guidance for each.
+
+## 🔮 Year Closing Wisdom
+1 paragraph of empowering closing advice for navigating this entire year.
+
+Rules:
+- Bold all astrological terms (**Saturn**, **Square**, **Pisces Moon**)
+- Be specific to THEIR chart, not generic zodiac horoscopes
+- Keep each section focused and impactful
+- Total length: 1200-1800 words
+- Do NOT use code blocks, links, or images`;
+
+        const transitSummary = report.majorTransits
+            .filter(t => t.significance !== 'minor')
+            .map(t => `${t.transitPlanet} ${t.aspectName} natal ${t.natalPlanet} (in ${t.transitSign}, peak ~${t.peakMonth}, ${t.nature})`)
+            .join('\n');
+
+        const eclipseSummary = report.eclipses
+            .map(e => `${e.type} eclipse (${e.kind}) on ${e.formattedDate} in ${e.signId}${e.natalAspects.length > 0 ? ` — aspects: ${e.natalAspects.map(a => `${a.aspect} ${a.planet}`).join(', ')}` : ''}`)
+            .join('\n');
+
+        const monthlySummary = report.months
+            .map(m => `${m.month} ${m.year}: ${m.dominantTransits.map(t => `${t.transit} ${t.aspect} ${t.natal} (${t.nature})`).join('; ')}${m.eclipseThisMonth ? ' [ECLIPSE MONTH]' : ''}`)
+            .join('\n');
+
+        const keyDatesSummary = report.keyDates
+            .map(kd => `${kd.formattedDate}: ${kd.description} (${kd.nature})`)
+            .join('\n');
+
+        let userPrompt = `Generate a Year Ahead Report for ${report.year}.
+
+SOLAR YEAR: ${report.solarYear.startFormatted} to end
+PERSONAL YEAR: ${report.personalYear} (Numerology)
+LIFE PATH: ${report.lifePathNumber}
+
+MAJOR TRANSITS:
+${transitSummary || 'No major outer planet transits detected.'}
+
+ECLIPSES:
+${eclipseSummary || 'No significant eclipses aspecting natal chart.'}
+
+MONTH-BY-MONTH TRANSITS:
+${monthlySummary}
+
+KEY DATES:
+${keyDatesSummary || 'No exact transit hits detected.'}`;
+
+        if (triad) {
+            const parts = [];
+            if (triad.sun) parts.push(`Sun in ${triad.sun}`);
+            if (triad.moon) parts.push(`Moon in ${triad.moon}`);
+            if (triad.rising) parts.push(`Rising in ${triad.rising}`);
+            if (parts.length > 0) {
+                userPrompt += `\n\nNATAL CHART: ${parts.join(', ')}.`;
+            }
+        }
+
+        return this.chatPremium(systemPrompt, userPrompt, 4000);
+    }
+
     async chat(systemPrompt: string, userPrompt: string, maxTokens = 600): Promise<string> {
         if (!this.apiKey) {
             throw new Error('No API key configured. Add your OpenRouter key in Settings.');
