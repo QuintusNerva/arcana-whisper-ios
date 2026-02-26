@@ -492,7 +492,7 @@ export function FamilyCircle({ onClose, onTabChange }: FamilyCircleProps) {
                         </div>
 
                         {/* Place of Birth */}
-                        <div className="glass-strong rounded-2xl p-4" ref={cityDropdownRef}>
+                        <div className="glass-strong rounded-2xl p-4 relative" ref={cityDropdownRef}>
                             <label className="text-[9px] font-display text-altar-muted tracking-[2px] uppercase mb-1 block">Place of Birth <span className="text-altar-muted/50">(optional)</span></label>
                             <div className="relative">
                                 <input
@@ -505,24 +505,26 @@ export function FamilyCircle({ onClose, onTabChange }: FamilyCircleProps) {
                                 {resolving && (
                                     <span className="absolute right-3 top-3 text-xs text-altar-gold animate-pulse">…</span>
                                 )}
-                                {showCitySuggestions && citySuggestions.length > 0 && (
-                                    <div className="absolute z-50 w-full mt-1 glass-strong rounded-xl border border-white/10 max-h-40 overflow-y-auto">
-                                        {citySuggestions.map((s, i) => (
-                                            <button
-                                                key={i}
-                                                onClick={() => handleCitySelect(s)}
-                                                className="w-full px-4 py-2.5 text-left text-xs text-altar-text/80 hover:bg-white/5 border-b border-white/5 last:border-0"
-                                            >
-                                                {s.description}
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
                             </div>
                             {formLocation && !resolving && (
                                 <p className="text-[10px] text-emerald-400/60 mt-2">✓ {formLocation}</p>
                             )}
                         </div>
+
+                        {/* City suggestions — rendered OUTSIDE the glass card so it doesn't overlap the save button */}
+                        {showCitySuggestions && citySuggestions.length > 0 && (
+                            <div className="glass-strong rounded-xl border border-white/10 max-h-48 overflow-y-auto -mt-2">
+                                {citySuggestions.map((s, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => handleCitySelect(s)}
+                                        className="w-full px-4 py-3 text-left text-xs text-altar-text/80 hover:bg-white/5 border-b border-white/5 last:border-0"
+                                    >
+                                        📍 {s.description}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
 
                         {/* Save button */}
                         <button
