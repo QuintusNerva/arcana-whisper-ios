@@ -17,6 +17,7 @@ import { generateYearAheadReport, YearAheadReport, isBirthdayToday } from '../se
 import { getBirthData, getNatalTriad } from '../services/astrology.service';
 import { AIService } from '../services/ai.service';
 import { safeStorage } from '../services/storage.service';
+import { scheduleYearAheadNotifications, scheduleBirthdayNotification } from '../services/cosmic-notifications.service';
 
 interface YearAheadProps {
     onClose: () => void;
@@ -40,6 +41,7 @@ export function YearAhead({ onClose, onTabChange }: YearAheadProps) {
     const [error, setError] = React.useState<string>('');
     const [loadingStep, setLoadingStep] = React.useState('');
     const [isBirthday, setIsBirthday] = React.useState(false);
+    const [scheduledCount, setScheduledCount] = React.useState(0);
     const contentRef = React.useRef<HTMLDivElement>(null);
 
     const currentYear = new Date().getFullYear();
@@ -108,6 +110,17 @@ export function YearAhead({ onClose, onTabChange }: YearAheadProps) {
 
             // Cache the result
             safeStorage.setItem(cacheKey, JSON.stringify({ report, reading }));
+
+            // Schedule notifications for key dates, eclipses, monthly
+            try {
+                const count = await scheduleYearAheadNotifications(report);
+                setScheduledCount(count);
+                // Also schedule birthday notification
+                const birthData = getBirthData();
+                if (birthData) {
+                    await scheduleBirthdayNotification(birthData.birthday, currentYear + 1);
+                }
+            } catch { /* notifications are optional */ }
         } catch (err: any) {
             setError(err.message || 'Failed to generate reading. Please try again.');
             setViewState('error');
@@ -230,7 +243,7 @@ export function YearAhead({ onClose, onTabChange }: YearAheadProps) {
                                     {report.majorTransits.filter(t => t.significance !== 'minor').slice(0, 5).map((t, i) => (
                                         <div key={i} className="flex items-center gap-3">
                                             <span className={`w-2 h-2 rounded-full flex-shrink-0 ${t.nature === 'harmonious' ? 'bg-emerald-400/60' :
-                                                    t.nature === 'challenging' ? 'bg-red-400/60' : 'bg-amber-400/60'
+                                                t.nature === 'challenging' ? 'bg-red-400/60' : 'bg-amber-400/60'
                                                 }`} />
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-xs text-altar-text truncate">
@@ -281,7 +294,7 @@ export function YearAhead({ onClose, onTabChange }: YearAheadProps) {
                                     {report.keyDates.slice(0, 5).map((kd, i) => (
                                         <div key={i} className="flex gap-3">
                                             <span className={`w-1.5 h-1.5 mt-1.5 rounded-full flex-shrink-0 ${kd.nature === 'harmonious' ? 'bg-emerald-400/60' :
-                                                    kd.nature === 'challenging' ? 'bg-red-400/60' : 'bg-amber-400/60'
+                                                kd.nature === 'challenging' ? 'bg-red-400/60' : 'bg-amber-400/60'
                                                 }`} />
                                             <div>
                                                 <p className="text-[10px] text-altar-gold font-display">{kd.formattedDate}</p>
@@ -369,7 +382,7 @@ export function YearAhead({ onClose, onTabChange }: YearAheadProps) {
                                     {report.keyDates.map((kd, i) => (
                                         <div key={i} className="flex gap-3">
                                             <span className={`w-1.5 h-1.5 mt-1.5 rounded-full flex-shrink-0 ${kd.nature === 'harmonious' ? 'bg-emerald-400/60' :
-                                                    kd.nature === 'challenging' ? 'bg-red-400/60' : 'bg-amber-400/60'
+                                                kd.nature === 'challenging' ? 'bg-red-400/60' : 'bg-amber-400/60'
                                                 }`} />
                                             <div>
                                                 <p className="text-[10px] text-altar-gold font-display">{kd.formattedDate}</p>
@@ -386,11 +399,17 @@ export function YearAhead({ onClose, onTabChange }: YearAheadProps) {
                             <p className="text-[10px] text-altar-muted mb-3">
                                 Generated {new Date(report.generatedAt).toLocaleDateString()} · Solar Year from {report.solarYear.startFormatted}
                             </p>
+                            {scheduledCount > 0 && (
+                                <p className="text-[10px] text-emerald-400/70 mb-3">
+                                    🔔 {scheduledCount} cosmic notifications scheduled
+                                </p>
+                            )}
                             <button
-                                onClick={() => {
+                                onClick={async () => {
                                     safeStorage.removeItem(cacheKey);
                                     setViewState('preview');
                                     setAiReading('');
+                                    setScheduledCount(0);
                                 }}
                                 className="text-xs text-altar-muted/50 hover:text-altar-muted underline transition-colors"
                             >
@@ -426,7 +445,7 @@ function TransitDetails({ transits }: { transits: YearAheadReport['majorTransits
                         <div key={i} className="border-b border-white/5 pb-3 last:border-0 last:pb-0">
                             <div className="flex items-center gap-2 mb-1">
                                 <span className={`w-2 h-2 rounded-full ${t.nature === 'harmonious' ? 'bg-emerald-400/60' :
-                                        t.nature === 'challenging' ? 'bg-red-400/60' : 'bg-amber-400/60'
+                                    t.nature === 'challenging' ? 'bg-red-400/60' : 'bg-amber-400/60'
                                     }`} />
                                 <p className="text-sm text-altar-text">
                                     {t.transitPlanet} {t.transitGlyph}
