@@ -553,6 +553,8 @@ FORMAT:
         childAge: number;
         childAgeLabel: string;
         relationship: string;
+        parentLifePath?: number;
+        childLifePath?: number;
         synastryHighlights: Array<{ planet1: string; planet2: string; aspect: string; nature: string; category: string }>;
     }): Promise<string> {
         const systemPrompt = `You are a deeply empathetic, wise astrologer who specializes in family dynamics and conscious parenting through astrology. Your tone is warm, validating, and practical — like a trusted mentor who helps parents UNDERSTAND their children through the stars.
@@ -572,12 +574,15 @@ The parent-child synastry — 3-4 key aspects explained through real parenting m
 ## 🌱 Parenting Through the Stars
 3-4 concrete, actionable parenting tips specifically tailored to this unique parent-child combination. What works best for THIS child given THEIR chart and YOUR chart together.
 
+## 🔢 Your Numbers Together
+1-2 paragraphs on how their Life Path numbers interact as parent and child. What does the parent's number teach the child? What does the child's number teach the parent?
+
 Rules:
 - Bold all astrological terms (**Scorpio Moon**, **Square**, etc.)
 - Frame everything through the lens of a ${data.childAgeLabel} (age ${data.childAge})
 - Never be judgmental — validate the parent's experience
 - Give specific behavioral examples, not abstract astrology
-- Total length: 600-900 words
+- Total length: 700-1000 words
 - Do NOT use code blocks, links, or images${TEACHING_FORMAT}`;
 
         const aspectSummary = data.synastryHighlights
@@ -586,8 +591,8 @@ Rules:
 
         const userPrompt = `Generate a parent↔child reading.
 
-PARENT: Sun in ${data.parentTriad.sun}, Moon in ${data.parentTriad.moon}, Rising in ${data.parentTriad.rising}
-CHILD (${data.childName}): Sun in ${data.childTriad.sun}, Moon in ${data.childTriad.moon}, Rising in ${data.childTriad.rising}
+PARENT: Sun in ${data.parentTriad.sun}, Moon in ${data.parentTriad.moon}, Rising in ${data.parentTriad.rising}${data.parentLifePath ? `, Life Path ${data.parentLifePath}` : ''}
+CHILD (${data.childName}): Sun in ${data.childTriad.sun}, Moon in ${data.childTriad.moon}, Rising in ${data.childTriad.rising}${data.childLifePath ? `, Life Path ${data.childLifePath}` : ''}
 RELATIONSHIP: ${data.relationship}
 AGE: ${data.childAge} years old (${data.childAgeLabel})
 
@@ -604,9 +609,11 @@ ${aspectSummary || 'Basic compatibility only — no exact aspects detected.'}`;
         child1Name: string;
         child1Triad: { sun: string; moon: string; rising: string };
         child1Age: number;
+        child1LifePath?: number;
         child2Name: string;
         child2Triad: { sun: string; moon: string; rising: string };
         child2Age: number;
+        child2LifePath?: number;
         synastryHighlights: Array<{ planet1: string; planet2: string; aspect: string; nature: string }>;
     }): Promise<string> {
         const systemPrompt = `You are a wise, warm astrologer specializing in sibling dynamics. You help parents understand why their children interact the way they do through the lens of astrological synastry.
@@ -625,11 +632,14 @@ You MUST format your response with these ## headers:
 ## 🌱 Helping Them Thrive Together
 3-4 actionable tips for parents to nurture this specific sibling relationship.
 
+## 🔢 Their Numbers Side by Side
+1 paragraph on how their Life Path numbers interact as siblings. Are they natural allies, rivals, or teacher-student?
+
 Rules:
 - Bold all astrological terms
 - Use age-appropriate examples (ages ${data.child1Age} and ${data.child2Age})
 - Be warm and practical
-- Total length: 500-700 words${TEACHING_FORMAT}`;
+- Total length: 600-800 words${TEACHING_FORMAT}`;
 
         const aspectSummary = data.synastryHighlights
             .map(a => `${data.child1Name}'s ${a.planet1} ${a.aspect} ${data.child2Name}'s ${a.planet2} (${a.nature})`)
@@ -637,8 +647,8 @@ Rules:
 
         const userPrompt = `Generate a sibling dynamics reading.
 
-${data.child1Name} (age ${data.child1Age}): Sun in ${data.child1Triad.sun}, Moon in ${data.child1Triad.moon}, Rising in ${data.child1Triad.rising}
-${data.child2Name} (age ${data.child2Age}): Sun in ${data.child2Triad.sun}, Moon in ${data.child2Triad.moon}, Rising in ${data.child2Triad.rising}
+${data.child1Name} (age ${data.child1Age}): Sun in ${data.child1Triad.sun}, Moon in ${data.child1Triad.moon}, Rising in ${data.child1Triad.rising}${data.child1LifePath ? `, Life Path ${data.child1LifePath}` : ''}
+${data.child2Name} (age ${data.child2Age}): Sun in ${data.child2Triad.sun}, Moon in ${data.child2Triad.moon}, Rising in ${data.child2Triad.rising}${data.child2LifePath ? `, Life Path ${data.child2LifePath}` : ''}
 
 KEY SYNASTRY ASPECTS:
 ${aspectSummary || 'Basic compatibility only — no exact aspects detected.'}`;

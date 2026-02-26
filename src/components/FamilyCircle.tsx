@@ -11,7 +11,7 @@
 import React from 'react';
 import { safeStorage } from '../services/storage.service';
 import {
-    getBirthData, getNatalTriad, getSynastryChart,
+    getBirthData, getNatalTriad, getSynastryChart, getLifePathNumber,
     BirthData, NatalTriad, SynastryReport, SynastryAspect,
 } from '../services/astrology.service';
 import { AIService } from '../services/ai.service';
@@ -273,6 +273,8 @@ export function FamilyCircle({ onClose, onTabChange }: FamilyCircleProps) {
             const age = getAge(member.birthday);
 
             const ai = new AIService();
+            const parentLP = getLifePathNumber(parentData.birthday);
+            const childLP = getLifePathNumber(member.birthday);
             const reading = await ai.getFamilyReading({
                 parentTriad: { sun: parentTriad.sun.name, moon: parentTriad.moon.name, rising: parentTriad.rising.name },
                 childName: member.name,
@@ -280,6 +282,8 @@ export function FamilyCircle({ onClose, onTabChange }: FamilyCircleProps) {
                 childAge: age,
                 childAgeLabel: getAgeLabel(age),
                 relationship: member.relationship,
+                parentLifePath: parentLP,
+                childLifePath: childLP,
                 synastryHighlights: synastry.aspects.slice(0, 8).map(a => ({
                     planet1: a.planet1.name, planet2: a.planet2.name,
                     aspect: a.type, nature: a.nature, category: a.category,
@@ -322,9 +326,11 @@ export function FamilyCircle({ onClose, onTabChange }: FamilyCircleProps) {
                 child1Name: child1.name,
                 child1Triad: { sun: triad1.sun.name, moon: triad1.moon.name, rising: triad1.rising.name },
                 child1Age: getAge(child1.birthday),
+                child1LifePath: getLifePathNumber(child1.birthday),
                 child2Name: child2.name,
                 child2Triad: { sun: triad2.sun.name, moon: triad2.moon.name, rising: triad2.rising.name },
                 child2Age: getAge(child2.birthday),
+                child2LifePath: getLifePathNumber(child2.birthday),
                 synastryHighlights: synastry.aspects.slice(0, 8).map(a => ({
                     planet1: a.planet1.name, planet2: a.planet2.name,
                     aspect: a.type, nature: a.nature,
@@ -603,7 +609,7 @@ function FamilyMemberCard({ member, index, onRead, onEdit, onDelete, hasParentDa
                     </div>
                     {triad && (
                         <p className="text-[10px] text-altar-muted mt-0.5">
-                            ☉ {triad.sun.name} · ☽ {triad.moon.name} · ↑ {triad.rising.name}
+                            ☉ {triad.sun.name} · ☽ {triad.moon.name} · ↑ {triad.rising.name} · <span className="text-altar-gold/70">LP {getLifePathNumber(member.birthday)}</span>
                         </p>
                     )}
                     <p className="text-[10px] text-altar-muted/50 mt-0.5">
