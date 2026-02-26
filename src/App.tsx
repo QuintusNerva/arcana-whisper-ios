@@ -675,11 +675,11 @@ function App() {
                         <div className="flex justify-around">
                             {[
                                 { icon: '🔮', label: 'Tarot', tab: 'new', bg: 'from-violet-500/20 to-fuchsia-500/15 border-violet-500/25' },
+                                { icon: '💞', label: 'Relationships', tab: 'compatibility', bg: 'from-rose-500/20 to-pink-500/15 border-rose-500/25' },
                                 { icon: '✨', label: 'Cosmos', tab: 'cosmos', bg: 'from-blue-500/20 to-indigo-500/15 border-blue-500/25' },
                                 { icon: '♈', label: 'Horoscope', tab: 'horoscope', bg: 'from-red-500/20 to-orange-500/15 border-red-500/25' },
                                 { icon: '🌙', label: 'Natal', tab: 'natal', bg: 'from-indigo-500/20 to-purple-500/15 border-indigo-500/25' },
                                 { icon: '🔢', label: 'Numbers', tab: 'numerology', bg: 'from-amber-600/20 to-yellow-500/15 border-amber-500/25' },
-                                { icon: '💞', label: 'Synastry', tab: 'compatibility', bg: 'from-rose-500/20 to-pink-500/15 border-rose-500/25' },
                             ].map(item => (
                                 <button
                                     key={item.tab}
