@@ -169,9 +169,7 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
     // Auto-show results if partner data was saved
     React.useEffect(() => {
         if (savedPartner?.birthday && birthData) {
-            const r = getCoupleCompatibility(birthData, savedPartner.birthday);
-            setReport(r);
-            // Calculate synastry
+            // Build full partner data including coordinates for rising sign
             const partnerData: BirthData = {
                 birthday: savedPartner.birthday,
                 birthTime: savedPartner.birthTime,
@@ -180,6 +178,8 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
                 longitude: savedPartner.longitude,
                 utcOffset: savedPartner.utcOffset,
             };
+            const r = getCoupleCompatibility(birthData, partnerData);
+            setReport(r);
             const syn = getSynastryChart(birthData, partnerData, undefined, savedPartner.name || 'Partner');
             setSynastry(syn);
         }
@@ -187,7 +187,16 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
 
     const handleReveal = () => {
         if (!birthData || !partnerBirthday) return;
-        const r = getCoupleCompatibility(birthData, partnerBirthday);
+        // Build full partner data for accurate rising sign
+        const partnerData: BirthData = {
+            birthday: partnerBirthday,
+            birthTime: partnerBirthTime || undefined,
+            location: partnerBirthLocation.trim() || undefined,
+            latitude: partnerLatitude,
+            longitude: partnerLongitude,
+            utcOffset: partnerUtcOffset,
+        };
+        const r = getCoupleCompatibility(birthData, partnerData);
         setReport(r);
         // Save partner data
         safeStorage.setItem('arcana_partner', JSON.stringify({
@@ -200,14 +209,6 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
             utcOffset: partnerUtcOffset,
         }));
         // Calculate synastry chart
-        const partnerData: BirthData = {
-            birthday: partnerBirthday,
-            birthTime: partnerBirthTime || undefined,
-            location: partnerBirthLocation.trim() || undefined,
-            latitude: partnerLatitude,
-            longitude: partnerLongitude,
-            utcOffset: partnerUtcOffset,
-        };
         const syn = getSynastryChart(birthData, partnerData, undefined, partnerName.trim() || 'Partner');
         setSynastry(syn);
     };

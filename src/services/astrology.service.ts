@@ -541,9 +541,12 @@ function getStrengthsAndEdges(sunM: SignMatch, moonM: SignMatch, risingM: SignMa
     return { strengths, edges };
 }
 
-export function getCoupleCompatibility(userBirthData: BirthData, partnerBirthday: string): CoupleReport {
+export function getCoupleCompatibility(userBirthData: BirthData, partnerBirthdayOrData: string | BirthData): CoupleReport {
     const userTriad = getNatalTriad(userBirthData);
-    const partnerTriad = getNatalTriad({ birthday: partnerBirthday });
+    const partnerData: BirthData = typeof partnerBirthdayOrData === 'string'
+        ? { birthday: partnerBirthdayOrData }
+        : partnerBirthdayOrData;
+    const partnerTriad = getNatalTriad(partnerData);
 
     const sunAff = getSignAffinity(userTriad.sun.id, partnerTriad.sun.id);
     const moonAff = getSignAffinity(userTriad.moon.id, partnerTriad.moon.id);
