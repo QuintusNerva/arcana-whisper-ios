@@ -135,6 +135,7 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
     const [partnerName, setPartnerName] = React.useState(savedPartner?.name || '');
     const [partnerBirthday, setPartnerBirthday] = React.useState(savedPartner?.birthday || '');
     const [partnerBirthTime, setPartnerBirthTime] = React.useState(savedPartner?.birthTime || '');
+    const [partnerBirthLocation, setPartnerBirthLocation] = React.useState(savedPartner?.location || '');
     const [report, setReport] = React.useState<CoupleReport | null>(null);
     const [synastry, setSynastry] = React.useState<SynastryReport | null>(null);
     const [aiReading, setAiReading] = React.useState<string | null>(null);
@@ -153,6 +154,7 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
             const partnerData: BirthData = {
                 birthday: savedPartner.birthday,
                 birthTime: savedPartner.birthTime,
+                location: savedPartner.location,
             };
             const syn = getSynastryChart(birthData, partnerData, undefined, savedPartner.name || 'Partner');
             setSynastry(syn);
@@ -168,11 +170,13 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
             name: partnerName.trim(),
             birthday: partnerBirthday,
             birthTime: partnerBirthTime || undefined,
+            location: partnerBirthLocation.trim() || undefined,
         }));
         // Calculate synastry chart
         const partnerData: BirthData = {
             birthday: partnerBirthday,
             birthTime: partnerBirthTime || undefined,
+            location: partnerBirthLocation.trim() || undefined,
         };
         const syn = getSynastryChart(birthData, partnerData, undefined, partnerName.trim() || 'Partner');
         setSynastry(syn);
@@ -322,7 +326,18 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
                                     type="time"
                                     value={partnerBirthTime}
                                     onChange={(e) => setPartnerBirthTime(e.target.value)}
-                                    className="w-full bg-transparent text-altar-text text-sm focus:outline-none border-b border-altar-gold/20 focus:border-altar-gold/50 transition-colors pb-3 [color-scheme:dark]"
+                                    className="w-full bg-transparent text-altar-text text-sm focus:outline-none border-b border-altar-gold/20 focus:border-altar-gold/50 transition-colors pb-3 mb-5 [color-scheme:dark]"
+                                />
+
+                                <label className="block font-display text-xs text-altar-muted tracking-[2px] uppercase mb-3">
+                                    Place of Birth <span className="text-altar-muted/40">(optional — improves accuracy)</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    value={partnerBirthLocation}
+                                    onChange={(e) => setPartnerBirthLocation(e.target.value)}
+                                    placeholder="City, State or Country…"
+                                    className="w-full bg-transparent text-altar-text placeholder-altar-muted/50 text-sm focus:outline-none border-b border-altar-gold/20 focus:border-altar-gold/50 transition-colors pb-3 [color-scheme:dark]"
                                 />
                             </div>
 
@@ -379,8 +394,8 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id)}
                                         className={`flex-1 py-2.5 rounded-xl font-display text-xs tracking-wide transition-all ${activeTab === tab.id
-                                                ? 'bg-altar-gold/15 text-altar-gold border border-altar-gold/25'
-                                                : 'bg-white/[0.03] text-altar-muted/60 border border-white/5 hover:bg-white/[0.06]'
+                                            ? 'bg-altar-gold/15 text-altar-gold border border-altar-gold/25'
+                                            : 'bg-white/[0.03] text-altar-muted/60 border border-white/5 hover:bg-white/[0.06]'
                                             }`}
                                     >
                                         <span className="mr-1">{tab.emoji}</span> {tab.label}
@@ -604,6 +619,7 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
                                     setPartnerName('');
                                     setPartnerBirthday('');
                                     setPartnerBirthTime('');
+                                    setPartnerBirthLocation('');
                                     setActiveTab('overview');
                                     safeStorage.removeItem('arcana_partner');
                                 }}
