@@ -696,9 +696,9 @@ function App() {
                         </button>
                     </div>
 
-                    {/* ── Explore Circles — 4 icons ── */}
+                    {/* ── Explore Circles ── */}
                     <div className="mx-5 mb-4 animate-fade-up" style={{ animationDelay: '0.5s', opacity: 0 }}>
-                        <div className="flex justify-around">
+                        <div className="grid grid-cols-4 gap-y-4 gap-x-2 justify-items-center">
                             {[
                                 { icon: '🔮', label: 'Tarot', tab: 'new', bg: 'from-violet-500/20 to-fuchsia-500/15 border-violet-500/25' },
                                 { icon: '💞', label: 'Relationships', tab: 'compatibility', bg: 'from-rose-500/20 to-pink-500/15 border-rose-500/25' },
