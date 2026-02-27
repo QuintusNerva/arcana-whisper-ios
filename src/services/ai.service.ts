@@ -544,6 +544,81 @@ FORMAT:
     }
 
     /**
+     * Dream Interpretation — transit-aware, natal-chart-personalized dream reading.
+     * Interprets dreams through three lenses: symbolism, active transits, and natal chart.
+     */
+    async getDreamInterpretation(data: {
+        dreamText: string;
+        symbolTags: string[];
+        wakingMood?: string;
+        activeTransits: string;   // formatted transit string
+        triad?: { sun?: string; moon?: string; rising?: string };
+        lifePath?: number;
+    }): Promise<string> {
+        const systemPrompt = `You are a wise dream interpreter who reads dreams through the lens of astrology and cosmic timing.
+You combine Jungian dream symbolism with astrological transits to offer deeply personalized interpretations.
+
+YOUR VOICE:
+- Speak directly to them ("you"). Warm, intuitive, unhurried.
+- Never be clinical or diagnostic. You're a mystic, not a therapist.
+- Make them feel like their dream was important and meaningful.
+- Be specific to THEIR symbols and THEIR chart — no generic dream dictionary entries.
+
+FORMAT — Use these exact three sections with ## headers:
+
+## 🔮 The Mirror
+2-3 paragraphs interpreting the dream's core symbols through their natal chart lens. What is the dream showing them about themselves? Be specific to the symbols they tagged. Bold key dream symbols and astrological placements.
+
+## ⚡ The Transit Connection
+1-2 paragraphs explaining WHY this dream appeared NOW based on the active transits. Connect specific transit energies to specific dream elements. Make them feel like the timing wasn't random.
+
+## 🗝️ The Invitation
+1 paragraph of empowering, non-prescriptive guidance. What is the dream asking them to pay attention to? End with one italicized question for them to sit with. Never tell them what to do — offer an invitation.
+
+Rules:
+- Bold key terms with **double asterisks**
+- Keep total to 250-350 words
+- End with an italicized question
+- No bullet points. Flowing, warm prose.
+- Be specific about their symbols, not generic.`;
+
+        const symbolList = data.symbolTags.length > 0
+            ? `Symbol tags: ${data.symbolTags.join(', ')}`
+            : '';
+
+        const moodNote = data.wakingMood
+            ? `Waking mood: ${data.wakingMood}`
+            : '';
+
+        let userPrompt = `Interpret this dream:
+
+"${data.dreamText.slice(0, 500)}${data.dreamText.length > 500 ? '...' : ''}"
+
+${symbolList}
+${moodNote}
+
+ACTIVE TRANSITS: ${data.activeTransits}`;
+
+        if (data.triad) {
+            const parts = [];
+            if (data.triad.sun) parts.push(`Sun in ${data.triad.sun}`);
+            if (data.triad.moon) parts.push(`Moon in ${data.triad.moon}`);
+            if (data.triad.rising) parts.push(`Rising in ${data.triad.rising}`);
+            if (parts.length > 0) {
+                userPrompt += `\n\nNATAL CHART: ${parts.join(', ')}.`;
+            }
+        }
+
+        if (data.lifePath) {
+            userPrompt += `\nLife Path Number: ${data.lifePath}.`;
+        }
+
+        userPrompt += `\n\nInterpret this dream through the triple lens of symbolism, transits, and their chart. Be specific to their symbols and timing.`;
+
+        return this.chat(systemPrompt, userPrompt, 500);
+    }
+
+    /**
      * Family Reading — parent↔child synastry with age-aware interpretations.
      */
     async getFamilyReading(data: {

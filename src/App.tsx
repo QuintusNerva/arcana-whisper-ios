@@ -30,6 +30,7 @@ import { recordReading } from './services/memory.service';
 import { fireReminder } from './services/reminder.service';
 import { fireTransitNotification, getTransitFeed } from './services/transit.service';
 import { fireJournalReminder, getJournalEntries, getPatternProgress } from './services/journal.service';
+import { getDreamEntries } from './services/dream-journal.service';
 import { getBirthData, getSunSign, getDailyHoroscope, getNatalTriad, ZODIAC_SIGNS } from './services/astrology.service';
 
 /* ── Ambient particle backdrop ── */
@@ -759,7 +760,69 @@ function App() {
                         </button>
                     </div>
 
+                    {/* ── Dream Journal Widget — Midnight Indigo ── */}
+                    <div className="mx-5 mb-4 animate-fade-up" style={{ animationDelay: '0.35s', opacity: 0 }}>
+                        <button
+                            onClick={() => handleTabChange('journal')}
+                            className="w-full text-left rounded-2xl overflow-hidden border relative"
+                            style={{
+                                background: 'linear-gradient(135deg, rgba(10,8,30,0.95) 0%, rgba(20,10,50,0.9) 40%, rgba(8,6,25,0.95) 100%)',
+                                borderColor: 'rgba(139,92,246,0.15)',
+                            }}
+                        >
+                            {/* Starfield glow */}
+                            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                                {[0, 1, 2, 3, 4, 5].map(i => (
+                                    <div key={i} className="absolute rounded-full bg-white"
+                                        style={{
+                                            width: '1px', height: '1px',
+                                            left: `${(i * 17 + 11) % 95}%`,
+                                            top: `${(i * 23 + 13) % 80}%`,
+                                            opacity: 0.4,
+                                        }}
+                                    />
+                                ))}
+                                <div className="absolute bottom-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-violet-400/20 to-transparent blur-sm" />
+                            </div>
+
+                            <div className="relative p-4">
+                                <div className="flex items-center justify-between mb-3">
+                                    <h3 className="font-display text-sm tracking-wide flex items-center gap-2 font-semibold" style={{ color: 'rgba(196,181,253,0.85)' }}>
+                                        <span>🌙</span> DREAM JOURNAL
+                                    </h3>
+                                    <span className="text-[10px] font-display" style={{ color: 'rgba(167,139,250,0.45)' }}>Dreams</span>
+                                </div>
+                                {(() => {
+                                    const dreams = getDreamEntries();
+                                    const latest = dreams[0];
+                                    return (
+                                        <>
+                                            {latest ? (
+                                                <div>
+                                                    <div className="flex items-center gap-1.5 mb-1">
+                                                        {latest.wakingMood && <span className="text-sm">{latest.wakingMood}</span>}
+                                                        <p className="text-[11px] line-clamp-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                                                            {latest.text}
+                                                        </p>
+                                                    </div>
+                                                    <p className="text-[10px]" style={{ color: 'rgba(167,139,250,0.45)' }}>
+                                                        {dreams.length} dream{dreams.length !== 1 ? 's' : ''} recorded · Tap to interpret
+                                                    </p>
+                                                </div>
+                                            ) : (
+                                                <p className="text-xs italic" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                                                    What did you see last night?
+                                                </p>
+                                            )}
+                                        </>
+                                    );
+                                })()}
+                            </div>
+                        </button>
+                    </div>
+
                     {/* ── Explore Circles ── */}
+
                     <div className="mx-5 mb-4 animate-fade-up" style={{ animationDelay: '0.5s', opacity: 0 }}>
                         <div className="grid grid-cols-4 gap-y-4 gap-x-2 justify-items-center">
                             {[

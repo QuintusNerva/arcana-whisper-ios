@@ -3,6 +3,7 @@ import React from 'react';
 import { BottomNav } from './BottomNav';
 import { JournalEntryView } from './JournalEntry';
 import { AIResponseRenderer } from './AIResponseRenderer';
+import { DreamJournal } from './DreamJournal';
 import {
     getJournalEntries, getJournalEntryCount, deleteJournalEntry,
     getPatternProgress, getPatternInsights, PatternInsight,
@@ -20,6 +21,7 @@ interface JournalTabProps {
 }
 
 export function JournalTab({ onClose, onTabChange }: JournalTabProps) {
+    const [activeSubTab, setActiveSubTab] = React.useState<'journal' | 'dreams'>('journal');
     const [showEntry, setShowEntry] = React.useState(false);
     const [editEntry, setEditEntry] = React.useState<JournalEntry | null>(null);
     const [entries, setEntries] = React.useState<JournalEntry[]>([]);
@@ -145,6 +147,16 @@ export function JournalTab({ onClose, onTabChange }: JournalTabProps) {
         return <JournalEntryView onClose={handleCloseEntry} editEntry={editEntry} />;
     }
 
+    // Dreams sub-tab — render the full DreamJournal view
+    if (activeSubTab === 'dreams') {
+        return (
+            <DreamJournal
+                onClose={() => setActiveSubTab('journal')}
+                onTabChange={onTabChange}
+            />
+        );
+    }
+
     // Group entries by date
     const today = new Date().toISOString().slice(0, 10);
     const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
@@ -170,7 +182,30 @@ export function JournalTab({ onClose, onTabChange }: JournalTabProps) {
                 <header className="sticky top-0 z-20 bg-altar-deep/90 backdrop-blur-xl border-b border-white/5 safe-top">
                     <div className="flex items-center justify-between px-4 py-3 max-w-[500px] mx-auto">
                         <button onClick={onClose} className="text-altar-muted hover:text-white transition-colors text-sm font-display tracking-wide">← Altar</button>
-                        <h1 className="font-display text-lg text-altar-gold tracking-[4px]">JOURNAL</h1>
+                        {/* Sub-tab switcher */}
+                        <div className="flex items-center gap-1 rounded-full p-1" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                            {(['journal', 'dreams'] as const).map(tab => {
+                                const isActive = activeSubTab === tab;
+                                const isDream = tab === 'dreams';
+                                return (
+                                    <button
+                                        key={tab}
+                                        onClick={() => setActiveSubTab(tab)}
+                                        className="px-3 py-1 rounded-full text-[11px] font-display tracking-wide transition-all"
+                                        style={isActive ? {
+                                            background: isDream ? 'rgba(109,40,217,0.5)' : 'rgba(212,175,55,0.2)',
+                                            color: isDream ? '#c4b5fd' : '#d4af37',
+                                            border: `1px solid ${isDream ? 'rgba(139,92,246,0.5)' : 'rgba(212,175,55,0.3)'}`,
+                                        } : {
+                                            color: 'rgba(255,255,255,0.4)',
+                                            border: '1px solid transparent',
+                                        }}
+                                    >
+                                        {isDream ? '🌙 Dreams' : '📓 Journal'}
+                                    </button>
+                                );
+                            })}
+                        </div>
                         <button
                             onClick={() => setShowReminder(!showReminder)}
                             className={`text-sm ${reminderSettings.enabled ? 'text-altar-gold' : 'text-altar-muted/40'}`}
