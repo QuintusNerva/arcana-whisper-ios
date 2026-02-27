@@ -23,6 +23,7 @@ import { TransitFeed } from './components/TransitFeed';
 import { JournalTab } from './components/JournalTab';
 import { YearAhead } from './components/YearAhead';
 import { FamilyCircle } from './components/FamilyCircle';
+import { CareerAlignment } from './components/CareerAlignment';
 import { CosmicInvite, parseInviteParams } from './components/CosmicInvite';
 import { JournalWidget } from './components/JournalWidget';
 import { canDoReading, incrementReadingCount, getRemainingReadings, AIService, dailyCache } from './services/ai.service';
@@ -254,6 +255,7 @@ function App() {
     const [showJournal, setShowJournal] = React.useState(false);
     const [showYearAhead, setShowYearAhead] = React.useState(false);
     const [showFamily, setShowFamily] = React.useState(false);
+    const [showCareer, setShowCareer] = React.useState(false);
 
     // ── Cosmic Card Invite detection ──
     const [inviteData, setInviteData] = React.useState(() => {
@@ -355,6 +357,7 @@ function App() {
         setShowJournal(false);
         setShowYearAhead(false);
         setShowFamily(false);
+        setShowCareer(false);
 
         setCurrentTab(tab);
         if (tab === 'new') {
@@ -375,6 +378,7 @@ function App() {
         else if (tab === 'journal') setShowJournal(true);
         else if (tab === 'yearahead') setShowYearAhead(true);
         else if (tab === 'family') setShowFamily(true);
+        else if (tab === 'career') setShowCareer(true);
     };
 
     React.useEffect(() => {
@@ -549,6 +553,15 @@ function App() {
         return (
             <JournalTab
                 onClose={() => { setShowJournal(false); setCurrentTab('home'); }}
+                onTabChange={handleTabChange}
+            />
+        );
+    }
+
+    if (showCareer) {
+        return (
+            <CareerAlignment
+                onClose={() => { setShowCareer(false); setCurrentTab('home'); }}
                 onTabChange={handleTabChange}
             />
         );
@@ -834,6 +847,7 @@ function App() {
                                 { icon: '🔢', label: 'Numbers', tab: 'numerology', bg: 'from-amber-600/20 to-yellow-500/15 border-amber-500/25' },
                                 { icon: '🌟', label: 'Year Ahead', tab: 'yearahead', bg: 'from-yellow-500/20 to-amber-500/15 border-yellow-500/25' },
                                 { icon: '👨‍👩‍👧‍👦', label: 'Family', tab: 'family', bg: 'from-pink-500/20 to-rose-500/15 border-pink-500/25' },
+                                { icon: '💼', label: 'Career', tab: 'career', bg: 'from-emerald-500/20 to-teal-500/15 border-emerald-500/25' },
                             ].map(item => (
                                 <button
                                     key={item.tab}
