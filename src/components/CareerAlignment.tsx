@@ -172,7 +172,7 @@ export function CareerAlignment({ onClose, onTabChange }: CareerAlignmentProps) 
                             </p>
                             <button
                                 onClick={() => onTabChange('natal')}
-                                className="px-6 py-3 rounded-full font-display text-sm tracking-[2px] text-altar-gold border border-altar-gold/30 hover:bg-altar-gold/10 transition-all"
+                                className="px-6 py-3 rounded-full font-display text-sm tracking-[2px] clay-btn-gold"
                             >
                                 → Set Up Natal Chart
                             </button>
@@ -298,7 +298,7 @@ export function CareerAlignment({ onClose, onTabChange }: CareerAlignmentProps) 
 
                                     {/* Thrive + Struggle grid */}
                                     <div className="grid grid-cols-2 gap-3">
-                                        <div className="rounded-2xl p-4 border" style={{ background: 'rgba(34,197,94,0.05)', borderColor: 'rgba(34,197,94,0.15)' }}>
+                                        <div className="rounded-2xl p-4 border" style={{ background: 'rgba(34,197,94,0.08)', borderColor: 'rgba(34,197,94,0.2)', boxShadow: 'inset 0 1px 4px rgba(0,0,0,0.4)' }}>
                                             <p className="text-[9px] font-display text-green-400/70 tracking-[2px] uppercase mb-3">✦ You Thrive When</p>
                                             <ul className="space-y-1.5">
                                                 {reading.thrive.map((item, i) => (
@@ -309,7 +309,7 @@ export function CareerAlignment({ onClose, onTabChange }: CareerAlignmentProps) 
                                                 ))}
                                             </ul>
                                         </div>
-                                        <div className="rounded-2xl p-4 border" style={{ background: 'rgba(239,68,68,0.05)', borderColor: 'rgba(239,68,68,0.12)' }}>
+                                        <div className="rounded-2xl p-4 border" style={{ background: 'rgba(239,68,68,0.08)', borderColor: 'rgba(239,68,68,0.2)', boxShadow: 'inset 0 1px 4px rgba(0,0,0,0.4)' }}>
                                             <p className="text-[9px] font-display text-red-400/70 tracking-[2px] uppercase mb-3">✦ You Struggle With</p>
                                             <ul className="space-y-1.5">
                                                 {reading.struggle.map((item, i) => (
@@ -367,7 +367,7 @@ export function CareerAlignment({ onClose, onTabChange }: CareerAlignmentProps) 
                             )}
 
                             {/* Coaching upsell */}
-                            <div className="rounded-2xl p-5 border border-dashed border-white/10 text-center mt-2">
+                            <div className="rounded-2xl p-5 border border-white/8 text-center mt-2">
                                 <p className="text-[9px] font-display text-altar-gold/40 tracking-[2px] uppercase mb-2">✦ Go Deeper</p>
                                 <p className="text-[11px] text-altar-muted/60 leading-relaxed">
                                     Share this reading with a career coach or mentor to turn cosmic insight into a concrete plan.

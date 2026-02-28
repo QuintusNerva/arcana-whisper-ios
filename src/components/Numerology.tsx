@@ -302,7 +302,7 @@ Life Path: ${lifePathNum} (${lifePathMeaning?.title || ''})`;
 
                             <button
                                 onClick={() => setShowYearModal(false)}
-                                className="w-full py-3 rounded-xl glass border border-white/10 text-sm text-altar-muted font-display tracking-wide hover:border-white/20 transition-colors"
+                                className="w-full py-3 rounded-xl clay-btn"
                             >
                                 Close
                             </button>
@@ -409,7 +409,7 @@ Life Path: ${lifePathNum} (${lifePathMeaning?.title || ''})`;
 
                             <button
                                 onClick={() => setShowPathModal(false)}
-                                className="w-full py-3 rounded-xl glass border border-white/10 text-sm text-altar-muted font-display tracking-wide hover:border-white/20 transition-colors"
+                                className="w-full py-3 rounded-xl clay-btn"
                             >
                                 Close
                             </button>

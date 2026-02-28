@@ -237,7 +237,7 @@ export function JournalTab({ onClose, onTabChange, initialSubTab = 'journal' }: 
                             </p>
                             <button
                                 onClick={handleDismissOnboarding}
-                                className="w-full py-2.5 rounded-xl bg-altar-gold/10 border border-altar-gold/20 text-xs text-altar-gold font-display tracking-wide hover:border-altar-gold/40 transition-all"
+                                className="w-full py-2.5 rounded-xl clay-btn-gold"
                             >
                                 I understand — let me write ✦
                             </button>

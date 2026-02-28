@@ -169,20 +169,104 @@ body {
   background-color: var(--color-altar-deep);
 }
 
-/* Glassmorphism Utilities */
+/* ── Clay Design System ── */
+/* .glass → clay card: deep dark bg + layered shadow stack */
 .glass {
-  background: rgba(13, 6, 24, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 215, 0, 0.1);
+  background: linear-gradient(160deg, #1c1538 0%, #130f2e 55%, #0d0b22 100%);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.5),
+    0 2px 6px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.08),
+    inset 0 -2px 5px rgba(0, 0, 0, 0.35);
 }
 
+/* .glass-strong → deeper clay card */
+.glass-strong {
+  background: linear-gradient(160deg, #211a42 0%, #170e36 55%, #0e0b26 100%);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow:
+    0 10px 32px rgba(0, 0, 0, 0.6),
+    0 3px 8px rgba(0, 0, 0, 0.45),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* Legacy alias */
 .glass-panel {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow:
+    0 6px 24px rgba(0, 0, 0, 0.45),
+    inset 0 1px 1px rgba(255, 255, 255, 0.07),
+    inset 0 -1px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* ── Reusable Clay Utilities ── */
+
+/* Generic clay card — neutral deep indigo */
+.clay-card {
+  background: linear-gradient(160deg, #1c1538 0%, #130f2e 55%, #0d0b22 100%);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.5),
+    0 2px 6px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.08),
+    inset 0 -2px 5px rgba(0, 0, 0, 0.35);
+  border-radius: 1.25rem; /* 20px */
+}
+
+/* Clay primary action button — indigo raise */
+.clay-btn {
+  background: linear-gradient(145deg, #2d1f6e 0%, #1e1454 55%, #130d3a 100%);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  box-shadow:
+    0 6px 18px rgba(109, 40, 217, 0.4),
+    0 2px 4px rgba(0, 0, 0, 0.5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.14),
+    inset 0 -2px 5px rgba(0, 0, 0, 0.4);
+  border-radius: 0.875rem;
+  color: #ffd700;
+  transition: filter 0.15s ease, transform 0.1s ease;
+}
+.clay-btn:hover { filter: brightness(1.1); }
+.clay-btn:active { transform: scale(0.98); }
+
+/* Clay gold action button */
+.clay-btn-gold {
+  background: linear-gradient(145deg, #3d2e08 0%, #2a1f05 55%, #1a1203 100%);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  box-shadow:
+    0 6px 18px rgba(180, 130, 20, 0.35),
+    0 2px 4px rgba(0, 0, 0, 0.5),
+    inset 0 1px 1px rgba(255, 220, 80, 0.15),
+    inset 0 -2px 5px rgba(0, 0, 0, 0.4);
+  border-radius: 0.875rem;
+  color: #ffd700;
+  transition: filter 0.15s ease, transform 0.1s ease;
+}
+.clay-btn-gold:hover { filter: brightness(1.1); }
+.clay-btn-gold:active { transform: scale(0.98); }
+
+/* Clay inset tile — sunken sculpted look */
+.clay-inset {
+  background: linear-gradient(145deg, rgba(255,255,255,0.04) 0%, rgba(0,0,0,0.1) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow:
+    inset 0 2px 5px rgba(0, 0, 0, 0.45),
+    inset 0 -1px 2px rgba(255, 255, 255, 0.05),
+    0 1px 2px rgba(255, 255, 255, 0.04);
+}
+
+/* Clay pill — small raised tag */
+.clay-pill {
+  background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.3);
+  border-radius: 999px;
 }
 
 .shimmer-text {

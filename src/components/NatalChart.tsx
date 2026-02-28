@@ -309,7 +309,7 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
                                                     setChartSummaryLoading(false);
                                                 }
                                             }}
-                                            className="w-full py-3 rounded-xl bg-gradient-to-r from-altar-mid/40 to-altar-bright/40 border border-altar-gold/15 text-sm text-altar-gold font-display tracking-wide hover:border-altar-gold/30 transition-all flex items-center justify-center gap-2"
+                                            className="w-full py-3 rounded-xl clay-btn flex items-center justify-center gap-2"
                                         >
                                             <span>✨</span> Reveal Full Chart Reading
                                         </button>
@@ -324,7 +324,7 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
                                 <div className="space-y-2">
                                     <button
                                         onClick={() => onTabChange('new')}
-                                        className="w-full py-3 rounded-xl bg-gradient-to-r from-altar-mid/40 to-altar-bright/40 border border-altar-gold/15 text-sm text-altar-gold font-display tracking-wide hover:border-altar-gold/30 transition-all text-left px-4 flex items-center gap-3"
+                                        className="w-full py-3 rounded-xl clay-btn text-left px-4 flex items-center gap-3"
                                     >
                                         <span className="text-xl">🔮</span>
                                         <div>
@@ -334,7 +334,7 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
                                     </button>
                                     <button
                                         onClick={() => onTabChange('new')}
-                                        className="w-full py-3 rounded-xl bg-gradient-to-r from-altar-mid/40 to-altar-bright/40 border border-altar-gold/15 text-sm text-altar-gold font-display tracking-wide hover:border-altar-gold/30 transition-all text-left px-4 flex items-center gap-3"
+                                        className="w-full py-3 rounded-xl clay-btn text-left px-4 flex items-center gap-3"
                                     >
                                         <span className="text-xl">💫</span>
                                         <div>
@@ -403,7 +403,7 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
 
                             <button
                                 onClick={() => setShowCosmicModal(false)}
-                                className="w-full py-3 rounded-xl glass border border-white/10 text-sm text-altar-muted font-display tracking-wide hover:border-white/20 transition-colors"
+                                className="w-full py-3 rounded-xl clay-btn"
                             >
                                 Close
                             </button>
@@ -539,7 +539,7 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
                                 {/* Close */}
                                 <button
                                     onClick={() => { setSelectedPlacement(null); setAiMeaning(null); setAiError(null); }}
-                                    className="w-full mt-5 py-3 rounded-xl glass border border-white/10 text-sm text-altar-muted font-display tracking-wide hover:border-white/20 transition-colors"
+                                    className="w-full mt-5 py-3 rounded-xl clay-btn"
                                 >
                                     Close
                                 </button>

@@ -538,7 +538,7 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
                         <div className="flex gap-2">
                             <button
                                 onClick={() => setShowManageSub(false)}
-                                className="flex-1 py-3 rounded-xl glass border border-white/10 text-sm text-altar-muted font-display hover:border-white/20 transition-colors"
+                                className="flex-1 py-3 rounded-xl clay-btn"
                             >
                                 Close
                             </button>

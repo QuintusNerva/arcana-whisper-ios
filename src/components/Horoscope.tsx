@@ -122,10 +122,23 @@ Expand on that theme with practical guidance, emotional insight, and a sense of 
                     {/* Sign Hero */}
                     <div className="text-center mt-6 mb-4 animate-fade-up">
                         <div className="relative inline-block">
-                            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-altar-mid to-altar-bright flex items-center justify-center text-5xl shadow-[0_0_40px_rgba(139,95,191,0.4)]">
+                            <div
+                                className="w-24 h-24 rounded-full flex items-center justify-center text-5xl"
+                                style={{
+                                    background: 'linear-gradient(145deg, #3b1f8a 0%, #2d1b6e 50%, #1a1042 100%)',
+                                    boxShadow: '0 8px 24px rgba(109,40,217,0.5), 0 2px 6px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.18), inset 0 -3px 6px rgba(0,0,0,0.4)',
+                                }}
+                            >
                                 {horoscope.sign.glyph}
                             </div>
-                            <div className="absolute -bottom-1 -right-1 px-2 py-0.5 rounded-full bg-altar-dark border border-altar-gold/30 text-[9px] text-altar-gold font-display">
+                            <div
+                                className="absolute -bottom-1 -right-1 px-2 py-0.5 rounded-full text-[9px] text-altar-gold font-display"
+                                style={{
+                                    background: 'linear-gradient(145deg, #2a1a05 0%, #1a1003 100%)',
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,220,80,0.12)',
+                                    border: '1px solid rgba(212,175,55,0.3)',
+                                }}
+                            >
                                 {horoscope.sign.element}
                             </div>
                         </div>
@@ -147,10 +160,18 @@ Expand on that theme with practical guidance, emotional insight, and a sense of 
                                     <button
                                         key={z.id}
                                         onClick={() => { setSelectedSign(z.id); setShowSignPicker(false); }}
-                                        className={`py-2 rounded-lg text-center transition-all ${selectedSign === z.id
-                                            ? 'bg-altar-gold/15 border border-altar-gold/30 text-altar-gold'
-                                            : 'bg-altar-deep/30 border border-white/5 text-altar-muted hover:text-white'
-                                            }`}
+                                        className="py-2 rounded-lg text-center transition-all"
+                                        style={selectedSign === z.id ? {
+                                            background: 'linear-gradient(145deg, #3d2e08 0%, #2a1f05 100%)',
+                                            boxShadow: '0 3px 10px rgba(146,64,14,0.4), inset 0 1px 1px rgba(255,220,80,0.14)',
+                                            border: '1px solid rgba(212,175,55,0.25)',
+                                            color: '#ffd700',
+                                        } : {
+                                            background: 'linear-gradient(145deg, rgba(255,255,255,0.04) 0%, rgba(0,0,0,0.1) 100%)',
+                                            border: '1px solid rgba(255,255,255,0.06)',
+                                            boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.4)',
+                                            color: 'rgba(148,163,184,0.8)',
+                                        }}
                                     >
                                         <span className="text-xl block">{z.glyph}</span>
                                         <span className="text-[8px] font-display tracking-wide">{z.name}</span>
@@ -163,7 +184,15 @@ Expand on that theme with practical guidance, emotional insight, and a sense of 
                     {/* Date + Mood */}
                     <div className="flex items-center justify-between mb-4 animate-fade-up" style={{ animationDelay: '0.15s', opacity: 0 }}>
                         <span className="text-xs text-altar-muted">{dateLabel}</span>
-                        <span className="text-[10px] px-2.5 py-1 rounded-full bg-altar-gold/10 border border-altar-gold/15 text-altar-gold font-display">
+                        <span
+                            className="text-[10px] px-2.5 py-1 rounded-full font-display"
+                            style={{
+                                background: 'linear-gradient(145deg, #3d2e08 0%, #2a1f05 100%)',
+                                boxShadow: '0 3px 10px rgba(146,64,14,0.4), inset 0 1px 1px rgba(255,220,80,0.14), inset 0 -1px 2px rgba(0,0,0,0.35)',
+                                border: '1px solid rgba(212,175,55,0.2)',
+                                color: '#ffd700',
+                            }}
+                        >
                             {horoscope.mood}
                         </span>
                     </div>
@@ -205,8 +234,16 @@ Expand on that theme with practical guidance, emotional insight, and a sense of 
                     </div>
 
                     {/* Extended Forecast — Premium gate */}
-                    <div className="rounded-2xl p-[1px] bg-gradient-to-r from-altar-gold/20 via-altar-bright/10 to-altar-gold/20 mb-4 animate-fade-up" style={{ animationDelay: '0.45s', opacity: 0 }}>
-                        <div className="rounded-2xl bg-altar-dark/95 p-5">
+                    <div
+                        className="rounded-2xl mb-4 animate-fade-up"
+                        style={{
+                            animationDelay: '0.45s', opacity: 0,
+                            background: 'linear-gradient(160deg, #211a42 0%, #170e36 55%, #0e0b26 100%)',
+                            boxShadow: '0 10px 32px rgba(0,0,0,0.6), 0 3px 8px rgba(0,0,0,0.45), inset 0 1px 1px rgba(255,255,255,0.09), inset 0 -2px 5px rgba(0,0,0,0.4)',
+                            border: '1px solid rgba(212,175,55,0.15)',
+                        }}
+                    >
+                        <div className="rounded-2xl p-5">
                             <h3 className="font-display text-xs text-altar-muted tracking-[3px] uppercase mb-3 flex items-center gap-1.5">
                                 {isPremium ? <span className="text-altar-gold">✦</span> : <span>👑</span>} Extended Forecast
                             </h3>
@@ -219,7 +256,9 @@ Expand on that theme with practical guidance, emotional insight, and a sense of 
                                     <p className="text-sm text-altar-text/40 leading-relaxed italic line-clamp-2 blur-[2px]">
                                         {horoscope.extended}
                                     </p>
-                                    <button className="mt-3 w-full py-2.5 rounded-xl bg-altar-gold/10 border border-altar-gold/20 text-xs text-altar-gold font-display tracking-wide hover:border-altar-gold/40 transition-all">
+                                    <button
+                                        className="mt-3 w-full py-2.5 rounded-xl text-xs font-display tracking-wide transition-all clay-btn-gold"
+                                    >
                                         Unlock Premium — $4.99/mo
                                     </button>
                                 </div>
@@ -235,7 +274,11 @@ Expand on that theme with practical guidance, emotional insight, and a sense of 
                                 <p className="text-[9px] text-green-400/70 font-display tracking-[2px] uppercase mb-1.5">Best Matches</p>
                                 <div className="flex gap-2">
                                     {compat.best.map(z => (
-                                        <div key={z.id} className="flex-1 text-center py-2 rounded-lg bg-green-500/5 border border-green-500/15">
+                                        <div
+                                            key={z.id}
+                                            className="flex-1 text-center py-2 rounded-lg"
+                                            style={{ background: 'rgba(34,197,94,0.07)', border: '1px solid rgba(34,197,94,0.18)', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.35)' }}
+                                        >
                                             <span className="text-xl block">{z.glyph}</span>
                                             <span className="text-[9px] text-altar-text/70 font-display">{z.name}</span>
                                         </div>
@@ -246,7 +289,11 @@ Expand on that theme with practical guidance, emotional insight, and a sense of 
                                 <p className="text-[9px] text-red-400/70 font-display tracking-[2px] uppercase mb-1.5">Challenging</p>
                                 <div className="flex gap-2">
                                     {compat.challenging.map(z => (
-                                        <div key={z.id} className="flex-1 text-center py-2 rounded-lg bg-red-500/5 border border-red-500/15">
+                                        <div
+                                            key={z.id}
+                                            className="flex-1 text-center py-2 rounded-lg"
+                                            style={{ background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.18)', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.35)' }}
+                                        >
                                             <span className="text-xl block">{z.glyph}</span>
                                             <span className="text-[9px] text-altar-text/70 font-display">{z.name}</span>
                                         </div>
