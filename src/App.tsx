@@ -845,25 +845,67 @@ function App() {
                     <div className="mx-5 mb-4 animate-fade-up" style={{ animationDelay: '0.5s', opacity: 0 }}>
                         <div className="grid grid-cols-4 gap-y-4 gap-x-2 justify-items-center">
                             {[
-                                { icon: '🔮', label: 'Tarot', tab: 'new', bg: 'from-violet-500/20 to-fuchsia-500/15 border-violet-500/25' },
-                                { icon: '💞', label: 'Relationships', tab: 'compatibility', bg: 'from-rose-500/20 to-pink-500/15 border-rose-500/25' },
-                                { icon: '✨', label: 'Cosmos', tab: 'cosmos', bg: 'from-blue-500/20 to-indigo-500/15 border-blue-500/25' },
-                                { icon: '♈', label: 'Horoscope', tab: 'horoscope', bg: 'from-red-500/20 to-orange-500/15 border-red-500/25' },
-                                { icon: '🌙', label: 'Natal', tab: 'natal', bg: 'from-indigo-500/20 to-purple-500/15 border-indigo-500/25' },
-                                { icon: '🔢', label: 'Numbers', tab: 'numerology', bg: 'from-amber-600/20 to-yellow-500/15 border-amber-500/25' },
-                                { icon: '🌟', label: 'Year Ahead', tab: 'yearahead', bg: 'from-yellow-500/20 to-amber-500/15 border-yellow-500/25' },
-                                { icon: '👨‍👩‍👧‍👦', label: 'Family', tab: 'family', bg: 'from-pink-500/20 to-rose-500/15 border-pink-500/25' },
-                                { icon: '💼', label: 'Career', tab: 'career', bg: 'from-emerald-500/20 to-teal-500/15 border-emerald-500/25' },
+                                {
+                                    icon: '🔮', label: 'Tarot', tab: 'new',
+                                    base: 'linear-gradient(145deg, #7c3aed 0%, #6d28d9 45%, #4c1d95 100%)',
+                                    shadow: '0 6px 16px rgba(109,40,217,0.55), 0 2px 4px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.18), inset 0 -2px 4px rgba(0,0,0,0.3)'
+                                },
+                                {
+                                    icon: '💞', label: 'Relationships', tab: 'compatibility',
+                                    base: 'linear-gradient(145deg, #be185d 0%, #9f1239 45%, #6b0d2d 100%)',
+                                    shadow: '0 6px 16px rgba(190,24,93,0.5), 0 2px 4px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.15), inset 0 -2px 4px rgba(0,0,0,0.3)'
+                                },
+                                {
+                                    icon: '✨', label: 'Cosmos', tab: 'cosmos',
+                                    base: 'linear-gradient(145deg, #1d4ed8 0%, #1e3a8a 45%, #0f1f5c 100%)',
+                                    shadow: '0 6px 16px rgba(29,78,216,0.55), 0 2px 4px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.15), inset 0 -2px 4px rgba(0,0,0,0.3)'
+                                },
+                                {
+                                    icon: '♈', label: 'Horoscope', tab: 'horoscope',
+                                    base: 'linear-gradient(145deg, #b91c1c 0%, #991b1b 45%, #5c0a0a 100%)',
+                                    shadow: '0 6px 16px rgba(185,28,28,0.55), 0 2px 4px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.14), inset 0 -2px 4px rgba(0,0,0,0.3)'
+                                },
+                                {
+                                    icon: '🌙', label: 'Natal', tab: 'natal',
+                                    base: 'linear-gradient(145deg, #3730a3 0%, #312e81 45%, #1e1b5e 100%)',
+                                    shadow: '0 6px 16px rgba(55,48,163,0.55), 0 2px 4px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.15), inset 0 -2px 4px rgba(0,0,0,0.3)'
+                                },
+                                {
+                                    icon: '🔢', label: 'Numbers', tab: 'numerology',
+                                    base: 'linear-gradient(145deg, #92400e 0%, #78350f 45%, #451a03 100%)',
+                                    shadow: '0 6px 16px rgba(146,64,14,0.55), 0 2px 4px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.14), inset 0 -2px 4px rgba(0,0,0,0.3)'
+                                },
+                                {
+                                    icon: '🌟', label: 'Year Ahead', tab: 'yearahead',
+                                    base: 'linear-gradient(145deg, #92400e 0%, #6b2d0a 45%, #3d1505 100%)',
+                                    shadow: '0 6px 16px rgba(146,64,14,0.5), 0 2px 4px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.14), inset 0 -2px 4px rgba(0,0,0,0.3)'
+                                },
+                                {
+                                    icon: '👨‍👩‍👧‍👦', label: 'Family', tab: 'family',
+                                    base: 'linear-gradient(145deg, #9d174d 0%, #831843 45%, #4c0729 100%)',
+                                    shadow: '0 6px 16px rgba(157,23,77,0.5), 0 2px 4px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.14), inset 0 -2px 4px rgba(0,0,0,0.3)'
+                                },
+                                {
+                                    icon: '💼', label: 'Career', tab: 'career',
+                                    base: 'linear-gradient(145deg, #065f46 0%, #064e3b 45%, #022c22 100%)',
+                                    shadow: '0 6px 16px rgba(6,95,70,0.55), 0 2px 4px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.14), inset 0 -2px 4px rgba(0,0,0,0.3)'
+                                },
                             ].map(item => (
                                 <button
                                     key={item.tab}
                                     onClick={() => handleTabChange(item.tab)}
-                                    className="flex flex-col items-center gap-1.5 transition-all hover:scale-105 active:scale-95"
+                                    className="flex flex-col items-center gap-2 transition-all hover:scale-105 active:scale-95"
                                 >
-                                    <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${item.bg} border flex items-center justify-center text-2xl shadow-md`}>
+                                    <div
+                                        className="w-16 h-16 rounded-full flex items-center justify-center text-2xl"
+                                        style={{
+                                            background: item.base,
+                                            boxShadow: item.shadow,
+                                        }}
+                                    >
                                         {item.icon}
                                     </div>
-                                    <span className="text-[10px] text-altar-muted/70 font-display">{item.label}</span>
+                                    <span className="text-[10px] text-white/55 font-display tracking-wide">{item.label}</span>
                                 </button>
                             ))}
                         </div>
