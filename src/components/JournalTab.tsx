@@ -187,7 +187,14 @@ export function JournalTab({ onClose, onTabChange, initialSubTab = 'journal' }: 
                     <div className="flex items-center justify-between px-4 py-3 max-w-[500px] mx-auto">
                         <button onClick={onClose} className="text-altar-muted hover:text-white transition-colors text-sm font-display tracking-wide">← Altar</button>
                         {/* Sub-tab switcher */}
-                        <div className="flex items-center gap-1 rounded-full p-1" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                        <div
+                            className="flex items-center gap-1 rounded-full p-1"
+                            style={{
+                                background: 'linear-gradient(145deg, #120c2a 0%, #0d0820 100%)',
+                                boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.5), inset 0 -1px 2px rgba(255,255,255,0.04)',
+                                border: '1px solid rgba(255,255,255,0.07)',
+                            }}
+                        >
                             {(['journal', 'dreams'] as const).map(tab => {
                                 const isActive = activeSubTab === tab;
                                 const isDream = tab === 'dreams';
@@ -196,12 +203,20 @@ export function JournalTab({ onClose, onTabChange, initialSubTab = 'journal' }: 
                                         key={tab}
                                         onClick={() => setActiveSubTab(tab)}
                                         className="px-3 py-1 rounded-full text-[11px] font-display tracking-wide transition-all"
-                                        style={isActive ? {
-                                            background: isDream ? 'rgba(109,40,217,0.5)' : 'rgba(212,175,55,0.2)',
-                                            color: isDream ? '#c4b5fd' : '#d4af37',
-                                            border: `1px solid ${isDream ? 'rgba(139,92,246,0.5)' : 'rgba(212,175,55,0.3)'}`,
-                                        } : {
-                                            color: 'rgba(255,255,255,0.4)',
+                                        style={isActive ? (
+                                            isDream ? {
+                                                background: 'linear-gradient(145deg, #3b1f8a 0%, #2d1b6e 100%)',
+                                                boxShadow: '0 3px 10px rgba(109,40,217,0.5), inset 0 1px 1px rgba(255,255,255,0.14), inset 0 -1px 3px rgba(0,0,0,0.4)',
+                                                border: '1px solid rgba(139,92,246,0.4)',
+                                                color: '#c4b5fd',
+                                            } : {
+                                                background: 'linear-gradient(145deg, #3d2e08 0%, #2a1f05 100%)',
+                                                boxShadow: '0 3px 10px rgba(146,64,14,0.5), inset 0 1px 1px rgba(255,220,80,0.14), inset 0 -1px 3px rgba(0,0,0,0.4)',
+                                                border: '1px solid rgba(212,175,55,0.35)',
+                                                color: '#ffd700',
+                                            }
+                                        ) : {
+                                            color: 'rgba(255,255,255,0.35)',
                                             border: '1px solid transparent',
                                         }}
                                     >
@@ -273,7 +288,13 @@ export function JournalTab({ onClose, onTabChange, initialSubTab = 'journal' }: 
                     <div className="mt-5 mb-4">
                         <button
                             onClick={handleNewEntry}
-                            className="w-full py-4 rounded-2xl bg-gradient-to-r from-altar-mid/40 via-altar-bright/30 to-altar-mid/40 border border-altar-gold/15 text-altar-gold font-display text-sm tracking-wide hover:border-altar-gold/30 hover:shadow-[0_0_20px_rgba(255,215,0,0.08)] transition-all flex items-center justify-center gap-2"
+                            className="w-full py-4 rounded-2xl font-display text-sm tracking-wide flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+                            style={{
+                                background: 'linear-gradient(145deg, #2d1f6e 0%, #1e1454 50%, #130d3a 100%)',
+                                boxShadow: '0 8px 24px rgba(109,40,217,0.45), 0 2px 6px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.16), inset 0 -3px 6px rgba(0,0,0,0.4)',
+                                border: '1px solid rgba(212,175,55,0.22)',
+                                color: '#ffd700',
+                            }}
                         >
                             <span className="text-lg">✦</span> New Entry
                         </button>
@@ -284,7 +305,12 @@ export function JournalTab({ onClose, onTabChange, initialSubTab = 'journal' }: 
                     <div className="mb-4 animate-fade-up" style={{ animationDelay: '0.1s', opacity: 0 }}>
                         <button
                             onClick={() => setShowGuide(!showGuide)}
-                            className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all"
+                            className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all"
+                            style={{
+                                background: 'linear-gradient(145deg, rgba(255,255,255,0.04) 0%, rgba(0,0,0,0.1) 100%)',
+                                boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.4), inset 0 -1px 1px rgba(255,255,255,0.04)',
+                                border: '1px solid rgba(255,255,255,0.07)',
+                            }}
                         >
                             <span className="text-[10px] text-altar-muted/50 font-display tracking-[2px] uppercase">How It Works</span>
                             <span className={`text-[10px] text-altar-muted/30 transition-transform ${showGuide ? 'rotate-180' : ''}`}>▾</span>
@@ -298,7 +324,14 @@ export function JournalTab({ onClose, onTabChange, initialSubTab = 'journal' }: 
                                     { step: '3', icon: '✨', title: 'Discover patterns', desc: `After ${progress.target} entries, we analyze your words against your cosmic transits and surface hidden patterns — themes you might not notice otherwise.` },
                                 ].map(item => (
                                     <div key={item.step} className="flex gap-3">
-                                        <div className="w-7 h-7 rounded-full bg-altar-gold/10 border border-altar-gold/15 flex items-center justify-center shrink-0">
+                                        <div
+                                            className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
+                                            style={{
+                                                background: 'linear-gradient(145deg, #3d2e08 0%, #2a1f05 100%)',
+                                                boxShadow: '0 3px 8px rgba(146,64,14,0.4), inset 0 1px 1px rgba(255,220,80,0.14)',
+                                                border: '1px solid rgba(212,175,55,0.2)',
+                                            }}
+                                        >
                                             <span className="text-xs">{item.icon}</span>
                                         </div>
                                         <div>
@@ -367,18 +400,35 @@ export function JournalTab({ onClose, onTabChange, initialSubTab = 'journal' }: 
                             </div>
                         ) : (
                             /* Progress toward unlock */
-                            <div className="glass rounded-2xl p-4 border border-white/5">
+                            <div
+                                className="rounded-2xl p-4"
+                                style={{
+                                    background: 'linear-gradient(160deg, #1c1538 0%, #130f2e 55%, #0d0b22 100%)',
+                                    boxShadow: '0 8px 28px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.08), inset 0 -2px 5px rgba(0,0,0,0.35)',
+                                    border: '1px solid rgba(255,255,255,0.07)',
+                                }}
+                            >
                                 <h3 className="font-display text-xs text-altar-muted tracking-[3px] uppercase mb-2 flex items-center gap-1.5">
                                     <span className="text-altar-muted/50">✨</span> Cosmic Patterns
                                 </h3>
                                 <p className="text-[10px] text-altar-muted/70 mb-3">
                                     After {progress.target} journal entries, we'll start finding hidden patterns between your words and the stars.
                                 </p>
-                                {/* Progress bar */}
-                                <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden mb-2">
+                                {/* Progress bar — clay inset track */}
+                                <div
+                                    className="w-full h-2 rounded-full overflow-hidden mb-2"
+                                    style={{
+                                        background: 'linear-gradient(145deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.3) 100%)',
+                                        boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.6), inset 0 -1px 1px rgba(255,255,255,0.04)',
+                                    }}
+                                >
                                     <div
-                                        className="h-full bg-gradient-to-r from-altar-gold/40 to-altar-gold/70 rounded-full transition-all duration-700"
-                                        style={{ width: `${progress.percentage}%` }}
+                                        className="h-full rounded-full transition-all duration-700"
+                                        style={{
+                                            width: `${progress.percentage}%`,
+                                            background: 'linear-gradient(90deg, #78350f, #d97706, #fbbf24)',
+                                            boxShadow: '0 0 8px rgba(217,119,6,0.5)',
+                                        }}
                                     />
                                 </div>
                                 <p className="text-[9px] text-altar-muted/50 italic">
@@ -398,7 +448,12 @@ export function JournalTab({ onClose, onTabChange, initialSubTab = 'journal' }: 
                                         {group.entries.map(entry => (
                                             <div
                                                 key={entry.id}
-                                                className="rounded-xl border border-white/5 bg-white/[0.02] p-4 hover:border-white/10 transition-all"
+                                                className="rounded-xl p-4 transition-all hover:brightness-105"
+                                                style={{
+                                                    background: 'linear-gradient(150deg, #1a1338 0%, #130f2a 55%, #0d0b22 100%)',
+                                                    boxShadow: '0 4px 16px rgba(0,0,0,0.45), 0 1px 4px rgba(0,0,0,0.35), inset 0 1px 1px rgba(255,255,255,0.07), inset 0 -1px 3px rgba(0,0,0,0.3)',
+                                                    border: '1px solid rgba(255,255,255,0.07)',
+                                                }}
                                             >
                                                 <div className="flex items-start justify-between gap-2 mb-1.5">
                                                     <div className="flex items-center gap-1.5">
@@ -428,7 +483,16 @@ export function JournalTab({ onClose, onTabChange, initialSubTab = 'journal' }: 
                                                 {entry.transitSnapshot && entry.transitSnapshot.length > 0 && (
                                                     <div className="mt-2 flex gap-1 flex-wrap">
                                                         {entry.transitSnapshot.slice(0, 3).map((t, i) => (
-                                                            <span key={i} className="text-[8px] px-1.5 py-0.5 rounded-full bg-white/[0.03] text-altar-muted/30">
+                                                            <span
+                                                                key={i}
+                                                                className="text-[8px] px-1.5 py-0.5 rounded-full"
+                                                                style={{
+                                                                    background: 'linear-gradient(145deg, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0.1) 100%)',
+                                                                    border: '1px solid rgba(255,255,255,0.08)',
+                                                                    boxShadow: '0 1px 4px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.06)',
+                                                                    color: 'rgba(148,163,184,0.5)',
+                                                                }}
+                                                            >
                                                                 {t.transitPlanet} {t.aspect.slice(0, 3).toLowerCase()} {t.natalPlanet}
                                                             </span>
                                                         ))}
