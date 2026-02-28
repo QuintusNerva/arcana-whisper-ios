@@ -76,10 +76,11 @@ export function DreamEntryView({ onClose, onSaved }: DreamEntryProps) {
                             height: i % 5 === 0 ? '2px' : '1px',
                             left: `${(i * 37 + 13) % 100}%`,
                             top: `${(i * 53 + 7) % 100}%`,
-                            opacity: Math.random() * 0.5 + 0.1,
+                            opacity: i % 3 === 0 ? 0.2 : i % 2 === 0 ? 0.12 : 0.07,
                         }}
                     />
                 ))}
+
             </div>
 
             {/* Header */}
