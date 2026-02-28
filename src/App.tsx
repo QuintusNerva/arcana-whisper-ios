@@ -645,18 +645,31 @@ function App() {
                         return (
                             <div className="flex justify-center gap-2 mx-5 mt-1 mb-4 animate-fade-up" style={{ opacity: 0 }}>
                                 {[
-                                    { symbol: '☉', label: 'Sun', sign: triad.sun.name, glyph: sunSign?.glyph, bg: 'from-amber-700/50 to-amber-600/25', border: 'border-amber-500/35' },
-                                    { symbol: '☽', label: 'Moon', sign: triad.moon.name, glyph: moonSign?.glyph, bg: 'from-slate-500/40 to-slate-400/15', border: 'border-slate-400/25' },
-                                    { symbol: '↑', label: 'Rising', sign: triad.rising.name, glyph: risingSign?.glyph, bg: 'from-orange-700/50 to-red-600/25', border: 'border-orange-500/35' },
+                                    {
+                                        symbol: '☉', label: 'Sun', sign: triad.sun.name, glyph: sunSign?.glyph,
+                                        bg: 'linear-gradient(145deg, #92400e 0%, #78350f 60%, #451a03 100%)',
+                                        shadow: '0 4px 12px rgba(146,64,14,0.5), 0 1px 3px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15), inset 0 -1px 3px rgba(0,0,0,0.35)'
+                                    },
+                                    {
+                                        symbol: '☽', label: 'Moon', sign: triad.moon.name, glyph: moonSign?.glyph,
+                                        bg: 'linear-gradient(145deg, #334155 0%, #1e293b 60%, #0f172a 100%)',
+                                        shadow: '0 4px 12px rgba(51,65,85,0.6), 0 1px 3px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.12), inset 0 -1px 3px rgba(0,0,0,0.35)'
+                                    },
+                                    {
+                                        symbol: '↑', label: 'Rising', sign: triad.rising.name, glyph: risingSign?.glyph,
+                                        bg: 'linear-gradient(145deg, #9a3412 0%, #7c2d12 60%, #431407 100%)',
+                                        shadow: '0 4px 12px rgba(154,52,18,0.5), 0 1px 3px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.14), inset 0 -1px 3px rgba(0,0,0,0.35)'
+                                    },
                                 ].map(pill => (
                                     <div
                                         key={pill.label}
-                                        className={`bg-gradient-to-r ${pill.bg} ${pill.border} border px-2.5 py-1 rounded-full flex items-center gap-1 whitespace-nowrap shadow-md`}
+                                        className="px-3 py-1.5 rounded-full flex items-center gap-1.5 whitespace-nowrap"
+                                        style={{ background: pill.bg, boxShadow: pill.shadow }}
                                     >
-                                        <span className="text-[10px] opacity-60">{pill.symbol}</span>
-                                        <span className="text-[10px] text-white/50 font-display">{pill.label}:</span>
+                                        <span className="text-[10px] text-white/50">{pill.symbol}</span>
+                                        <span className="text-[10px] text-white/45 font-display">{pill.label}:</span>
                                         <span className="text-[11px] text-white/90 font-display font-semibold">{pill.sign}</span>
-                                        <span className="text-[10px] opacity-50">{pill.glyph}</span>
+                                        <span className="text-[10px] text-white/45">{pill.glyph}</span>
                                     </div>
                                 ))}
                             </div>
@@ -708,13 +721,15 @@ function App() {
                         )}
                     </div>
 
-                    {/* ── Journal Widget — Teal Aurora ── */}
+                    {/* ── Journal Widget — Teal Clay ── */}
                     <div className="mx-5 mb-4 animate-fade-up" style={{ animationDelay: '0.3s', opacity: 0 }}>
                         <button
                             onClick={() => handleTabChange('journal')}
-                            className="w-full text-left rounded-2xl overflow-hidden border border-teal-400/20 relative"
+                            className="w-full text-left rounded-3xl overflow-hidden relative transition-all hover:brightness-110 active:scale-[0.98]"
                             style={{
-                                background: 'linear-gradient(135deg, rgba(13,35,40,0.95) 0%, rgba(15,50,50,0.9) 40%, rgba(10,40,35,0.95) 100%)',
+                                background: 'linear-gradient(150deg, #0d2b2b 0%, #0b2424 50%, #071a1a 100%)',
+                                boxShadow: '0 8px 24px rgba(20,184,166,0.2), 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.07), inset 0 -2px 6px rgba(0,0,0,0.4)',
+                                border: '1px solid rgba(45,212,191,0.12)',
                             }}
                         >
                             {/* Aurora glow effect */}
@@ -778,15 +793,16 @@ function App() {
                         </button>
                     </div>
 
-                    {/* ── Dream Journal Widget — Midnight Indigo ── */}
+                    {/* ── Dream Journal Widget — Midnight Clay ── */}
                     <div className="mx-5 mb-4 animate-fade-up" style={{ animationDelay: '0.35s', opacity: 0 }}>
                         <button
                             onClick={() => { setJournalInitialSubTab('dreams'); handleTabChange('journal'); }}
 
-                            className="w-full text-left rounded-2xl overflow-hidden border relative"
+                            className="w-full text-left rounded-3xl overflow-hidden relative transition-all hover:brightness-110 active:scale-[0.98]"
                             style={{
-                                background: 'linear-gradient(135deg, rgba(10,8,30,0.95) 0%, rgba(20,10,50,0.9) 40%, rgba(8,6,25,0.95) 100%)',
-                                borderColor: 'rgba(139,92,246,0.15)',
+                                background: 'linear-gradient(150deg, #0e0820 0%, #0b0619 50%, #070412 100%)',
+                                boxShadow: '0 8px 24px rgba(109,40,217,0.2), 0 3px 8px rgba(0,0,0,0.55), inset 0 1px 1px rgba(255,255,255,0.06), inset 0 -2px 6px rgba(0,0,0,0.4)',
+                                border: '1px solid rgba(139,92,246,0.12)',
                             }}
                         >
                             {/* Starfield glow */}
