@@ -18,10 +18,12 @@ import { getBirthData, getNatalTriad } from '../services/astrology.service';
 interface JournalTabProps {
     onClose: () => void;
     onTabChange: (tab: string) => void;
+    initialSubTab?: 'journal' | 'dreams';
 }
 
-export function JournalTab({ onClose, onTabChange }: JournalTabProps) {
-    const [activeSubTab, setActiveSubTab] = React.useState<'journal' | 'dreams'>('journal');
+export function JournalTab({ onClose, onTabChange, initialSubTab = 'journal' }: JournalTabProps) {
+    const [activeSubTab, setActiveSubTab] = React.useState<'journal' | 'dreams'>(initialSubTab);
+
     const [showEntry, setShowEntry] = React.useState(false);
     const [editEntry, setEditEntry] = React.useState<JournalEntry | null>(null);
     const [entries, setEntries] = React.useState<JournalEntry[]>([]);

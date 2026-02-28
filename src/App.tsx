@@ -253,6 +253,8 @@ function App() {
     const [showCompatibility, setShowCompatibility] = React.useState(false);
     const [showTransitFeed, setShowTransitFeed] = React.useState(false);
     const [showJournal, setShowJournal] = React.useState(false);
+    const [journalInitialSubTab, setJournalInitialSubTab] = React.useState<'journal' | 'dreams'>('journal');
+
     const [showYearAhead, setShowYearAhead] = React.useState(false);
     const [showFamily, setShowFamily] = React.useState(false);
     const [showCareer, setShowCareer] = React.useState(false);
@@ -355,6 +357,8 @@ function App() {
         setShowCompatibility(false);
         setShowTransitFeed(false);
         setShowJournal(false);
+        setJournalInitialSubTab('journal');
+
         setShowYearAhead(false);
         setShowFamily(false);
         setShowCareer(false);
@@ -552,8 +556,9 @@ function App() {
     if (showJournal) {
         return (
             <JournalTab
-                onClose={() => { setShowJournal(false); setCurrentTab('home'); }}
+                onClose={() => { setShowJournal(false); setJournalInitialSubTab('journal'); setCurrentTab('home'); }}
                 onTabChange={handleTabChange}
+                initialSubTab={journalInitialSubTab}
             />
         );
     }
@@ -776,7 +781,8 @@ function App() {
                     {/* ── Dream Journal Widget — Midnight Indigo ── */}
                     <div className="mx-5 mb-4 animate-fade-up" style={{ animationDelay: '0.35s', opacity: 0 }}>
                         <button
-                            onClick={() => handleTabChange('journal')}
+                            onClick={() => { setJournalInitialSubTab('dreams'); handleTabChange('journal'); }}
+
                             className="w-full text-left rounded-2xl overflow-hidden border relative"
                             style={{
                                 background: 'linear-gradient(135deg, rgba(10,8,30,0.95) 0%, rgba(20,10,50,0.9) 40%, rgba(8,6,25,0.95) 100%)',
