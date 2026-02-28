@@ -603,7 +603,7 @@ function MemoryStatsCard() {
                 <h3 className="font-display text-xs text-altar-muted tracking-[3px] uppercase flex items-center gap-1.5">
                     <span>{memStats.tierIcon}</span> The Cards Remember
                 </h3>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-altar-gold/10 border border-altar-gold/15 text-altar-gold font-display">
+                <span className="text-[10px] px-2 py-0.5 rounded-full clay-pill text-altar-gold font-display">
                     {memStats.tier}
                 </span>
             </div>

@@ -224,8 +224,9 @@ export function DreamEntryView({ onClose, onSaved }: DreamEntryProps) {
                         color: '#e9d5ff',
                         boxShadow: '0 0 30px rgba(139,92,246,0.2)',
                     } : {
-                        background: 'rgba(255,255,255,0.04)',
-                        border: '1px solid rgba(255,255,255,0.08)',
+                        background: 'linear-gradient(145deg, rgba(255,255,255,0.04) 0%, rgba(0,0,0,0.1) 100%)',
+                    boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.45), inset 0 -1px 2px rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.08)',
                         color: 'rgba(255,255,255,0.3)',
                     }}
                 >

@@ -227,7 +227,7 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
                                         {fullChart.planets.map(planet => {
                                             const zodiac = ZODIAC_SIGNS.find(z => z.id === planet.signId);
                                             return (
-                                                <div key={planet.id} className="flex items-center gap-2.5 py-2 px-3 rounded-xl bg-white/[0.03] border border-white/5">
+                                                <div key={planet.id} className="flex items-center gap-2.5 py-2 px-3 rounded-xl clay-inset">
                                                     <span className="text-lg w-6 text-center" title={planet.name}>{planet.glyph}</span>
                                                     <div className="min-w-0">
                                                         <p className="text-[10px] text-altar-muted font-display tracking-wider uppercase">{planet.name}</p>
@@ -374,7 +374,7 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
                                     { label: 'Moon', sign: triad.moon },
                                     { label: 'Rising', sign: triad.rising },
                                 ].map(item => (
-                                    <div key={item.label} className="rounded-xl p-3 bg-white/5 border border-white/5 text-center">
+                                    <div key={item.label} className="rounded-xl p-3 clay-inset text-center">
                                         <p className="text-[8px] text-altar-muted font-display tracking-[2px] uppercase">{item.label}</p>
                                         <p className="text-sm text-altar-text font-display mt-1">{item.sign.element}</p>
                                         <p className="text-[10px] text-altar-muted mt-0.5">{item.sign.ruling}</p>

@@ -154,8 +154,9 @@ export function DreamJournal({ onClose, onTabChange }: DreamJournalProps) {
                         <div
                             className="mt-5 mb-4 rounded-2xl p-4 border"
                             style={{
-                                background: 'rgba(109,40,217,0.06)',
-                                borderColor: 'rgba(139,92,246,0.15)',
+                                background: 'linear-gradient(160deg, #1c1538 0%, #130f2e 55%, #0d0b22 100%)',
+                                boxShadow: '0 8px 28px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.08), inset 0 -2px 5px rgba(0,0,0,0.35)',
+                                borderColor: 'rgba(139,92,246,0.2)',
                             }}
                         >
                             <p className="text-[9px] font-display tracking-[2px] uppercase mb-3"
@@ -169,8 +170,9 @@ export function DreamJournal({ onClose, onTabChange }: DreamJournalProps) {
                                         key={stat.emoji}
                                         className="flex items-center gap-1.5 rounded-full px-3 py-1.5 border"
                                         style={{
-                                            background: 'rgba(139,92,246,0.1)',
-                                            borderColor: 'rgba(139,92,246,0.2)',
+                                            background: 'linear-gradient(145deg, rgba(139,92,246,0.15) 0%, rgba(109,40,217,0.08) 100%)',
+                                            boxShadow: '0 2px 8px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.08)',
+                                            borderColor: 'rgba(139,92,246,0.25)',
                                         }}
                                     >
                                         <span className="text-sm">{stat.emoji}</span>
@@ -207,10 +209,11 @@ export function DreamJournal({ onClose, onTabChange }: DreamJournalProps) {
                             </p>
                             <button
                                 onClick={() => setShowNewEntry(true)}
-                                className="px-6 py-3 rounded-full font-display text-sm tracking-[2px] transition-all"
+                                className="px-6 py-4 rounded-2xl font-display text-sm tracking-[2px] transition-all active:scale-[0.98]"
                                 style={{
-                                    background: 'rgba(109,40,217,0.3)',
-                                    border: '1px solid rgba(139,92,246,0.4)',
+                                    background: 'linear-gradient(145deg, #3b1f8a 0%, #2d1b6e 55%, #1a1042 100%)',
+                                    boxShadow: '0 6px 18px rgba(109,40,217,0.45), 0 2px 4px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15), inset 0 -2px 5px rgba(0,0,0,0.4)',
+                                    border: '1px solid rgba(167,139,250,0.3)',
                                     color: '#c4b5fd',
                                 }}
                             >

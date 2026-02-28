@@ -284,7 +284,7 @@ export function CareerAlignment({ onClose, onTabChange }: CareerAlignmentProps) 
                                 <>
                                     {/* Work Style */}
                                     <div
-                                        className="rounded-2xl p-5 border"
+                                        className="rounded-2xl p-5 glass"
                                         style={{
                                             background: 'rgba(255,255,255,0.03)',
                                             borderColor: `${accent}18`,
@@ -324,7 +324,7 @@ export function CareerAlignment({ onClose, onTabChange }: CareerAlignmentProps) 
 
                                     {/* Blind Spot */}
                                     <div
-                                        className="rounded-2xl p-5 border"
+                                        className="rounded-2xl p-5 glass"
                                         style={{
                                             background: 'rgba(251,191,36,0.04)',
                                             borderColor: 'rgba(251,191,36,0.15)',
@@ -336,7 +336,7 @@ export function CareerAlignment({ onClose, onTabChange }: CareerAlignmentProps) 
 
                                     {/* Closing Question */}
                                     <div
-                                        className="rounded-2xl p-6 border text-center"
+                                        className="rounded-2xl p-6 glass text-center"
                                         style={{
                                             background: `linear-gradient(135deg, ${accent}08, transparent)`,
                                             borderColor: `${accent}20`,
