@@ -18,6 +18,8 @@ import { DreamEntryView } from './DreamEntry';
 interface DreamJournalProps {
     onClose: () => void;
     onTabChange: (tab: string) => void;
+    subscription: string;
+    onShowPremium: () => void;
 }
 
 // ── Helpers ──────────────────────────────────────────────
@@ -51,7 +53,7 @@ function groupByDate(entries: DreamEntry[]) {
 
 // ── Main Component ────────────────────────────────────────
 
-export function DreamJournal({ onClose, onTabChange }: DreamJournalProps) {
+export function DreamJournal({ onClose, onTabChange, subscription, onShowPremium }: DreamJournalProps) {
     const [entries, setEntries] = React.useState<DreamEntry[]>([]);
     const [showNewEntry, setShowNewEntry] = React.useState(false);
 
@@ -242,6 +244,8 @@ export function DreamJournal({ onClose, onTabChange }: DreamJournalProps) {
                                         dream={dream}
                                         onDelete={handleDelete}
                                         onInterpreted={handleInterpreted}
+                                        subscription={subscription}
+                                        onShowPremium={onShowPremium}
                                     />
                                 ))}
                             </div>

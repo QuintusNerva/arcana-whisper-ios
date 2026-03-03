@@ -494,6 +494,8 @@ function App() {
             <NatalChart
                 onClose={() => { setShowNatalChart(false); setCurrentTab('home'); }}
                 onTabChange={handleTabChange}
+                subscription={sub}
+                onShowPremium={() => setShowPremiumOverlay(true)}
             />
         );
     }
@@ -503,6 +505,8 @@ function App() {
             <Numerology
                 onClose={() => { setShowNumerology(false); setCurrentTab('home'); }}
                 onTabChange={handleTabChange}
+                subscription={sub}
+                onShowPremium={() => setShowPremiumOverlay(true)}
             />
         );
     }
@@ -522,6 +526,8 @@ function App() {
             <Compatibility
                 onClose={() => { setShowCompatibility(false); setCurrentTab('home'); }}
                 onTabChange={handleTabChange}
+                subscription={sub}
+                onShowPremium={() => setShowPremiumOverlay(true)}
             />
         );
     }
@@ -531,6 +537,8 @@ function App() {
             <TransitFeed
                 onClose={() => { setShowTransitFeed(false); setCurrentTab('home'); }}
                 onTabChange={handleTabChange}
+                subscription={sub}
+                onShowPremium={() => setShowPremiumOverlay(true)}
             />
         );
     }
@@ -540,6 +548,8 @@ function App() {
             <FamilyCircle
                 onClose={() => { setShowFamily(false); setCurrentTab('home'); }}
                 onTabChange={handleTabChange}
+                subscription={sub}
+                onShowPremium={() => setShowPremiumOverlay(true)}
             />
         );
     }
@@ -549,6 +559,8 @@ function App() {
             <YearAhead
                 onClose={() => { setShowYearAhead(false); setCurrentTab('home'); }}
                 onTabChange={handleTabChange}
+                subscription={sub}
+                onShowPremium={() => setShowPremiumOverlay(true)}
             />
         );
     }
@@ -559,6 +571,8 @@ function App() {
                 onClose={() => { setShowJournal(false); setJournalInitialSubTab('journal'); setCurrentTab('home'); }}
                 onTabChange={handleTabChange}
                 initialSubTab={journalInitialSubTab}
+                subscription={sub}
+                onShowPremium={() => setShowPremiumOverlay(true)}
             />
         );
     }
@@ -568,6 +582,8 @@ function App() {
             <CareerAlignment
                 onClose={() => { setShowCareer(false); setCurrentTab('home'); }}
                 onTabChange={handleTabChange}
+                subscription={sub}
+                onShowPremium={() => setShowPremiumOverlay(true)}
             />
         );
     }
@@ -721,66 +737,56 @@ function App() {
                         )}
                     </div>
 
-                    {/* ── Journal Widget — Teal Clay ── */}
+                    {/* ── The Journal Widget — Clay ── */}
                     <div className="mx-5 mb-4 animate-fade-up" style={{ animationDelay: '0.3s', opacity: 0 }}>
                         <button
                             onClick={() => handleTabChange('journal')}
-                            className="w-full text-left rounded-3xl overflow-hidden relative transition-all hover:brightness-110 active:scale-[0.98]"
-                            style={{
-                                background: 'linear-gradient(150deg, #0d2b2b 0%, #0b2424 50%, #071a1a 100%)',
-                                boxShadow: '0 8px 24px rgba(20,184,166,0.2), 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.07), inset 0 -2px 6px rgba(0,0,0,0.4)',
-                                border: '1px solid rgba(45,212,191,0.12)',
-                            }}
+                            className="w-full text-left rounded-3xl p-[1px] relative transition-all hover:scale-[1.02] active:scale-[0.98] clay-card block overflow-hidden"
+                            style={{ padding: 0 }}
                         >
-                            {/* Aurora glow effect */}
-                            <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-teal-500/10 via-cyan-500/5 to-transparent pointer-events-none" />
-                            <div className="absolute bottom-2 left-1/4 right-1/4 h-[2px] bg-gradient-to-r from-transparent via-teal-400/30 to-transparent blur-sm pointer-events-none" />
-
                             <div className="relative p-4">
-                                {/* Header row */}
-                                <div className="flex items-center justify-between mb-3">
-                                    <h3 className="font-display text-sm text-white tracking-wide flex items-center gap-2 font-semibold">
-                                        <span>📓</span> YOUR JOURNAL
+                                <div className="flex items-center justify-between mb-2">
+                                    <h3 className="font-display text-sm text-altar-gold tracking-wide flex items-center gap-2 font-semibold">
+                                        <span>📓</span> THE JOURNAL
                                     </h3>
-                                    <span className="text-[10px] text-teal-300/60 font-display">Tracking</span>
+                                    <span className="text-[10px] text-altar-gold/50 font-display">Tracking & Dreams</span>
                                 </div>
 
-                                {/* Content */}
                                 {(() => {
                                     const entries = getJournalEntries();
+                                    const dreams = getDreamEntries();
                                     const progress = getPatternProgress();
-                                    const latestEntry = entries[0];
 
                                     return (
                                         <>
-                                            {latestEntry ? (
-                                                <div className="mb-3">
-                                                    <div className="flex items-center justify-between mb-1">
-                                                        <p className="text-xs text-white/80 font-semibold">Latest entry</p>
-                                                        <span className="text-[10px] text-white/40">
-                                                            {new Date(latestEntry.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
-                                                        </span>
-                                                    </div>
-                                                    <p className="text-[11px] text-white/60 flex items-center gap-1.5">
-                                                        {latestEntry.mood && <span>{latestEntry.mood}</span>}
-                                                        <span className="line-clamp-1">{latestEntry.text}</span>
-                                                    </p>
+                                            <div className="mb-3">
+                                                <p className="text-xs text-altar-text/70 italic leading-relaxed">
+                                                    Your personal sanctuary for daily reflections and dream logs.
+                                                </p>
+                                            </div>
+
+                                            {/* Quick Stats */}
+                                            <div className="flex items-center gap-3 mt-3">
+                                                <div className="flex-1 rounded-xl p-2.5 clay-inset text-center">
+                                                    <span className="block text-[10px] text-altar-muted/60 font-display uppercase tracking-[1px] mb-1">Daily Entries</span>
+                                                    <span className="text-sm font-semibold text-altar-gold">{entries.length}</span>
                                                 </div>
-                                            ) : (
-                                                <div className="mb-3">
-                                                    <p className="text-xs text-white/60 italic">No pressure. Just say what's real.</p>
+                                                <div className="flex-1 rounded-xl p-2.5 clay-inset text-center">
+                                                    <span className="block text-[10px] text-altar-muted/60 font-display uppercase tracking-[1px] mb-1">Dream Logs</span>
+                                                    <span className="text-sm font-semibold text-purple-300">{dreams.length}</span>
                                                 </div>
-                                            )}
+                                            </div>
 
                                             {/* Progress bar */}
                                             {!progress.unlocked && (
-                                                <div>
-                                                    <p className="text-[10px] text-white/50 mb-1.5">
-                                                        <span className="font-semibold text-white/70">{progress.current}/{progress.target}</span> to cosmic patterns <span>✨</span>
+                                                <div className="mt-3">
+                                                    <p className="text-[10px] text-altar-gold/50 mb-1.5 flex justify-between">
+                                                        <span><span className="font-bold text-altar-gold/80">{progress.current}/{progress.target}</span> to cosmic patterns</span>
+                                                        <span>✨</span>
                                                     </p>
-                                                    <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                                    <div className="h-1.5 bg-black/30 rounded-full overflow-hidden shadow-inner">
                                                         <div
-                                                            className="h-full bg-gradient-to-r from-teal-500/60 to-cyan-400/70 rounded-full transition-all"
+                                                            className="h-full bg-gradient-to-r from-altar-gold/60 to-purple-400/70 rounded-full transition-all"
                                                             style={{ width: `${progress.percentage}%` }}
                                                         />
                                                     </div>
@@ -793,72 +799,15 @@ function App() {
                         </button>
                     </div>
 
-                    {/* ── Dream Journal Widget — Midnight Clay ── */}
-                    <div className="mx-5 mb-4 animate-fade-up" style={{ animationDelay: '0.35s', opacity: 0 }}>
-                        <button
-                            onClick={() => { setJournalInitialSubTab('dreams'); handleTabChange('journal'); }}
-
-                            className="w-full text-left rounded-3xl overflow-hidden relative transition-all hover:brightness-110 active:scale-[0.98]"
-                            style={{
-                                background: 'linear-gradient(150deg, #0e0820 0%, #0b0619 50%, #070412 100%)',
-                                boxShadow: '0 8px 24px rgba(109,40,217,0.2), 0 3px 8px rgba(0,0,0,0.55), inset 0 1px 1px rgba(255,255,255,0.06), inset 0 -2px 6px rgba(0,0,0,0.4)',
-                                border: '1px solid rgba(139,92,246,0.12)',
-                            }}
-                        >
-                            {/* Starfield glow */}
-                            <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                                {[0, 1, 2, 3, 4, 5].map(i => (
-                                    <div key={i} className="absolute rounded-full bg-white"
-                                        style={{
-                                            width: '1px', height: '1px',
-                                            left: `${(i * 17 + 11) % 95}%`,
-                                            top: `${(i * 23 + 13) % 80}%`,
-                                            opacity: 0.4,
-                                        }}
-                                    />
-                                ))}
-                                <div className="absolute bottom-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-violet-400/20 to-transparent blur-sm" />
-                            </div>
-
-                            <div className="relative p-4">
-                                <div className="flex items-center justify-between mb-3">
-                                    <h3 className="font-display text-sm tracking-wide flex items-center gap-2 font-semibold" style={{ color: 'rgba(196,181,253,0.85)' }}>
-                                        <span>🌙</span> DREAM JOURNAL
-                                    </h3>
-                                    <span className="text-[10px] font-display" style={{ color: 'rgba(167,139,250,0.45)' }}>Dreams</span>
-                                </div>
-                                {(() => {
-                                    const dreams = getDreamEntries();
-                                    const latest = dreams[0];
-                                    return (
-                                        <>
-                                            {latest ? (
-                                                <div>
-                                                    <div className="flex items-center gap-1.5 mb-1">
-                                                        {latest.wakingMood && <span className="text-sm">{latest.wakingMood}</span>}
-                                                        <p className="text-[11px] line-clamp-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
-                                                            {latest.text}
-                                                        </p>
-                                                    </div>
-                                                    <p className="text-[10px]" style={{ color: 'rgba(167,139,250,0.45)' }}>
-                                                        {dreams.length} dream{dreams.length !== 1 ? 's' : ''} recorded · Tap to interpret
-                                                    </p>
-                                                </div>
-                                            ) : (
-                                                <p className="text-xs italic" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                                                    What did you see last night?
-                                                </p>
-                                            )}
-                                        </>
-                                    );
-                                })()}
-                            </div>
-                        </button>
-                    </div>
+                    {/* ── Cosmic Blueprint ── */}
+                    <CosmicBlueprint onTabChange={handleTabChange} />
 
                     {/* ── Explore Circles ── */}
 
                     <div className="mx-5 mb-4 animate-fade-up" style={{ animationDelay: '0.5s', opacity: 0 }}>
+                        <h3 className="font-display text-center text-sm tracking-[4px] text-altar-muted uppercase mb-5">
+                            <span className="text-altar-gold">✧</span> Your Portal <span className="text-altar-gold">✧</span>
+                        </h3>
                         <div className="grid grid-cols-4 gap-y-4 gap-x-2 justify-items-center">
                             {[
                                 {
@@ -916,7 +865,7 @@ function App() {
                                         className="w-16 h-16 rounded-full flex items-center justify-center text-2xl"
                                         style={{
                                             background: item.base,
-                                            boxShadow: item.shadow,
+                                            boxShadow: '0 4px 10px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15), inset 0 -2px 4px rgba(0,0,0,0.3)',
                                         }}
                                     >
                                         {item.icon}
@@ -926,9 +875,6 @@ function App() {
                             ))}
                         </div>
                     </div>
-
-                    {/* ── Below the fold: Blueprint only (MBS & Horoscope removed) ── */}
-                    <CosmicBlueprint onTabChange={handleTabChange} />
 
                     {/* Premium Banner — only for free users */}
                     {sub !== 'premium' && (

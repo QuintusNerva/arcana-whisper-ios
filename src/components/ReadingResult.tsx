@@ -87,31 +87,7 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
         return () => timers.forEach(clearTimeout);
     }, [reading.cards]);
 
-    // Auto-fire spread reading once all cards are revealed
-    React.useEffect(() => {
-        if (!allRevealed || spreadInsight || spreadInsightLoading) return;
-        const ai = new AIService();
-        if (!ai.hasApiKey()) return;
-        (async () => {
-            setSpreadInsightLoading(true);
-            setAiError(null);
-            try {
-                const cards = reading.cards.map((c, i) => ({
-                    name: c.name,
-                    meaning: c.meaning,
-                    position: positions[i] || `Card ${i + 1}`,
-                }));
-                const insight = await ai.getSpreadInsight(
-                    cards, reading.spread, reading.theme, reading.question
-                );
-                setSpreadInsight(insight);
-            } catch (e: any) {
-                setAiError(e.message);
-            } finally {
-                setSpreadInsightLoading(false);
-            }
-        })();
-    }, [allRevealed]);
+    // Spread reading is now triggered manually via the 'Deep Dive' button
 
     const handleSave = () => {
         const tarotService = new TarotService();
@@ -452,7 +428,7 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
                             </button>
                         </div>
 
-                        {/* Spread Reading — auto-loaded */}
+                        {/* Spread Reading — manual trigger */}
                         {spreadInsightLoading ? (
                             <div className="glass-strong rounded-2xl p-5">
                                 <h4 className="font-display text-sm text-altar-gold tracking-[2px] uppercase mb-3 flex items-center gap-2">
@@ -473,14 +449,46 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
                                 </h4>
                                 <AIResponseRenderer text={spreadInsight} />
                             </div>
-                        ) : !isPremium ? (
-                            <button onClick={onShowPremium} className="w-full py-3.5 rounded-xl bg-gradient-to-r from-altar-gold/10 to-altar-bright/10 border border-altar-gold/20 text-center transition-all hover:border-altar-gold/40 hover:scale-[1.01] active:scale-[0.99]">
-                                <span className="shimmer-text font-display text-sm font-semibold tracking-wide">
-                                    👑 Unlock Premium Insight
+                        ) : (
+                            <button
+                                onClick={async () => {
+                                    if (!isPremium) {
+                                        onShowPremium();
+                                        return;
+                                    }
+                                    const ai = new AIService();
+                                    if (!ai.hasApiKey()) {
+                                        setAiError('Please enter your OpenAI API key in the settings to generate AI readings.');
+                                        return;
+                                    }
+                                    setSpreadInsightLoading(true);
+                                    setAiError(null);
+                                    try {
+                                        const cardsContext = reading.cards.map((c, i) => ({
+                                            name: c.name,
+                                            meaning: c.meaning,
+                                            position: positions[i] || `Card ${i + 1}`,
+                                        }));
+                                        const insight = await ai.getSpreadInsight(
+                                            cardsContext, reading.spread, reading.theme, reading.question
+                                        );
+                                        setSpreadInsight(insight);
+                                    } catch (e: any) {
+                                        setAiError(e.message);
+                                    } finally {
+                                        setSpreadInsightLoading(false);
+                                    }
+                                }}
+                                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-altar-gold/10 to-altar-bright/10 border border-altar-gold/20 text-center transition-all hover:border-altar-gold/40 hover:scale-[1.01] active:scale-[0.99]"
+                            >
+                                <span className="shimmer-text font-display text-sm font-semibold tracking-wide flex items-center justify-center gap-2">
+                                    {isPremium ? '✨' : '👑'} {isPremium ? 'Get Deep Dive Reading' : 'Unlock Deep Dive Reading'}
                                 </span>
-                                <p className="text-[10px] text-altar-muted mt-0.5">Deep personalized readings · $4.99/mo</p>
+                                <p className="text-[10px] text-altar-muted mt-0.5">
+                                    {isPremium ? 'Unlock the mystic synthesis of your spread' : 'Premium mystic synthesis of your spread'}
+                                </p>
                             </button>
-                        ) : null}
+                        )}
                         {aiError && <p className="text-xs text-red-400 text-center mt-2">{aiError}</p>}
 
                         {/* Draw again */}

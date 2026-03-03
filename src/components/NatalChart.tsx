@@ -10,9 +10,11 @@ import { AIResponseRenderer } from './AIResponseRenderer';
 interface NatalChartProps {
     onClose: () => void;
     onTabChange: (tab: string) => void;
+    subscription: string;
+    onShowPremium: () => void;
 }
 
-export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
+export function NatalChart({ onClose, onTabChange, subscription, onShowPremium }: NatalChartProps) {
     const [birthData] = React.useState<BirthData | null>(getBirthData);
     const [selectedPlacement, setSelectedPlacement] = React.useState<{ position: 'sun' | 'moon' | 'rising'; sign: typeof ZODIAC_SIGNS[number]; icon: string } | null>(null);
     const [aiMeaning, setAiMeaning] = React.useState<{ title: string; overview: string; strengths: string; challenges: string; advice: string } | null>(null);
@@ -27,6 +29,10 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
 
 
     const handleCardTap = async (position: 'sun' | 'moon' | 'rising', sign: typeof ZODIAC_SIGNS[number], icon: string) => {
+        if (subscription !== 'premium') {
+            onShowPremium();
+            return;
+        }
         setSelectedPlacement({ position, sign, icon });
         setAiMeaning(null);
         setAiError(null);
@@ -104,7 +110,7 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
 
                     {/* Birth Data — read only, edit in Profile */}
                     {birthData ? (
-                        <div className="glass rounded-2xl p-4 mb-5 animate-fade-up">
+                        <div className="clay-card rounded-3xl p-4 mb-5 animate-fade-up">
                             <div className="flex items-center justify-between mb-2">
                                 <h3 className="font-display text-xs text-altar-muted tracking-[3px] uppercase">Birth Data</h3>
                                 <button onClick={() => onTabChange('profile')} className="text-xs text-altar-gold font-display hover:underline">
@@ -133,11 +139,11 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
                             </div>
                         </div>
                     ) : (
-                        <div className="glass rounded-2xl p-5 mb-5 text-center animate-fade-up">
+                        <div className="clay-card rounded-3xl p-5 mb-5 text-center animate-fade-up">
                             <p className="text-sm text-altar-muted mb-3">Set your birth data to reveal your natal chart</p>
                             <button
                                 onClick={() => onTabChange('profile')}
-                                className="px-5 py-2.5 rounded-xl bg-altar-gold/15 text-sm text-altar-gold font-display border border-altar-gold/20 hover:border-altar-gold/40 transition-all"
+                                className="w-full sm:w-auto px-6 py-3 rounded-2xl clay-btn text-sm text-altar-muted font-display transition-all"
                             >
                                 Set Up in Profile →
                             </button>
@@ -157,7 +163,7 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
                                     <button
                                         key={item.label}
                                         onClick={() => handleCardTap(item.position, item.data, item.icon)}
-                                        className={`rounded-2xl p-4 text-center border bg-gradient-to-br ${ELEMENT_COLORS[item.data.element] || ''} transition-all hover:scale-[1.03] active:scale-[0.97] cursor-pointer`}
+                                        className={`clay-card rounded-3xl p-4 text-center border bg-gradient-to-br ${ELEMENT_COLORS[item.data.element] || ''} transition-all hover:scale-[1.03] active:scale-[0.97] cursor-pointer`}
                                     >
                                         <span className="text-2xl block mb-1">{item.icon}</span>
                                         <p className="text-[9px] text-altar-muted font-display tracking-[2px] uppercase mb-1">{item.label}</p>
@@ -181,6 +187,10 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
                             {/* Element & Ruling Planet — tappable */}
                             <button
                                 onClick={async () => {
+                                    if (subscription !== 'premium') {
+                                        onShowPremium();
+                                        return;
+                                    }
                                     setShowCosmicModal(true);
                                     if (cosmicSynthesis || cosmicLoading) return;
                                     const ai = new AIService();
@@ -195,7 +205,7 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
                                         setCosmicLoading(false);
                                     }
                                 }}
-                                className="w-full text-left glass rounded-2xl p-4 transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer border border-white/5 hover:border-white/10"
+                                className="w-full text-left clay-card rounded-3xl p-4 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                             >
                                 <h3 className="font-display text-xs text-altar-muted tracking-[3px] uppercase mb-3">Cosmic Details</h3>
                                 <div className="space-y-2">
@@ -220,8 +230,8 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
                             </button>
 
                             {/* 🪐 Planetary Placements */}
-                            {fullChart && fullChart.planets.length > 0 && (
-                                <div className="glass rounded-2xl p-4">
+                            {fullChart && fullChart.planets.length > 0 && subscription === 'premium' && (
+                                <div className="clay-card rounded-3xl p-4">
                                     <h3 className="font-display text-xs text-altar-muted tracking-[3px] uppercase mb-3">🪐 Planetary Placements</h3>
                                     <div className="grid grid-cols-2 gap-2">
                                         {fullChart.planets.map(planet => {
@@ -243,8 +253,8 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
                             )}
 
                             {/* ✦ Notable Aspects */}
-                            {fullChart && fullChart.aspects.length > 0 && (
-                                <div className="glass rounded-2xl p-4">
+                            {fullChart && fullChart.aspects.length > 0 && subscription === 'premium' && (
+                                <div className="clay-card rounded-3xl p-4">
                                     <h3 className="font-display text-xs text-altar-muted tracking-[3px] uppercase mb-3">✦ Notable Aspects</h3>
                                     <div className="space-y-1.5">
                                         {fullChart.aspects.slice(0, 10).map((aspect, i) => {
@@ -274,8 +284,8 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
                             )}
 
                             {/* ✨ Full Chart Summary */}
-                            {fullChart && (
-                                <div className="glass rounded-2xl p-4">
+                            {fullChart && subscription === 'premium' && (
+                                <div className="clay-card rounded-3xl p-4">
                                     <h3 className="font-display text-xs text-altar-muted tracking-[3px] uppercase mb-3">✨ Chart Summary</h3>
                                     {chartSummary ? (
                                         <AIResponseRenderer text={chartSummary} />
@@ -318,7 +328,7 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
                             )}
 
                             {/* Suggested Spreads */}
-                            <div className="glass rounded-2xl p-4">
+                            <div className="clay-card rounded-3xl p-4">
                                 <h3 className="font-display text-xs text-altar-muted tracking-[3px] uppercase mb-3">✦ Suggested Spreads</h3>
                                 <p className="text-xs text-altar-text/70 mb-3">Based on your {triad.sun.element} Sun and {triad.moon.element} Moon</p>
                                 <div className="space-y-2">
@@ -356,7 +366,7 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
                     <div className="fixed inset-0 z-50 flex items-center justify-center px-4" onClick={() => setShowCosmicModal(false)}>
                         <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
                         <div
-                            className="relative w-full max-w-[500px] max-h-[85vh] overflow-y-auto rounded-3xl bg-gradient-to-b from-altar-dark to-altar-deep border border-white/10 p-6 pb-8 animate-fade-up"
+                            className="relative w-full max-w-[500px] max-h-[85vh] overflow-y-auto clay-card rounded-[2rem] p-6 pb-8 animate-fade-up"
                             onClick={e => e.stopPropagation()}
                         >
                             <div className="w-10 h-1 rounded-full bg-white/20 mx-auto mb-5" />
@@ -383,7 +393,7 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
                             </div>
 
                             {/* AI Synthesis */}
-                            <div className={`glass rounded-2xl p-4 mb-4`}>
+                            <div className={`clay-inset rounded-2xl p-4 mb-4`}>
                                 {cosmicLoading ? (
                                     <div className="space-y-2.5 py-1">
                                         <div className="h-3 shimmer-skeleton w-full" />
@@ -425,7 +435,7 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
 
                             {/* Modal */}
                             <div
-                                className="relative w-full max-w-[500px] max-h-[85vh] overflow-y-auto rounded-3xl bg-gradient-to-b from-altar-dark to-altar-deep border border-white/10 p-6 pb-8 animate-fade-up"
+                                className="relative w-full max-w-[500px] max-h-[85vh] overflow-y-auto clay-card rounded-[2rem] p-6 pb-8 animate-fade-up"
                                 onClick={e => e.stopPropagation()}
                             >
                                 {/* Handle */}
@@ -465,7 +475,7 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
                                 </div>
 
                                 {/* Overview */}
-                                <div className="glass rounded-2xl p-4 mb-4">
+                                <div className="clay-inset rounded-2xl p-4 mb-4">
                                     {aiLoading ? (
                                         <div className="space-y-2.5">
                                             <div className="h-3 shimmer-skeleton w-full" />
@@ -480,7 +490,7 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
 
                                 {/* Strengths & Challenges */}
                                 <div className="grid grid-cols-2 gap-3 mb-4">
-                                    <div className="rounded-xl p-3 bg-green-500/5 border border-green-500/15">
+                                    <div className="clay-inset rounded-xl p-3">
                                         <p className="text-[9px] font-display text-green-400/70 tracking-[2px] uppercase mb-1.5">Strengths</p>
                                         {aiLoading ? (
                                             <div className="space-y-2">
@@ -498,7 +508,7 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
                                             </ul>
                                         )}
                                     </div>
-                                    <div className="rounded-xl p-3 bg-red-500/5 border border-red-500/15">
+                                    <div className="clay-inset rounded-xl p-3">
                                         <p className="text-[9px] font-display text-red-400/70 tracking-[2px] uppercase mb-1.5">Challenges</p>
                                         {aiLoading ? (
                                             <div className="space-y-2">
@@ -519,7 +529,7 @@ export function NatalChart({ onClose, onTabChange }: NatalChartProps) {
                                 </div>
 
                                 {/* Advice */}
-                                <div className="rounded-2xl p-4 bg-altar-gold/5 border border-altar-gold/15">
+                                <div className="clay-card rounded-2xl p-4 border border-altar-gold/15">
                                     <p className="text-[9px] font-display text-altar-gold/70 tracking-[2px] uppercase mb-1.5">✦ Cosmic Advice</p>
                                     {aiLoading ? (
                                         <div className="space-y-2">

@@ -17,9 +17,11 @@ interface DreamCardProps {
     dream: DreamEntry;
     onDelete: (id: string) => void;
     onInterpreted: (id: string, text: string) => void;
+    subscription: string;
+    onShowPremium: () => void;
 }
 
-export function DreamCard({ dream, onDelete, onInterpreted }: DreamCardProps) {
+export function DreamCard({ dream, onDelete, onInterpreted, subscription, onShowPremium }: DreamCardProps) {
     const [expanded, setExpanded] = React.useState(false);
     const [interpreting, setInterpreting] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
@@ -28,6 +30,10 @@ export function DreamCard({ dream, onDelete, onInterpreted }: DreamCardProps) {
     const hasInterpretation = !!dream.interpretation;
 
     async function handleInterpret() {
+        if (subscription !== 'premium') {
+            onShowPremium();
+            return;
+        }
         setInterpreting(true);
         setError(null);
         try {
@@ -142,8 +148,8 @@ export function DreamCard({ dream, onDelete, onInterpreted }: DreamCardProps) {
                                 className="rounded-xl p-4"
                                 style={{
                                     background: 'linear-gradient(160deg, #1c1538 0%, #130f2e 55%, #0d0b22 100%)',
-                boxShadow: '0 8px 28px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.08), inset 0 -2px 5px rgba(0,0,0,0.35)',
-                border: '1px solid rgba(139,92,246,0.18)',
+                                    boxShadow: '0 8px 28px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.08), inset 0 -2px 5px rgba(0,0,0,0.35)',
+                                    border: '1px solid rgba(139,92,246,0.18)',
                                 }}
                             >
                                 <p className="text-[9px] font-display text-violet-400/60 tracking-[2px] uppercase mb-3">
@@ -167,8 +173,8 @@ export function DreamCard({ dream, onDelete, onInterpreted }: DreamCardProps) {
                                     className="w-full py-3 rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-60"
                                     style={{
                                         background: 'linear-gradient(160deg, #1c1538 0%, #130f2e 55%, #0d0b22 100%)',
-                boxShadow: '0 8px 28px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.08), inset 0 -2px 5px rgba(0,0,0,0.35)',
-                border: '1px solid rgba(139,92,246,0.18)',
+                                        boxShadow: '0 8px 28px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.08), inset 0 -2px 5px rgba(0,0,0,0.35)',
+                                        border: '1px solid rgba(139,92,246,0.18)',
                                         color: '#c4b5fd',
                                     }}
                                 >

@@ -10,9 +10,11 @@ import { AIResponseRenderer } from './AIResponseRenderer';
 interface NumerologyProps {
     onClose: () => void;
     onTabChange: (tab: string) => void;
+    subscription: string;
+    onShowPremium: () => void;
 }
 
-export function Numerology({ onClose, onTabChange }: NumerologyProps) {
+export function Numerology({ onClose, onTabChange, subscription, onShowPremium }: NumerologyProps) {
     const birthData = getBirthData();
     const [manualDate, setManualDate] = React.useState('');
     const dateToUse = birthData?.birthday || manualDate;
@@ -33,6 +35,10 @@ export function Numerology({ onClose, onTabChange }: NumerologyProps) {
     const [aiYearLoading, setAiYearLoading] = React.useState(false);
 
     const handlePathTap = async () => {
+        if (subscription !== 'premium') {
+            onShowPremium();
+            return;
+        }
         setShowPathModal(true);
         if (aiPath || aiPathLoading) return;
 
@@ -109,13 +115,13 @@ Weave their astrology into the numerology reading — how does their Life Path $
 
                     {/* Manual date entry if no birth data */}
                     {!birthData && (
-                        <div className="glass-strong rounded-2xl p-5 mb-5 animate-fade-up">
+                        <div className="clay-card rounded-3xl p-5 mb-5 animate-fade-up">
                             <h3 className="font-display text-xs text-altar-muted tracking-[3px] uppercase mb-3">Enter Birthday</h3>
                             <input
                                 type="date"
                                 value={manualDate}
                                 onChange={e => setManualDate(e.target.value)}
-                                className="w-full bg-altar-deep/50 text-sm text-altar-text rounded-lg px-3 py-2.5 border border-white/10 focus:border-altar-gold/30 focus:outline-none transition-colors"
+                                className="w-full clay-inset text-sm text-altar-text rounded-xl px-4 py-3 focus:outline-none transition-all focus:shadow-[0_0_15px_rgba(212,175,55,0.2)]"
                             />
                             <p className="text-[10px] text-altar-muted/60 mt-2 italic">
                                 💡 Save birth data in your <button onClick={() => onTabChange('natal')} className="text-altar-gold underline">Natal Chart</button> for auto-fill
@@ -127,9 +133,9 @@ Weave their astrology into the numerology reading — how does their Life Path $
                     {hasDate && lifePathNum !== null && lifePathMeaning && (
                         <div className="space-y-4 animate-fade-up">
                             {/* Big number display */}
-                            <div className="relative rounded-2xl overflow-hidden p-8 text-center border border-altar-gold/20">
+                            <div className="relative clay-card rounded-3xl overflow-hidden p-8 text-center border border-altar-gold/20">
                                 {/* Background glow */}
-                                <div className="absolute inset-0 bg-gradient-to-br from-altar-gold/5 via-altar-mid/10 to-altar-bright/5" />
+                                <div className="absolute inset-0 bg-gradient-to-br from-altar-gold/5 via-altar-mid/10 to-altar-bright/5 mix-blend-overlay" />
                                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full bg-altar-gold/10 blur-[60px]" />
 
                                 <div className="relative">
@@ -149,13 +155,13 @@ Weave their astrology into the numerology reading — how does their Life Path $
                             {/* Meaning card — tappable */}
                             <button
                                 onClick={handlePathTap}
-                                className="w-full text-left glass-strong rounded-2xl p-5 transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer border border-white/5 hover:border-white/10"
+                                className="w-full text-left clay-card rounded-3xl p-5 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                             >
                                 <h3 className="font-display text-xs text-altar-muted tracking-[3px] uppercase mb-3">Your Path</h3>
                                 <p className="text-sm text-altar-text/85 leading-relaxed mb-4">{lifePathMeaning.desc}</p>
 
                                 <div className="grid grid-cols-2 gap-3">
-                                    <div className="rounded-xl p-3 bg-green-500/5 border border-green-500/15 overflow-hidden">
+                                    <div className="clay-inset rounded-xl p-3 overflow-hidden">
                                         <p className="text-[9px] font-display text-green-400/70 tracking-[2px] uppercase mb-1.5">Strengths</p>
                                         <ul className="space-y-1">
                                             {lifePathMeaning.strengths.split(',').map((s, i) => (
@@ -166,7 +172,7 @@ Weave their astrology into the numerology reading — how does their Life Path $
                                             ))}
                                         </ul>
                                     </div>
-                                    <div className="rounded-xl p-3 bg-red-500/5 border border-red-500/15 overflow-hidden">
+                                    <div className="clay-inset rounded-xl p-3 overflow-hidden">
                                         <p className="text-[9px] font-display text-red-400/70 tracking-[2px] uppercase mb-1.5">Challenges</p>
                                         <ul className="space-y-1">
                                             {lifePathMeaning.challenges.split(',').map((s, i) => (
@@ -198,6 +204,10 @@ Weave their astrology into the numerology reading — how does their Life Path $
                                 return (
                                     <button
                                         onClick={async () => {
+                                            if (subscription !== 'premium') {
+                                                onShowPremium();
+                                                return;
+                                            }
                                             setShowYearModal(true);
                                             if (aiYear || aiYearLoading) return;
 
@@ -232,7 +242,7 @@ Life Path: ${lifePathNum} (${lifePathMeaning?.title || ''})`;
                                             } catch { /* fallback */ }
                                             finally { setAiYearLoading(false); }
                                         }}
-                                        className="w-full text-left glass rounded-2xl p-5 transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer border border-white/5 hover:border-white/10"
+                                        className="w-full text-left clay-card rounded-3xl p-5 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                                     >
                                         <div className="flex items-center gap-4">
                                             <div className="w-14 h-14 rounded-full bg-gradient-to-br from-altar-mid to-altar-bright flex items-center justify-center shadow-[0_0_20px_rgba(139,95,191,0.3)]">
@@ -259,7 +269,7 @@ Life Path: ${lifePathNum} (${lifePathMeaning?.title || ''})`;
                     <div className="fixed inset-0 z-50 flex items-center justify-center px-4" onClick={() => setShowYearModal(false)}>
                         <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
                         <div
-                            className="relative w-full max-w-[500px] max-h-[85vh] overflow-y-auto rounded-3xl bg-gradient-to-b from-altar-dark to-altar-deep border border-white/10 p-6 pb-8 animate-fade-up"
+                            className="relative w-full max-w-[500px] max-h-[85vh] overflow-y-auto clay-card rounded-[2rem] p-6 pb-8 animate-fade-up"
                             onClick={e => e.stopPropagation()}
                         >
                             <div className="w-10 h-1 rounded-full bg-white/20 mx-auto mb-5" />
@@ -285,7 +295,7 @@ Life Path: ${lifePathNum} (${lifePathMeaning?.title || ''})`;
                                 )}
                             </div>
 
-                            <div className={`glass rounded-2xl p-4 mb-4 transition-all duration-500`}>
+                            <div className={`clay-inset rounded-2xl p-4 mb-4 transition-all duration-500`}>
                                 {aiYearLoading ? (
                                     <div className="space-y-2.5 py-1">
                                         <div className="h-3 shimmer-skeleton w-full" />
@@ -317,7 +327,7 @@ Life Path: ${lifePathNum} (${lifePathMeaning?.title || ''})`;
                     <div className="fixed inset-0 z-50 flex items-center justify-center px-4" onClick={() => setShowPathModal(false)}>
                         <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
                         <div
-                            className="relative w-full max-w-[500px] max-h-[85vh] overflow-y-auto rounded-3xl bg-gradient-to-b from-altar-dark to-altar-deep border border-white/10 p-6 pb-8 animate-fade-up"
+                            className="relative w-full max-w-[500px] max-h-[85vh] overflow-y-auto clay-card rounded-[2rem] p-6 pb-8 animate-fade-up"
                             onClick={e => e.stopPropagation()}
                         >
                             <div className="w-10 h-1 rounded-full bg-white/20 mx-auto mb-5" />
@@ -349,7 +359,7 @@ Life Path: ${lifePathNum} (${lifePathMeaning?.title || ''})`;
                             </div>
 
                             {/* Overview */}
-                            <div className={`glass rounded-2xl p-4 mb-4 transition-all duration-500`}>
+                            <div className={`clay-inset rounded-2xl p-4 mb-4 transition-all duration-500`}>
                                 {aiPathLoading ? (
                                     <div className="space-y-2.5">
                                         <div className="h-3 shimmer-skeleton w-full" />
@@ -363,7 +373,7 @@ Life Path: ${lifePathNum} (${lifePathMeaning?.title || ''})`;
 
                             {/* Strengths & Challenges */}
                             <div className={`grid grid-cols-2 gap-3 mb-4 transition-all duration-500`}>
-                                <div className="rounded-xl p-3 bg-green-500/5 border border-green-500/15">
+                                <div className="clay-inset rounded-xl p-3">
                                     <p className="text-[9px] font-display text-green-400/70 tracking-[2px] uppercase mb-1.5">Strengths</p>
                                     {aiPathLoading ? (
                                         <div className="space-y-2"><div className="h-2.5 shimmer-skeleton w-full" /><div className="h-2.5 shimmer-skeleton w-[70%]" /></div>
@@ -378,7 +388,7 @@ Life Path: ${lifePathNum} (${lifePathMeaning?.title || ''})`;
                                         </ul>
                                     )}
                                 </div>
-                                <div className="rounded-xl p-3 bg-red-500/5 border border-red-500/15">
+                                <div className="clay-inset rounded-xl p-3">
                                     <p className="text-[9px] font-display text-red-400/70 tracking-[2px] uppercase mb-1.5">Challenges</p>
                                     {aiPathLoading ? (
                                         <div className="space-y-2"><div className="h-2.5 shimmer-skeleton w-full" /><div className="h-2.5 shimmer-skeleton w-[65%]" /></div>
@@ -397,7 +407,7 @@ Life Path: ${lifePathNum} (${lifePathMeaning?.title || ''})`;
 
                             {/* Advice */}
                             {(aiPath?.advice || aiPathLoading) && (
-                                <div className={`rounded-2xl p-4 bg-altar-gold/5 border border-altar-gold/15 mb-4 transition-all duration-500`}>
+                                <div className={`clay-card rounded-2xl p-4 mb-4 transition-all duration-500 border border-altar-gold/15`}>
                                     <p className="text-[9px] font-display text-altar-gold/70 tracking-[2px] uppercase mb-1.5">✦ Cosmic Guidance</p>
                                     {aiPathLoading ? (
                                         <div className="space-y-2"><div className="h-3 shimmer-skeleton w-[85%]" /><div className="h-3 shimmer-skeleton w-[50%]" /></div>

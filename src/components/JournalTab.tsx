@@ -19,9 +19,11 @@ interface JournalTabProps {
     onClose: () => void;
     onTabChange: (tab: string) => void;
     initialSubTab?: 'journal' | 'dreams';
+    subscription: string;
+    onShowPremium: () => void;
 }
 
-export function JournalTab({ onClose, onTabChange, initialSubTab = 'journal' }: JournalTabProps) {
+export function JournalTab({ onClose, onTabChange, initialSubTab = 'journal', subscription, onShowPremium }: JournalTabProps) {
     const [activeSubTab, setActiveSubTab] = React.useState<'journal' | 'dreams'>(initialSubTab);
 
     const [showEntry, setShowEntry] = React.useState(false);
@@ -157,6 +159,8 @@ export function JournalTab({ onClose, onTabChange, initialSubTab = 'journal' }: 
             <DreamJournal
                 onClose={() => setActiveSubTab('journal')}
                 onTabChange={onTabChange}
+                subscription={subscription}
+                onShowPremium={onShowPremium}
             />
         );
     }

@@ -22,6 +22,8 @@ import { scheduleYearAheadNotifications, scheduleBirthdayNotification } from '..
 interface YearAheadProps {
     onClose: () => void;
     onTabChange: (tab: string) => void;
+    subscription: string;
+    onShowPremium: () => void;
 }
 
 type ViewState = 'preview' | 'loading' | 'generated' | 'error';
@@ -34,7 +36,7 @@ const SIGN_DISPLAY: Record<string, string> = {
 
 const CACHE_KEY_PREFIX = 'arcana_year_ahead_';
 
-export function YearAhead({ onClose, onTabChange }: YearAheadProps) {
+export function YearAhead({ onClose, onTabChange, subscription, onShowPremium }: YearAheadProps) {
     const [viewState, setViewState] = React.useState<ViewState>('preview');
     const [report, setReport] = React.useState<YearAheadReport | null>(null);
     const [aiReading, setAiReading] = React.useState<string>('');
@@ -80,6 +82,10 @@ export function YearAhead({ onClose, onTabChange }: YearAheadProps) {
 
     // Generate the full reading
     const handleGenerate = async () => {
+        if (subscription !== 'premium') {
+            onShowPremium();
+            return;
+        }
         if (!report) return;
         setViewState('loading');
 

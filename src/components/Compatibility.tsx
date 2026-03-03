@@ -15,6 +15,8 @@ import { searchPlaces, resolvePlace, PlaceSuggestion } from '../services/geocodi
 interface CompatibilityProps {
     onClose: () => void;
     onTabChange: (tab: string) => void;
+    subscription: string;
+    onShowPremium: () => void;
 }
 
 const QUALITY_COLORS: Record<string, string> = {
@@ -122,7 +124,7 @@ const CATEGORY_META: Record<string, { emoji: string; label: string; color: strin
 // MAIN COMPONENT
 // ══════════════════════════════════════
 
-export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
+export function Compatibility({ onClose, onTabChange, subscription, onShowPremium }: CompatibilityProps) {
     const birthData = getBirthData();
 
     // Saved partner data
@@ -318,7 +320,7 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
 
                             {/* Your sign */}
                             {userSign && (
-                                <div className="glass rounded-2xl p-4 mb-4 flex items-center gap-3 animate-fade-up" style={{ animationDelay: '0.1s', opacity: 0 }}>
+                                <div className="clay-card rounded-3xl p-4 mb-4 flex items-center gap-3 animate-fade-up" style={{ animationDelay: '0.1s', opacity: 0 }}>
                                     <span className="text-3xl">{userSign.glyph}</span>
                                     <div>
                                         <p className="text-xs text-altar-muted font-display tracking-[2px] uppercase">You</p>
@@ -328,7 +330,7 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
                             )}
 
                             {/* Partner input */}
-                            <div className="glass-strong rounded-2xl p-5 mb-4 animate-fade-up" style={{ animationDelay: '0.2s', opacity: 0 }}>
+                            <div className="clay-card rounded-3xl p-5 mb-4 animate-fade-up" style={{ animationDelay: '0.2s', opacity: 0 }}>
                                 <label className="block font-display text-xs text-altar-muted tracking-[2px] uppercase mb-3">
                                     Partner's Name
                                 </label>
@@ -403,7 +405,7 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
                                                             setPartnerUtcOffset(resolved.utcOffset);
                                                         }
                                                     }}
-                                                    className="w-full text-left px-3 py-2.5 text-xs text-altar-text hover:bg-altar-gold/10 transition-colors border-b border-white/5 last:border-0"
+                                                    className="w-full text-left px-3 py-2.5 text-xs text-altar-text hover:bg-altar-gold/10 transition-colors border-b border-white/5 last:border-0 clay-inset"
                                                 >
                                                     <span className="font-medium">{place.mainText}</span>
                                                     {place.secondaryText && <span className="text-altar-muted ml-1">{place.secondaryText}</span>}
@@ -422,7 +424,7 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
 
                             {/* Partner sign preview */}
                             {partnerSign && partnerBirthday && (
-                                <div className="glass rounded-2xl p-4 mb-5 flex items-center gap-3 animate-fade-up">
+                                <div className="clay-card rounded-3xl p-4 mb-5 flex items-center gap-3 animate-fade-up">
                                     <span className="text-3xl">{partnerSign.glyph}</span>
                                     <div>
                                         <p className="text-xs text-altar-muted font-display tracking-[2px] uppercase">{partnerName || 'Partner'}</p>
@@ -471,7 +473,13 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
                                 {SUB_TABS.map(tab => (
                                     <button
                                         key={tab.id}
-                                        onClick={() => setActiveTab(tab.id)}
+                                        onClick={() => {
+                                            if (tab.id === 'deepdive' && subscription !== 'premium') {
+                                                onShowPremium();
+                                                return;
+                                            }
+                                            setActiveTab(tab.id);
+                                        }}
                                         className={`flex-1 py-2.5 rounded-xl font-display text-xs tracking-wide transition-all ${activeTab === tab.id
                                             ? 'bg-altar-gold/15 text-altar-gold border border-altar-gold/25'
                                             : 'bg-white/[0.03] text-altar-muted/60 border border-white/5 hover:bg-white/[0.06]'
@@ -491,7 +499,7 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
                                     </div>
 
                                     {/* Triad Comparison */}
-                                    <div className="glass-strong rounded-2xl p-5 mb-4 animate-fade-up" style={{ animationDelay: '0.2s', opacity: 0 }}>
+                                    <div className="clay-card rounded-3xl p-5 mb-4 animate-fade-up" style={{ animationDelay: '0.2s', opacity: 0 }}>
                                         <h3 className="font-display text-xs text-altar-muted tracking-[3px] uppercase mb-3 flex items-center gap-1.5">
                                             <span className="text-altar-gold">✦</span> Triad Comparison
                                         </h3>
@@ -501,7 +509,7 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
                                     </div>
 
                                     {/* Element Wheel */}
-                                    <div className="glass rounded-2xl p-5 mb-4 animate-fade-up" style={{ animationDelay: '0.3s', opacity: 0 }}>
+                                    <div className="clay-card rounded-3xl p-5 mb-4 animate-fade-up" style={{ animationDelay: '0.3s', opacity: 0 }}>
                                         <h3 className="font-display text-xs text-altar-muted tracking-[3px] uppercase mb-3 flex items-center gap-1.5">
                                             <span className="text-altar-gold">✦</span> Element Balance
                                         </h3>
@@ -511,7 +519,7 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
                                                 const maxCount = 6;
                                                 const pct = (count / maxCount) * 100;
                                                 return (
-                                                    <div key={elem} className={`rounded-xl p-3 text-center bg-gradient-to-br ${info.color} border`}>
+                                                    <div key={elem} className={`clay-inset rounded-xl p-3 text-center`}>
                                                         <span className="text-lg block">{info.emoji}</span>
                                                         <p className="font-display text-xs text-altar-gold mt-1">{count}/6</p>
                                                         <div className="w-full h-1 rounded-full bg-white/10 mt-1.5 overflow-hidden">
@@ -528,7 +536,7 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
                                     </div>
 
                                     {/* Relationship Reading */}
-                                    <div className="glass-strong rounded-2xl p-5 mb-4 animate-fade-up" style={{ animationDelay: '0.4s', opacity: 0 }}>
+                                    <div className="clay-card rounded-3xl p-5 mb-4 animate-fade-up" style={{ animationDelay: '0.4s', opacity: 0 }}>
                                         <h3 className="font-display text-xs text-altar-muted tracking-[3px] uppercase mb-3 flex items-center gap-1.5">
                                             <span className="text-altar-gold">✦</span> Your Connection
                                         </h3>
@@ -546,7 +554,7 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
 
                                     {/* Strengths & Growth */}
                                     <div className="grid grid-cols-2 gap-2.5 mb-4 animate-fade-up" style={{ animationDelay: '0.5s', opacity: 0 }}>
-                                        <div className="rounded-2xl p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/20">
+                                        <div className="clay-inset rounded-2xl p-4">
                                             <h4 className="font-display text-[9px] text-green-400/80 tracking-[2px] uppercase mb-2">Strengths</h4>
                                             <ul className="space-y-2">
                                                 {report.strengths.map((s, i) => (
@@ -557,7 +565,7 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
                                                 ))}
                                             </ul>
                                         </div>
-                                        <div className="rounded-2xl p-4 bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20">
+                                        <div className="clay-inset rounded-2xl p-4">
                                             <h4 className="font-display text-[9px] text-amber-400/80 tracking-[2px] uppercase mb-2">Growth Edges</h4>
                                             <ul className="space-y-2">
                                                 {report.growthEdges.map((e, i) => (
@@ -588,15 +596,15 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
 
                                     {/* Aspect count summary */}
                                     <div className="flex justify-center gap-3 mb-5 animate-fade-up" style={{ animationDelay: '0.2s', opacity: 0 }}>
-                                        <div className="px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/15 flex items-center gap-1.5">
+                                        <div className="clay-pill px-3 py-1.5 rounded-full flex items-center gap-1.5">
                                             <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
                                             <span className="text-[10px] text-green-400/80 font-display">{synastry.aspects.filter(a => a.nature === 'harmonious').length} harmonious</span>
                                         </div>
-                                        <div className="px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/15 flex items-center gap-1.5">
+                                        <div className="clay-pill px-3 py-1.5 rounded-full flex items-center gap-1.5">
                                             <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
                                             <span className="text-[10px] text-red-400/80 font-display">{synastry.aspects.filter(a => a.nature === 'challenging').length} challenging</span>
                                         </div>
-                                        <div className="px-3 py-1.5 rounded-full bg-yellow-500/10 border border-yellow-500/15 flex items-center gap-1.5">
+                                        <div className="clay-pill px-3 py-1.5 rounded-full flex items-center gap-1.5">
                                             <div className="w-1.5 h-1.5 rounded-full bg-yellow-400" />
                                             <span className="text-[10px] text-yellow-400/80 font-display">{synastry.aspects.filter(a => a.nature === 'neutral').length} neutral</span>
                                         </div>
@@ -614,7 +622,7 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
                                                     <span className={meta.color}>{meta.label}</span>
                                                     <span className="text-altar-muted/30 ml-1">({items.length})</span>
                                                 </h3>
-                                                <div className="glass rounded-2xl divide-y divide-white/[0.03] overflow-hidden">
+                                                <div className="clay-card rounded-3xl divide-y divide-white/[0.03] overflow-hidden">
                                                     {items.slice(0, 5).map((aspect, i) => (
                                                         <AspectListItem
                                                             key={`${aspect.planet1.id}-${aspect.planet2.id}-${i}`}
@@ -638,7 +646,7 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
                                         <p className="text-[11px] text-altar-muted mt-1">AI-powered analysis of your synastry chart</p>
                                     </div>
 
-                                    <div className="glass-strong rounded-2xl p-5 mb-4 animate-fade-up" style={{ animationDelay: '0.2s', opacity: 0 }}>
+                                    <div className="clay-card rounded-3xl p-5 mb-4 animate-fade-up" style={{ animationDelay: '0.2s', opacity: 0 }}>
                                         {deepDiveLoading ? (
                                             <div className="space-y-3 py-2">
                                                 {Array.from({ length: 8 }).map((_, i) => (
@@ -660,7 +668,7 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
 
                                     {/* What to Watch For */}
                                     {synastry && synastry.friction.length > 0 && (
-                                        <div className="rounded-2xl p-4 mb-4 bg-gradient-to-br from-amber-900/20 to-orange-900/10 border border-amber-500/15 animate-fade-up" style={{ animationDelay: '0.3s', opacity: 0 }}>
+                                        <div className="clay-inset rounded-2xl p-4 mb-4 animate-fade-up" style={{ animationDelay: '0.3s', opacity: 0 }}>
                                             <h4 className="font-display text-[10px] text-amber-400/80 tracking-[2px] uppercase mb-3 flex items-center gap-1.5">
                                                 <span>⚠️</span> What to Watch For
                                             </h4>
@@ -707,7 +715,7 @@ export function Compatibility({ onClose, onTabChange }: CompatibilityProps) {
                                     setActiveTab('overview');
                                     safeStorage.removeItem('arcana_partner');
                                 }}
-                                className="w-full py-3 rounded-2xl glass border border-white/5 text-center hover:border-altar-gold/20 transition-all text-sm font-display text-altar-muted tracking-wide mb-5"
+                                className="w-full py-3 rounded-2xl clay-btn text-center text-sm font-display text-altar-muted tracking-wide mb-5"
                             >
                                 Try Another Match →
                             </button>

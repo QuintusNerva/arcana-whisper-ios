@@ -17,6 +17,8 @@ import { BottomNav } from './BottomNav';
 interface CareerAlignmentProps {
     onClose: () => void;
     onTabChange: (tab: string) => void;
+    subscription: string;
+    onShowPremium: () => void;
 }
 
 interface CareerReading {
@@ -80,7 +82,7 @@ function elementGlyph(element: string) {
 
 // ── Component ─────────────────────────────────────────────────────
 
-export function CareerAlignment({ onClose, onTabChange }: CareerAlignmentProps) {
+export function CareerAlignment({ onClose, onTabChange, subscription, onShowPremium }: CareerAlignmentProps) {
     const birthData = getBirthData();
     const triad = birthData ? getNatalTriad(birthData) : null;
     const lifePath = birthData ? getLifePathNumber(birthData.birthday) : null;
@@ -108,6 +110,10 @@ export function CareerAlignment({ onClose, onTabChange }: CareerAlignmentProps) 
     }, []);
 
     async function handleGetReading() {
+        if (subscription !== 'premium') {
+            onShowPremium();
+            return;
+        }
         if (!triad || !lifePath) return;
         setLoading(true);
         setError(null);
@@ -184,7 +190,7 @@ export function CareerAlignment({ onClose, onTabChange }: CareerAlignmentProps) 
 
                             {/* Hero Archetype Card */}
                             <div
-                                className="relative rounded-3xl overflow-hidden border p-6 text-center"
+                                className="relative clay-card rounded-[2rem] overflow-hidden p-6 text-center"
                                 style={{
                                     background: gradBg,
                                     borderColor: `${accent}30`,
@@ -228,7 +234,7 @@ export function CareerAlignment({ onClose, onTabChange }: CareerAlignmentProps) 
                                     ].map(p => (
                                         <div
                                             key={p.label}
-                                            className="rounded-full px-3 py-1.5 border flex items-center gap-1.5 text-[10px] font-display tracking-wide"
+                                            className="clay-pill px-3 py-1.5 flex items-center gap-1.5 text-[10px] font-display tracking-wide border-white/5"
                                             style={{
                                                 background: 'rgba(255,255,255,0.05)',
                                                 borderColor: `${accent}20`,
@@ -245,7 +251,7 @@ export function CareerAlignment({ onClose, onTabChange }: CareerAlignmentProps) 
 
                             {/* Unlock CTA — if no reading yet */}
                             {!unlocked && !loading && (
-                                <div className="glass-strong rounded-2xl p-5 text-center border border-white/5">
+                                <div className="clay-card rounded-3xl p-5 text-center">
                                     <p className="text-xs text-altar-text/60 leading-relaxed mb-4">
                                         Your static archetype is shown above. Get your full reading — work style, where you thrive, what drains you, and the question to unlock your next chapter.
                                     </p>
@@ -254,7 +260,7 @@ export function CareerAlignment({ onClose, onTabChange }: CareerAlignmentProps) 
                                     )}
                                     <button
                                         onClick={handleGetReading}
-                                        className="w-full py-3.5 rounded-xl font-display tracking-[2px] text-sm transition-all"
+                                        className="w-full py-4 rounded-xl clay-btn font-display tracking-[2px] text-sm transition-all"
                                         style={{
                                             background: `linear-gradient(135deg, ${accent}30, ${accent}15)`,
                                             border: `1px solid ${accent}40`,
@@ -268,7 +274,7 @@ export function CareerAlignment({ onClose, onTabChange }: CareerAlignmentProps) 
 
                             {/* Loading skeleton */}
                             {loading && (
-                                <div className="glass-strong rounded-2xl p-5 space-y-3 border border-white/5">
+                                <div className="clay-card rounded-3xl p-5 space-y-3">
                                     <div className="flex items-center gap-2 mb-2">
                                         <span className="w-3 h-3 border-2 border-altar-gold/30 border-t-altar-gold rounded-full animate-spin" />
                                         <span className="text-[10px] font-display tracking-[2px] text-altar-gold/50 uppercase">Consulting the stars…</span>
@@ -284,7 +290,7 @@ export function CareerAlignment({ onClose, onTabChange }: CareerAlignmentProps) 
                                 <>
                                     {/* Work Style */}
                                     <div
-                                        className="rounded-2xl p-5 glass"
+                                        className="clay-card rounded-3xl p-5"
                                         style={{
                                             background: 'rgba(255,255,255,0.03)',
                                             borderColor: `${accent}18`,
@@ -298,7 +304,7 @@ export function CareerAlignment({ onClose, onTabChange }: CareerAlignmentProps) 
 
                                     {/* Thrive + Struggle grid */}
                                     <div className="grid grid-cols-2 gap-3">
-                                        <div className="rounded-2xl p-4 border" style={{ background: 'rgba(34,197,94,0.08)', borderColor: 'rgba(34,197,94,0.2)', boxShadow: 'inset 0 1px 4px rgba(0,0,0,0.4)' }}>
+                                        <div className="clay-inset rounded-2xl p-4" style={{ background: 'rgba(34,197,94,0.08)' }}>
                                             <p className="text-[9px] font-display text-green-400/70 tracking-[2px] uppercase mb-3">✦ You Thrive When</p>
                                             <ul className="space-y-1.5">
                                                 {reading.thrive.map((item, i) => (
@@ -309,7 +315,7 @@ export function CareerAlignment({ onClose, onTabChange }: CareerAlignmentProps) 
                                                 ))}
                                             </ul>
                                         </div>
-                                        <div className="rounded-2xl p-4 border" style={{ background: 'rgba(239,68,68,0.08)', borderColor: 'rgba(239,68,68,0.2)', boxShadow: 'inset 0 1px 4px rgba(0,0,0,0.4)' }}>
+                                        <div className="clay-inset rounded-2xl p-4" style={{ background: 'rgba(239,68,68,0.08)' }}>
                                             <p className="text-[9px] font-display text-red-400/70 tracking-[2px] uppercase mb-3">✦ You Struggle With</p>
                                             <ul className="space-y-1.5">
                                                 {reading.struggle.map((item, i) => (
@@ -324,7 +330,7 @@ export function CareerAlignment({ onClose, onTabChange }: CareerAlignmentProps) 
 
                                     {/* Blind Spot */}
                                     <div
-                                        className="rounded-2xl p-5 glass"
+                                        className="clay-card rounded-3xl p-5"
                                         style={{
                                             background: 'rgba(251,191,36,0.04)',
                                             borderColor: 'rgba(251,191,36,0.15)',
@@ -336,7 +342,7 @@ export function CareerAlignment({ onClose, onTabChange }: CareerAlignmentProps) 
 
                                     {/* Closing Question */}
                                     <div
-                                        className="rounded-2xl p-6 glass text-center"
+                                        className="clay-card rounded-3xl p-6 text-center"
                                         style={{
                                             background: `linear-gradient(135deg, ${accent}08, transparent)`,
                                             borderColor: `${accent}20`,
@@ -367,7 +373,7 @@ export function CareerAlignment({ onClose, onTabChange }: CareerAlignmentProps) 
                             )}
 
                             {/* Coaching upsell */}
-                            <div className="rounded-2xl p-5 border border-white/8 text-center mt-2">
+                            <div className="clay-inset rounded-2xl p-5 text-center mt-2 border-white/5">
                                 <p className="text-[9px] font-display text-altar-gold/40 tracking-[2px] uppercase mb-2">✦ Go Deeper</p>
                                 <p className="text-[11px] text-altar-muted/60 leading-relaxed">
                                     Share this reading with a career coach or mentor to turn cosmic insight into a concrete plan.

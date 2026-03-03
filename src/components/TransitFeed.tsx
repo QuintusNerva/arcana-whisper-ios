@@ -9,32 +9,38 @@ import { getBirthData, getNatalTriad } from '../services/astrology.service';
 interface TransitFeedProps {
     onClose: () => void;
     onTabChange: (tab: string) => void;
+    subscription: string;
+    onShowPremium: () => void;
 }
 
 /** Transit card — one per detected transit hit */
-function TransitCard({ hit, interpretation, isLoading }: {
+function TransitCard({ hit, interpretation, isLoading, onTap }: {
     hit: TransitHit;
     interpretation: string | null;
     isLoading: boolean;
+    onTap: () => void;
 }) {
     const [expanded, setExpanded] = React.useState(false);
 
     const natureColor = hit.aspect.nature === 'harmonious'
-        ? { border: 'border-emerald-500/20', bg: 'from-emerald-500/8 to-emerald-900/5', badge: 'bg-emerald-500/15 text-emerald-300', label: '✨ Harmonious' }
+        ? { border: 'border-emerald-500/20', bg: 'from-emerald-500/8 to-emerald-900/5', badge: 'clay-pill text-emerald-300', label: '✨ Harmonious' }
         : hit.aspect.nature === 'challenging'
-            ? { border: 'border-amber-500/20', bg: 'from-amber-500/8 to-red-900/5', badge: 'bg-amber-500/15 text-amber-300', label: '🔥 Challenging' }
-            : { border: 'border-violet-500/20', bg: 'from-violet-500/8 to-purple-900/5', badge: 'bg-violet-500/15 text-violet-300', label: '⚡ Powerful' };
+            ? { border: 'border-amber-500/20', bg: 'from-amber-500/8 to-red-900/5', badge: 'clay-pill text-amber-300', label: '🔥 Challenging' }
+            : { border: 'border-violet-500/20', bg: 'from-violet-500/8 to-purple-900/5', badge: 'clay-pill text-violet-300', label: '⚡ Powerful' };
 
     const sigBadge = hit.significance === 'major'
-        ? { bg: 'bg-red-500/15 text-red-300', label: 'Major' }
+        ? { bg: 'clay-pill text-red-300', label: 'Major' }
         : hit.significance === 'moderate'
-            ? { bg: 'bg-yellow-500/15 text-yellow-300', label: 'Moderate' }
+            ? { bg: 'clay-pill text-yellow-300', label: 'Moderate' }
             : null;
 
     return (
         <button
-            onClick={() => setExpanded(!expanded)}
-            className={`w-full text-left rounded-2xl border ${natureColor.border} bg-gradient-to-br ${natureColor.bg} p-4 transition-all hover:border-altar-gold/20 active:scale-[0.99]`}
+            onClick={() => {
+                if (!expanded) onTap();
+                setExpanded(!expanded);
+            }}
+            className={`w-full text-left clay-card rounded-3xl border ${natureColor.border} bg-gradient-to-br ${natureColor.bg} p-4 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer`}
         >
             {/* Header row */}
             <div className="flex items-start justify-between gap-2 mb-2">
@@ -58,7 +64,7 @@ function TransitCard({ hit, interpretation, isLoading }: {
                     {natureColor.label}
                 </span>
                 {hit.isExactToday && (
-                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-altar-gold/20 text-altar-gold font-display animate-pulse">
+                    <span className="text-[9px] px-2 py-0.5 rounded-full clay-pill text-altar-gold font-display animate-pulse">
                         ⚡ EXACT TODAY
                     </span>
                 )}
@@ -96,7 +102,7 @@ function TransitCard({ hit, interpretation, isLoading }: {
     );
 }
 
-export function TransitFeed({ onClose, onTabChange }: TransitFeedProps) {
+export function TransitFeed({ onClose, onTabChange, subscription, onShowPremium }: TransitFeedProps) {
     const [feed, setFeed] = React.useState<ReturnType<typeof getTransitFeed> | null>(null);
     const [interpretations, setInterpretations] = React.useState<Record<string, string>>({});
     const [loadingKeys, setLoadingKeys] = React.useState<Set<string>>(new Set());
@@ -112,6 +118,11 @@ export function TransitFeed({ onClose, onTabChange }: TransitFeedProps) {
 
     // Load AI interpretation for a transit
     const loadInterpretation = React.useCallback(async (hit: TransitHit) => {
+        if (subscription !== 'premium') {
+            onShowPremium();
+            return;
+        }
+
         const key = `${hit.transitPlanet.id}-${hit.natalPlanet.id}-${hit.aspect.name}`;
         if (interpretations[key] || loadingKeys.has(key)) return;
 
@@ -163,12 +174,12 @@ export function TransitFeed({ onClose, onTabChange }: TransitFeedProps) {
 
     // Auto-load top 2 active transit interpretations
     React.useEffect(() => {
-        if (!feed) return;
+        if (!feed || subscription !== 'premium') return;
         const topHits = feed.active.slice(0, 2);
         for (const hit of topHits) {
             loadInterpretation(hit);
         }
-    }, [feed]);
+    }, [feed, subscription, loadInterpretation]);
 
     if (!feed) {
         return (
@@ -203,7 +214,7 @@ export function TransitFeed({ onClose, onTabChange }: TransitFeedProps) {
                         </p>
                         <button
                             onClick={() => onTabChange('profile')}
-                            className="px-6 py-3 rounded-xl bg-altar-gold/10 border border-altar-gold/30 text-altar-gold font-display text-sm hover:border-altar-gold/60 transition-all"
+                            className="w-full sm:w-auto py-3 px-8 rounded-2xl clay-btn text-center hover:scale-[1.02] transition-all text-sm font-display text-altar-muted tracking-wide"
                         >
                             Enter Birth Details →
                         </button>
@@ -259,11 +270,12 @@ export function TransitFeed({ onClose, onTabChange }: TransitFeedProps) {
                                 {feed.active.map((hit, i) => {
                                     const key = `${hit.transitPlanet.id}-${hit.natalPlanet.id}-${hit.aspect.name}`;
                                     return (
-                                        <div key={key} onClick={() => loadInterpretation(hit)}>
+                                        <div key={key}>
                                             <TransitCard
                                                 hit={hit}
                                                 interpretation={interpretations[key] || null}
                                                 isLoading={loadingKeys.has(key)}
+                                                onTap={() => loadInterpretation(hit)}
                                             />
                                         </div>
                                     );
@@ -274,7 +286,7 @@ export function TransitFeed({ onClose, onTabChange }: TransitFeedProps) {
 
                     {/* No active transits message */}
                     {feed.active.length === 0 && (
-                        <div className="mb-5 animate-fade-up glass rounded-2xl p-5 text-center" style={{ animationDelay: '0.15s', opacity: 0 }}>
+                        <div className="mb-5 animate-fade-up clay-card rounded-3xl p-5 text-center" style={{ animationDelay: '0.15s', opacity: 0 }}>
                             <p className="text-2xl mb-2">🌙</p>
                             <p className="text-sm text-altar-text/70">The skies are quiet today.</p>
                             <p className="text-[10px] text-altar-muted mt-1">No major transits are hitting your chart right now.</p>
@@ -296,7 +308,7 @@ export function TransitFeed({ onClose, onTabChange }: TransitFeedProps) {
                                     return (
                                         <div
                                             key={key}
-                                            className="rounded-xl border border-white/5 bg-altar-deep/40 p-3 flex items-center gap-3"
+                                            className="clay-inset rounded-2xl p-3 flex items-center gap-3"
                                         >
                                             <span className="text-xl shrink-0">{hit.transitPlanet.glyph}</span>
                                             <div className="flex-1 min-w-0">
@@ -306,7 +318,7 @@ export function TransitFeed({ onClose, onTabChange }: TransitFeedProps) {
                                                 <p className="text-[10px] text-altar-muted">{dayLabel} · {hit.aspect.nature}</p>
                                             </div>
                                             {hit.significance === 'major' && (
-                                                <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-red-500/15 text-red-300 shrink-0">Major</span>
+                                                <span className="text-[9px] px-1.5 py-0.5 rounded-full clay-pill text-red-300 shrink-0">Major</span>
                                             )}
                                         </div>
                                     );
@@ -330,7 +342,7 @@ export function TransitFeed({ onClose, onTabChange }: TransitFeedProps) {
                                     return (
                                         <div
                                             key={key}
-                                            className="rounded-xl border border-white/5 bg-altar-deep/30 p-3 flex items-center gap-3"
+                                            className="clay-inset rounded-2xl p-3 flex items-center gap-3"
                                         >
                                             <span className="text-xl shrink-0 opacity-50">{hit.transitPlanet.glyph}</span>
                                             <div className="flex-1 min-w-0">
@@ -347,10 +359,10 @@ export function TransitFeed({ onClose, onTabChange }: TransitFeedProps) {
                     )}
 
                     {/* Info block */}
-                    <div className="glass rounded-2xl p-4 mb-5 animate-fade-up" style={{ animationDelay: '0.6s', opacity: 0 }}>
-                        <h3 className="font-display text-[10px] text-altar-muted tracking-[2px] uppercase mb-2">How Transit Alerts Work</h3>
-                        <p className="text-[11px] text-altar-text/60 leading-relaxed">
-                            We calculate the exact positions of all planets right now and compare them against your natal chart. When a transiting planet forms an aspect (conjunction, square, trine, etc.) to one of your natal planets, it activates that part of your chart. This is personalized to <strong className="text-altar-text/80">your</strong> specific birth chart — not generic zodiac predictions.
+                    <div className="clay-card rounded-3xl p-5 mb-5 animate-fade-up" style={{ animationDelay: '0.6s', opacity: 0 }}>
+                        <h3 className="font-display text-xs text-altar-muted tracking-[3px] uppercase mb-3 text-center">How Transit Alerts Work</h3>
+                        <p className="text-[11px] text-altar-text/60 leading-relaxed text-center">
+                            We calculate the exact positions of all planets right now and compare them against your natal chart. When a transiting planet forms an aspect to one of your natal planets, it activates that part of your chart. This is personalized to <strong className="text-altar-text/80">your</strong> specific birth chart — not generic zodiac predictions.
                         </p>
                     </div>
                 </div>

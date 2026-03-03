@@ -38,6 +38,8 @@ interface FamilyMember {
 interface FamilyCircleProps {
     onClose: () => void;
     onTabChange: (tab: string) => void;
+    subscription: string;
+    onShowPremium: () => void;
 }
 
 type ViewState = 'list' | 'add' | 'reading';
@@ -106,7 +108,7 @@ function toBirthData(member: FamilyMember): BirthData {
 // MAIN COMPONENT
 // ══════════════════════════════════════
 
-export function FamilyCircle({ onClose, onTabChange }: FamilyCircleProps) {
+export function FamilyCircle({ onClose, onTabChange, subscription, onShowPremium }: FamilyCircleProps) {
     const parentData = getBirthData();
 
     const [viewState, setViewState] = React.useState<ViewState>('list');
@@ -252,6 +254,10 @@ export function FamilyCircle({ onClose, onTabChange }: FamilyCircleProps) {
 
     // ── Generate parent↔child reading ──
     const generateReading = async (member: FamilyMember) => {
+        if (subscription !== 'premium') {
+            onShowPremium();
+            return;
+        }
         if (!parentData) return;
         setSelectedMember(member);
         setViewState('reading');
@@ -302,6 +308,10 @@ export function FamilyCircle({ onClose, onTabChange }: FamilyCircleProps) {
 
     // ── Generate sibling↔sibling reading ──
     const generateSiblingReading = async (child1: FamilyMember, child2: FamilyMember) => {
+        if (subscription !== 'premium') {
+            onShowPremium();
+            return;
+        }
         setSiblingPair([child1, child2]);
         setSelectedMember(null);
         setViewState('reading');
@@ -383,11 +393,11 @@ export function FamilyCircle({ onClose, onTabChange }: FamilyCircleProps) {
                     <>
                         {/* No birth data warning */}
                         {!parentData && (
-                            <div className="mx-5 mt-4 glass-strong rounded-2xl p-5 text-center animate-fade-up">
+                            <div className="mx-5 mt-4 clay-card p-5 text-center animate-fade-up">
                                 <p className="text-3xl mb-2">⚠️</p>
                                 <p className="text-sm text-altar-text/70 mb-3">Set your birth data first to see family dynamics.</p>
                                 <button onClick={() => onTabChange('profile')}
-                                    className="px-6 py-2 bg-altar-gold/20 text-altar-gold text-sm font-display tracking-[2px] rounded-xl border border-altar-gold/30">
+                                    className="clay-btn clay-btn-primary px-6 py-2 text-sm">
                                     SET UP PROFILE
                                 </button>
                             </div>
@@ -434,12 +444,7 @@ export function FamilyCircle({ onClose, onTabChange }: FamilyCircleProps) {
                             <div className="mx-5 mt-6 animate-fade-up" style={{ animationDelay: `${Math.min(family.length, 5) * 0.1 + 0.2}s`, opacity: 0 }}>
                                 <button
                                     onClick={() => { resetForm(); setViewState('add'); }}
-                                    className="w-full py-4 rounded-2xl font-display text-sm tracking-[3px] uppercase transition-all active:scale-[0.98] border"
-                                    style={{
-                                        background: 'linear-gradient(135deg, rgba(218,165,32,0.15), rgba(138,43,226,0.1))',
-                                        borderColor: 'rgba(218,165,32,0.25)',
-                                        color: 'var(--color-altar-gold)',
-                                    }}
+                                    className="clay-btn clay-btn-primary w-full py-4 text-sm"
                                 >
                                     + ADD FAMILY MEMBER
                                 </button>
@@ -465,7 +470,7 @@ export function FamilyCircle({ onClose, onTabChange }: FamilyCircleProps) {
                                             setTimeout(() => setShareStatus('idle'), 2500);
                                         }
                                     }}
-                                    className="w-full py-3.5 rounded-2xl font-display text-xs tracking-[2px] uppercase transition-all active:scale-[0.98] bg-white/5 border border-white/10 text-altar-muted hover:text-altar-text hover:border-white/20"
+                                    className="clay-btn w-full py-3.5 text-xs"
                                 >
                                     {shareStatus === 'done' ? '✅ LINK COPIED!' : '📤 SHARE MY COSMIC CARD'}
                                 </button>
@@ -479,27 +484,24 @@ export function FamilyCircle({ onClose, onTabChange }: FamilyCircleProps) {
                 {viewState === 'add' && (
                     <div className="mx-5 mt-4 space-y-4 animate-fade-up">
                         {/* Name */}
-                        <div className="glass-strong rounded-2xl p-4">
+                        <div className="clay-card p-4">
                             <label className="text-[9px] font-display text-altar-muted tracking-[2px] uppercase mb-2 block">Name</label>
                             <input
                                 type="text" value={formName} onChange={e => setFormName(e.target.value)}
                                 placeholder="e.g. Emma"
-                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-altar-text placeholder:text-altar-muted/40 outline-none focus:border-altar-gold/30"
+                                className="clay-inset w-full px-4 py-3 text-sm"
                             />
                         </div>
 
                         {/* Relationship */}
-                        <div className="glass-strong rounded-2xl p-4">
+                        <div className="clay-card p-4">
                             <label className="text-[9px] font-display text-altar-muted tracking-[2px] uppercase mb-2 block">Relationship</label>
                             <div className="grid grid-cols-3 gap-2">
                                 {RELATIONSHIP_OPTIONS.map(opt => (
                                     <button
                                         key={opt.value}
                                         onClick={() => setFormRelationship(opt.value)}
-                                        className={`py-2.5 rounded-xl text-xs font-display tracking-[1px] border transition-all ${formRelationship === opt.value
-                                            ? 'bg-altar-gold/20 border-altar-gold/40 text-altar-gold'
-                                            : 'bg-white/5 border-white/10 text-altar-muted hover:border-white/20'
-                                            }`}
+                                        className={`clay-btn py-2.5 text-xs ${formRelationship === opt.value ? 'clay-btn-active' : ''}`}
                                     >
                                         {opt.emoji} {opt.label}
                                     </button>
@@ -508,26 +510,26 @@ export function FamilyCircle({ onClose, onTabChange }: FamilyCircleProps) {
                         </div>
 
                         {/* Birthday */}
-                        <div className="glass-strong rounded-2xl p-4">
+                        <div className="clay-card p-4">
                             <label className="text-[9px] font-display text-altar-muted tracking-[2px] uppercase mb-2 block">Date of Birth</label>
                             <input
                                 type="date" value={formBirthday} onChange={e => setFormBirthday(e.target.value)}
-                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-altar-text outline-none focus:border-altar-gold/30 [color-scheme:dark]"
+                                className="clay-inset w-full px-4 py-3 text-sm [color-scheme:dark]"
                             />
                         </div>
 
                         {/* Birth Time (optional) */}
-                        <div className="glass-strong rounded-2xl p-4">
+                        <div className="clay-card p-4">
                             <label className="text-[9px] font-display text-altar-muted tracking-[2px] uppercase mb-1 block">Birth Time <span className="text-altar-muted/50">(optional)</span></label>
                             <p className="text-[10px] text-altar-muted/50 mb-2">Needed for accurate Moon & Rising sign</p>
                             <input
                                 type="time" value={formBirthTime} onChange={e => setFormBirthTime(e.target.value)}
-                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-altar-text outline-none focus:border-altar-gold/30 [color-scheme:dark]"
+                                className="clay-inset w-full px-4 py-3 text-sm [color-scheme:dark]"
                             />
                         </div>
 
                         {/* Place of Birth */}
-                        <div className="glass-strong rounded-2xl p-4 relative" ref={cityDropdownRef}>
+                        <div className="clay-card p-4 relative" ref={cityDropdownRef}>
                             <label className="text-[9px] font-display text-altar-muted tracking-[2px] uppercase mb-1 block">Place of Birth <span className="text-altar-muted/50">(optional)</span></label>
                             <div className="relative">
                                 <input
@@ -535,7 +537,7 @@ export function FamilyCircle({ onClose, onTabChange }: FamilyCircleProps) {
                                     onChange={e => handleCitySearch(e.target.value)}
                                     onFocus={() => citySuggestions.length > 0 && setShowCitySuggestions(true)}
                                     placeholder="Search city…"
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-altar-text placeholder:text-altar-muted/40 outline-none focus:border-altar-gold/30"
+                                    className="clay-inset w-full px-4 py-3 text-sm"
                                 />
                                 {resolving && (
                                     <span className="absolute right-3 top-3 text-xs text-altar-gold animate-pulse">…</span>
@@ -565,10 +567,7 @@ export function FamilyCircle({ onClose, onTabChange }: FamilyCircleProps) {
                         <button
                             onClick={handleSaveMember}
                             disabled={!formName || !formBirthday}
-                            className={`w-full py-4 rounded-2xl font-display text-sm tracking-[3px] uppercase transition-all active:scale-[0.98] border ${formName && formBirthday
-                                ? 'bg-altar-gold/20 border-altar-gold/30 text-altar-gold'
-                                : 'bg-white/5 border-white/10 text-altar-muted/30'
-                                }`}
+                            className={`clay-btn w-full py-4 text-sm ${formName && formBirthday ? 'clay-btn-primary' : ''}`}
                         >
                             {editingId ? '✦ SAVE CHANGES' : '✦ ADD TO FAMILY'}
                         </button>
@@ -579,15 +578,15 @@ export function FamilyCircle({ onClose, onTabChange }: FamilyCircleProps) {
                 {viewState === 'reading' && (
                     <div className="mx-5 mt-4 animate-fade-up">
                         {readingLoading ? (
-                            <div className="glass-strong rounded-2xl p-8 text-center mt-8">
-                                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-altar-gold/20 to-violet-500/20 border border-altar-gold/20 flex items-center justify-center animate-pulse">
+                            <div className="clay-card p-8 text-center mt-8">
+                                <div className="w-16 h-16 mx-auto mb-4 rounded-full clay-inset flex items-center justify-center animate-pulse">
                                     <span className="text-2xl">👨‍👩‍👧‍👦</span>
                                 </div>
                                 <p className="text-sm text-altar-text font-display tracking-[2px] mb-2">READING THE BONDS</p>
                                 <p className="text-xs text-altar-gold/60 animate-pulse">Channeling family dynamics…</p>
                             </div>
                         ) : readingContent ? (
-                            <div className="glass-strong rounded-2xl p-5">
+                            <div className="clay-card p-5">
                                 <AIResponseRenderer text={readingContent} />
                             </div>
                         ) : null}
@@ -595,7 +594,7 @@ export function FamilyCircle({ onClose, onTabChange }: FamilyCircleProps) {
                         {/* Back button */}
                         <button
                             onClick={() => { setViewState('list'); setReadingContent(null); setSiblingPair(null); }}
-                            className="w-full mt-4 py-3 rounded-xl text-xs text-altar-muted font-display tracking-[2px] bg-white/5 border border-white/10"
+                            className="clay-btn w-full mt-4 py-3 text-xs"
                         >
                             ← BACK TO FAMILY
                         </button>
@@ -626,9 +625,9 @@ function FamilyMemberCard({ member, index, onRead, onEdit, onDelete, hasParentDa
     }, [member.birthday, member.birthTime, member.location]);
 
     return (
-        <div className="glass-strong rounded-2xl p-4 animate-fade-up" style={{ animationDelay: `${index * 0.08}s`, opacity: 0 }}>
+        <div className="clay-card p-4 animate-fade-up" style={{ animationDelay: `${index * 0.08}s`, opacity: 0 }}>
             <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-full bg-gradient-to-br from-amber-500/15 to-violet-500/15 border border-white/10 flex items-center justify-center flex-shrink-0">
+                <div className="w-11 h-11 rounded-full clay-inset flex items-center justify-center flex-shrink-0">
                     <span className="text-lg">{RELATIONSHIP_EMOJI[member.relationship] || '✦'}</span>
                 </div>
                 <div className="flex-1 min-w-0">
@@ -654,16 +653,16 @@ function FamilyMemberCard({ member, index, onRead, onEdit, onDelete, hasParentDa
                 <div className="mt-3 pt-3 border-t border-white/5 flex gap-2">
                     {hasParentData && (
                         <button onClick={onRead}
-                            className="flex-1 py-2 rounded-xl text-[10px] font-display tracking-[1px] bg-altar-gold/15 text-altar-gold border border-altar-gold/20 active:scale-[0.98] transition-transform">
+                            className="clay-btn clay-btn-primary flex-1 py-2 text-[10px]">
                             ✦ YOUR BOND
                         </button>
                     )}
                     <button onClick={onEdit}
-                        className="px-4 py-2 rounded-xl text-[10px] font-display tracking-[1px] bg-white/5 text-altar-muted border border-white/10">
+                        className="clay-btn px-4 py-2 text-[10px]">
                         EDIT
                     </button>
                     <button onClick={onDelete}
-                        className="px-4 py-2 rounded-xl text-[10px] font-display tracking-[1px] bg-red-500/10 text-red-400/60 border border-red-500/10">
+                        className="clay-btn px-4 py-2 text-[10px] !bg-red-500/20 !text-red-400">
                         ✕
                     </button>
                 </div>
@@ -695,7 +694,7 @@ function SiblingSection({ family, onSelectPair }: {
                     <button
                         key={`${a.id}-${b.id}`}
                         onClick={() => onSelectPair(a, b)}
-                        className="w-full glass-strong rounded-xl p-3 flex items-center gap-3 text-left active:scale-[0.98] transition-transform"
+                        className="w-full clay-card p-3 flex items-center gap-3 text-left active:scale-[0.98] hover:shadow-[0_0_15px_rgba(218,165,32,0.15)] transition-all"
                     >
                         <div className="flex items-center gap-1.5">
                             <span className="text-sm">{RELATIONSHIP_EMOJI[a.relationship]}</span>

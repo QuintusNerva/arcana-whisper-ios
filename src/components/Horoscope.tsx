@@ -154,7 +154,7 @@ Expand on that theme with practical guidance, emotional insight, and a sense of 
 
                     {/* Sign Picker */}
                     {showSignPicker && (
-                        <div className="glass rounded-2xl p-3 mb-4 animate-fade-up">
+                        <div className="clay-card rounded-3xl p-3 mb-4 animate-fade-up">
                             <div className="grid grid-cols-4 gap-1.5">
                                 {ZODIAC_SIGNS.map(z => (
                                     <button
@@ -198,7 +198,7 @@ Expand on that theme with practical guidance, emotional insight, and a sense of 
                     </div>
 
                     {/* Daily Horoscope */}
-                    <div className="glass-strong rounded-2xl p-5 mb-4 animate-fade-up" style={{ animationDelay: '0.25s', opacity: 0 }}>
+                    <div className="clay-card rounded-3xl p-5 mb-4 animate-fade-up" style={{ animationDelay: '0.25s', opacity: 0 }}>
                         <h3 className="font-display text-xs text-altar-muted tracking-[3px] uppercase mb-3 flex items-center gap-1.5">
                             <span className="text-altar-gold">✦</span> Today's Reading
                         </h3>
@@ -216,17 +216,17 @@ Expand on that theme with practical guidance, emotional insight, and a sense of 
 
                     {/* Lucky Elements */}
                     <div className="grid grid-cols-3 gap-2.5 mb-4 animate-fade-up" style={{ animationDelay: '0.35s', opacity: 0 }}>
-                        <div className="glass rounded-xl p-3 text-center">
+                        <div className="clay-inset rounded-2xl p-3 text-center">
                             <p className="text-lg mb-0.5">🔢</p>
                             <p className="font-display text-base text-altar-gold">{horoscope.lucky.number}</p>
                             <p className="text-[8px] text-altar-muted font-display tracking-[1px] uppercase mt-0.5">Lucky Number</p>
                         </div>
-                        <div className="glass rounded-xl p-3 text-center">
+                        <div className="clay-inset rounded-2xl p-3 text-center">
                             <p className="text-lg mb-0.5">🎨</p>
                             <p className="font-display text-[11px] text-altar-gold leading-tight">{horoscope.lucky.color}</p>
                             <p className="text-[8px] text-altar-muted font-display tracking-[1px] uppercase mt-0.5">Color</p>
                         </div>
-                        <div className="glass rounded-xl p-3 text-center">
+                        <div className="clay-inset rounded-2xl p-3 text-center">
                             <p className="text-lg mb-0.5">💎</p>
                             <p className="font-display text-[11px] text-altar-gold leading-tight">{horoscope.lucky.crystal}</p>
                             <p className="text-[8px] text-altar-muted font-display tracking-[1px] uppercase mt-0.5">Crystal</p>
@@ -235,17 +235,14 @@ Expand on that theme with practical guidance, emotional insight, and a sense of 
 
                     {/* Extended Forecast — Premium gate */}
                     <div
-                        className="rounded-2xl mb-4 animate-fade-up"
+                        className="clay-card rounded-[2rem] mb-4 animate-fade-up border border-altar-gold/30 shadow-[0_0_30px_rgba(212,175,55,0.1)]"
                         style={{
                             animationDelay: '0.45s', opacity: 0,
-                            background: 'linear-gradient(160deg, #211a42 0%, #170e36 55%, #0e0b26 100%)',
-                            boxShadow: '0 10px 32px rgba(0,0,0,0.6), 0 3px 8px rgba(0,0,0,0.45), inset 0 1px 1px rgba(255,255,255,0.09), inset 0 -2px 5px rgba(0,0,0,0.4)',
-                            border: '1px solid rgba(212,175,55,0.15)',
                         }}
                     >
-                        <div className="rounded-2xl p-5">
-                            <h3 className="font-display text-xs text-altar-muted tracking-[3px] uppercase mb-3 flex items-center gap-1.5">
-                                {isPremium ? <span className="text-altar-gold">✦</span> : <span>👑</span>} Extended Forecast
+                        <div className="p-6">
+                            <h3 className="font-display text-xs text-altar-gold tracking-[3px] uppercase mb-4 flex items-center gap-1.5">
+                                {isPremium ? <span className="text-altar-bright">✦</span> : <span>👑</span>} Extended Forecast
                             </h3>
                             {isPremium ? (
                                 <p className="text-sm text-altar-text/85 leading-relaxed italic">
@@ -267,8 +264,8 @@ Expand on that theme with practical guidance, emotional insight, and a sense of 
                     </div>
 
                     {/* Compatibility */}
-                    <div className="glass rounded-2xl p-5 mb-5 animate-fade-up" style={{ animationDelay: '0.55s', opacity: 0 }}>
-                        <h3 className="font-display text-xs text-altar-muted tracking-[3px] uppercase mb-3">Compatibility</h3>
+                    <div className="clay-card rounded-3xl p-5 mb-5 animate-fade-up" style={{ animationDelay: '0.55s', opacity: 0 }}>
+                        <h3 className="font-display text-xs text-altar-muted tracking-[3px] uppercase mb-4">Compatibility</h3>
                         <div className="space-y-3">
                             <div>
                                 <p className="text-[9px] text-green-400/70 font-display tracking-[2px] uppercase mb-1.5">Best Matches</p>
@@ -276,8 +273,7 @@ Expand on that theme with practical guidance, emotional insight, and a sense of 
                                     {compat.best.map(z => (
                                         <div
                                             key={z.id}
-                                            className="flex-1 text-center py-2 rounded-lg"
-                                            style={{ background: 'rgba(34,197,94,0.07)', border: '1px solid rgba(34,197,94,0.18)', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.35)' }}
+                                            className="clay-inset flex-1 text-center py-3 rounded-2xl"
                                         >
                                             <span className="text-xl block">{z.glyph}</span>
                                             <span className="text-[9px] text-altar-text/70 font-display">{z.name}</span>
@@ -291,8 +287,7 @@ Expand on that theme with practical guidance, emotional insight, and a sense of 
                                     {compat.challenging.map(z => (
                                         <div
                                             key={z.id}
-                                            className="flex-1 text-center py-2 rounded-lg"
-                                            style={{ background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.18)', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.35)' }}
+                                            className="clay-inset flex-1 text-center py-3 rounded-2xl"
                                         >
                                             <span className="text-xl block">{z.glyph}</span>
                                             <span className="text-[9px] text-altar-text/70 font-display">{z.name}</span>
