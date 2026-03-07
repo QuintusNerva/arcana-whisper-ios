@@ -18,6 +18,7 @@ import { AIService } from '../services/ai.service';
 import { searchPlaces, resolvePlace, PlaceSuggestion } from '../services/geocoding.service';
 import { AIResponseRenderer } from './AIResponseRenderer';
 import { generateShareURL } from './CosmicInvite';
+import { PageHeader } from './PageHeader';
 
 // ══════════════════════════════════════
 // TYPES
@@ -364,27 +365,24 @@ export function FamilyCircle({ onClose, onTabChange, subscription, onShowPremium
     return (
         <div className="fixed inset-0 bg-altar-dark flex flex-col z-50">
             {/* Header */}
-            <div className="relative px-5 pt-14 pb-4 border-b border-white/5 flex-shrink-0">
-                <button
-                    onClick={() => {
-                        if (viewState !== 'list') { setViewState('list'); setReadingContent(null); setSiblingPair(null); }
-                        else onClose();
-                    }}
-                    className="absolute left-4 top-14 w-8 h-8 flex items-center justify-center text-altar-muted hover:text-altar-text transition-colors"
-                >
-                    ←
-                </button>
-                <div className="text-center">
-                    <h1 className="font-display text-lg text-altar-gold tracking-[4px]">
-                        {viewState === 'add' ? (editingId ? 'EDIT MEMBER' : 'ADD MEMBER') :
-                            viewState === 'reading' ? 'FAMILY READING' : 'FAMILY CIRCLE'}
-                    </h1>
-                    <p className="text-[10px] text-altar-muted tracking-[2px] mt-1 font-display">
-                        {viewState === 'reading' ? readingLabel :
-                            viewState === 'add' ? 'BIRTH DETAILS' : 'COSMIC FAMILY BONDS'}
-                    </p>
-                </div>
-            </div>
+            <PageHeader
+                onClose={() => {
+                    if (viewState !== 'list') { setViewState('list'); setReadingContent(null); setSiblingPair(null); }
+                    else onClose();
+                }}
+                centerContent={
+                    <div className="text-center w-full">
+                        <h1 className="font-display text-lg text-altar-gold tracking-[4px]">
+                            {viewState === 'add' ? (editingId ? 'EDIT MEMBER' : 'ADD MEMBER') :
+                                viewState === 'reading' ? 'FAMILY READING' : 'FAMILY CIRCLE'}
+                        </h1>
+                        <p className="text-[10px] text-altar-muted tracking-[2px] mt-1 font-display">
+                            {viewState === 'reading' ? readingLabel :
+                                viewState === 'add' ? 'BIRTH DETAILS' : 'COSMIC FAMILY BONDS'}
+                        </p>
+                    </div>
+                }
+            />
 
             <div className="flex-1 overflow-y-auto pb-32">
 

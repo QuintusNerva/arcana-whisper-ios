@@ -1,6 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
+import { ErrorBoundary } from './components/ErrorBoundary.tsx'
+import { OfflineNotice } from './components/OfflineNotice.tsx'
 import './index.css'
 
 // Catch uncaught errors and display them visually (debug)
@@ -17,7 +19,10 @@ window.addEventListener('unhandledrejection', (e) => {
 try {
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
-      <App />
+      <ErrorBoundary>
+        <OfflineNotice />
+        <App />
+      </ErrorBoundary>
     </React.StrictMode>,
   )
 } catch (e: any) {

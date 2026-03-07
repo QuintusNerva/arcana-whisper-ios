@@ -3,6 +3,7 @@ import { Card } from '../models/card.model';
 import { BottomNav } from './BottomNav';
 import { AIService } from '../services/ai.service';
 import { AIResponseRenderer } from './AIResponseRenderer';
+import { PageHeader } from './PageHeader';
 
 interface CardDetailProps {
     card: Card;
@@ -28,15 +29,11 @@ export function CardDetail({ card, onClose, currentTab, onTabChange, subscriptio
         <div className="page-frame">
             <div className="page-scroll bg-gradient-to-b from-altar-deep via-altar-dark to-altar-purple text-altar-text">
                 {/* Header */}
-                <header className="sticky top-0 z-20 bg-altar-deep/90 backdrop-blur-xl border-b border-white/5 safe-top">
-                    <div className="flex items-center justify-between px-4 py-3 max-w-[500px] mx-auto">
-                        <button onClick={onClose} className="text-altar-muted hover:text-white transition-colors text-sm font-display tracking-wide">
-                            ← Back
-                        </button>
-                        <h2 className="font-display text-sm text-altar-gold tracking-[3px]">CARD DETAIL</h2>
-                        <div className="w-12" />
-                    </div>
-                </header>
+                <PageHeader
+                    onClose={onClose}
+                    title="CARD DETAIL"
+                    titleSize="sm"
+                />
 
                 <div className="max-w-[500px] mx-auto px-4">
                     {/* Hero card image */}

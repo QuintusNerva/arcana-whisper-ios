@@ -4,6 +4,7 @@ import { BottomNav } from './BottomNav';
 import { JournalEntryView } from './JournalEntry';
 import { AIResponseRenderer } from './AIResponseRenderer';
 import { DreamJournal } from './DreamJournal';
+import { PageHeader } from './PageHeader';
 import {
     getJournalEntries, getJournalEntryCount, deleteJournalEntry,
     getPatternProgress, getPatternInsights, PatternInsight,
@@ -187,10 +188,9 @@ export function JournalTab({ onClose, onTabChange, initialSubTab = 'journal', su
         <div className="page-frame">
             <div className="page-scroll bg-gradient-to-b from-altar-deep via-altar-dark to-altar-purple text-altar-text">
                 {/* Header */}
-                <header className="sticky top-0 z-20 bg-altar-deep/90 backdrop-blur-xl border-b border-white/5 safe-top">
-                    <div className="flex items-center justify-between px-4 py-3 max-w-[500px] mx-auto">
-                        <button onClick={onClose} className="text-altar-muted hover:text-white transition-colors text-sm font-display tracking-wide">← Altar</button>
-                        {/* Sub-tab switcher */}
+                <PageHeader
+                    onClose={onClose}
+                    centerContent={
                         <div
                             className="flex items-center gap-1 rounded-full p-1"
                             style={{
@@ -229,14 +229,16 @@ export function JournalTab({ onClose, onTabChange, initialSubTab = 'journal', su
                                 );
                             })}
                         </div>
+                    }
+                    rightContent={
                         <button
                             onClick={() => setShowReminder(!showReminder)}
                             className={`text-sm ${reminderSettings.enabled ? 'text-altar-gold' : 'text-altar-muted/40'}`}
                         >
                             🔔
                         </button>
-                    </div>
-                </header>
+                    }
+                />
 
                 <div className="max-w-[500px] mx-auto px-4">
                     {/* Onboarding — first time only */}
@@ -518,6 +520,6 @@ export function JournalTab({ onClose, onTabChange, initialSubTab = 'journal', su
                 </div>
             </div>
             <BottomNav currentTab="journal" onTabChange={onTabChange} />
-        </div>
+        </div >
     );
 }

@@ -2,6 +2,7 @@ import React from 'react';
 import { Card } from '../models/card.model';
 import { TarotService } from '../services/tarot.service';
 import { BottomNav } from './BottomNav';
+import { PageHeader } from './PageHeader';
 
 interface CardLibraryProps {
     onClose: () => void;
@@ -40,60 +41,50 @@ export function CardLibrary({ onClose, onViewCard, currentTab, onTabChange }: Ca
         <div className="page-frame">
             <div className="page-scroll bg-gradient-to-b from-altar-deep via-altar-dark to-altar-purple text-altar-text">
                 {/* Header */}
-                <header className="sticky top-0 z-20 bg-altar-deep/90 backdrop-blur-xl border-b border-white/5 safe-top">
-                    <div className="max-w-[500px] mx-auto px-4 py-4">
-                        <div className="flex items-center justify-between mb-3">
-                            <button onClick={onClose} className="text-altar-muted hover:text-white transition-colors text-sm font-display tracking-wide">
-                                ← Altar
-                            </button>
-                            <h1 className="font-display text-lg text-altar-gold tracking-[4px]">CODEX</h1>
-                            <div className="w-12" />
-                        </div>
-
-                        {/* Search */}
-                        <div className="glass rounded-xl flex items-center gap-2 px-3 py-2.5">
-                            <span className="text-altar-muted text-sm">🔍</span>
-                            <input
-                                type="text"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                placeholder="Search the arcana…"
-                                className="bg-transparent flex-1 text-sm text-altar-text placeholder-altar-muted/50 focus:outline-none"
-                            />
-                            {search && (
-                                <button onClick={() => setSearch('')} className="text-altar-muted hover:text-white text-xs">✕</button>
-                            )}
-                        </div>
-
-                        {/* Filter pills */}
-                        <div className="flex gap-2 mt-3 overflow-x-auto scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
-                            {SUIT_FILTERS.map(filter => (
-                                <button
-                                    key={filter}
-                                    onClick={() => setSelectedFilter(filter)}
-                                    className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-display tracking-wide transition-all ${selectedFilter === filter
-                                        ? 'bg-altar-gold/20 text-altar-gold border border-altar-gold/30'
-                                        : 'glass text-altar-muted hover:text-white border border-transparent'
-                                        }`}
-                                >
-                                    {filter}
-                                </button>
-                            ))}
-                            {elements.map(el => (
-                                <button
-                                    key={el}
-                                    onClick={() => setSelectedFilter(selectedFilter === el ? 'All' : el)}
-                                    className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-display tracking-wide transition-all flex items-center gap-1 ${selectedFilter === el
-                                        ? 'bg-altar-gold/20 text-altar-gold border border-altar-gold/30'
-                                        : 'glass text-altar-muted hover:text-white border border-transparent'
-                                        }`}
-                                >
-                                    {ELEMENT_ICONS[el]} {el}
-                                </button>
-                            ))}
-                        </div>
+                <PageHeader title="CODEX" onClose={onClose} titleSize="lg">
+                    {/* Search */}
+                    <div className="glass rounded-xl flex items-center gap-2 px-3 py-2.5">
+                        <span className="text-altar-muted text-sm">🔍</span>
+                        <input
+                            type="text"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Search the arcana…"
+                            className="bg-transparent flex-1 text-sm text-altar-text placeholder-altar-muted/50 focus:outline-none"
+                        />
+                        {search && (
+                            <button onClick={() => setSearch('')} className="text-altar-muted hover:text-white text-xs">✕</button>
+                        )}
                     </div>
-                </header>
+
+                    {/* Filter pills */}
+                    <div className="flex gap-2 mt-3 overflow-x-auto scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
+                        {SUIT_FILTERS.map(filter => (
+                            <button
+                                key={filter}
+                                onClick={() => setSelectedFilter(filter)}
+                                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-display tracking-wide transition-all ${selectedFilter === filter
+                                    ? 'bg-altar-gold/20 text-altar-gold border border-altar-gold/30'
+                                    : 'glass text-altar-muted hover:text-white border border-transparent'
+                                    }`}
+                            >
+                                {filter}
+                            </button>
+                        ))}
+                        {elements.map(el => (
+                            <button
+                                key={el}
+                                onClick={() => setSelectedFilter(selectedFilter === el ? 'All' : el)}
+                                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-display tracking-wide transition-all flex items-center gap-1 ${selectedFilter === el
+                                    ? 'bg-altar-gold/20 text-altar-gold border border-altar-gold/30'
+                                    : 'glass text-altar-muted hover:text-white border border-transparent'
+                                    }`}
+                            >
+                                {ELEMENT_ICONS[el]} {el}
+                            </button>
+                        ))}
+                    </div>
+                </PageHeader>
 
                 {/* Results count */}
                 <div className="max-w-[500px] mx-auto px-4 pt-3 pb-1">

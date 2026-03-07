@@ -15,6 +15,8 @@ const TABS = [
 export function BottomNav({ currentTab, onTabChange }: BottomNavProps) {
     return (
         <nav
+            role="tablist"
+            aria-label="Main navigation"
             style={{
                 flexShrink: 0,
                 width: '100%',
@@ -34,6 +36,10 @@ export function BottomNav({ currentTab, onTabChange }: BottomNavProps) {
                         <button
                             key={tab.id}
                             onClick={() => onTabChange(tab.id)}
+                            role="tab"
+                            aria-label={`${tab.label} tab`}
+                            aria-selected={isActive}
+                            accessKey={tab.id === 'home' ? 'h' : 'p'}
                             style={{
                                 display: 'flex',
                                 flexDirection: 'column',

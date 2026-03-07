@@ -879,6 +879,19 @@ ${keyDatesSummary || 'No exact transit hits detected.'}`;
         if (!this.apiKey) {
             throw new Error('No API key configured. Add your OpenRouter key in Settings.');
         }
+        // Offline guard
+        if (!navigator.onLine) {
+            throw new Error('You appear to be offline. AI insights require an internet connection. Tarot, astrology, and numerology still work offline!');
+        }
+        // AI consent check
+        try {
+            const consent = JSON.parse(safeStorage.getItem('ai_consent') || '{}');
+            if (consent.consented === false) {
+                throw new Error('AI features are disabled. You can enable them in Settings.');
+            }
+        } catch (e) {
+            if (e instanceof Error && e.message.includes('AI features are disabled')) throw e;
+        }
 
         const response = await fetch(OPENROUTER_URL, {
             method: 'POST',
@@ -922,6 +935,10 @@ ${keyDatesSummary || 'No exact transit hits detected.'}`;
     async chatPremium(systemPrompt: string, userPrompt: string, maxTokens = 3000): Promise<string> {
         if (!this.apiKey) {
             throw new Error('No API key configured. Add your OpenRouter key in Settings.');
+        }
+        // Offline guard
+        if (!navigator.onLine) {
+            throw new Error('You appear to be offline. AI insights require an internet connection. Tarot, astrology, and numerology still work offline!');
         }
 
         const response = await fetch(OPENROUTER_URL, {

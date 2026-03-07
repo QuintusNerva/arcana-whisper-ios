@@ -13,6 +13,7 @@ import {
     DreamEntry,
 } from '../services/dream-journal.service';
 import { DreamEntryView } from './DreamEntry';
+import { PageHeader } from './PageHeader';
 
 
 interface DreamJournalProps {
@@ -118,27 +119,11 @@ export function DreamJournal({ onClose, onTabChange, subscription, onShowPremium
                 </div>
 
                 {/* Header */}
-                <header className="sticky top-0 z-20 backdrop-blur-xl border-b safe-top"
-                    style={{
-                        background: 'rgba(8,8,24,0.85)',
-                        borderColor: 'rgba(139,92,246,0.1)',
-                    }}
-                >
-                    <div className="flex items-center justify-between px-4 py-3 max-w-[500px] mx-auto">
-                        <button
-                            onClick={onClose}
-                            className="text-sm transition-colors"
-                            style={{ color: 'rgba(255,255,255,0.4)' }}
-                        >
-                            ← Journal
-                        </button>
-                        <div className="text-center">
-                            <h1 className="font-display text-sm tracking-[4px]"
-                                style={{ color: 'rgba(196,181,253,0.9)' }}
-                            >
-                                🌙 DREAM JOURNAL
-                            </h1>
-                        </div>
+                <PageHeader
+                    onClose={onClose}
+                    title="🌙 DREAM JOURNAL"
+                    titleSize="sm"
+                    rightContent={
                         <button
                             onClick={() => setShowNewEntry(true)}
                             className="text-sm font-semibold transition-colors"
@@ -146,8 +131,8 @@ export function DreamJournal({ onClose, onTabChange, subscription, onShowPremium
                         >
                             + New
                         </button>
-                    </div>
-                </header>
+                    }
+                />
 
                 <div className="relative z-10 max-w-[500px] mx-auto px-4 pb-28">
 

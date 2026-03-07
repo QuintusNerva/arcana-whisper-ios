@@ -13,6 +13,7 @@ import {
     getPersonalYearNumber,
 } from '../services/astrology.service';
 import { BottomNav } from './BottomNav';
+import { PageHeader } from './PageHeader';
 
 interface CareerAlignmentProps {
     onClose: () => void;
@@ -156,15 +157,7 @@ export function CareerAlignment({ onClose, onTabChange, subscription, onShowPrem
             <div className="page-scroll bg-gradient-to-b from-altar-deep via-altar-dark to-altar-purple text-altar-text">
 
                 {/* Header */}
-                <header className="sticky top-0 z-20 bg-altar-deep/90 backdrop-blur-xl border-b border-white/5 safe-top">
-                    <div className="flex items-center justify-between px-4 py-3 max-w-[500px] mx-auto">
-                        <button onClick={onClose} className="text-altar-muted hover:text-white transition-colors text-sm font-display tracking-wide">
-                            ← Altar
-                        </button>
-                        <h1 className="font-display text-sm tracking-[4px] text-altar-gold">CAREER ALIGNMENT</h1>
-                        <div className="w-14" />
-                    </div>
-                </header>
+                <PageHeader title="CAREER ALIGNMENT" onClose={onClose} titleSize="sm" />
 
                 <div className="max-w-[500px] mx-auto px-4 pb-28">
 

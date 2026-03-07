@@ -445,146 +445,157 @@ function App() {
     if (!currentCard) return null;
 
     // ── Sub-screens (preserve all existing routing) ──
-    if (selectedCard) {
-        return (
-            <CardDetail
-                card={selectedCard}
-                onClose={() => setSelectedCard(null)}
-                currentTab={currentTab}
-                onTabChange={handleTabChange}
-                subscription={sub}
-                onShowPremium={() => setShowPremiumOverlay(true)}
-            />
-        );
-    }
+    const getActivePage = () => {
+        if (selectedCard) {
+            return (
+                <CardDetail
+                    card={selectedCard}
+                    onClose={() => setSelectedCard(null)}
+                    currentTab={currentTab}
+                    onTabChange={handleTabChange}
+                    subscription={sub}
+                    onShowPremium={() => setShowPremiumOverlay(true)}
+                />
+            );
+        }
+        if (showCardLibrary) {
+            return (
+                <CardLibrary
+                    onClose={() => { setShowCardLibrary(false); setCurrentTab('home'); }}
+                    onViewCard={(card) => { setSelectedCard(card); setShowCardLibrary(false); }}
+                    currentTab={currentTab}
+                    onTabChange={handleTabChange}
+                />
+            );
+        }
+        if (showHistory) {
+            return (
+                <ReadingHistory
+                    onClose={() => setShowHistory(false)}
+                    onViewReading={(reading) => { setCustomReadingResult(reading); setShowHistory(false); }}
+                    onTabChange={handleTabChange}
+                />
+            );
+        }
+        if (showProfileModal) {
+            return (
+                <ProfileModal
+                    onClose={() => { setShowProfileModal(false); setCurrentTab('home'); }}
+                    userProfile={userProfile}
+                    onTabChange={handleTabChange}
+                />
+            );
+        }
+        if (showNatalChart) {
+            return (
+                <NatalChart
+                    onClose={() => { setShowNatalChart(false); setCurrentTab('home'); }}
+                    onTabChange={handleTabChange}
+                    subscription={sub}
+                    onShowPremium={() => setShowPremiumOverlay(true)}
+                />
+            );
+        }
+        if (showNumerology) {
+            return (
+                <Numerology
+                    onClose={() => { setShowNumerology(false); setCurrentTab('home'); }}
+                    onTabChange={handleTabChange}
+                    subscription={sub}
+                    onShowPremium={() => setShowPremiumOverlay(true)}
+                />
+            );
+        }
+        if (showHoroscope) {
+            return (
+                <Horoscope
+                    onClose={() => { setShowHoroscope(false); setCurrentTab('home'); }}
+                    onTabChange={handleTabChange}
+                    subscription={sub}
+                />
+            );
+        }
+        if (showCompatibility) {
+            return (
+                <Compatibility
+                    onClose={() => { setShowCompatibility(false); setCurrentTab('home'); }}
+                    onTabChange={handleTabChange}
+                    subscription={sub}
+                    onShowPremium={() => setShowPremiumOverlay(true)}
+                />
+            );
+        }
+        if (showTransitFeed) {
+            return (
+                <TransitFeed
+                    onClose={() => { setShowTransitFeed(false); setCurrentTab('home'); }}
+                    onTabChange={handleTabChange}
+                    subscription={sub}
+                    onShowPremium={() => setShowPremiumOverlay(true)}
+                />
+            );
+        }
+        if (showFamily) {
+            return (
+                <FamilyCircle
+                    onClose={() => { setShowFamily(false); setCurrentTab('home'); }}
+                    onTabChange={handleTabChange}
+                    subscription={sub}
+                    onShowPremium={() => setShowPremiumOverlay(true)}
+                />
+            );
+        }
+        if (showYearAhead) {
+            return (
+                <YearAhead
+                    onClose={() => { setShowYearAhead(false); setCurrentTab('home'); }}
+                    onTabChange={handleTabChange}
+                    subscription={sub}
+                    onShowPremium={() => setShowPremiumOverlay(true)}
+                />
+            );
+        }
+        if (showJournal) {
+            return (
+                <JournalTab
+                    onClose={() => { setShowJournal(false); setJournalInitialSubTab('journal'); setCurrentTab('home'); }}
+                    onTabChange={handleTabChange}
+                    initialSubTab={journalInitialSubTab}
+                    subscription={sub}
+                    onShowPremium={() => setShowPremiumOverlay(true)}
+                />
+            );
+        }
+        if (showCareer) {
+            return (
+                <CareerAlignment
+                    onClose={() => { setShowCareer(false); setCurrentTab('home'); }}
+                    onTabChange={handleTabChange}
+                    subscription={sub}
+                    onShowPremium={() => setShowPremiumOverlay(true)}
+                />
+            );
+        }
+        return null;
+    };
 
-    if (showCardLibrary) {
+    const activePage = getActivePage();
+    if (activePage) {
         return (
-            <CardLibrary
-                onClose={() => { setShowCardLibrary(false); setCurrentTab('home'); }}
-                onViewCard={(card) => { setSelectedCard(card); setShowCardLibrary(false); }}
-                currentTab={currentTab}
-                onTabChange={handleTabChange}
-            />
-        );
-    }
-
-    if (showHistory) {
-        return (
-            <ReadingHistory
-                onClose={() => setShowHistory(false)}
-                onViewReading={(reading) => { setCustomReadingResult(reading); setShowHistory(false); }}
-                onTabChange={handleTabChange}
-            />
-        );
-    }
-
-    if (showProfileModal) {
-        return (
-            <ProfileModal
-                onClose={() => { setShowProfileModal(false); setCurrentTab('home'); }}
-                userProfile={userProfile}
-                onTabChange={handleTabChange}
-            />
-        );
-    }
-
-    if (showNatalChart) {
-        return (
-            <NatalChart
-                onClose={() => { setShowNatalChart(false); setCurrentTab('home'); }}
-                onTabChange={handleTabChange}
-                subscription={sub}
-                onShowPremium={() => setShowPremiumOverlay(true)}
-            />
-        );
-    }
-
-    if (showNumerology) {
-        return (
-            <Numerology
-                onClose={() => { setShowNumerology(false); setCurrentTab('home'); }}
-                onTabChange={handleTabChange}
-                subscription={sub}
-                onShowPremium={() => setShowPremiumOverlay(true)}
-            />
-        );
-    }
-
-    if (showHoroscope) {
-        return (
-            <Horoscope
-                onClose={() => { setShowHoroscope(false); setCurrentTab('home'); }}
-                onTabChange={handleTabChange}
-                subscription={sub}
-            />
-        );
-    }
-
-    if (showCompatibility) {
-        return (
-            <Compatibility
-                onClose={() => { setShowCompatibility(false); setCurrentTab('home'); }}
-                onTabChange={handleTabChange}
-                subscription={sub}
-                onShowPremium={() => setShowPremiumOverlay(true)}
-            />
-        );
-    }
-
-    if (showTransitFeed) {
-        return (
-            <TransitFeed
-                onClose={() => { setShowTransitFeed(false); setCurrentTab('home'); }}
-                onTabChange={handleTabChange}
-                subscription={sub}
-                onShowPremium={() => setShowPremiumOverlay(true)}
-            />
-        );
-    }
-
-    if (showFamily) {
-        return (
-            <FamilyCircle
-                onClose={() => { setShowFamily(false); setCurrentTab('home'); }}
-                onTabChange={handleTabChange}
-                subscription={sub}
-                onShowPremium={() => setShowPremiumOverlay(true)}
-            />
-        );
-    }
-
-    if (showYearAhead) {
-        return (
-            <YearAhead
-                onClose={() => { setShowYearAhead(false); setCurrentTab('home'); }}
-                onTabChange={handleTabChange}
-                subscription={sub}
-                onShowPremium={() => setShowPremiumOverlay(true)}
-            />
-        );
-    }
-
-    if (showJournal) {
-        return (
-            <JournalTab
-                onClose={() => { setShowJournal(false); setJournalInitialSubTab('journal'); setCurrentTab('home'); }}
-                onTabChange={handleTabChange}
-                initialSubTab={journalInitialSubTab}
-                subscription={sub}
-                onShowPremium={() => setShowPremiumOverlay(true)}
-            />
-        );
-    }
-
-    if (showCareer) {
-        return (
-            <CareerAlignment
-                onClose={() => { setShowCareer(false); setCurrentTab('home'); }}
-                onTabChange={handleTabChange}
-                subscription={sub}
-                onShowPremium={() => setShowPremiumOverlay(true)}
-            />
+            <>
+                {activePage}
+                {showPremiumOverlay && (
+                    <PremiumOverlay
+                        onClose={() => setShowPremiumOverlay(false)}
+                        onSubscribe={() => {
+                            const updated = { ...userProfile, subscription: 'premium' };
+                            safeStorage.setItem('userProfile', JSON.stringify(updated));
+                            setUserProfile(updated);
+                            setShowPremiumOverlay(false);
+                        }}
+                    />
+                )}
+            </>
         );
     }
 

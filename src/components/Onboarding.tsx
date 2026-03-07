@@ -1,6 +1,7 @@
 import React from 'react';
 import { saveBirthData, getSunSign } from '../services/astrology.service';
 import { searchPlaces, resolvePlace, PlaceSuggestion } from '../services/geocoding.service';
+import { safeStorage } from '../services/storage.service';
 
 interface OnboardingProps {
     onComplete: (profile: { name: string; birthday: string; zodiac: string; birthTime?: string; birthCity?: string; latitude?: number; longitude?: number; utcOffset?: number }) => void;
@@ -49,7 +50,7 @@ function EyeOfProvidence({ size = 80, className = '' }: { size?: number; classNa
     );
 }
 
-const STEPS = ['welcome', 'name', 'birthday', 'birthdetails', 'reveal'] as const;
+const STEPS = ['welcome', 'name', 'birthday', 'birthdetails', 'consent', 'reveal'] as const;
 
 export function Onboarding({ onComplete }: OnboardingProps) {
     const [step, setStep] = React.useState<typeof STEPS[number]>('welcome');
@@ -61,6 +62,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     const [cityResults, setCityResults] = React.useState<PlaceSuggestion[]>([]);
     const [resolving, setResolving] = React.useState(false);
     const [revealReady, setRevealReady] = React.useState(false);
+    const [aiConsent, setAiConsent] = React.useState(false);
     const searchTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const sunSign = birthday ? getSunSign(birthday) : null;
@@ -126,6 +128,11 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     };
 
     const handleDetailsNext = () => {
+        setStep('consent');
+    };
+
+    const handleConsentNext = () => {
+        safeStorage.setItem('ai_consent', JSON.stringify({ consented: aiConsent, timestamp: new Date().toISOString() }));
         setStep('reveal');
         setTimeout(() => setRevealReady(true), 1200);
     };
@@ -306,6 +313,54 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                 </div>
             )}
 
+            {/* ── AI Consent ── */}
+            {step === 'consent' && (
+                <div className="text-center max-w-[380px] animate-fade-up w-full">
+                    <div className="text-4xl mb-4">🤖</div>
+                    <h2 className="font-display text-xl text-altar-gold tracking-[3px] mb-2">AI-POWERED INSIGHTS</h2>
+                    <p className="text-sm text-altar-muted mb-5">
+                        Arcana Whisper uses AI to create personalized reading interpretations.
+                    </p>
+
+                    <div className="glass-strong rounded-xl p-4 text-left mb-5">
+                        <p className="text-xs text-altar-text font-medium mb-3">When you request an AI interpretation:</p>
+                        <ul className="space-y-2 text-[11px] text-altar-muted">
+                            <li className="flex gap-2"><span className="text-altar-gold">•</span> Your card selections and reading theme are sent to our AI provider</li>
+                            <li className="flex gap-2"><span className="text-altar-gold">•</span> Your zodiac sign and birth data may be included for personalization</li>
+                            <li className="flex gap-2"><span className="text-altar-gold">•</span> Data is processed by <span className="text-altar-gold">OpenRouter</span> (third-party AI service)</li>
+                            <li className="flex gap-2"><span className="text-altar-gold">•</span> All other data stays on your device</li>
+                        </ul>
+                    </div>
+
+                    <button
+                        onClick={() => setAiConsent(!aiConsent)}
+                        className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all mb-4 ${aiConsent
+                                ? 'border-altar-gold/30 bg-altar-gold/10'
+                                : 'border-white/10 glass'
+                            }`}
+                    >
+                        <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${aiConsent ? 'border-altar-gold bg-altar-gold text-altar-deep' : 'border-white/20'
+                            }`}>
+                            {aiConsent && <span className="text-xs font-bold">✓</span>}
+                        </div>
+                        <span className="text-xs text-altar-text text-left">I consent to my reading data being processed by a third-party AI service</span>
+                    </button>
+
+                    <button
+                        onClick={handleConsentNext}
+                        className="w-full py-3.5 rounded-xl font-display tracking-wide transition-all bg-altar-gold/15 text-altar-gold border border-altar-gold/25 hover:border-altar-gold/50"
+                    >
+                        Continue →
+                    </button>
+
+                    <p className="text-[10px] text-altar-muted/40 mt-3">
+                        You can still use tarot, astrology, and numerology without AI. {!aiConsent && 'AI features will be disabled.'}
+                    </p>
+
+                    <button onClick={() => setStep('birthdetails')} className="mt-3 text-xs text-altar-muted/50 hover:text-altar-muted transition-colors">← Back</button>
+                </div>
+            )}
+
             {/* ── Reveal ── */}
             {step === 'reveal' && sunSign && (
                 <div className="text-center max-w-[380px] w-full">
@@ -346,7 +401,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             {/* Step indicator */}
             {step !== 'welcome' && (
                 <div className="absolute bottom-8 flex gap-2">
-                    {['name', 'birthday', 'birthdetails', 'reveal'].map((s) => (
+                    {['name', 'birthday', 'birthdetails', 'consent', 'reveal'].map((s) => (
                         <div
                             key={s}
                             className={`h-1 rounded-full transition-all duration-500 ${step === s || stepIndex > STEPS.indexOf(s as any)

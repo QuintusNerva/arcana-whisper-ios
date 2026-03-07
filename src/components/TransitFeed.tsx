@@ -5,6 +5,7 @@ import { AIResponseRenderer } from './AIResponseRenderer';
 import { getTransitFeed, TransitHit, formatTransitShort, formatTransitDetail } from '../services/transit.service';
 import { AIService } from '../services/ai.service';
 import { getBirthData, getNatalTriad } from '../services/astrology.service';
+import { PageHeader } from './PageHeader';
 
 interface TransitFeedProps {
     onClose: () => void;
@@ -199,13 +200,7 @@ export function TransitFeed({ onClose, onTabChange, subscription, onShowPremium 
         return (
             <div className="page-frame">
                 <div className="page-scroll bg-gradient-to-b from-altar-deep via-altar-dark to-altar-purple text-altar-text">
-                    <header className="sticky top-0 z-20 bg-altar-deep/90 backdrop-blur-xl border-b border-white/5 safe-top">
-                        <div className="flex items-center justify-between px-4 py-3 max-w-[500px] mx-auto">
-                            <button onClick={onClose} className="text-altar-muted hover:text-white transition-colors text-sm font-display tracking-wide">← Altar</button>
-                            <h1 className="font-display text-lg text-altar-gold tracking-[4px]">COSMOS</h1>
-                            <div className="w-12" />
-                        </div>
-                    </header>
+                    <PageHeader title="COSMOS" onClose={onClose} titleSize="lg" />
                     <div className="max-w-[500px] mx-auto px-4 pt-16 text-center">
                         <div className="text-5xl mb-4">🌌</div>
                         <h2 className="font-display text-xl text-altar-gold mb-2">Unlock Cosmic Weather</h2>
@@ -232,13 +227,7 @@ export function TransitFeed({ onClose, onTabChange, subscription, onShowPremium 
         <div className="page-frame">
             <div className="page-scroll bg-gradient-to-b from-altar-deep via-altar-dark to-altar-purple text-altar-text">
                 {/* Header */}
-                <header className="sticky top-0 z-20 bg-altar-deep/90 backdrop-blur-xl border-b border-white/5 safe-top">
-                    <div className="flex items-center justify-between px-4 py-3 max-w-[500px] mx-auto">
-                        <button onClick={onClose} className="text-altar-muted hover:text-white transition-colors text-sm font-display tracking-wide">← Altar</button>
-                        <h1 className="font-display text-lg text-altar-gold tracking-[4px]">COSMOS</h1>
-                        <div className="w-12" />
-                    </div>
-                </header>
+                <PageHeader title="COSMOS" onClose={onClose} titleSize="lg" />
 
                 <div className="max-w-[500px] mx-auto px-4">
                     {/* Hero */}

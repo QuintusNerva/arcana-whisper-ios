@@ -1,5 +1,6 @@
 import React from 'react';
 import { TarotService } from '../services/tarot.service';
+import { PageHeader } from './PageHeader';
 
 interface CustomReadingProps {
     onClose: () => void;
@@ -156,17 +157,11 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange }
     return (
         <div className="fixed inset-0 z-50 bg-gradient-to-b from-altar-deep via-altar-dark to-altar-purple overflow-y-auto">
             {/* Header */}
-            <header className="sticky top-0 z-10 bg-altar-deep/80 backdrop-blur-xl border-b border-white/5 safe-top">
-                <div className="flex items-center justify-between px-4 py-3 max-w-[500px] mx-auto">
-                    <button
-                        onClick={handleBack}
-                        className="text-altar-muted hover:text-white transition-colors text-sm font-display tracking-wide"
-                    >
-                        {step > 1 ? '← Back' : '✕ Close'}
-                    </button>
-
-                    {/* Step indicators */}
-                    <div className="flex items-center gap-2">
+            <PageHeader
+                onClose={handleBack}
+                centerContent={
+                    /* Step indicators */
+                    <div className="flex items-center justify-center gap-2 w-full">
                         {[1, 2, 3].map(s => (
                             <div key={s} className="flex items-center gap-2">
                                 <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-display transition-all duration-500 ${s === step
@@ -181,10 +176,8 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange }
                             </div>
                         ))}
                     </div>
-
-                    <div className="w-12" /> {/* Spacer */}
-                </div>
-            </header>
+                }
+            />
 
             <div className="max-w-[500px] mx-auto px-4 pb-32">
                 {/* ── STEP 1: Choose Spread ── */}

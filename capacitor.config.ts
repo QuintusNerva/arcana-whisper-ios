@@ -11,6 +11,17 @@ const config: CapacitorConfig = {
         allowsLinkPreview: false,
         scrollEnabled: false,
     },
+    plugins: {
+        SplashScreen: {
+            launchAutoHide: true,
+            launchShowDuration: 2000,
+            backgroundColor: '#0a0612',
+            showSpinner: false,
+            androidScaleType: 'CENTER_CROP',
+            splashFullScreen: true,
+            splashImmersive: true,
+        },
+    },
 };
 
 export default config;

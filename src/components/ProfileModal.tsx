@@ -11,6 +11,8 @@ import {
     getBirthData, saveBirthData, getNatalTriad, getSunSign, ZODIAC_SIGNS, BirthData,
 } from '../services/astrology.service';
 import { searchPlaces, resolvePlace, PlaceSuggestion } from '../services/geocoding.service';
+import { PageHeader } from './PageHeader';
+import { LegalPage } from './LegalPages';
 
 interface ProfileModalProps {
     onClose: () => void;
@@ -23,6 +25,8 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
     const [editing, setEditing] = React.useState(false);
     const [saved, setSaved] = React.useState(false);
     const [showManageSub, setShowManageSub] = React.useState(false);
+    const [showLegal, setShowLegal] = React.useState<'privacy' | 'terms' | null>(null);
+    const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
 
     // ── Birth Data State ──
     const [birthData, setBirthDataState] = React.useState<BirthData | null>(getBirthData);
@@ -161,28 +165,26 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
     };
 
     const handleClearData = () => {
-        if (confirm('This will delete all your readings, preferences, and memory. Continue?')) {
-            safeStorage.removeItem('tarot_readings');
-            safeStorage.removeItem('userProfile');
-            safeStorage.removeItem('arcane_tab_usage');
-            clearMemory();
-            window.location.reload();
-        }
+        // Apple requires a clear data deletion mechanism
+        safeStorage.removeItem('tarot_readings');
+        safeStorage.removeItem('userProfile');
+        safeStorage.removeItem('arcane_tab_usage');
+        safeStorage.removeItem('birthData');
+        safeStorage.removeItem('reading_journal');
+        safeStorage.removeItem('dream_journal');
+        safeStorage.removeItem('arcana_subscription_status');
+        safeStorage.removeItem('ai_consent');
+        clearMemory();
+        // Clear ALL localStorage as a safety net
+        try { localStorage.clear(); } catch { /* ignore */ }
+        window.location.reload();
     };
 
     return (
         <div className="page-frame">
             <div className="page-scroll bg-gradient-to-b from-altar-deep via-altar-dark to-altar-purple text-altar-text">
                 {/* Header */}
-                <header className="sticky top-0 z-20 bg-altar-deep/90 backdrop-blur-xl border-b border-white/5 safe-top">
-                    <div className="flex items-center justify-between px-4 py-3 max-w-[500px] mx-auto">
-                        <button onClick={onClose} className="text-altar-muted hover:text-white transition-colors text-sm font-display tracking-wide">
-                            ← Altar
-                        </button>
-                        <h1 className="font-display text-lg text-altar-gold tracking-[4px]">SELF</h1>
-                        <div className="w-12" />
-                    </div>
-                </header>
+                <PageHeader title="SELF" onClose={onClose} titleSize="lg" />
 
                 <div className="max-w-[500px] mx-auto px-4">
                     {/* ── Avatar + Name ── */}
@@ -469,24 +471,68 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
                         </div>
 
                         {/* App Version */}
-                        <div className="flex items-center gap-3 px-4 py-3">
+                        <div className="flex items-center gap-3 px-4 py-3 border-b border-white/5">
                             <span className="text-lg">📱</span>
                             <div className="flex-1"><p className="text-sm text-altar-text">App Version</p></div>
                             <span className="text-xs text-altar-muted">1.0.0</span>
                         </div>
+
+                        {/* Privacy Policy */}
+                        <button onClick={() => setShowLegal('privacy')} className="flex items-center gap-3 px-4 py-3 w-full text-left border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                            <span className="text-lg">🔒</span>
+                            <div className="flex-1"><p className="text-sm text-altar-text">Privacy Policy</p></div>
+                            <span className="text-xs text-altar-muted">→</span>
+                        </button>
+
+                        {/* Terms of Service */}
+                        <button onClick={() => setShowLegal('terms')} className="flex items-center gap-3 px-4 py-3 w-full text-left hover:bg-white/[0.02] transition-colors">
+                            <span className="text-lg">📄</span>
+                            <div className="flex-1"><p className="text-sm text-altar-text">Terms of Service</p></div>
+                            <span className="text-xs text-altar-muted">→</span>
+                        </button>
                     </div>
 
                     {/* Memory */}
                     <MemoryStatsCard />
 
-                    {/* Danger zone */}
+                    {/* Danger zone — Apple requires data deletion capability */}
                     <div className="mb-8 space-y-2.5 animate-fade-up" style={{ animationDelay: '0.6s', opacity: 0 }}>
-                        <button
-                            onClick={handleClearData}
-                            className="w-full py-3 rounded-xl border border-red-500/15 text-red-400/60 hover:text-red-400 hover:border-red-500/30 text-xs font-display tracking-wide transition-all"
-                        >
-                            Clear All Data
-                        </button>
+                        {!showDeleteConfirm ? (
+                            <button
+                                onClick={() => setShowDeleteConfirm(true)}
+                                className="w-full py-3 rounded-xl border border-red-500/15 text-red-400/60 hover:text-red-400 hover:border-red-500/30 text-xs font-display tracking-wide transition-all"
+                            >
+                                🗑 Delete My Account & Data
+                            </button>
+                        ) : (
+                            <div className="rounded-xl border border-red-500/25 bg-red-500/5 p-4 space-y-3">
+                                <p className="text-xs text-red-300 text-center font-medium">
+                                    ⚠️ This will permanently delete:
+                                </p>
+                                <ul className="text-[10px] text-red-300/70 space-y-1 ml-4 list-disc">
+                                    <li>All readings and reading history</li>
+                                    <li>Your profile and birth data</li>
+                                    <li>Journal and dream entries</li>
+                                    <li>Card memory and preferences</li>
+                                    <li>Subscription information (local)</li>
+                                </ul>
+                                <p className="text-[10px] text-red-300/50 text-center">This cannot be undone.</p>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => setShowDeleteConfirm(false)}
+                                        className="flex-1 py-2.5 rounded-lg glass text-xs text-altar-muted font-display"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleClearData}
+                                        className="flex-1 py-2.5 rounded-lg bg-red-500/20 border border-red-500/30 text-xs text-red-400 font-display font-bold hover:bg-red-500/30 transition-colors"
+                                    >
+                                        Delete Everything
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
@@ -569,6 +615,11 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Legal Pages Overlay */}
+            {showLegal && (
+                <LegalPage page={showLegal} onClose={() => setShowLegal(null)} />
             )}
         </div>
     );
