@@ -14,19 +14,27 @@ import { safeStorage } from './storage.service';
 
 // ── Product Configuration ──
 export const PRODUCTS = {
+    WEEKLY: {
+        id: 'com.arcanawhisper.premium.weekly',
+        label: 'Weekly',
+        price: '$4.99',
+        period: '/wk',
+        savings: '',
+    },
     MONTHLY: {
         id: 'com.arcanawhisper.premium.monthly',
         label: 'Monthly',
-        price: '$4.99',
+        price: '$12.99',
         period: '/mo',
         savings: '',
     },
     YEARLY: {
         id: 'com.arcanawhisper.premium.yearly',
         label: 'Yearly',
-        price: '$29.99',
+        price: '$49.99',
         period: '/yr',
-        savings: 'Save 50%',
+        savings: 'Save 68%',
+        popular: true,
     },
 } as const;
 
