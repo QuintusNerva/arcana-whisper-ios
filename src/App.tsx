@@ -33,6 +33,7 @@ import { fireTransitNotification, getTransitFeed } from './services/transit.serv
 import { fireJournalReminder, getJournalEntries, getPatternProgress } from './services/journal.service';
 import { getDreamEntries } from './services/dream-journal.service';
 import { getBirthData, getSunSign, getDailyHoroscope, getNatalTriad, ZODIAC_SIGNS } from './services/astrology.service';
+import { initializePurchases } from './services/storekit.service';
 
 /* ── Ambient particle backdrop ── */
 function AltarParticles() {
@@ -393,6 +394,8 @@ function App() {
                 await new Promise(resolve => setTimeout(resolve, 1500));
                 setIsInitialLoad(false);
             }
+            // Initialize RevenueCat for real IAP
+            await initializePurchases();
             await loadCard();
             setIsLoading(false);
             // Check and fire daily reminder
