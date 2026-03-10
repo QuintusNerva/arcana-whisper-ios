@@ -657,12 +657,12 @@ function App() {
                         </div>
                         <div className="max-w-[500px] mx-auto">
                             {/* Intro explanation */}
-                            <div className="mx-5 mt-6 mb-2 rounded-3xl p-5" style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.15)' }}>
-                                <p className="text-[9px] font-display tracking-[2px] text-indigo-400/60 uppercase mb-2">✦ Signs & Synchronicities</p>
-                                <p className="text-sm text-altar-text/80 leading-relaxed mb-2">
+                            <div className="mx-5 mt-6 mb-2 rounded-3xl p-5" style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.3)' }}>
+                                <p className="text-[9px] font-display tracking-[2px] text-indigo-300 uppercase mb-2">✦ Signs & Synchronicities</p>
+                                <p className="text-sm text-altar-text leading-relaxed mb-2">
                                     Angel numbers are sequences the universe places in your path — on clocks, receipts, license plates — as coded messages.
                                 </p>
-                                <p className="text-xs text-altar-muted/60 leading-relaxed">
+                                <p className="text-xs text-altar-text/70 leading-relaxed">
                                     Enter any number you keep seeing and receive a personalized interpretation woven with your natal chart and life path — because your numbers aren't random, they speak to <em>you</em>.
                                 </p>
                             </div>

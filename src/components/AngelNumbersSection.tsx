@@ -141,7 +141,7 @@ export function AngelNumbersSection() {
 
 
             {/* Input panel — always visible */}
-            <div className="rounded-3xl p-4 mb-3" style={{ background: 'rgba(99,102,241,0.05)', border: '1px solid rgba(99,102,241,0.15)' }}>
+            <div className="rounded-3xl p-4 mb-3" style={{ background: 'rgba(99,102,241,0.07)', border: '1px solid rgba(99,102,241,0.3)' }}>
 
                 <div className="flex gap-2">
                     <input
@@ -150,13 +150,13 @@ export function AngelNumbersSection() {
                         onKeyDown={e => e.key === 'Enter' && handleCustomSubmit()}
                         inputMode="numeric"
                         placeholder="e.g. 1717, 2121, 515..."
-                        className="flex-1 rounded-xl px-3 py-2.5 text-sm text-altar-text bg-white/5 border border-white/10 focus:outline-none focus:border-indigo-500/40 font-display tracking-widest text-center"
+                        className="flex-1 rounded-xl px-3 py-2.5 text-sm text-altar-text bg-white/5 border border-white/20 focus:outline-none focus:border-indigo-400/50 font-display tracking-widest text-center"
                     />
                     <button
                         onClick={handleCustomSubmit}
                         disabled={!customInput.trim()}
-                        className="px-4 py-2.5 rounded-xl text-xs font-display text-indigo-300 disabled:opacity-40 transition-all"
-                        style={{ background: 'rgba(99,102,241,0.18)', border: '1px solid rgba(99,102,241,0.3)' }}
+                        className="px-4 py-2.5 rounded-xl text-xs font-display text-indigo-200 disabled:opacity-40 transition-all"
+                        style={{ background: 'rgba(99,102,241,0.22)', border: '1px solid rgba(99,102,241,0.45)' }}
                     >
                         Reveal →
                     </button>
