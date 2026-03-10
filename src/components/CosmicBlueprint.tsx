@@ -259,9 +259,7 @@ export function CosmicBlueprint({ onTabChange }: CosmicBlueprintProps) {
                             <span className="text-[8px] text-violet-300/60">→</span>
                         </button>
                     </div>
-                    <p className="text-[11px] text-altar-text/55 mb-4">
-                        Astrology + Numerology — woven into practical life guidance
-                    </p>
+
 
                     {/* Sun / Moon / Rising — element-colored tappable pills */}
                     <div className="grid grid-cols-3 gap-2 mb-3">
@@ -276,14 +274,13 @@ export function CosmicBlueprint({ onTabChange }: CosmicBlueprintProps) {
                                     border: `1px solid ${item.style.border}`,
                                 }}
                             >
-                                <p className="text-[8px] font-display tracking-[2px] uppercase mb-0.5"
+                                <p className="text-[9px] font-display tracking-[2px] uppercase mb-0.5"
                                     style={{ color: item.style.labelColor }}>
                                     {item.label}
                                 </p>
-                                <p className="text-xs font-medium" style={{ color: item.style.valueColor }}>
+                                <p className="text-sm font-bold" style={{ color: item.style.valueColor }}>
                                     {item.glyph} {item.value}
                                 </p>
-                                <p className="text-[7px] mt-0.5" style={{ color: item.style.labelColor, opacity: 0.6 }}>{item.sublabel}</p>
                             </button>
                         ))}
                     </div>
@@ -300,21 +297,21 @@ export function CosmicBlueprint({ onTabChange }: CosmicBlueprintProps) {
                                 border: '1px solid rgba(251,191,36,0.12)',
                             }}
                         >
-                            <p className="text-[8px] text-amber-400/60 font-display tracking-[2px] uppercase mb-1 flex items-center justify-between">
-                                Life Path <span className="text-[7px] opacity-50">→</span>
+                            <p className="text-[9px] text-amber-300/70 font-display tracking-[2px] uppercase mb-1 flex items-center justify-between">
+                                Life Path <span className="text-[8px] opacity-50">→</span>
                             </p>
-                            <p className="text-sm text-amber-300 font-bold text-left">
-                                #{lifePath} <span className="text-[10px] font-normal text-amber-400/55">— {lifePathMeaning.title}</span>
+                            <p className="text-sm text-amber-200 font-bold text-left">
+                                #{lifePath} <span className="text-[10px] font-normal text-amber-300/65">— {lifePathMeaning.title}</span>
                             </p>
-                            <p className="text-[8px] text-amber-300/50 mt-1.5 leading-snug">
+                            <p className="text-[9px] text-amber-200/55 mt-1.5 leading-snug">
                                 {lifePathMeaning.desc}
                             </p>
                             <div className="mt-2 flex flex-col gap-1">
-                                <p className="text-[7px] text-amber-400/40 leading-snug">
-                                    <span className="text-amber-400/70">✦</span> {lifePathMeaning.strengths}
+                                <p className="text-[9px] text-amber-300/55 leading-snug">
+                                    <span className="text-amber-300/80">✦</span> {lifePathMeaning.strengths}
                                 </p>
-                                <p className="text-[7px] text-amber-400/40 leading-snug">
-                                    <span className="text-amber-400/70">⚡</span> {lifePathMeaning.challenges}
+                                <p className="text-[9px] text-amber-300/55 leading-snug">
+                                    <span className="text-amber-300/80">⚡</span> {lifePathMeaning.challenges}
                                 </p>
                             </div>
                         </button>
@@ -329,14 +326,14 @@ export function CosmicBlueprint({ onTabChange }: CosmicBlueprintProps) {
                                 border: '1px solid rgba(167,139,250,0.12)',
                             }}
                         >
-                            <p className="text-[8px] text-violet-400/60 font-display tracking-[2px] uppercase mb-1 flex items-center justify-between">
-                                Personal Year <span className="text-[7px] opacity-50">→</span>
+                            <p className="text-[9px] text-violet-300/70 font-display tracking-[2px] uppercase mb-1 flex items-center justify-between">
+                                Personal Year <span className="text-[8px] opacity-50">→</span>
                             </p>
-                            <p className="text-sm text-violet-300 font-bold">
-                                #{personalYear} <span className="text-[10px] font-normal text-violet-400/55">— {new Date().getFullYear()} Cycle</span>
+                            <p className="text-sm text-violet-200 font-bold">
+                                #{personalYear} <span className="text-[10px] font-normal text-violet-300/65">— {new Date().getFullYear()} Cycle</span>
                             </p>
                             {PY_MANIFESTATION[personalYear] && (
-                                <p className="text-[8px] text-violet-300/60 mt-1 leading-snug italic">
+                                <p className="text-[9px] text-violet-200/65 mt-1 leading-snug italic">
                                     {PY_MANIFESTATION[personalYear]}
                                 </p>
                             )}
