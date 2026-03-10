@@ -255,11 +255,11 @@ export function CosmicBlueprint({ onTabChange }: CosmicBlueprintProps) {
                             }}
                         >
                             <span className="text-sm">{lunarData.currentPhase.emoji}</span>
-                            <span className="text-[8px] text-violet-300/70 font-display tracking-wider">{lunarData.currentPhase.name}</span>
-                            <span className="text-[7px] text-violet-400/40">→</span>
+                            <span className="text-[9px] text-violet-200/80 font-display tracking-wider">{lunarData.currentPhase.name}</span>
+                            <span className="text-[8px] text-violet-300/60">→</span>
                         </button>
                     </div>
-                    <p className="text-[10px] text-altar-muted/60 mb-4">
+                    <p className="text-[11px] text-altar-text/55 mb-4">
                         Astrology + Numerology — woven into practical life guidance
                     </p>
 

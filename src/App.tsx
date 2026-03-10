@@ -796,7 +796,7 @@ function App() {
                         const userName = userProfile?.name || '';
                         const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
                         return (
-                            <p className="relative text-xs text-altar-text/60 mt-1.5">
+                            <p className="relative text-sm text-altar-text/75 mt-1.5">
                                 {greeting}{userName ? `, ${userName}` : ''} · {dateStr}
                             </p>
                         );
@@ -813,7 +813,7 @@ function App() {
 
                     {/* ── Portal Cards ── */}
                     <div className="mx-3 mb-4 animate-fade-up" style={{ animationDelay: '0.5s', opacity: 0 }}>
-                        <h3 className="font-display text-center text-xs tracking-[5px] text-altar-muted uppercase mb-4">
+                        <h3 className="font-display text-center text-sm tracking-[5px] text-altar-text/70 uppercase mb-4">
                             <span className="text-altar-gold">✦</span> Your Portal <span className="text-altar-gold">✦</span>
                         </h3>
                         <div className="grid grid-cols-3 gap-2.5">
@@ -884,10 +884,10 @@ function App() {
                                     </div>
 
                                     <div className="relative z-10 flex flex-col items-center gap-1">
-                                        <span className="text-[11px] font-semibold text-white leading-tight text-center tracking-wide">
+                                        <span className="text-[12px] font-semibold text-white leading-tight text-center tracking-wide">
                                             {item.label}
                                         </span>
-                                        <span className="text-[8.5px] text-white/40 leading-snug text-center px-1">
+                                        <span className="text-[9px] text-white/55 leading-snug text-center px-1">
                                             {item.tagline}
                                         </span>
                                     </div>
@@ -904,7 +904,7 @@ function App() {
                     {/* Daily reading counter — free users only */}
                     {sub !== 'premium' && (
                         <div className="mx-5 mb-2 text-center">
-                            <span className="text-xs text-altar-muted">
+                            <span className="text-xs text-altar-text/60">
                                 {getRemainingReadings()} of 3 free readings remaining today
                             </span>
                         </div>
