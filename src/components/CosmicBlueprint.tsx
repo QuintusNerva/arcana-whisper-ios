@@ -279,7 +279,7 @@ export function CosmicBlueprint({ onTabChange }: CosmicBlueprintProps) {
                                     style={{ color: item.style.labelColor, opacity: 1 }}>
                                     {item.label}
                                 </p>
-                                <p className="text-[13px] font-bold leading-tight" style={{ color: item.style.valueColor }}>
+                                <p className="text-[11px] font-bold leading-tight whitespace-nowrap overflow-hidden text-ellipsis" style={{ color: item.style.valueColor }}>
                                     {item.glyph} {item.value}
                                 </p>
                             </button>
