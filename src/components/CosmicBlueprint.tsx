@@ -52,7 +52,7 @@ const ELEMENT_STYLE: Record<Element, {
     Fire: {
         grad: 'linear-gradient(145deg, #7c1d06 0%, #5a1504 60%, #2d0c02 100%)',
         border: 'rgba(251,146,60,0.22)',
-        labelColor: 'rgba(253,186,116,0.65)',
+        labelColor: 'rgba(253,186,116,0.85)',
         valueColor: 'rgb(253,186,116)',
         shadow: clayPill(239, 68, 68),
         r: 239, g: 68, b: 68,
@@ -60,7 +60,7 @@ const ELEMENT_STYLE: Record<Element, {
     Earth: {
         grad: 'linear-gradient(145deg, #1a3311 0%, #122509 60%, #090f05 100%)',
         border: 'rgba(134,239,172,0.2)',
-        labelColor: 'rgba(134,239,172,0.55)',
+        labelColor: 'rgba(134,239,172,0.8)',
         valueColor: 'rgb(134,239,172)',
         shadow: clayPill(22, 163, 74),
         r: 22, g: 163, b: 74,
@@ -68,7 +68,7 @@ const ELEMENT_STYLE: Record<Element, {
     Air: {
         grad: 'linear-gradient(145deg, #0c2a45 0%, #071d33 60%, #030e1a 100%)',
         border: 'rgba(147,197,253,0.2)',
-        labelColor: 'rgba(147,197,253,0.55)',
+        labelColor: 'rgba(147,197,253,0.8)',
         valueColor: 'rgb(147,197,253)',
         shadow: clayPill(59, 130, 246),
         r: 59, g: 130, b: 246,
@@ -76,7 +76,7 @@ const ELEMENT_STYLE: Record<Element, {
     Water: {
         grad: 'linear-gradient(145deg, #0d2a3a 0%, #081d28 60%, #030d14 100%)',
         border: 'rgba(94,234,212,0.2)',
-        labelColor: 'rgba(94,234,212,0.55)',
+        labelColor: 'rgba(94,234,212,0.8)',
         valueColor: 'rgb(94,234,212)',
         shadow: clayPill(20, 184, 166),
         r: 20, g: 184, b: 166,
@@ -267,18 +267,19 @@ export function CosmicBlueprint({ onTabChange }: CosmicBlueprintProps) {
                             <button
                                 key={item.label}
                                 onClick={() => onTabChange(item.tab)}
-                                className="rounded-xl p-2.5 text-center transition-all duration-200 hover:brightness-110 hover:scale-[1.03] active:scale-[0.97]"
+                                className="rounded-xl p-2.5 text-center transition-all duration-200 hover:brightness-110 hover:scale-[1.03] active:scale-[0.97] flex flex-col items-center justify-center"
                                 style={{
                                     background: item.style.grad,
                                     boxShadow: item.style.shadow,
                                     border: `1px solid ${item.style.border}`,
+                                    minHeight: '58px',
                                 }}
                             >
                                 <p className="text-[9px] font-display tracking-[2px] uppercase mb-0.5"
-                                    style={{ color: item.style.labelColor }}>
+                                    style={{ color: item.style.labelColor, opacity: 1 }}>
                                     {item.label}
                                 </p>
-                                <p className="text-sm font-bold" style={{ color: item.style.valueColor }}>
+                                <p className="text-[13px] font-bold leading-tight" style={{ color: item.style.valueColor }}>
                                     {item.glyph} {item.value}
                                 </p>
                             </button>
