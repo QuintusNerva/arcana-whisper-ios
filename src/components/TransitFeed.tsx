@@ -7,6 +7,29 @@ import { AIService } from '../services/ai.service';
 import { getBirthData, getNatalTriad } from '../services/astrology.service';
 import { PageHeader } from './PageHeader';
 
+// Planets that open manifestation windows — what to call in during each
+const MANIFESTATION_PLANETS: Record<string, { badge: string; guidance: string }> = {
+    jupiter: { badge: '🌟 Expansion Window', guidance: 'Think bigger — ask for more than you think you deserve.' },
+    venus: { badge: '🌹 Abundance Window', guidance: 'Call in love, beauty, and material blessings now.' },
+    saturn: { badge: '⏳ Structure Window', guidance: 'Set long-term intentions — what you build now lasts.' },
+};
+
+// Simple moon phase compute — days since known new moon Jan 6 2025
+function getMoonPhase(): { emoji: string; name: string; guidance: string } {
+    const knownNewMoon = new Date('2025-01-06T00:00:00Z').getTime();
+    const CYCLE = 29.530589;
+    const daysSince = (Date.now() - knownNewMoon) / 86400000;
+    const pos = ((daysSince % CYCLE) + CYCLE) % CYCLE;
+    if (pos < 1.85) return { emoji: '🌑', name: 'New Moon', guidance: 'Plant new seeds now — declare your intentions.' };
+    if (pos < 7.38) return { emoji: '🌒', name: 'Waxing Crescent', guidance: 'Nurture your intentions — take small, consistent steps.' };
+    if (pos < 9.22) return { emoji: '🌓', name: 'First Quarter', guidance: 'Act with courage — push through any resistance.' };
+    if (pos < 14.76) return { emoji: '🌔', name: 'Waxing Gibbous', guidance: 'Amplify and affirm — your momentum is building.' };
+    if (pos < 16.61) return { emoji: '🌕', name: 'Full Moon', guidance: 'Celebrate what is manifesting. Release what blocks you.' };
+    if (pos < 22.15) return { emoji: '🌖', name: 'Waning Gibbous', guidance: 'Integrate and reflect — watch for signs of alignment.' };
+    if (pos < 24.0) return { emoji: '🌗', name: 'Last Quarter', guidance: 'Release what no longer serves — clear space for the new.' };
+    return { emoji: '🌘', name: 'Waning Crescent', guidance: 'Rest and prepare — a new cycle is almost here.' };
+}
+
 interface TransitFeedProps {
     onClose: () => void;
     onTabChange: (tab: string) => void;
@@ -74,6 +97,14 @@ function TransitCard({ hit, interpretation, isLoading, onTap }: {
                         {sigBadge.label}
                     </span>
                 )}
+                {/* Manifestation Window badge for Jupiter / Venus / harmonious Saturn */}
+                {MANIFESTATION_PLANETS[hit.transitPlanet.id] &&
+                    (hit.transitPlanet.id !== 'saturn' || hit.aspect.nature === 'harmonious') && (
+                        <span className="text-[9px] px-2 py-0.5 rounded-full font-display"
+                            style={{ background: 'rgba(212,175,55,0.15)', color: '#f0c853', border: '1px solid rgba(212,175,55,0.25)' }}>
+                            {MANIFESTATION_PLANETS[hit.transitPlanet.id].badge}
+                        </span>
+                    )}
                 <span className="text-[9px] text-altar-muted">
                     Orb: {hit.orb}° · {hit.isApplying ? 'Approaching ↗' : 'Separating ↘'}
                 </span>
@@ -82,6 +113,14 @@ function TransitCard({ hit, interpretation, isLoading, onTap }: {
             {/* AI Interpretation */}
             {expanded && (
                 <div className="mt-3 pt-3 border-t border-white/5">
+                    {/* Manifestation guidance for this planet */}
+                    {MANIFESTATION_PLANETS[hit.transitPlanet.id] &&
+                        (hit.transitPlanet.id !== 'saturn' || hit.aspect.nature === 'harmonious') && (
+                            <p className="text-[9px] mb-2 leading-snug italic"
+                                style={{ color: '#f0c853' }}>
+                                ✨ {MANIFESTATION_PLANETS[hit.transitPlanet.id].guidance}
+                            </p>
+                        )}
                     {isLoading ? (
                         <div className="space-y-2 py-1">
                             <div className="h-3 shimmer-skeleton w-full" />
@@ -248,6 +287,32 @@ export function TransitFeed({ onClose, onTabChange, subscription, onShowPremium 
                             {totalActive} active transit{totalActive !== 1 ? 's' : ''} hitting your chart
                         </p>
                     </div>
+
+                    {/* Moon Phase Manifestation Callout */}
+                    {(() => {
+                        const phase = getMoonPhase();
+                        const isHighlight = phase.name === 'New Moon' || phase.name === 'Full Moon';
+                        return (
+                            <div className="mb-5 animate-fade-up rounded-2xl p-3 flex items-center gap-3"
+                                style={{
+                                    background: isHighlight
+                                        ? 'linear-gradient(135deg, rgba(212,175,55,0.12) 0%, rgba(99,40,217,0.08) 100%)'
+                                        : 'rgba(255,255,255,0.04)',
+                                    border: isHighlight ? '1px solid rgba(212,175,55,0.2)' : '1px solid rgba(255,255,255,0.06)',
+                                }}>
+                                <span className="text-2xl shrink-0">{phase.emoji}</span>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-[9px] font-display tracking-[2px] uppercase mb-0.5"
+                                        style={{ color: isHighlight ? '#f0c853' : '#9ca3af' }}>
+                                        {phase.name} · Manifestation Window
+                                    </p>
+                                    <p className="text-[10px] text-altar-text/70 leading-snug italic">
+                                        {phase.guidance}
+                                    </p>
+                                </div>
+                            </div>
+                        );
+                    })()}
 
                     {/* ── ACTIVE NOW ── */}
                     {feed.active.length > 0 && (

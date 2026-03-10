@@ -1,4 +1,11 @@
 import { safeStorage } from "./storage.service";
+import {
+    buildEmpowermentContext,
+    buildManifestationContextString,
+    buildCompassionSystemPrefix,
+    type EmpowermentContext,
+} from './empowerment.service';
+import { getActiveManifestations } from './manifestation.service';
 /**
  * AI Interpretation Service — OpenRouter Integration
  * Uses Gemini 2.0 Flash via OpenRouter for tarot card interpretations.
@@ -35,11 +42,35 @@ export const dailyCache = {
 const TEACHING_FORMAT = `
 
 You MUST format your response using these rules:
-1. Structure into 2-3 sections using ## headers (e.g. ## The Theme, ## The Lesson, ## Your Action Steps).
+1. Structure into 2-3 sections using ## headers (e.g. ## The Theme, ## The Lesson, ## The Energy).
 2. Bold all key terminology using **double asterisks** (e.g. **Personal Year 9**, **Virgo Moon**, **The Tower**).
-3. End with a section called "## Your Action Steps" containing 2-3 bullet points starting with "- ".
-4. Keep paragraphs short (2-3 sentences max).
-5. Do NOT use any other markdown like code blocks, links, or images.`;
+3. Keep paragraphs short (2-3 sentences max).
+4. Do NOT use any other markdown like code blocks, links, or images.
+5. End with these TWO sections (always, in this order):
+
+## 🪞 The Mirror
+One thoughtful, non-prescriptive question for the seeker to sit with — turning the reading inward. Italicize the question. (Example: *What would it feel like to trust that this is already on its way to you?*)
+
+## 🚀 Your Next Step
+One specific, actionable micro-step they can take TODAY or THIS WEEK — directly justified by what the cards or chart revealed. Format: "Because [specific insight] → [specific action]." Never generic.`;
+
+/**
+ * Build a manifestation-aware system prompt prefix.
+ * Returns empty string when context doesn't warrant it.
+ */
+function buildManifestationSystemGuidance(ctx: EmpowermentContext): string {
+    if (ctx.compassionMode) return '';
+    if (ctx.readingContext === 'grief_or_loss' || ctx.readingContext === 'past_processing') return '';
+
+    return `
+
+MANIFESTATION LENS:
+After your primary interpretation (which always comes first), weave in the manifestation dimension:
+- What is the seeker's energy CALLING IN right now?
+- What do they need to RELEASE for it to flow?
+- What cosmic energy is SUPPORTING their intention?
+This is the second voice in the conversation, not the first. The reading always leads.`;
+}
 
 export class AIService {
     private apiKey: string | null = null;
@@ -67,11 +98,20 @@ export class AIService {
         cardName: string,
         cardMeaning: string,
         cardReversed: string,
-        context?: { theme?: string; question?: string }
+        context?: { theme?: string; question?: string },
+        empowermentCtx?: EmpowermentContext,
     ): Promise<string> {
-        const systemPrompt = `You are an expert mystical tarot reader with deep knowledge of the Rider-Waite-Smith deck. 
-You give insightful, poetic yet practical readings. 
-Use a warm, wise tone — like a compassionate oracle.${TEACHING_FORMAT}`;
+        // Build empowerment context if not provided
+        const ctx = empowermentCtx ?? buildEmpowermentContext(context?.question, [cardName]);
+        const activeManifestations = getActiveManifestations();
+        const manifestationCtx = buildManifestationContextString(ctx, activeManifestations);
+        const compassionPrefix = ctx.compassionMode ? buildCompassionSystemPrefix() : '';
+        const manifestationGuidance = buildManifestationSystemGuidance(ctx);
+
+        const systemPrompt = `${compassionPrefix}You are an expert mystical tarot reader with deep knowledge of the Rider-Waite-Smith deck.
+You give insightful, poetic yet practical readings.
+Use a warm, wise tone — like a compassionate oracle.
+Always explain what the card means first — its symbolism, archetype, and traditional meaning — before offering personal insight.${manifestationGuidance}${TEACHING_FORMAT}`;
 
         let userPrompt = `Give a personalized insight for "${cardName}".
 Upright meaning: ${cardMeaning}
@@ -82,6 +122,11 @@ Reversed meaning: ${cardReversed}`;
         }
         if (context?.question) {
             userPrompt += `\nTheir question: "${context.question}"`;
+        }
+
+        // Inject manifestation/empowerment context
+        if (manifestationCtx) {
+            userPrompt += manifestationCtx;
         }
 
         // Inject memory context for personalization
@@ -100,12 +145,22 @@ Reversed meaning: ${cardReversed}`;
         cards: Array<{ name: string; meaning: string; position: string }>,
         spread: string,
         theme: string,
-        question?: string
+        question?: string,
+        empowermentCtx?: EmpowermentContext,
     ): Promise<string> {
-        const systemPrompt = `You are an expert mystical tarot reader with deep knowledge of the Rider-Waite-Smith deck.
+        // Build empowerment context
+        const cardNames = cards.map(c => c.name);
+        const ctx = empowermentCtx ?? buildEmpowermentContext(question, cardNames);
+        const activeManifestations = getActiveManifestations();
+        const manifestationCtx = buildManifestationContextString(ctx, activeManifestations);
+        const compassionPrefix = ctx.compassionMode ? buildCompassionSystemPrefix() : '';
+        const manifestationGuidance = buildManifestationSystemGuidance(ctx);
+
+        const systemPrompt = `${compassionPrefix}You are an expert mystical tarot reader with deep knowledge of the Rider-Waite-Smith deck.
 You synthesize multi-card spreads into cohesive, insightful narratives.
 Be specific to the cards drawn and their positions.
-Use a warm, wise tone — like a compassionate oracle.${TEACHING_FORMAT}`;
+Use a warm, wise tone — like a compassionate oracle.
+Always explain what each card means (its core symbolism and teaching) before weaving it into the spread narrative.${manifestationGuidance}${TEACHING_FORMAT}`;
 
         const cardLines = cards.map((c, i) =>
             `Position ${i + 1} (${c.position}): ${c.name} — ${c.meaning}`
@@ -117,13 +172,18 @@ Use a warm, wise tone — like a compassionate oracle.${TEACHING_FORMAT}`;
             userPrompt += `\nThe seeker asks: "${question}"`;
         }
 
+        // Inject manifestation/empowerment context
+        if (manifestationCtx) {
+            userPrompt += manifestationCtx;
+        }
+
         // Inject memory context for personalization
         const memoryCtx = getMemoryContextForAI();
         if (memoryCtx) {
             userPrompt += `\n\n${memoryCtx}`;
         }
 
-        userPrompt += `\n\nProvide a cohesive reading that weaves all cards together. Focus on the story they tell and actionable guidance.`;
+        userPrompt += `\n\nProvide a cohesive reading that weaves all cards together. Explain each card's meaning and the story they tell collectively. Focus on insight and the second side of the coin — what is being called in or released.`;
 
         return this.chat(systemPrompt, userPrompt);
     }
@@ -325,7 +385,16 @@ Personal Year: ${personalYear.number} (current cycle, year ${new Date().getFullY
 
 Follow the four-section structure. For every insight: name the energy, ground it in a relatable life scenario, then reframe it. Make them feel like you truly see them.
 
-IMPORTANT: You MUST include ALL FOUR sections. Keep each section to 150-200 words max. The total reading should be approximately 600-800 words. Do NOT write long essays — be precise and impactful.`;
+AFTER the four main sections, add one final section:
+**✦ How You Manifest**
+Based on their dominant element (derived from their chart), describe their unique manifestation style in 80-100 words:
+- Fire (Aries/Leo/Sag): manifests through bold action, momentum, and declaring intentions publicly
+- Earth (Taurus/Virgo/Cap): manifests through patient ritual, consistent daily practice, and tangible steps
+- Air (Gemini/Libra/Aquarius): manifests through words, connection, sharing vision with others
+- Water (Cancer/Scorpio/Pisces): manifests through emotional alignment, feeling it first, then acting
+End with one specific practice matched to their element: "Your soul practice: [specific ritual/exercise]"
+
+IMPORTANT: You MUST include ALL FIVE sections. Keep each section to 150-200 words max. The total reading should be approximately 700-900 words. Do NOT write long essays — be precise and impactful.`;
 
         return this.chatPremium(systemPrompt, userPrompt);
     }
@@ -340,7 +409,11 @@ IMPORTANT: You MUST include ALL FOUR sections. Keep each section to 150-200 word
         score: number,
         tier: string
     ): Promise<string> {
-        const systemPrompt = `You are a warm, mystical relationship astrologer. Write a flowing, second-person ("you and your partner") compatibility reading. Be specific about the sign combinations. Include what draws them together, their emotional dynamic, one growth edge, and name their unique "Couple Superpower."${TEACHING_FORMAT}`;
+        const systemPrompt = `You are a warm, mystical relationship astrologer. Write a flowing, second-person ("you and your partner") compatibility reading. Be specific about the sign combinations. Include what draws them together, their emotional dynamic, one growth edge, and name their unique "Couple Superpower."
+
+AFTER the main reading, add one final section:
+## 🌱 What You're Building Together
+2-3 sentences about what this couple naturally ATTRACTS as a unit based on their combined elements, and close with: "What is the shared intention you're both ready to declare?"${TEACHING_FORMAT}`;
 
         const userPrompt = `Write a couple compatibility reading for these two charts:
 
@@ -564,7 +637,7 @@ YOUR VOICE:
 - Make them feel like their dream was important and meaningful.
 - Be specific to THEIR symbols and THEIR chart — no generic dream dictionary entries.
 
-FORMAT — Use these exact three sections with ## headers:
+FORMAT — Use these exact sections with ## headers:
 
 ## 🔮 The Mirror
 2-3 paragraphs interpreting the dream's core symbols through their natal chart lens. What is the dream showing them about themselves? Be specific to the symbols they tagged. Bold key dream symbols and astrological placements.
@@ -575,9 +648,12 @@ FORMAT — Use these exact three sections with ## headers:
 ## 🗝️ The Invitation
 1 paragraph of empowering, non-prescriptive guidance. What is the dream asking them to pay attention to? End with one italicized question for them to sit with. Never tell them what to do — offer an invitation.
 
+## 💫 Manifestation Signal
+1-2 sentences: What is the dream revealing about what this person is READY to call in or release? If they have an active manifestation, connect the dream symbols to it. If not, gently ask: "What is your subconscious already trying to create?"
+
 Rules:
 - Bold key terms with **double asterisks**
-- Keep total to 250-350 words
+- Keep total to 300-400 words
 - End with an italicized question
 - No bullet points. Flowing, warm prose.
 - Be specific about their symbols, not generic.`;
@@ -662,6 +738,8 @@ Life Path ${data.lifePath} is the underlying drive and soul mission woven throug
 
 Generate their unique career archetype and reading. Be specific to this combination — how does ${data.sun} Sun + ${data.moon} Moon interact professionally? What makes this specific combo stand out? What is the tension point between these placements?
 ${data.personalYear ? `Also briefly note how Personal Year ${data.personalYear} influences their career timing this year.` : ''}
+
+In the JSON, add a field: "howYouManifestSuccess": "2-3 sentences about how this specific archetype manifests career success — what actions, declarations, or practices are aligned with HOW they naturally create results. Make it specific to their element and Life Path."
 
 Be honest, specific, and empowering. Make them feel deeply seen.`;
 
@@ -809,10 +887,19 @@ For each major transit, write 2-3 sentences about what it means personally. Use 
 What the eclipses stir up in their chart. 1-2 paragraphs. If eclipses aspect natal planets, explain what gets activated.
 
 ## 📅 Month-by-Month Guidance
-For EACH month, write 2-3 sentences with the dominant energy and practical advice. Format as:
-**January**: [guidance]
+For EACH month: 1-2 sentences on the dominant transit energy + practical guidance. Then on the NEXT LINE add the optimal manifestation intention for that month.
+
+Format EXACTLY as:
+
+**January**: [transit guidance]
+
+✨ *Intention: "I am calling in [what this month's energy supports]."*
+
 **February**: [guidance]
-...and so on for all 12 months.
+
+✨ *Intention: "I am calling in [theme]."*
+
+...every month MUST have both the guidance line AND the Intention line.
 
 ## ⭐ Key Dates to Watch
 List the most important dates with one-line guidance for each.
@@ -873,6 +960,57 @@ ${keyDatesSummary || 'No exact transit hits detected.'}`;
         }
 
         return this.chatPremium(systemPrompt, userPrompt, 4000);
+    }
+
+    /**
+     * Angel Number Oracle — AI-powered meaning for any number sequence.
+     * Gives the universal spiritual meaning, then optionally connects to the user's
+     * astro/numerology chart if there is GENUINE resonance (not forced).
+     */
+    async getAngelNumberMeaning(
+        number: string,
+        chartContext?: {
+            sun?: string;
+            moon?: string;
+            rising?: string;
+            lifePath?: number;
+            personalYear?: number;
+        }
+    ): Promise<string> {
+        const systemPrompt = `You are a warm, wise numerology guide with deep knowledge of angel numbers, sacred geometry, repeating number sequences, and spiritual symbolism across traditions (Pythagorean, Kabbalistic, Doreen Virtue system, and ancient numerology). 
+
+YOUR VOICE:
+- Speak directly to the person ("you"). Warm, oracle-like, grounded.
+- Explain the UNIVERSAL meaning of the number first — its digit composition, what single or master numbers it reduces to, and what that frequency carries spiritually.
+- Use poetic but practical language. Not vague. Not generic.
+- If chart context is provided: ONLY mention their chart if there is a specific, genuine, interesting resonance between the number's meaning and their placement. If the connection feels forced or is not compelling, DO NOT mention the chart at all.
+- End with ONE italicized reflection question (use *asterisks*).
+
+FORMAT:
+- First line: a short evocative title for this number (2-5 words, NO hashtags or asterisks, just plain text)
+- Then a blank line
+- Then 3-4 short paragraphs (2-3 sentences each) — the reading
+- End with the italicized reflection question
+- Total: 150-200 words. Tight and powerful. No fluff.
+- No markdown headers (##), no bullet points, no bold markers.`;
+
+        let userPrompt = `Angel number seen: ${number}
+
+Give the universal spiritual meaning of ${number}. Break down its digit composition and what frequency it carries. Then deliver a warm, personal oracle message.`;
+
+        if (chartContext) {
+            const parts: string[] = [];
+            if (chartContext.sun) parts.push(`Sun in ${chartContext.sun}`);
+            if (chartContext.moon) parts.push(`Moon in ${chartContext.moon}`);
+            if (chartContext.rising) parts.push(`Rising in ${chartContext.rising}`);
+            if (chartContext.lifePath) parts.push(`Life Path ${chartContext.lifePath}`);
+            if (chartContext.personalYear) parts.push(`Personal Year ${chartContext.personalYear}`);
+            if (parts.length > 0) {
+                userPrompt += `\n\nTheir chart context: ${parts.join(' · ')}. ONLY weave this in if there is a genuinely interesting, specific resonance with the number ${number}. If not clearly relevant, skip it entirely.`;
+            }
+        }
+
+        return this.chat(systemPrompt, userPrompt, 350);
     }
 
     async chat(systemPrompt: string, userPrompt: string, maxTokens = 600): Promise<string> {
@@ -1024,3 +1162,4 @@ export function incrementReadingCount() {
 export function getTodayReadingCount(): number {
     return getDailyData().count;
 }
+

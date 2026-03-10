@@ -26,13 +26,19 @@ import { FamilyCircle } from './components/FamilyCircle';
 import { CareerAlignment } from './components/CareerAlignment';
 import { CosmicInvite, parseInviteParams } from './components/CosmicInvite';
 import { JournalWidget } from './components/JournalWidget';
+import { CreateTab } from './components/CreateTab';
+import { SchoolTab } from './components/SchoolTab';
+import { TarotTab } from './components/TarotTab';
+import { AngelNumbersSection } from './components/AngelNumbersSection';
+import { SignReadingScreen } from './components/SignReadingScreen';
+import { MoonScreen } from './components/MoonScreen';
 import { canDoReading, incrementReadingCount, getRemainingReadings, AIService, dailyCache } from './services/ai.service';
 import { recordReading } from './services/memory.service';
 import { fireReminder } from './services/reminder.service';
 import { fireTransitNotification, getTransitFeed } from './services/transit.service';
 import { fireJournalReminder, getJournalEntries, getPatternProgress } from './services/journal.service';
 import { getDreamEntries } from './services/dream-journal.service';
-import { getBirthData, getSunSign, getDailyHoroscope, getNatalTriad, ZODIAC_SIGNS } from './services/astrology.service';
+import { getBirthData, getSunSign, getDailyHoroscope, ZODIAC_SIGNS } from './services/astrology.service';
 import { initializePurchases } from './services/storekit.service';
 
 /* ── Ambient particle backdrop ── */
@@ -259,6 +265,14 @@ function App() {
     const [showYearAhead, setShowYearAhead] = React.useState(false);
     const [showFamily, setShowFamily] = React.useState(false);
     const [showCareer, setShowCareer] = React.useState(false);
+    const [showCreate, setShowCreate] = React.useState(false);
+    const [showSchool, setShowSchool] = React.useState(false);
+    const [showTarot, setShowTarot] = React.useState(false);
+    const [showAngelNumbers, setShowAngelNumbers] = React.useState(false);
+    const [showMoon, setShowMoon] = React.useState(false);
+    const [showMoonReading, setShowMoonReading] = React.useState(false);
+    const [showRisingReading, setShowRisingReading] = React.useState(false);
+    const [showBlueprintScreen, setShowBlueprintScreen] = React.useState(false);
 
     // ── Cosmic Card Invite detection ──
     const [inviteData, setInviteData] = React.useState(() => {
@@ -363,6 +377,14 @@ function App() {
         setShowYearAhead(false);
         setShowFamily(false);
         setShowCareer(false);
+        setShowCreate(false);
+        setShowSchool(false);
+        setShowTarot(false);
+        setShowAngelNumbers(false);
+        setShowMoon(false);
+        setShowMoonReading(false);
+        setShowRisingReading(false);
+        setShowBlueprintScreen(false);
 
         setCurrentTab(tab);
         if (tab === 'new') {
@@ -384,6 +406,14 @@ function App() {
         else if (tab === 'yearahead') setShowYearAhead(true);
         else if (tab === 'family') setShowFamily(true);
         else if (tab === 'career') setShowCareer(true);
+        else if (tab === 'create') setShowCreate(true);
+        else if (tab === 'school') setShowSchool(true);
+        else if (tab === 'tarot') setShowTarot(true);
+        else if (tab === 'angelnumbers') setShowAngelNumbers(true);
+        else if (tab === 'moon') setShowMoon(true);
+        else if (tab === 'moonreading') setShowMoonReading(true);
+        else if (tab === 'risingreading') setShowRisingReading(true);
+        else if (tab === 'blueprint') setShowBlueprintScreen(true);
     };
 
     React.useEffect(() => {
@@ -579,6 +609,108 @@ function App() {
                 />
             );
         }
+        if (showCreate) {
+            return (
+                <CreateTab
+                    onClose={() => { setShowCreate(false); setCurrentTab('home'); }}
+                    onTabChange={handleTabChange}
+                    subscription={sub}
+                    onShowPremium={() => setShowPremiumOverlay(true)}
+                />
+            );
+        }
+        if (showSchool) {
+            return (
+                <SchoolTab
+                    onClose={() => { setShowSchool(false); setCurrentTab('home'); }}
+                    onTabChange={handleTabChange}
+                    subscription={sub}
+                    onShowPremium={() => setShowPremiumOverlay(true)}
+                />
+            );
+        }
+        if (showTarot) {
+            return (
+                <TarotTab
+                    onClose={() => { setShowTarot(false); setCurrentTab('home'); }}
+                    onTabChange={handleTabChange}
+                    energyCards={energyCards}
+                    onViewCard={(card) => { setSelectedCard(card); setShowTarot(false); }}
+                    subscription={sub}
+                    onShowPremium={() => setShowPremiumOverlay(true)}
+                />
+            );
+        }
+        if (showAngelNumbers) {
+            return (
+                <div className="page-frame">
+                    <div className="page-scroll bg-altar-deep">
+                        <div className="sticky top-0 z-10 bg-altar-deep/95 backdrop-blur-sm px-5 pt-safe pt-4 pb-3 flex items-center gap-3 border-b border-white/5 max-w-[500px] mx-auto w-full">
+                            <button
+                                onClick={() => { setShowAngelNumbers(false); setCurrentTab('home'); }}
+                                className="text-altar-muted/70 text-sm font-display hover:text-altar-muted transition-colors"
+                            >
+                                ← Witness
+                            </button>
+                            <h2 className="flex-1 text-center font-display text-sm tracking-[3px] text-altar-gold uppercase">Angel Numbers</h2>
+                            <div className="w-16" />
+                        </div>
+                        <div className="max-w-[500px] mx-auto">
+                            {/* Intro explanation */}
+                            <div className="mx-5 mt-6 mb-2 rounded-3xl p-5" style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.15)' }}>
+                                <p className="text-[9px] font-display tracking-[2px] text-indigo-400/60 uppercase mb-2">✦ Signs & Synchronicities</p>
+                                <p className="text-sm text-altar-text/80 leading-relaxed mb-2">
+                                    Angel numbers are sequences the universe places in your path — on clocks, receipts, license plates — as coded messages.
+                                </p>
+                                <p className="text-xs text-altar-muted/60 leading-relaxed">
+                                    Enter any number you keep seeing and receive a personalized interpretation woven with your natal chart and life path — because your numbers aren't random, they speak to <em>you</em>.
+                                </p>
+                            </div>
+                            <AngelNumbersSection />
+                            <div className="h-24" />
+                        </div>
+                    </div>
+                    <BottomNav currentTab="home" onTabChange={handleTabChange} />
+                </div>
+            );
+        }
+        if (showMoon) {
+            return (
+                <MoonScreen
+                    onClose={() => { setShowMoon(false); setCurrentTab('home'); }}
+                    onTabChange={handleTabChange}
+                />
+            );
+        }
+        if (showMoonReading) {
+            return (
+                <SignReadingScreen
+                    focus="moon"
+                    onClose={() => { setShowMoonReading(false); setCurrentTab('home'); }}
+                    onTabChange={handleTabChange}
+                />
+            );
+        }
+        if (showRisingReading) {
+            return (
+                <SignReadingScreen
+                    focus="rising"
+                    onClose={() => { setShowRisingReading(false); setCurrentTab('home'); }}
+                    onTabChange={handleTabChange}
+                />
+            );
+        }
+        if (showBlueprintScreen) {
+            return (
+                <NatalChart
+                    onClose={() => { setShowBlueprintScreen(false); setCurrentTab('home'); }}
+                    onTabChange={handleTabChange}
+                    subscription={sub}
+                    onShowPremium={() => setShowPremiumOverlay(true)}
+                    initialFocus="blueprint"
+                />
+            );
+        }
         return null;
     };
 
@@ -607,6 +739,16 @@ function App() {
         <div className="page-frame">
             <div className="page-scroll bg-gradient-to-b from-altar-deep via-altar-dark to-altar-purple text-altar-text">
                 <AltarParticles />
+
+                {/* Profile gear icon */}
+                <button
+                    onClick={() => setShowProfileModal(true)}
+                    className="absolute right-4 top-5 z-10 transition-opacity"
+                    style={{ opacity: 0.4, fontSize: '17px', lineHeight: 1 }}
+                    aria-label="Profile settings"
+                >
+                    ⚙️
+                </button>
 
                 {/* Overlays */}
                 {showCustomReading && (
@@ -664,227 +806,91 @@ function App() {
                 {/* ── Main Content ── */}
                 <main className="relative z-10 max-w-[500px] mx-auto">
 
-                    {/* ── Triad Pills — horizontal labeled row ── */}
-                    {(() => {
-                        const birthData = getBirthData();
-                        if (!birthData) return null;
-                        const triad = getNatalTriad(birthData);
-                        const sunSign = ZODIAC_SIGNS.find(z => z.id === triad.sun.id);
-                        const moonSign = ZODIAC_SIGNS.find(z => z.id === triad.moon.id);
-                        const risingSign = ZODIAC_SIGNS.find(z => z.id === triad.rising.id);
-                        return (
-                            <div className="flex justify-center gap-2 mx-5 mt-1 mb-4 animate-fade-up" style={{ opacity: 0 }}>
-                                {[
-                                    {
-                                        symbol: '☉', label: 'Sun', sign: triad.sun.name, glyph: sunSign?.glyph,
-                                        bg: 'linear-gradient(145deg, #92400e 0%, #78350f 60%, #451a03 100%)',
-                                        shadow: '0 4px 12px rgba(146,64,14,0.5), 0 1px 3px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15), inset 0 -1px 3px rgba(0,0,0,0.35)'
-                                    },
-                                    {
-                                        symbol: '☽', label: 'Moon', sign: triad.moon.name, glyph: moonSign?.glyph,
-                                        bg: 'linear-gradient(145deg, #334155 0%, #1e293b 60%, #0f172a 100%)',
-                                        shadow: '0 4px 12px rgba(51,65,85,0.6), 0 1px 3px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.12), inset 0 -1px 3px rgba(0,0,0,0.35)'
-                                    },
-                                    {
-                                        symbol: '↑', label: 'Rising', sign: triad.rising.name, glyph: risingSign?.glyph,
-                                        bg: 'linear-gradient(145deg, #9a3412 0%, #7c2d12 60%, #431407 100%)',
-                                        shadow: '0 4px 12px rgba(154,52,18,0.5), 0 1px 3px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.14), inset 0 -1px 3px rgba(0,0,0,0.35)'
-                                    },
-                                ].map(pill => (
-                                    <div
-                                        key={pill.label}
-                                        className="px-3 py-1.5 rounded-full flex items-center gap-1.5 whitespace-nowrap"
-                                        style={{ background: pill.bg, boxShadow: pill.shadow }}
-                                    >
-                                        <span className="text-[10px] text-white/50">{pill.symbol}</span>
-                                        <span className="text-[10px] text-white/45 font-display">{pill.label}:</span>
-                                        <span className="text-[11px] text-white/90 font-display font-semibold">{pill.sign}</span>
-                                        <span className="text-[10px] text-white/45">{pill.glyph}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        );
-                    })()}
-
-                    {/* ── Hero: Today's Energy (Mind / Body / Spirit) ── */}
-                    <div className="mx-5 mb-5 animate-fade-up" style={{ animationDelay: '0.15s', opacity: 0 }}>
-                        <h3 className="font-display text-center text-sm tracking-[4px] text-altar-muted uppercase mb-4">
-                            <span className="text-altar-gold">✧</span> Today's Energy <span className="text-altar-gold">✧</span>
-                        </h3>
-
-                        {energyCards.length >= 3 ? (
-                            <>
-                                {/* Three cards */}
-                                <div className="flex justify-center gap-3 mb-4">
-                                    {energyCards.slice(0, 3).map((card, idx) => (
-                                        <div
-                                            key={card.id}
-                                            className="flex flex-col items-center cursor-pointer group"
-                                            onClick={() => setSelectedCard(card)}
-                                        >
-                                            <div className="relative w-[105px] h-[155px] rounded-xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.4)] border border-white/10 transition-all duration-300 group-hover:scale-105 group-hover:shadow-[0_0_25px_rgba(139,95,191,0.3)]">
-                                                <img
-                                                    src={card.image}
-                                                    alt={card.name}
-                                                    className="w-full h-full object-cover"
-                                                />
-                                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-40" />
-                                            </div>
-                                            <div className="mt-2 flex flex-col items-center">
-                                                <span className="text-base">{['🧠', '💫', '🕊️'][idx]}</span>
-                                                <span className="text-[9px] text-altar-muted font-display tracking-[2px] uppercase mt-0.5">
-                                                    {['Mind', 'Body', 'Spirit'][idx]}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                {/* AI Energy Interpretation */}
-                                <EnergyInterpretation cards={energyCards.slice(0, 3)} />
-                            </>
-                        ) : (
-                            <div className="text-center py-6">
-                                <div className="animate-pulse text-altar-gold text-2xl mb-2">✦</div>
-                                <p className="text-xs text-altar-muted">Drawing your energy cards...</p>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* ── The Journal Widget — Clay ── */}
-                    <div className="mx-5 mb-4 animate-fade-up" style={{ animationDelay: '0.3s', opacity: 0 }}>
-                        <button
-                            onClick={() => handleTabChange('journal')}
-                            className="w-full text-left rounded-3xl p-[1px] relative transition-all hover:scale-[1.02] active:scale-[0.98] clay-card block overflow-hidden"
-                            style={{ padding: 0 }}
-                        >
-                            <div className="relative p-4">
-                                <div className="flex items-center justify-between mb-2">
-                                    <h3 className="font-display text-sm text-altar-gold tracking-wide flex items-center gap-2 font-semibold">
-                                        <span>📓</span> THE JOURNAL
-                                    </h3>
-                                    <span className="text-[10px] text-altar-gold/50 font-display">Tracking & Dreams</span>
-                                </div>
-
-                                {(() => {
-                                    const entries = getJournalEntries();
-                                    const dreams = getDreamEntries();
-                                    const progress = getPatternProgress();
-
-                                    return (
-                                        <>
-                                            <div className="mb-3">
-                                                <p className="text-xs text-altar-text/70 italic leading-relaxed">
-                                                    Your personal sanctuary for daily reflections and dream logs.
-                                                </p>
-                                            </div>
-
-                                            {/* Quick Stats */}
-                                            <div className="flex items-center gap-3 mt-3">
-                                                <div className="flex-1 rounded-xl p-2.5 clay-inset text-center">
-                                                    <span className="block text-[10px] text-altar-muted/60 font-display uppercase tracking-[1px] mb-1">Daily Entries</span>
-                                                    <span className="text-sm font-semibold text-altar-gold">{entries.length}</span>
-                                                </div>
-                                                <div className="flex-1 rounded-xl p-2.5 clay-inset text-center">
-                                                    <span className="block text-[10px] text-altar-muted/60 font-display uppercase tracking-[1px] mb-1">Dream Logs</span>
-                                                    <span className="text-sm font-semibold text-purple-300">{dreams.length}</span>
-                                                </div>
-                                            </div>
-
-                                            {/* Progress bar */}
-                                            {!progress.unlocked && (
-                                                <div className="mt-3">
-                                                    <p className="text-[10px] text-altar-gold/50 mb-1.5 flex justify-between">
-                                                        <span><span className="font-bold text-altar-gold/80">{progress.current}/{progress.target}</span> to cosmic patterns</span>
-                                                        <span>✨</span>
-                                                    </p>
-                                                    <div className="h-1.5 bg-black/30 rounded-full overflow-hidden shadow-inner">
-                                                        <div
-                                                            className="h-full bg-gradient-to-r from-altar-gold/60 to-purple-400/70 rounded-full transition-all"
-                                                            style={{ width: `${progress.percentage}%` }}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </>
-                                    );
-                                })()}
-                            </div>
-                        </button>
-                    </div>
-
-                    {/* ── Cosmic Blueprint ── */}
+                    {/* ── Cosmic Blueprint — Identity anchor at top of Altar ── */}
                     <CosmicBlueprint onTabChange={handleTabChange} />
 
-                    {/* ── Explore Circles ── */}
 
-                    <div className="mx-5 mb-4 animate-fade-up" style={{ animationDelay: '0.5s', opacity: 0 }}>
-                        <h3 className="font-display text-center text-sm tracking-[4px] text-altar-muted uppercase mb-5">
-                            <span className="text-altar-gold">✧</span> Your Portal <span className="text-altar-gold">✧</span>
+
+                    {/* ── Portal Cards ── */}
+                    <div className="mx-3 mb-4 animate-fade-up" style={{ animationDelay: '0.5s', opacity: 0 }}>
+                        <h3 className="font-display text-center text-xs tracking-[5px] text-altar-muted uppercase mb-4">
+                            <span className="text-altar-gold">✦</span> Your Portal <span className="text-altar-gold">✦</span>
                         </h3>
-                        <div className="grid grid-cols-4 gap-y-4 gap-x-2 justify-items-center">
+                        <div className="grid grid-cols-3 gap-2.5">
                             {[
                                 {
-                                    icon: '🔮', label: 'Tarot', tab: 'new',
-                                    base: 'linear-gradient(145deg, #7c3aed 0%, #6d28d9 45%, #4c1d95 100%)',
-                                    shadow: '0 6px 16px rgba(109,40,217,0.55), 0 2px 4px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.18), inset 0 -2px 4px rgba(0,0,0,0.3)'
+                                    icon: '🔮', label: 'Tarot', tagline: "Today's energy + spreads", tab: 'tarot',
+                                    grad: 'radial-gradient(ellipse at 50% 30%, #6d28d9 0%, #3b0764 40%, #0c0118 100%)',
+                                    shadow: '0 16px 40px rgba(109,40,217,0.65), 0 4px 12px rgba(0,0,0,0.8)',
+                                    halo: 'rgba(167,139,250,0.8)',
                                 },
                                 {
-                                    icon: '💞', label: 'Relationships', tab: 'compatibility',
-                                    base: 'linear-gradient(145deg, #be185d 0%, #9f1239 45%, #6b0d2d 100%)',
-                                    shadow: '0 6px 16px rgba(190,24,93,0.5), 0 2px 4px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.15), inset 0 -2px 4px rgba(0,0,0,0.3)'
+                                    icon: '💞', label: 'Relationships', tagline: 'Cosmic bonds', tab: 'compatibility',
+                                    grad: 'radial-gradient(ellipse at 50% 30%, #9f1239 0%, #4c0519 40%, #0d0108 100%)',
+                                    shadow: '0 16px 40px rgba(159,18,57,0.65), 0 4px 12px rgba(0,0,0,0.8)',
+                                    halo: 'rgba(251,113,133,0.8)',
                                 },
                                 {
-                                    icon: '✨', label: 'Cosmos', tab: 'cosmos',
-                                    base: 'linear-gradient(145deg, #1d4ed8 0%, #1e3a8a 45%, #0f1f5c 100%)',
-                                    shadow: '0 6px 16px rgba(29,78,216,0.55), 0 2px 4px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.15), inset 0 -2px 4px rgba(0,0,0,0.3)'
+                                    icon: '🔢', label: 'Angel Numbers', tagline: 'Signs & synchronicities', tab: 'angelnumbers',
+                                    grad: 'radial-gradient(ellipse at 50% 30%, #1e3a5f 0%, #0b1f35 40%, #020810 100%)',
+                                    shadow: '0 16px 40px rgba(99,102,241,0.55), 0 4px 12px rgba(0,0,0,0.8)',
+                                    halo: 'rgba(165,180,252,0.8)',
                                 },
                                 {
-                                    icon: '♈', label: 'Horoscope', tab: 'horoscope',
-                                    base: 'linear-gradient(145deg, #b91c1c 0%, #991b1b 45%, #5c0a0a 100%)',
-                                    shadow: '0 6px 16px rgba(185,28,28,0.55), 0 2px 4px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.14), inset 0 -2px 4px rgba(0,0,0,0.3)'
+                                    icon: '🌙', label: 'Natal', tagline: 'Your birth blueprint', tab: 'natal',
+                                    grad: 'radial-gradient(ellipse at 50% 30%, #0f766e 0%, #042f2e 40%, #010d0c 100%)',
+                                    shadow: '0 16px 40px rgba(15,118,110,0.65), 0 4px 12px rgba(0,0,0,0.8)',
+                                    halo: 'rgba(94,234,212,0.8)',
                                 },
                                 {
-                                    icon: '🌙', label: 'Natal', tab: 'natal',
-                                    base: 'linear-gradient(145deg, #3730a3 0%, #312e81 45%, #1e1b5e 100%)',
-                                    shadow: '0 6px 16px rgba(55,48,163,0.55), 0 2px 4px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.15), inset 0 -2px 4px rgba(0,0,0,0.3)'
+                                    icon: '👨‍👩‍👧‍👦', label: 'Family', tagline: 'Circle of souls', tab: 'family',
+                                    grad: 'radial-gradient(ellipse at 50% 30%, #86198f 0%, #3b0764 40%, #0d0114 100%)',
+                                    shadow: '0 16px 40px rgba(134,25,143,0.65), 0 4px 12px rgba(0,0,0,0.8)',
+                                    halo: 'rgba(240,171,252,0.8)',
                                 },
                                 {
-                                    icon: '🔢', label: 'Numbers', tab: 'numerology',
-                                    base: 'linear-gradient(145deg, #92400e 0%, #78350f 45%, #451a03 100%)',
-                                    shadow: '0 6px 16px rgba(146,64,14,0.55), 0 2px 4px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.14), inset 0 -2px 4px rgba(0,0,0,0.3)'
-                                },
-                                {
-                                    icon: '🌟', label: 'Year Ahead', tab: 'yearahead',
-                                    base: 'linear-gradient(145deg, #92400e 0%, #6b2d0a 45%, #3d1505 100%)',
-                                    shadow: '0 6px 16px rgba(146,64,14,0.5), 0 2px 4px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.14), inset 0 -2px 4px rgba(0,0,0,0.3)'
-                                },
-                                {
-                                    icon: '👨‍👩‍👧‍👦', label: 'Family', tab: 'family',
-                                    base: 'linear-gradient(145deg, #9d174d 0%, #831843 45%, #4c0729 100%)',
-                                    shadow: '0 6px 16px rgba(157,23,77,0.5), 0 2px 4px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.14), inset 0 -2px 4px rgba(0,0,0,0.3)'
-                                },
-                                {
-                                    icon: '💼', label: 'Career', tab: 'career',
-                                    base: 'linear-gradient(145deg, #065f46 0%, #064e3b 45%, #022c22 100%)',
-                                    shadow: '0 6px 16px rgba(6,95,70,0.55), 0 2px 4px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.14), inset 0 -2px 4px rgba(0,0,0,0.3)'
+                                    icon: '💼', label: 'Career', tagline: 'Your true calling', tab: 'career',
+                                    grad: 'radial-gradient(ellipse at 50% 30%, #065f46 0%, #022c22 40%, #010d09 100%)',
+                                    shadow: '0 16px 40px rgba(6,95,70,0.65), 0 4px 12px rgba(0,0,0,0.8)',
+                                    halo: 'rgba(110,231,183,0.8)',
                                 },
                             ].map(item => (
                                 <button
                                     key={item.tab}
                                     onClick={() => handleTabChange(item.tab)}
-                                    className="flex flex-col items-center gap-2 transition-all hover:scale-105 active:scale-95"
+                                    className="relative flex flex-col items-center justify-between rounded-2xl px-2 pt-3.5 pb-3 transition-all duration-200 hover:scale-[1.04] active:scale-[0.96] overflow-hidden"
+                                    style={{
+                                        background: item.grad,
+                                        boxShadow: `${item.shadow}, inset 0 1.5px 0 rgba(255,255,255,0.22), inset 0 -5px 15px rgba(0,0,0,0.5)`,
+                                        aspectRatio: '1 / 0.88',
+                                    }}
                                 >
+                                    {/* Specular top-edge shine — lacquer catch-light */}
+                                    <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-white/35 to-transparent" />
+                                    <div className="absolute top-0 left-1/4 right-1/4 h-[1px] bg-white/20" />
+                                    {/* Soft top inner glow */}
+                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-12 blur-2xl opacity-15"
+                                        style={{ background: 'white' }} />
+
+                                    {/* Icon bubble — dark circle with luminous halo */}
                                     <div
-                                        className="w-16 h-16 rounded-full flex items-center justify-center text-2xl"
+                                        className="w-12 h-12 rounded-full flex items-center justify-center text-2xl relative z-10 flex-shrink-0"
                                         style={{
-                                            background: item.base,
-                                            boxShadow: '0 4px 10px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15), inset 0 -2px 4px rgba(0,0,0,0.3)',
+                                            background: 'rgba(0,0,0,0.5)',
+                                            boxShadow: `0 0 24px ${item.halo}, 0 0 10px ${item.halo}, inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 14px rgba(0,0,0,0.6)`,
                                         }}
                                     >
                                         {item.icon}
                                     </div>
-                                    <span className="text-[10px] text-white/55 font-display tracking-wide">{item.label}</span>
+
+                                    <div className="relative z-10 flex flex-col items-center gap-1">
+                                        <span className="text-[11px] font-semibold text-white leading-tight text-center tracking-wide">
+                                            {item.label}
+                                        </span>
+                                        <span className="text-[8.5px] text-white/40 leading-snug text-center px-1">
+                                            {item.tagline}
+                                        </span>
+                                    </div>
                                 </button>
                             ))}
                         </div>
@@ -907,9 +913,9 @@ function App() {
                     {/* Spacer for bottom nav */}
                     <div className="h-6" />
                 </main>
-            </div>
+            </div >
             <BottomNav currentTab={currentTab} onTabChange={handleTabChange} />
-        </div>
+        </div >
     );
 }
 

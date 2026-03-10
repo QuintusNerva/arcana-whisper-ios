@@ -13,9 +13,10 @@ interface NatalChartProps {
     onTabChange: (tab: string) => void;
     subscription: string;
     onShowPremium: () => void;
+    initialFocus?: 'moon' | 'rising' | 'blueprint';
 }
 
-export function NatalChart({ onClose, onTabChange, subscription, onShowPremium }: NatalChartProps) {
+export function NatalChart({ onClose, onTabChange, subscription, onShowPremium, initialFocus }: NatalChartProps) {
     const [birthData] = React.useState<BirthData | null>(getBirthData);
     const [selectedPlacement, setSelectedPlacement] = React.useState<{ position: 'sun' | 'moon' | 'rising'; sign: typeof ZODIAC_SIGNS[number]; icon: string } | null>(null);
     const [aiMeaning, setAiMeaning] = React.useState<{ title: string; overview: string; strengths: string; challenges: string; advice: string } | null>(null);
@@ -27,7 +28,7 @@ export function NatalChart({ onClose, onTabChange, subscription, onShowPremium }
     const [cosmicLoading, setCosmicLoading] = React.useState(false);
     const [chartSummary, setChartSummary] = React.useState<string | null>(null);
     const [chartSummaryLoading, setChartSummaryLoading] = React.useState(false);
-
+    const autoFocusedRef = React.useRef(false);
 
     const handleCardTap = async (position: 'sun' | 'moon' | 'rising', sign: typeof ZODIAC_SIGNS[number], icon: string) => {
         if (subscription !== 'premium') {
@@ -75,6 +76,23 @@ export function NatalChart({ onClose, onTabChange, subscription, onShowPremium }
 
     const triad = birthData ? getNatalTriad(birthData) : null;
     const fullChart: FullChartData | null = React.useMemo(() => birthData ? getFullChart(birthData) : null, [birthData]);
+
+    // Auto-open placement modal when arriving from Blueprint card Moon/Rising tile
+    React.useEffect(() => {
+        if (autoFocusedRef.current || !initialFocus || !triad) return;
+        autoFocusedRef.current = true;
+        const t = setTimeout(() => {
+            if (initialFocus === 'blueprint') {
+                setShowCosmicModal(true);
+            } else if (initialFocus === 'moon') {
+                handleCardTap('moon', triad.moon, '🌙');
+            } else if (initialFocus === 'rising') {
+                handleCardTap('rising', triad.rising, '⬆️');
+            }
+        }, 100);
+        return () => clearTimeout(t);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [triad, initialFocus]);
 
     // Accuracy indicators
     const hasBirthTime = !!birthData?.birthTime;

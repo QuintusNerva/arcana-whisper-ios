@@ -2,7 +2,7 @@ import React from 'react';
 import { BottomNav } from './BottomNav';
 import {
     getBirthData, getLifePathNumber, getLifePathMeaning, getPersonalYearNumber,
-    getNatalTriad,
+    getCurrentPersonalYear, getNatalTriad,
 } from '../services/astrology.service';
 import { AIService, dailyCache } from '../services/ai.service';
 import { AIResponseRenderer } from './AIResponseRenderer';
@@ -23,9 +23,20 @@ export function Numerology({ onClose, onTabChange, subscription, onShowPremium }
 
     const lifePathNum = hasDate ? getLifePathNumber(dateToUse) : null;
     const lifePathMeaning = lifePathNum !== null ? getLifePathMeaning(lifePathNum) : null;
-    const personalYear = hasDate ? getPersonalYearNumber(dateToUse) : null;
+    const personalYear = hasDate ? getCurrentPersonalYear(dateToUse) : null;
     const triad = birthData ? getNatalTriad(birthData) : null;
 
+    // Solar year range label for the personal year (e.g. "Dec 2025 – Dec 2026")
+    const solarYearLabel = React.useMemo(() => {
+        if (!dateToUse) return String(new Date().getFullYear());
+        const bday = new Date(dateToUse + 'T12:00:00');
+        const today = new Date();
+        const thisYearBirthday = new Date(today.getFullYear(), bday.getMonth(), bday.getDate());
+        const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
+        const startYear = thisYearBirthday.getTime() - today.getTime() > threeDaysMs
+            ? today.getFullYear() - 1 : today.getFullYear();
+        return `${startYear}–${startYear + 1}`;
+    }, [dateToUse]);
     const isMaster = lifePathNum === 11 || lifePathNum === 22 || lifePathNum === 33;
 
     const [showPathModal, setShowPathModal] = React.useState(false);
@@ -182,139 +193,13 @@ Weave their astrology into the numerology reading — how does their Life Path $
                                 <p className="text-[8px] text-altar-gold/40 mt-3 font-display text-center">Tap for deep reading ✦</p>
                             </button>
 
-                            {/* Personal Year — tappable */}
-                            {personalYear !== null && (() => {
-                                const yearDesc = personalYear === 1 ? 'A year of new beginnings and fresh starts.'
-                                    : personalYear === 2 ? 'A year of partnerships and patience.'
-                                        : personalYear === 3 ? 'A year of creativity and self-expression.'
-                                            : personalYear === 4 ? 'A year of building solid foundations.'
-                                                : personalYear === 5 ? 'A year of change and adventure.'
-                                                    : personalYear === 6 ? 'A year of home, family, and responsibility.'
-                                                        : personalYear === 7 ? 'A year of introspection and spiritual growth.'
-                                                            : personalYear === 8 ? 'A year of power, abundance, and achievement.'
-                                                                : personalYear === 9 ? 'A year of completion and letting go.'
-                                                                    : personalYear === 11 ? 'A master year of intuition and illumination.'
-                                                                        : personalYear === 22 ? 'A master year of manifesting grand visions.'
-                                                                            : '';
-                                return (
-                                    <button
-                                        onClick={async () => {
-                                            if (subscription !== 'premium') {
-                                                onShowPremium();
-                                                return;
-                                            }
-                                            setShowYearModal(true);
-                                            if (aiYear || aiYearLoading) return;
-
-                                            // Check daily cache first
-                                            const cached = dailyCache.get(`personalyear_${personalYear}`);
-                                            if (cached) { setAiYear(cached); return; }
-
-                                            const ai = new AIService();
-                                            if (!ai.hasApiKey()) return;
-                                            setAiYearLoading(true);
-                                            try {
-                                                const sysPrompt = `You are a master numerologist and astrologer. Give a deeply personal reading for this person's current Personal Year.
-Explain what this year theme means specifically for them given their chart. Cover: what to focus on, what to release, key opportunities.
-Use a warm, mystical, empowering tone.
-
-You MUST format your response using these rules:
-1. Structure into 2-3 sections using ## headers (e.g. ## The Theme, ## The Lesson, ## Your Action Steps).
-2. Bold all key terminology using **double asterisks** (e.g. **Personal Year 9**, **Life Path 11**).
-3. End with a section called "## Your Action Steps" containing 2-3 bullet points starting with "- ".
-4. Keep paragraphs short (2-3 sentences max).
-5. Do NOT use any other markdown like code blocks, links, or images.`;
-                                                let userPrompt = `This person is in Personal Year ${personalYear} (${new Date().getFullYear()}).
-Theme: "${yearDesc}"
-Life Path: ${lifePathNum} (${lifePathMeaning?.title || ''})`;
-                                                if (triad) {
-                                                    userPrompt += `\nSun: ${triad.sun.name} (${triad.sun.element})\nMoon: ${triad.moon.name} (${triad.moon.element})\nRising: ${triad.rising.name} (${triad.rising.element})`;
-                                                    userPrompt += `\n\nHow does Personal Year ${personalYear} interact with their ${triad.sun.name} Sun and Life Path ${lifePathNum}? What should they specifically do this year?`;
-                                                }
-                                                const result = await ai.chatPremium(sysPrompt, userPrompt);
-                                                setAiYear(result);
-                                                dailyCache.set(`personalyear_${personalYear}`, result);
-                                            } catch { /* fallback */ }
-                                            finally { setAiYearLoading(false); }
-                                        }}
-                                        className="w-full text-left clay-card rounded-3xl p-5 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-                                    >
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-altar-mid to-altar-bright flex items-center justify-center shadow-[0_0_20px_rgba(139,95,191,0.3)]">
-                                                <span className="font-display text-2xl text-altar-gold font-bold">{personalYear}</span>
-                                            </div>
-                                            <div>
-                                                <p className="text-[9px] font-display text-altar-muted tracking-[2px] uppercase">Personal Year {new Date().getFullYear()}</p>
-                                                <p className="text-sm text-altar-text/80 mt-1 leading-relaxed">{yearDesc}</p>
-                                            </div>
-                                        </div>
-                                        <p className="text-[8px] text-altar-gold/40 mt-3 font-display text-center">Tap for year reading ✦</p>
-                                    </button>
-                                );
-                            })()}
                         </div>
                     )}
                 </div>
             </div>
             <BottomNav currentTab="home" onTabChange={onTabChange} />
 
-            {/* ── Personal Year AI Modal ── */}
-            {
-                showYearModal && personalYear !== null && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center px-4" onClick={() => setShowYearModal(false)}>
-                        <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
-                        <div
-                            className="relative w-full max-w-[500px] max-h-[85vh] overflow-y-auto clay-card rounded-[2rem] p-6 pb-8 animate-fade-up"
-                            onClick={e => e.stopPropagation()}
-                        >
-                            <div className="w-10 h-1 rounded-full bg-white/20 mx-auto mb-5" />
 
-                            {(aiYearLoading || aiYear) && (
-                                <div className="flex items-center justify-center gap-1.5 mb-3">
-                                    <span className="text-[9px] font-display tracking-[2px] uppercase text-altar-gold/50">
-                                        {aiYearLoading ? '✦ Reading your year…' : '✦ Year Reading'}
-                                    </span>
-                                    {aiYearLoading && <span className="inline-block w-3 h-3 border-2 border-altar-gold/30 border-t-altar-gold rounded-full animate-spin" />}
-                                </div>
-                            )}
-
-                            <div className="text-center mb-5">
-                                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-altar-mid to-altar-bright flex items-center justify-center mx-auto mb-3 shadow-[0_0_30px_rgba(139,95,191,0.4)]">
-                                    <span className="font-display text-4xl text-altar-gold font-bold">{personalYear}</span>
-                                </div>
-                                <h3 className="font-display text-xl text-altar-gold tracking-[3px]">PERSONAL YEAR {new Date().getFullYear()}</h3>
-                                {triad && (
-                                    <p className="text-[10px] text-altar-muted mt-2">
-                                        ☀️ {triad.sun.name} · Life Path {lifePathNum}
-                                    </p>
-                                )}
-                            </div>
-
-                            <div className={`clay-inset rounded-2xl p-4 mb-4 transition-all duration-500`}>
-                                {aiYearLoading ? (
-                                    <div className="space-y-2.5 py-1">
-                                        <div className="h-3 shimmer-skeleton w-full" />
-                                        <div className="h-3 shimmer-skeleton w-[90%]" />
-                                        <div className="h-3 shimmer-skeleton w-[75%]" />
-                                        <div className="h-3 shimmer-skeleton w-[60%]" />
-                                    </div>
-                                ) : aiYear ? (
-                                    <AIResponseRenderer text={aiYear} />
-                                ) : (
-                                    <p className="text-xs text-altar-muted text-center py-2">No API key configured — add one in Settings for deep readings</p>
-                                )}
-                            </div>
-
-                            <button
-                                onClick={() => setShowYearModal(false)}
-                                className="w-full py-3 rounded-xl clay-btn"
-                            >
-                                Close
-                            </button>
-                        </div>
-                    </div>
-                )
-            }
 
             {/* ── Life Path AI Modal ── */}
             {

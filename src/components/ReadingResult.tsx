@@ -8,6 +8,8 @@ import { CelticCrossLayout } from './CelticCrossLayout';
 import { HorseshoeLayout } from './HorseshoeLayout';
 import { RelationshipLayout } from './RelationshipLayout';
 import { CareerLayout } from './CareerLayout';
+import CourageCard from './CourageCard';
+import { detectCrisisCards } from '../services/empowerment.service';
 
 interface ReadingResultProps {
     reading: Reading;
@@ -65,7 +67,14 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
     const [spreadInsight, setSpreadInsight] = React.useState<string | null>(null);
     const [spreadInsightLoading, setSpreadInsightLoading] = React.useState(false);
     const [aiError, setAiError] = React.useState<string | null>(null);
+    const [courageCardDismissed, setCourageCardDismissed] = React.useState(false);
     const isPremium = subscription === 'premium';
+
+    // Detect crisis/challenge cards in this reading
+    const crisisResult = React.useMemo(
+        () => detectCrisisCards(reading.cards.map(c => c.name)),
+        [reading.cards]
+    );
 
     const positions = POSITION_LABELS[reading.spread] || reading.cards.map((_, i) => `Card ${i + 1}`);
 
@@ -134,6 +143,16 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
             </header>
 
             <div className="relative z-10 max-w-[500px] mx-auto px-4 pb-32">
+                {/* Courage Card — shown when challenge cards present */}
+                {crisisResult.hasCrisis && !courageCardDismissed && (
+                    <div className="mt-4">
+                        <CourageCard
+                            crisisCardNames={crisisResult.crisisCards}
+                            onDismiss={() => setCourageCardDismissed(true)}
+                        />
+                    </div>
+                )}
+
                 {/* Reading info */}
                 {reading.question && (
                     <div className="glass rounded-2xl p-4 mt-4 mb-2">

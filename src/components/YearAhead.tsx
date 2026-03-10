@@ -137,41 +137,92 @@ export function YearAhead({ onClose, onTabChange, subscription, onShowPremium }:
         }
     };
 
-    // Parse markdown-ish AI reading into sections
+    // Parse markdown AI reading into styled React elements
     const renderReading = (text: string) => {
         const lines = text.split('\n');
         const elements: React.ReactNode[] = [];
 
         lines.forEach((line, i) => {
-            if (line.startsWith('## ')) {
+            const trimmed = line.trim();
+
+            // H1 — reading title (e.g. "# Year Ahead Report: 2026")
+            if (trimmed.startsWith('# ') && !trimmed.startsWith('## ')) {
+                const content = trimmed.replace(/^# /, '');
                 elements.push(
-                    <h2 key={`h-${i}`} className="font-display text-base text-altar-gold tracking-[2px] mt-6 mb-3 uppercase">
-                        {line.replace('## ', '')}
-                    </h2>
+                    <div key={`h1-${i}`} className="mb-4 mt-2">
+                        <h1 className="font-display text-xl text-altar-gold tracking-[2px]"
+                            dangerouslySetInnerHTML={{ __html: formatInline(content) }} />
+                    </div>
                 );
-            } else if (line.startsWith('- ')) {
+            }
+            // H2 — section headers
+            else if (trimmed.startsWith('## ')) {
+                const content = trimmed.replace(/^## /, '');
                 elements.push(
-                    <p key={`li-${i}`} className="text-altar-text/80 text-sm leading-relaxed pl-4 mb-1">
-                        <span className="text-altar-gold mr-2">✦</span>
-                        <span dangerouslySetInnerHTML={{ __html: formatBold(line.slice(2)) }} />
+                    <div key={`h2-${i}`} className="mt-7 mb-3 flex items-center gap-3">
+                        <div className="flex-1 h-[1px] bg-altar-gold/15" />
+                        <h2 className="font-display text-xs text-altar-gold tracking-[3px] uppercase shrink-0">
+                            {content}
+                        </h2>
+                        <div className="flex-1 h-[1px] bg-altar-gold/15" />
+                    </div>
+                );
+            }
+            // Horizontal rule
+            else if (trimmed === '---' || trimmed === '***' || trimmed === '___') {
+                elements.push(
+                    <div key={`hr-${i}`} className="my-4 h-[1px] bg-white/5" />
+                );
+            }
+            // Bullet points
+            else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+                const content = trimmed.replace(/^[-*] /, '');
+                elements.push(
+                    <p key={`li-${i}`} className="text-altar-text/80 text-sm leading-relaxed pl-4 mb-2 flex gap-2">
+                        <span className="text-altar-gold mt-0.5 shrink-0">✦</span>
+                        <span dangerouslySetInnerHTML={{ __html: formatInline(content) }} />
                     </p>
                 );
-            } else if (line.trim() === '') {
-                elements.push(<div key={`br-${i}`} className="h-2" />);
-            } else {
-                elements.push(
-                    <p key={`p-${i}`} className="text-altar-text/80 text-sm leading-relaxed mb-2"
-                        dangerouslySetInnerHTML={{ __html: formatBold(line) }} />
-                );
+            }
+            // Empty line
+            else if (trimmed === '') {
+                elements.push(<div key={`br-${i}`} className="h-1" />);
+            }
+            // Regular paragraph (may contain *italic* lines from AI like the subtitle)
+            else {
+                // Detect if the whole line is italic (e.g. *Solar Year beginning...*)
+                const isFullItalic = /^\*[^*].*[^*]\*$/.test(trimmed) || /^_[^_].*[^_]_$/.test(trimmed);
+                const content = trimmed.replace(/^[*_](.*)[*_]$/, '$1');
+
+                if (isFullItalic) {
+                    elements.push(
+                        <p key={`it-${i}`} className="text-altar-muted text-xs italic leading-relaxed mb-2 text-center">
+                            {content}
+                        </p>
+                    );
+                } else {
+                    elements.push(
+                        <p key={`p-${i}`} className="text-altar-text/80 text-sm leading-relaxed mb-2"
+                            dangerouslySetInnerHTML={{ __html: formatInline(trimmed) }} />
+                    );
+                }
             }
         });
 
         return elements;
     };
 
-    const formatBold = (text: string) => {
-        return text.replace(/\*\*(.*?)\*\*/g, '<strong class="text-altar-text font-semibold">$1</strong>');
+    // Format inline markdown: **bold**, *italic*, ***bold-italic***
+    const formatInline = (text: string) => {
+        return text
+            .replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em class="text-altar-text/90">$1</em></strong>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong class="text-altar-text font-semibold">$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em class="text-altar-muted/90 not-italic text-altar-text/70">$1</em>')
+            .replace(/_(.*?)_/g, '<em class="text-altar-muted/90">$1</em>');
     };
+
+    // Keep formatBold as alias for compatibility
+    const formatBold = formatInline;
 
     const personalYearMeaning: Record<number, string> = {
         1: 'New Beginnings', 2: 'Partnership & Balance', 3: 'Creative Expression',
@@ -188,7 +239,10 @@ export function YearAhead({ onClose, onTabChange, subscription, onShowPremium }:
                     <div className="text-center w-full">
                         <h1 className="font-display text-lg text-altar-gold tracking-[4px]">YEAR AHEAD</h1>
                         <p className="text-[10px] text-altar-muted tracking-[2px] mt-1 font-display">
-                            {currentYear} ANNUAL BLUEPRINT
+                            {report
+                                ? `${new Date(report.solarYear.start).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} — ${new Date(report.solarYear.end).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+                                : `${currentYear} ANNUAL BLUEPRINT`
+                            }
                         </p>
                     </div>
                 }
@@ -225,10 +279,13 @@ export function YearAhead({ onClose, onTabChange, subscription, onShowPremium }:
                     <>
                         {/* Solar Year Card */}
                         <div className="mx-5 mt-4 glass-strong rounded-2xl p-5 animate-fade-up">
-                            <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center justify-between mb-2">
                                 <div>
                                     <p className="text-[9px] font-display text-altar-muted tracking-[2px] uppercase">Solar Year Begins</p>
                                     <p className="text-sm text-altar-text mt-1">{report.solarYear.startFormatted}</p>
+                                    <p className="text-[9px] text-altar-muted/60 mt-0.5">
+                                        Ends {new Date(report.solarYear.end).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                                    </p>
                                 </div>
                                 <div className="text-center">
                                     <div className="w-14 h-14 rounded-full bg-gradient-to-br from-amber-500/20 to-violet-500/20 border border-altar-gold/30 flex items-center justify-center">
@@ -239,6 +296,9 @@ export function YearAhead({ onClose, onTabChange, subscription, onShowPremium }:
                             </div>
                             <p className="text-xs text-altar-muted italic">
                                 {personalYearMeaning[report.personalYear] || 'Transformation'} — Life Path {report.lifePathNumber}
+                            </p>
+                            <p className="text-[10px] text-altar-muted/50 mt-1.5">
+                                Personal Year {report.personalYear} runs {new Date(report.solarYear.start).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} → {new Date(report.solarYear.end).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                             </p>
                         </div>
 
@@ -353,6 +413,7 @@ export function YearAhead({ onClose, onTabChange, subscription, onShowPremium }:
                             <div className="flex-1 glass-strong rounded-xl p-3 text-center">
                                 <p className="text-xl font-display text-altar-gold">{report.personalYear}</p>
                                 <p className="text-[8px] text-altar-muted tracking-[1px] font-display mt-0.5">PERSONAL YEAR</p>
+                                <p className="text-[8px] text-altar-muted/50 mt-0.5">{personalYearMeaning[report.personalYear] ?? 'Transformation'}</p>
                             </div>
                             <div className="flex-1 glass-strong rounded-xl p-3 text-center">
                                 <p className="text-xl font-display text-purple-300">{report.majorTransits.filter(t => t.significance !== 'minor').length}</p>

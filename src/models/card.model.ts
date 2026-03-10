@@ -17,6 +17,8 @@ export interface Reading {
   date: Date;
   cards: Card[];
   question?: string;
+  intention?: string;        // Pre-reading intention/manifestation set by user
+  manifestationId?: string;  // ID of active manifestation at time of reading
   type: 'daily' | 'custom';
   spread: string;
   theme: string;

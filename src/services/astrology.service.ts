@@ -296,15 +296,36 @@ export function getLifePathNumber(dateStr: string): number {
     return reduceToSingle(month + day + year);
 }
 
-export function getPersonalYearNumber(dateStr: string): number {
+export function getPersonalYearNumber(dateStr: string, forYear?: number): number {
     const d = new Date(dateStr + 'T12:00:00');
     const month = d.getMonth() + 1;
     const day = d.getDate();
-    const currentYear = new Date().getFullYear();
+    const targetYear = forYear ?? new Date().getFullYear();
     const sum = reduceToSingle(month) + reduceToSingle(day) + reduceToSingle(
-        String(currentYear).split('').reduce((a, c) => a + parseInt(c), 0)
+        String(targetYear).split('').reduce((a, c) => a + parseInt(c), 0)
     );
     return reduceToSingle(sum);
+}
+
+/**
+ * Returns the personal year the user is currently living inside.
+ * Uses the solar year approach: if the birthday hasn't occurred yet this
+ * calendar year, the current solar cycle started last year, so we use last year.
+ *
+ * Example: birthday Dec 14, today March 9, 2026 →
+ *   birthday this year = Dec 14, 2026 (future) → use 2025 → PY 8 ✓
+ *   (they are inside the Dec 14, 2025 → Dec 14, 2026 cycle)
+ */
+export function getCurrentPersonalYear(dateStr: string): number {
+    const today = new Date();
+    const bday = new Date(dateStr + 'T12:00:00');
+    const thisYearBirthday = new Date(today.getFullYear(), bday.getMonth(), bday.getDate());
+    // If this year's birthday is more than 3 days away, we haven't entered it yet
+    const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
+    const referenceYear = thisYearBirthday.getTime() - today.getTime() > threeDaysMs
+        ? today.getFullYear() - 1
+        : today.getFullYear();
+    return getPersonalYearNumber(dateStr, referenceYear);
 }
 
 const LIFE_PATH_MEANINGS: Record<number, { title: string; desc: string; strengths: string; challenges: string }> = {

@@ -1,6 +1,8 @@
 import React from 'react';
 import { TarotService } from '../services/tarot.service';
 import { PageHeader } from './PageHeader';
+import { getActiveManifestations } from '../services/manifestation.service';
+import { checkForRepeatedTopic, MindfulCheck } from '../services/mindful-reading.service';
 
 interface CustomReadingProps {
     onClose: () => void;
@@ -31,18 +33,34 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange }
     const [selectedSpread, setSelectedSpread] = React.useState<string | null>(null);
     const [selectedTheme, setSelectedTheme] = React.useState<string | null>(null);
     const [question, setQuestion] = React.useState('');
+    const [intention, setIntention] = React.useState('');
     const [lockedShake, setLockedShake] = React.useState<string | null>(null);
+    const [mindfulWarning, setMindfulWarning] = React.useState<MindfulCheck | null>(null);
+
+    // Check for active manifestations
+    const activeManifestations = React.useMemo(() => getActiveManifestations(), []);
+    const primaryManifestation = activeManifestations[0] ?? null;
 
     const selectSpread = (id: string) => {
         const spread = SPREADS.find(s => s.id === id);
         if (spread?.tier === 'premium' && subscription !== 'premium') {
-            // Shake animation for locked spread
             setLockedShake(id);
             setTimeout(() => setLockedShake(null), 600);
             return;
         }
         setSelectedSpread(id);
-        setTimeout(() => setStep(2), 350);
+
+        // Career and Relationship spreads have their theme baked into the spread itself —
+        // skip the theme selection step entirely.
+        if (id === 'career') {
+            setSelectedTheme('career');
+            setTimeout(() => setStep(3), 350);
+        } else if (id === 'relationship') {
+            setSelectedTheme('love');
+            setTimeout(() => setStep(3), 350);
+        } else {
+            setTimeout(() => setStep(2), 350);
+        }
     };
 
     const selectTheme = (id: string) => {
@@ -67,11 +85,26 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange }
     };
 
     const handleBack = () => {
-        if (step > 1) setStep(step - 1);
-        else onClose();
+        if (step === 3 && (selectedSpread === 'career' || selectedSpread === 'relationship')) {
+            // These spreads skip step 2, so back from step 3 goes straight to step 1
+            setStep(1);
+        } else if (step > 1) {
+            setStep(step - 1);
+        } else {
+            onClose();
+        }
     };
 
-    const startDrawRitual = async () => {
+    const startDrawRitual = async (skipMindfulCheck = false) => {
+        // Phase 2: anti-bias nudge check — uses theme as primary signal + question text as fallback
+        if (!skipMindfulCheck) {
+            const check = checkForRepeatedTopic(question.trim(), selectedTheme);
+            if (check.shouldWarn) {
+                setMindfulWarning(check);
+                return; // Wait for user to acknowledge
+            }
+        }
+        setMindfulWarning(null);
         setIsShuffling(true);
         setShuffleProgress(0);
 
@@ -83,10 +116,17 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange }
 
         await new Promise(r => setTimeout(r, 500));
 
+        // Build the final context to pass through
+        // If user typed a custom intention, use that; else fall back to active manifestation
+        const finalIntention = intention.trim() || primaryManifestation?.declaration || undefined;
+        const manifestationId = primaryManifestation?.id || undefined;
+
         onComplete({
             spread: selectedSpread,
             theme: selectedTheme,
             question: question || undefined,
+            intention: finalIntention,
+            manifestationId,
         });
     };
 
@@ -303,6 +343,15 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange }
                             </div>
                         </div>
 
+                        {/* Active manifestation badge */}
+                        {primaryManifestation && (
+                            <div className="glass rounded-2xl p-4 mb-4 border border-altar-gold/25 bg-altar-gold/5">
+                                <p className="text-[10px] font-display text-altar-gold tracking-[2px] uppercase mb-1">✨ Active Manifestation</p>
+                                <p className="text-sm text-altar-text italic">"{primaryManifestation.declaration}"</p>
+                                <p className="text-[10px] text-altar-muted mt-1">This reading will be woven through your active intention</p>
+                            </div>
+                        )}
+
                         {/* Question input */}
                         <div className="glass-strong rounded-2xl p-5">
                             <label className="block font-display text-xs text-altar-muted tracking-[2px] uppercase mb-3">
@@ -312,16 +361,64 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange }
                                 value={question}
                                 onChange={(e) => setQuestion(e.target.value)}
                                 placeholder="What guidance do you seek…"
-                                rows={4}
+                                rows={3}
                                 className="w-full bg-transparent text-altar-text placeholder-altar-muted/50 text-sm leading-relaxed resize-none focus:outline-none border-b border-altar-gold/20 focus:border-altar-gold/50 transition-colors pb-3"
                             />
                             <p className="text-xs text-altar-muted/60 mt-2 italic">
                                 Leave empty for an open reading
                             </p>
                         </div>
+
+                        {/* Intention / Manifestation — only show if no active manifestation */}
+                        {!primaryManifestation && (
+                            <div className="glass-strong rounded-2xl p-5 mt-3">
+                                <label className="block font-display text-xs text-altar-muted tracking-[2px] uppercase mb-1">
+                                    🌙 Set an Intention <span className="text-altar-muted/50 normal-case font-normal tracking-normal">(optional)</span>
+                                </label>
+                                <p className="text-[11px] text-altar-muted/60 mb-3">What are you calling in? The cards will speak to your intention.</p>
+                                <input
+                                    type="text"
+                                    value={intention}
+                                    onChange={(e) => setIntention(e.target.value)}
+                                    placeholder="I am calling in…"
+                                    className="w-full bg-transparent text-altar-text placeholder-altar-muted/40 text-sm focus:outline-none border-b border-altar-gold/20 focus:border-altar-gold/50 transition-colors pb-2"
+                                />
+                            </div>
+                        )}
+                        {/* Mindful anti-bias nudge — shown if repeated topic detected */}
+                        {mindfulWarning && (
+                            <div
+                                className="mt-4 rounded-2xl overflow-hidden"
+                                style={{
+                                    background: 'linear-gradient(135deg, rgba(120,53,15,0.2) 0%, rgba(30,20,5,0.7) 100%)',
+                                    border: '1px solid rgba(251,191,36,0.18)',
+                                }}
+                            >
+                                <div className="p-4">
+                                    <p className="text-amber-300/80 text-[10px] font-semibold tracking-widest uppercase mb-2">🌑 A gentle reflection</p>
+                                    <p className="text-white/70 text-[12px] leading-relaxed">
+                                        {mindfulWarning.message}
+                                    </p>
+                                    <div className="flex gap-2 mt-3">
+                                        <button
+                                            onClick={() => startDrawRitual(true)}
+                                            className="flex-1 py-2 rounded-xl text-[11px] text-amber-200/70 border border-amber-400/15 hover:border-amber-400/30 transition-colors"
+                                        >
+                                            Continue anyway
+                                        </button>
+                                        <button
+                                            onClick={() => setMindfulWarning(null)}
+                                            className="flex-1 py-2 rounded-xl text-[11px] text-white/40 border border-white/8 hover:border-white/15 transition-colors"
+                                        >
+                                            I'll sit with this
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                         {/* Begin Ritual button */}
                         <button
-                            onClick={startDrawRitual}
+                            onClick={() => startDrawRitual()}
                             className="w-full mt-6 py-4 rounded-2xl font-display font-semibold text-base tracking-wide transition-all duration-300 bg-gradient-to-r from-altar-gold via-altar-gold-dim to-altar-gold text-altar-deep hover:shadow-[0_0_30px_rgba(255,215,0,0.3)] hover:scale-[1.01] active:scale-[0.99]"
                         >
                             ✦ Begin the Ritual ✦

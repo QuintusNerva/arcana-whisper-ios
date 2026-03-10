@@ -486,11 +486,21 @@ export function generateYearAheadReport(birthData?: BirthData): YearAheadReport 
     const now = new Date();
     const currentYear = now.getFullYear();
 
-    // Solar return: find when Sun returns to natal degree this year
+    // Solar return: find when Sun returns to natal degree
     const natalSun = chart.planets.find(p => p.id === 'sun');
     if (!natalSun) return null;
 
-    const solarReturnDate = findSolarReturn(natalSun.longitude, currentYear);
+    // Find the solar return in the current calendar year
+    let solarReturnDate = findSolarReturn(natalSun.longitude, currentYear);
+
+    // If the solar return is more than 3 days in the future, the current solar year
+    // started at LAST year's solar return. (e.g. birthday Dec 14 → in March 2026 we're
+    // inside the Dec 14, 2025 → Dec 14, 2026 cycle, not the Dec 14, 2026 one.)
+    const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
+    if (solarReturnDate.getTime() - now.getTime() > threeDaysMs) {
+        solarReturnDate = findSolarReturn(natalSun.longitude, currentYear - 1);
+    }
+
     const solarYearEnd = new Date(solarReturnDate);
     solarYearEnd.setFullYear(solarYearEnd.getFullYear() + 1);
 
@@ -498,8 +508,9 @@ export function generateYearAheadReport(birthData?: BirthData): YearAheadReport 
     const startDate = solarReturnDate;
     const endDate = solarYearEnd;
 
-    // Numerology
-    const personalYear = getPersonalYearNumber(data.birthday);
+    // Numerology — use the solar return year so personal year aligns with the transit window
+    const solarReturnYear = solarReturnDate.getFullYear();
+    const personalYear = getPersonalYearNumber(data.birthday, solarReturnYear);
     const lifePathNumber = getLifePathNumber(data.birthday);
 
     // Major transits

@@ -14,11 +14,18 @@ const MAX_RECENT_CARDS = 20;
 
 // ── Data model ──
 
+export interface QuestionTopic {
+    topic: string;    // Category: 'love' | 'career' | 'health' | 'family' | 'purpose' | 'decision'
+    dates: string[];  // ISO dates this topic was asked about
+}
+
 export interface UserMemory {
     readingCount: number;
     themes: Record<string, number>;
     keywords: Record<string, number>;
-    recentCards: string[];
+    recentCards: string[];           // Last N card IDs (ordered)
+    cardFrequency: Record<string, number>;  // All-time draw count per card ID
+    questionTopics: QuestionTopic[];  // Per-category topic history
     lastReading: string;   // ISO date
     firstReading: string;  // ISO date
 }
@@ -29,6 +36,7 @@ export interface MemoryProfile {
     topKeywords: string[];
     readingCount: number;
     recentCards: string[];
+    cardFrequency: Record<string, number>;
 }
 
 export interface MemoryStats {
@@ -61,6 +69,27 @@ const STOPWORDS = new Set([
     'something', 'anything', 'everything', 'nothing', 'someone',
 ]);
 
+// ── Topic category keyword map (used by mindful-reading service) ──
+
+export const TOPIC_KEYWORDS: Record<string, string[]> = {
+    love: ['love', 'relationship', 'partner', 'boyfriend', 'girlfriend', 'husband', 'wife',
+        'crush', 'romance', 'dating', 'soulmate', 'marriage', 'heartbreak', 'ex', 'feelings'],
+    career: ['job', 'work', 'career', 'business', 'money', 'income', 'promotion', 'boss',
+        'colleague', 'interview', 'salary', 'fired', 'quit', 'success', 'entrepreneurship'],
+    health: ['health', 'sick', 'illness', 'body', 'healing', 'wellness', 'doctor', 'diagnosis', 'pain', 'anxiety', 'depression'],
+    family: ['family', 'mother', 'father', 'parent', 'sibling', 'brother', 'sister', 'child', 'son', 'daughter', 'home'],
+    purpose: ['purpose', 'meaning', 'path', 'calling', 'destiny', 'soul', 'spiritual', 'god', 'universe', 'spirit', 'awakening'],
+    decision: ['should', 'choice', 'decide', 'decision', 'option', 'move', 'change', 'stay', 'leave', 'pick', 'choose'],
+};
+
+export function extractTopicCategory(question: string): string | null {
+    const lower = question.toLowerCase();
+    for (const [topic, keywords] of Object.entries(TOPIC_KEYWORDS)) {
+        if (keywords.some(kw => lower.includes(kw))) return topic;
+    }
+    return null;
+}
+
 // ── Theme label mapping ──
 
 const THEME_LABELS: Record<string, string> = {
@@ -75,13 +104,39 @@ const THEME_LABELS: Record<string, string> = {
 function getMemory(): UserMemory {
     try {
         const raw = safeStorage.getItem(MEMORY_KEY);
-        if (raw) return JSON.parse(raw) as UserMemory;
+        if (raw) {
+            const parsed = JSON.parse(raw) as UserMemory;
+            // Back-fill Phase 2 fields for existing users
+            if (!parsed.cardFrequency) parsed.cardFrequency = {};
+            if (!parsed.questionTopics) parsed.questionTopics = [];
+
+            // One-time migration: if questionTopics is empty but themes has data,
+            // synthesize recent topic history so existing users get the mindful check immediately.
+            if (parsed.questionTopics.length === 0 && Object.keys(parsed.themes || {}).length > 0) {
+                const base = Date.now();
+                for (const [topic, count] of Object.entries(parsed.themes)) {
+                    if (count >= 2) {
+                        // Spread dates backward in 1-hour intervals, all within 7-day window
+                        const dates = Array.from({ length: Math.min(count, 10) }, (_, i) =>
+                            new Date(base - i * 60 * 60 * 1000).toISOString()
+                        );
+                        parsed.questionTopics.push({ topic, dates });
+                    }
+                }
+                // Save so migration only runs once
+                safeStorage.setItem(MEMORY_KEY, JSON.stringify(parsed));
+            }
+
+            return parsed;
+        }
     } catch { /* corrupted data — start fresh */ }
     return {
         readingCount: 0,
         themes: {},
         keywords: {},
         recentCards: [],
+        cardFrequency: {},
+        questionTopics: [],
         lastReading: '',
         firstReading: '',
     };
@@ -129,10 +184,25 @@ export function recordReading(
         }
     }
 
-    // Track recent cards (keep last N)
+    // Track recent cards (keep last N) + all-time frequency
     if (cards) {
         const newIds = cards.map(c => c.id);
         memory.recentCards = [...newIds, ...memory.recentCards].slice(0, MAX_RECENT_CARDS);
+        for (const id of newIds) {
+            memory.cardFrequency[id] = (memory.cardFrequency[id] || 0) + 1;
+        }
+    }
+
+    // Track topic category — use explicit theme first, then fall back to question text extraction.
+    // Theme is explicitly selected by the user and is the most reliable signal.
+    const topicKey = theme || extractTopicCategory(question || '');
+    if (topicKey) {
+        const existing = memory.questionTopics.find(t => t.topic === topicKey);
+        if (existing) {
+            existing.dates.push(now);
+        } else {
+            memory.questionTopics.push({ topic: topicKey, dates: [now] });
+        }
     }
 
     saveMemory(memory);
@@ -173,6 +243,7 @@ export function getMemoryProfile(): MemoryProfile {
         topKeywords,
         readingCount: memory.readingCount,
         recentCards: memory.recentCards,
+        cardFrequency: memory.cardFrequency,
     };
 }
 
@@ -273,4 +344,35 @@ export function getMemoryStats(): MemoryStats {
  */
 export function clearMemory(): void {
     safeStorage.removeItem(MEMORY_KEY);
+}
+
+// ── Phase 2: Pattern Analysis ──
+
+export interface CardPatternAnalysis {
+    lightCards: Array<{ id: string; count: number }>;  // Top drawn cards
+    totalUniqueCards: number;
+    totalReadings: number;
+}
+
+/**
+ * Analyze which cards appear most (light patterns) across all readings.
+ */
+export function getCardPatternAnalysis(): CardPatternAnalysis {
+    const memory = getMemory();
+    const freq = memory.cardFrequency || {};
+    const sorted = Object.entries(freq).sort((a, b) => b[1] - a[1]);
+    const lightCards = sorted.slice(0, 7).map(([id, count]) => ({ id, count }));
+    return {
+        lightCards,
+        totalUniqueCards: sorted.length,
+        totalReadings: memory.readingCount,
+    };
+}
+
+/**
+ * Return date history for a given topic category.
+ */
+export function getTopicHistory(topic: string): { dates: string[] } | null {
+    const memory = getMemory();
+    return memory.questionTopics?.find(t => t.topic === topic) ?? null;
 }

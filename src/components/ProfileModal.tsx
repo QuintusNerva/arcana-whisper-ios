@@ -13,6 +13,7 @@ import {
 import { searchPlaces, resolvePlace, PlaceSuggestion } from '../services/geocoding.service';
 import { PageHeader } from './PageHeader';
 import { LegalPage } from './LegalPages';
+import PatternAwakening from './PatternAwakening';
 
 interface ProfileModalProps {
     onClose: () => void;
@@ -494,6 +495,11 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
 
                     {/* Memory */}
                     <MemoryStatsCard />
+
+                    {/* Phase 2: Pattern Awakening */}
+                    <div className="mb-4 animate-fade-up" style={{ animationDelay: '0.57s', opacity: 0 }}>
+                        <PatternAwakening />
+                    </div>
 
                     {/* Danger zone — Apple requires data deletion capability */}
                     <div className="mb-8 space-y-2.5 animate-fade-up" style={{ animationDelay: '0.6s', opacity: 0 }}>
