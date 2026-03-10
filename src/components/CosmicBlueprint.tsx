@@ -295,24 +295,24 @@ export function CosmicBlueprint({ onTabChange }: CosmicBlueprintProps) {
                             style={{
                                 background: 'linear-gradient(145deg, #3d2007 0%, #2a1505 100%)',
                                 boxShadow: clayPill(146, 64, 14),
-                                border: '1px solid rgba(251,191,36,0.12)',
+                                border: '1px solid rgba(251,191,36,0.25)',
                             }}
                         >
-                            <p className="text-[9px] text-amber-300/70 font-display tracking-[2px] uppercase mb-1 flex items-center justify-between">
-                                Life Path <span className="text-[8px] opacity-50">→</span>
+                            <p className="text-[10px] text-amber-200 font-display tracking-[2px] uppercase mb-1 flex items-center justify-between">
+                                Life Path <span className="text-[8px] opacity-60">→</span>
                             </p>
-                            <p className="text-sm text-amber-200 font-bold text-left">
-                                #{lifePath} <span className="text-[10px] font-normal text-amber-300/65">— {lifePathMeaning.title}</span>
+                            <p className="text-sm text-amber-100 font-bold text-left">
+                                #{lifePath} <span className="text-[10px] font-normal text-amber-200/80">— {lifePathMeaning.title}</span>
                             </p>
-                            <p className="text-[9px] text-amber-200/55 mt-1.5 leading-snug">
+                            <p className="text-[9px] text-amber-100/70 mt-1.5 leading-snug">
                                 {lifePathMeaning.desc}
                             </p>
                             <div className="mt-2 flex flex-col gap-1">
-                                <p className="text-[9px] text-amber-300/55 leading-snug">
-                                    <span className="text-amber-300/80">✦</span> {lifePathMeaning.strengths}
+                                <p className="text-[9px] text-amber-200/75 leading-snug">
+                                    <span className="text-amber-200">✦</span> {lifePathMeaning.strengths}
                                 </p>
-                                <p className="text-[9px] text-amber-300/55 leading-snug">
-                                    <span className="text-amber-300/80">⚡</span> {lifePathMeaning.challenges}
+                                <p className="text-[9px] text-amber-200/75 leading-snug">
+                                    <span className="text-amber-200">⚡</span> {lifePathMeaning.challenges}
                                 </p>
                             </div>
                         </button>
@@ -324,17 +324,17 @@ export function CosmicBlueprint({ onTabChange }: CosmicBlueprintProps) {
                             style={{
                                 background: 'linear-gradient(145deg, #22164d 0%, #170f38 100%)',
                                 boxShadow: clayPill(109, 40, 217),
-                                border: '1px solid rgba(167,139,250,0.12)',
+                                border: '1px solid rgba(167,139,250,0.25)',
                             }}
                         >
-                            <p className="text-[9px] text-violet-300/70 font-display tracking-[2px] uppercase mb-1 flex items-center justify-between">
-                                Personal Year <span className="text-[8px] opacity-50">→</span>
+                            <p className="text-[10px] text-violet-200 font-display tracking-[2px] uppercase mb-1 flex items-center justify-between">
+                                Personal Year <span className="text-[8px] opacity-60">→</span>
                             </p>
-                            <p className="text-sm text-violet-200 font-bold">
-                                #{personalYear} <span className="text-[10px] font-normal text-violet-300/65">— {new Date().getFullYear()} Cycle</span>
+                            <p className="text-sm text-violet-100 font-bold">
+                                #{personalYear} <span className="text-[10px] font-normal text-violet-200/80">— {new Date().getFullYear()} Cycle</span>
                             </p>
                             {PY_MANIFESTATION[personalYear] && (
-                                <p className="text-[9px] text-violet-200/65 mt-1 leading-snug italic">
+                                <p className="text-[9px] text-violet-100/75 mt-1 leading-snug italic">
                                     {PY_MANIFESTATION[personalYear]}
                                 </p>
                             )}
