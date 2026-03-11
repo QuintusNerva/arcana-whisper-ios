@@ -9,6 +9,7 @@ interface CustomReadingProps {
     onComplete: (data: any) => void;
     subscription: string;
     onTabChange: (tab: string) => void;
+    initialSpread?: string | null;
 }
 
 const SPREADS = [
@@ -22,13 +23,48 @@ const SPREADS = [
 ];
 
 const THEMES = [
-    { id: 'general', name: 'General', icon: '🔮', color: 'from-purple-500/20 to-indigo-500/20', border: 'border-purple-500/40' },
-    { id: 'love', name: 'Love', icon: '💕', color: 'from-pink-500/20 to-rose-500/20', border: 'border-pink-500/40' },
-    { id: 'career', name: 'Career', icon: '💼', color: 'from-amber-500/20 to-orange-500/20', border: 'border-amber-500/40' },
-    { id: 'growth', name: 'Spirit', icon: '🕊️', color: 'from-cyan-500/20 to-teal-500/20', border: 'border-cyan-500/40' },
+    { id: 'general', name: 'General', icon: '🔮', desc: 'Universal guidance for your path' },
+    { id: 'love', name: 'Love', icon: '💕', desc: 'Matters of the heart & relationships' },
+    { id: 'career', name: 'Career', icon: '💼', desc: 'Work, prosperity & purpose' },
+    { id: 'growth', name: 'Spirit', icon: '🕊️', desc: 'Spiritual awakening & inner truth' },
 ];
 
-export function CustomReading({ onClose, onComplete, subscription, onTabChange }: CustomReadingProps) {
+/* ── Sacred Fintech Design System Styles ── */
+const primaryCardStyle: React.CSSProperties = {
+    background: 'linear-gradient(135deg, #1c1538 0%, #130f2e 50%, #0d0b22 100%)',
+    border: '1px solid rgba(255,255,255,0.06)',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03)',
+    borderRadius: '16px',
+};
+
+const goldCardStyle: React.CSSProperties = {
+    background: 'linear-gradient(135deg, #1c1538 0%, #130f2e 50%, #0d0b22 100%)',
+    border: '1px solid var(--color-gold-glow-med)',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(212,175,55,0.08)',
+    borderRadius: '16px',
+};
+
+const insetStyle: React.CSSProperties = {
+    background: 'linear-gradient(135deg, rgba(13,11,34,0.6) 0%, rgba(19,15,46,0.4) 100%)',
+    border: '1px solid rgba(255,255,255,0.04)',
+    boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.3)',
+    borderRadius: '16px',
+};
+
+const headerStyle: React.CSSProperties = {
+    fontFamily: 'var(--font-display)',
+    color: 'var(--color-gold-200)',
+    letterSpacing: '3px',
+    textTransform: 'uppercase' as const,
+};
+
+const mutedTextStyle: React.CSSProperties = {
+    color: 'var(--color-altar-muted)',
+    fontFamily: 'var(--font-body)',
+    fontWeight: 300,
+};
+
+export function CustomReading({ onClose, onComplete, subscription, onTabChange, initialSpread }: CustomReadingProps) {
     const [step, setStep] = React.useState(1);
     const [selectedSpread, setSelectedSpread] = React.useState<string | null>(null);
     const [selectedTheme, setSelectedTheme] = React.useState<string | null>(null);
@@ -41,6 +77,25 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange }
     const activeManifestations = React.useMemo(() => getActiveManifestations(), []);
     const primaryManifestation = activeManifestations[0] ?? null;
 
+    // Auto-select spread if coming from TarotTab with a preselected spread
+    React.useEffect(() => {
+        if (initialSpread) {
+            const spread = SPREADS.find(s => s.id === initialSpread);
+            if (spread) {
+                setSelectedSpread(initialSpread);
+                if (initialSpread === 'career') {
+                    setSelectedTheme('career');
+                    setStep(3);
+                } else if (initialSpread === 'relationship') {
+                    setSelectedTheme('love');
+                    setStep(3);
+                } else {
+                    setStep(2);
+                }
+            }
+        }
+    }, [initialSpread]);
+
     const selectSpread = (id: string) => {
         const spread = SPREADS.find(s => s.id === id);
         if (spread?.tier === 'premium' && subscription !== 'premium') {
@@ -50,8 +105,6 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange }
         }
         setSelectedSpread(id);
 
-        // Career and Relationship spreads have their theme baked into the spread itself —
-        // skip the theme selection step entirely.
         if (id === 'career') {
             setSelectedTheme('career');
             setTimeout(() => setStep(3), 350);
@@ -86,8 +139,13 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange }
 
     const handleBack = () => {
         if (step === 3 && (selectedSpread === 'career' || selectedSpread === 'relationship')) {
-            // These spreads skip step 2, so back from step 3 goes straight to step 1
-            setStep(1);
+            if (initialSpread) {
+                onClose();
+            } else {
+                setStep(1);
+            }
+        } else if (step === 2 && initialSpread) {
+            onClose();
         } else if (step > 1) {
             setStep(step - 1);
         } else {
@@ -96,19 +154,17 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange }
     };
 
     const startDrawRitual = async (skipMindfulCheck = false) => {
-        // Phase 2: anti-bias nudge check — uses theme as primary signal + question text as fallback
         if (!skipMindfulCheck) {
             const check = checkForRepeatedTopic(question.trim(), selectedTheme);
             if (check.shouldWarn) {
                 setMindfulWarning(check);
-                return; // Wait for user to acknowledge
+                return;
             }
         }
         setMindfulWarning(null);
         setIsShuffling(true);
         setShuffleProgress(0);
 
-        // Simulate shuffle
         for (let i = 0; i <= 100; i += 2) {
             await new Promise(r => setTimeout(r, 30));
             setShuffleProgress(i);
@@ -116,8 +172,6 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange }
 
         await new Promise(r => setTimeout(r, 500));
 
-        // Build the final context to pass through
-        // If user typed a custom intention, use that; else fall back to active manifestation
         const finalIntention = intention.trim() || primaryManifestation?.declaration || undefined;
         const manifestationId = primaryManifestation?.id || undefined;
 
@@ -141,13 +195,14 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange }
                     {Array.from({ length: 20 }, (_, i) => (
                         <span
                             key={i}
-                            className="absolute text-altar-gold/30 animate-particle"
+                            className="absolute animate-particle"
                             style={{
                                 left: `${(i * 31 + 7) % 100}%`,
                                 top: `${(i * 43 + 11) % 100}%`,
                                 animationDelay: `${(i * 0.5) % 6}s`,
                                 animationDuration: `${4 + (i % 3) * 2}s`,
                                 fontSize: `${8 + (i % 3) * 4}px`,
+                                color: 'rgba(212,175,55,0.3)',
                             }}
                         >
                             {['✦', '✧', '⊹', '✶', '·'][i % 5]}
@@ -161,32 +216,37 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange }
                         {[0, 1, 2, 3, 4].map(i => (
                             <div
                                 key={i}
-                                className="absolute inset-0 rounded-xl bg-gradient-to-br from-altar-mid to-altar-bright border border-altar-gold/30 shadow-lg"
+                                className="absolute inset-0 rounded-xl"
                                 style={{
+                                    ...primaryCardStyle,
+                                    border: '1px solid var(--color-gold-glow-med)',
                                     transform: `rotate(${(i - 2) * (8 + Math.sin(shuffleProgress / 10 + i) * 5)}deg) translateY(${Math.sin(shuffleProgress / 8 + i * 2) * 8}px)`,
                                     transition: 'transform 0.1s ease-out',
                                     zIndex: i,
                                 }}
                             >
                                 <div className="w-full h-full rounded-xl flex items-center justify-center">
-                                    <span className="text-3xl text-altar-gold/60">✦</span>
+                                    <span style={{ fontSize: '30px', color: 'rgba(212,175,55,0.6)' }}>✦</span>
                                 </div>
                             </div>
                         ))}
                     </div>
 
-                    <h2 className="font-display text-xl text-altar-gold tracking-[4px] mb-3">
+                    <h2 style={{ ...headerStyle, fontSize: '20px', letterSpacing: '4px', marginBottom: '12px' }}>
                         SHUFFLING THE DECK
                     </h2>
-                    <p className="text-sm text-altar-muted mb-6">
+                    <p style={{ ...mutedTextStyle, fontSize: '14px', marginBottom: '24px' }}>
                         The cards are aligning with your energy…
                     </p>
 
                     {/* Progress bar */}
-                    <div className="w-48 h-1 mx-auto bg-altar-purple/50 rounded-full overflow-hidden">
+                    <div className="w-48 h-1 mx-auto rounded-full overflow-hidden" style={{ background: 'rgba(75,0,130,0.5)' }}>
                         <div
-                            className="h-full bg-gradient-to-r from-altar-gold to-altar-bright rounded-full transition-all duration-100"
-                            style={{ width: `${shuffleProgress}%` }}
+                            className="h-full rounded-full transition-all duration-100"
+                            style={{
+                                width: `${shuffleProgress}%`,
+                                background: 'linear-gradient(to right, var(--color-gold-100), var(--color-gold-200))',
+                            }}
                         />
                     </div>
                 </div>
@@ -204,15 +264,27 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange }
                     <div className="flex items-center justify-center gap-2 w-full">
                         {[1, 2, 3].map(s => (
                             <div key={s} className="flex items-center gap-2">
-                                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-display transition-all duration-500 ${s === step
-                                    ? 'bg-altar-gold text-altar-deep scale-110 shadow-[0_0_12px_rgba(255,215,0,0.4)]'
-                                    : s < step
-                                        ? 'bg-altar-bright/50 text-white'
-                                        : 'bg-white/10 text-white/40'
-                                    }`}>
+                                <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs transition-all duration-500"
+                                    style={{
+                                        fontFamily: 'var(--font-display)',
+                                        background: s === step
+                                            ? 'var(--color-gold-100)'
+                                            : s < step
+                                                ? 'rgba(212,175,55,0.3)'
+                                                : 'rgba(255,255,255,0.08)',
+                                        color: s === step
+                                            ? '#0d0b22'
+                                            : s < step
+                                                ? 'white'
+                                                : 'rgba(255,255,255,0.4)',
+                                        boxShadow: s === step
+                                            ? '0 0 12px rgba(212,175,55,0.4)'
+                                            : 'none',
+                                        transform: s === step ? 'scale(1.1)' : 'scale(1)',
+                                    }}>
                                     {s < step ? '✓' : s}
                                 </div>
-                                {s < 3 && <div className={`w-6 h-[1px] transition-colors ${s < step ? 'bg-altar-gold/50' : 'bg-white/10'}`} />}
+                                {s < 3 && <div className="w-6 h-[1px]" style={{ background: s < step ? 'rgba(212,175,55,0.5)' : 'rgba(255,255,255,0.1)' }} />}
                             </div>
                         ))}
                     </div>
@@ -225,8 +297,8 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange }
                     <div className="animate-fade-up">
                         <div className="text-center mt-6 mb-6">
                             <span className="text-3xl mb-2 block">🃏</span>
-                            <h2 className="font-display text-xl text-altar-gold tracking-[3px]">CHOOSE YOUR SPREAD</h2>
-                            <p className="text-sm text-altar-muted mt-2">Select the ritual that calls to you</p>
+                            <h2 style={{ ...headerStyle, fontSize: '20px' }}>CHOOSE YOUR SPREAD</h2>
+                            <p style={{ ...mutedTextStyle, fontSize: '14px', marginTop: '8px' }}>Select the ritual that calls to you</p>
                         </div>
 
                         {/* 2×2 spread grid */}
@@ -240,23 +312,42 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange }
                                     <div
                                         key={s.id}
                                         onClick={() => selectSpread(s.id)}
-                                        className={`cursor-pointer rounded-2xl p-4 transition-all duration-300 border ${isSelected
-                                            ? 'bg-altar-mid/60 border-altar-gold/50 scale-105 shadow-[0_0_25px_rgba(255,215,0,0.15)]'
-                                            : isLocked
-                                                ? 'glass border-white/5 opacity-60 hover:opacity-80'
-                                                : 'glass border-white/5 hover:border-white/15 hover:scale-[1.02]'
-                                            } ${isShaking ? 'animate-[shake_0.5s_ease-in-out]' : ''}`}
+                                        className={`cursor-pointer p-4 transition-all duration-300 ${isShaking ? 'animate-[shake_0.5s_ease-in-out]' : ''}`}
+                                        style={{
+                                            ...primaryCardStyle,
+                                            border: isSelected
+                                                ? '1px solid var(--color-gold-100)'
+                                                : '1px solid var(--color-gold-glow-med)',
+                                            boxShadow: isSelected
+                                                ? '0 8px 32px rgba(0,0,0,0.5), 0 0 25px rgba(212,175,55,0.15)'
+                                                : primaryCardStyle.boxShadow,
+                                            transform: isSelected ? 'scale(1.05)' : 'scale(1)',
+                                            opacity: isLocked ? 0.6 : 1,
+                                        }}
                                     >
                                         <div className="text-center">
                                             <span className="text-3xl block mb-2">{s.icon}</span>
-                                            <h3 className={`font-display text-sm font-semibold mb-1 ${isSelected ? 'text-altar-gold' : 'text-altar-text'}`}>
+                                            <h3 style={{
+                                                fontFamily: 'var(--font-display)',
+                                                fontSize: '14px',
+                                                fontWeight: 600,
+                                                marginBottom: '4px',
+                                                color: isSelected ? 'var(--color-gold-100)' : 'var(--color-gold-200)',
+                                            }}>
                                                 {s.name}
                                             </h3>
-                                            <p className="text-xs text-altar-muted mb-2">{s.desc}</p>
+                                            <p style={{ ...mutedTextStyle, fontSize: '12px', marginBottom: '8px' }}>{s.desc}</p>
                                             <div className="flex items-center justify-center gap-1">
-                                                <span className="text-[10px] text-altar-muted">{s.cards} card{s.cards > 1 ? 's' : ''}</span>
+                                                <span style={{ ...mutedTextStyle, fontSize: '10px' }}>{s.cards} card{s.cards > 1 ? 's' : ''}</span>
                                                 {isLocked && (
-                                                    <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-altar-gold/10 text-altar-gold border border-altar-gold/20">
+                                                    <span style={{
+                                                        fontSize: '9px',
+                                                        padding: '2px 6px',
+                                                        borderRadius: '9999px',
+                                                        background: 'rgba(212,175,55,0.1)',
+                                                        border: '1px solid rgba(212,175,55,0.2)',
+                                                        color: 'var(--color-gold-100)',
+                                                    }}>
                                                         🔒 PRO
                                                     </span>
                                                 )}
@@ -270,11 +361,15 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange }
                         {/* Card Codex link */}
                         <button
                             onClick={() => onTabChange('meanings')}
-                            className="w-full mt-5 py-3 rounded-2xl glass border border-white/5 text-center hover:border-altar-gold/20 transition-all flex items-center justify-center gap-2"
+                            className="w-full mt-5 py-3 text-center transition-all flex items-center justify-center gap-2"
+                            style={{
+                                ...primaryCardStyle,
+                                border: '1px solid var(--color-gold-glow-med)',
+                            }}
                         >
                             <span className="text-lg">📖</span>
-                            <span className="text-sm font-display text-altar-muted tracking-wide">Card Codex</span>
-                            <span className="text-altar-muted/50">→</span>
+                            <span style={{ ...headerStyle, fontSize: '14px', letterSpacing: '1px' }}>Card Codex</span>
+                            <span style={{ color: 'var(--color-altar-muted)' }}>→</span>
                         </button>
                     </div>
                 )}
@@ -284,8 +379,8 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange }
                     <div className="animate-fade-up">
                         <div className="text-center mt-6 mb-6">
                             <span className="text-3xl mb-2 block">✨</span>
-                            <h2 className="font-display text-xl text-altar-gold tracking-[3px]">SET YOUR INTENTION</h2>
-                            <p className="text-sm text-altar-muted mt-2">What realm seeks your attention?</p>
+                            <h2 style={{ ...headerStyle, fontSize: '20px' }}>SET YOUR INTENTION</h2>
+                            <p style={{ ...mutedTextStyle, fontSize: '14px', marginTop: '8px' }}>What realm seeks your attention?</p>
                         </div>
 
                         <div className="space-y-3">
@@ -295,26 +390,36 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange }
                                     <button
                                         key={theme.id}
                                         onClick={() => selectTheme(theme.id)}
-                                        className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 border ${isSelected
-                                            ? `bg-gradient-to-r ${theme.color} ${theme.border} scale-[1.02] shadow-lg`
-                                            : 'glass border-white/5 hover:border-white/15 hover:scale-[1.01]'
-                                            }`}
+                                        className="w-full flex items-center gap-4 p-4 transition-all duration-300"
+                                        style={{
+                                            ...primaryCardStyle,
+                                            border: isSelected
+                                                ? '1px solid var(--color-gold-100)'
+                                                : '1px solid var(--color-gold-glow-med)',
+                                            boxShadow: isSelected
+                                                ? '0 8px 32px rgba(0,0,0,0.5), 0 0 25px rgba(212,175,55,0.15)'
+                                                : primaryCardStyle.boxShadow,
+                                            transform: isSelected ? 'scale(1.02)' : 'scale(1)',
+                                            textAlign: 'left' as const,
+                                        }}
                                     >
                                         <span className="text-3xl">{theme.icon}</span>
-                                        <div className="text-left">
-                                            <h3 className={`font-display text-base font-semibold tracking-wide ${isSelected ? 'text-white' : 'text-altar-text'
-                                                }`}>
+                                        <div>
+                                            <h3 style={{
+                                                fontFamily: 'var(--font-display)',
+                                                fontSize: '16px',
+                                                fontWeight: 600,
+                                                letterSpacing: '1px',
+                                                color: isSelected ? 'var(--color-gold-100)' : 'var(--color-gold-200)',
+                                            }}>
                                                 {theme.name}
                                             </h3>
-                                            <p className="text-xs text-altar-muted mt-0.5">
-                                                {theme.id === 'general' && 'Universal guidance for your path'}
-                                                {theme.id === 'love' && 'Matters of the heart & relationships'}
-                                                {theme.id === 'career' && 'Work, prosperity & purpose'}
-                                                {theme.id === 'growth' && 'Spiritual awakening & inner truth'}
+                                            <p style={{ ...mutedTextStyle, fontSize: '12px', marginTop: '2px' }}>
+                                                {theme.desc}
                                             </p>
                                         </div>
                                         {isSelected && (
-                                            <span className="ml-auto text-altar-gold text-lg">✦</span>
+                                            <span className="ml-auto" style={{ color: 'var(--color-gold-100)', fontSize: '18px' }}>✦</span>
                                         )}
                                     </button>
                                 );
@@ -328,16 +433,16 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange }
                     <div className="animate-fade-up">
                         <div className="text-center mt-6 mb-6">
                             <span className="text-3xl mb-2 block">🌙</span>
-                            <h2 className="font-display text-xl text-altar-gold tracking-[3px]">ASK THE CARDS</h2>
-                            <p className="text-sm text-altar-muted mt-2">Focus your energy (optional)</p>
+                            <h2 style={{ ...headerStyle, fontSize: '20px' }}>ASK THE CARDS</h2>
+                            <p style={{ ...mutedTextStyle, fontSize: '14px', marginTop: '8px' }}>Focus your energy (optional)</p>
                         </div>
 
                         {/* Summary of selections */}
-                        <div className="glass rounded-2xl p-4 mb-5 flex items-center gap-3">
+                        <div className="flex items-center gap-3 p-4 mb-5" style={goldCardStyle}>
                             <span className="text-2xl">{spread?.icon}</span>
                             <div>
-                                <p className="text-sm font-display text-altar-gold">{spread?.name}</p>
-                                <p className="text-xs text-altar-muted">
+                                <p style={{ fontFamily: 'var(--font-display)', color: 'var(--color-gold-100)', fontSize: '14px' }}>{spread?.name}</p>
+                                <p style={{ ...mutedTextStyle, fontSize: '12px' }}>
                                     {THEMES.find(t => t.id === selectedTheme)?.name} · {spread?.cards} card{(spread?.cards || 0) > 1 ? 's' : ''}
                                 </p>
                             </div>
@@ -345,16 +450,19 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange }
 
                         {/* Active manifestation badge */}
                         {primaryManifestation && (
-                            <div className="glass rounded-2xl p-4 mb-4 border border-altar-gold/25 bg-altar-gold/5">
-                                <p className="text-[10px] font-display text-altar-gold tracking-[2px] uppercase mb-1">✨ Active Manifestation</p>
-                                <p className="text-sm text-altar-text italic">"{primaryManifestation.declaration}"</p>
-                                <p className="text-[10px] text-altar-muted mt-1">This reading will be woven through your active intention</p>
+                            <div className="p-4 mb-4" style={{
+                                ...goldCardStyle,
+                                background: 'linear-gradient(135deg, rgba(212,175,55,0.05) 0%, #130f2e 50%, rgba(184,134,11,0.03) 100%)',
+                            }}>
+                                <p style={{ ...headerStyle, fontSize: '10px', marginBottom: '4px' }}>✨ Active Manifestation</p>
+                                <p style={{ ...mutedTextStyle, fontSize: '14px', fontStyle: 'italic', color: 'rgba(226,232,240,0.9)' }}>"{primaryManifestation.declaration}"</p>
+                                <p style={{ ...mutedTextStyle, fontSize: '10px', marginTop: '4px' }}>This reading will be woven through your active intention</p>
                             </div>
                         )}
 
                         {/* Question input */}
-                        <div className="glass-strong rounded-2xl p-5">
-                            <label className="block font-display text-xs text-altar-muted tracking-[2px] uppercase mb-3">
+                        <div className="p-5" style={goldCardStyle}>
+                            <label style={{ ...headerStyle, fontSize: '12px', display: 'block', marginBottom: '12px' }}>
                                 YOUR QUESTION
                             </label>
                             <textarea
@@ -362,53 +470,81 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange }
                                 onChange={(e) => setQuestion(e.target.value)}
                                 placeholder="What guidance do you seek…"
                                 rows={3}
-                                className="w-full bg-transparent text-altar-text placeholder-altar-muted/50 text-sm leading-relaxed resize-none focus:outline-none border-b border-altar-gold/20 focus:border-altar-gold/50 transition-colors pb-3"
+                                className="w-full bg-transparent resize-none focus:outline-none pb-3"
+                                style={{
+                                    ...mutedTextStyle,
+                                    fontSize: '14px',
+                                    lineHeight: '1.6',
+                                    color: 'rgba(226,232,240,0.9)',
+                                    borderBottom: '1px solid rgba(212,175,55,0.2)',
+                                }}
                             />
-                            <p className="text-xs text-altar-muted/60 mt-2 italic">
+                            <p style={{ ...mutedTextStyle, fontSize: '12px', fontStyle: 'italic', marginTop: '8px', opacity: 0.6 }}>
                                 Leave empty for an open reading
                             </p>
                         </div>
 
                         {/* Intention / Manifestation — only show if no active manifestation */}
                         {!primaryManifestation && (
-                            <div className="glass-strong rounded-2xl p-5 mt-3">
-                                <label className="block font-display text-xs text-altar-muted tracking-[2px] uppercase mb-1">
-                                    🌙 Set an Intention <span className="text-altar-muted/50 normal-case font-normal tracking-normal">(optional)</span>
+                            <div className="p-5 mt-3" style={goldCardStyle}>
+                                <label style={{ ...headerStyle, fontSize: '12px', display: 'block', marginBottom: '4px' }}>
+                                    🌙 Set an Intention <span style={{ ...mutedTextStyle, fontSize: '11px', fontWeight: 400, textTransform: 'none' as const, letterSpacing: 'normal' }}>(optional)</span>
                                 </label>
-                                <p className="text-[11px] text-altar-muted/60 mb-3">What are you calling in? The cards will speak to your intention.</p>
+                                <p style={{ ...mutedTextStyle, fontSize: '11px', marginBottom: '12px', opacity: 0.6 }}>What are you calling in? The cards will speak to your intention.</p>
                                 <input
                                     type="text"
                                     value={intention}
                                     onChange={(e) => setIntention(e.target.value)}
                                     placeholder="I am calling in…"
-                                    className="w-full bg-transparent text-altar-text placeholder-altar-muted/40 text-sm focus:outline-none border-b border-altar-gold/20 focus:border-altar-gold/50 transition-colors pb-2"
+                                    className="w-full bg-transparent focus:outline-none pb-2"
+                                    style={{
+                                        ...mutedTextStyle,
+                                        fontSize: '14px',
+                                        color: 'rgba(226,232,240,0.9)',
+                                        borderBottom: '1px solid rgba(212,175,55,0.2)',
+                                    }}
                                 />
                             </div>
                         )}
-                        {/* Mindful anti-bias nudge — shown if repeated topic detected */}
+                        {/* Mindful anti-bias nudge */}
                         {mindfulWarning && (
-                            <div
-                                className="mt-4 rounded-2xl overflow-hidden"
-                                style={{
-                                    background: 'linear-gradient(135deg, rgba(120,53,15,0.2) 0%, rgba(30,20,5,0.7) 100%)',
-                                    border: '1px solid rgba(251,191,36,0.18)',
-                                }}
-                            >
+                            <div className="mt-4 overflow-hidden animate-fade-up" style={{
+                                ...primaryCardStyle,
+                                border: '1px solid #f59e0b',
+                                boxShadow: '0 8px 40px rgba(251,191,36,0.15), 0 0 30px rgba(251,191,36,0.08), 0 0 0 1px rgba(251,191,36,0.1)',
+                            }}>
                                 <div className="p-4">
-                                    <p className="text-amber-300/80 text-[10px] font-semibold tracking-widest uppercase mb-2">🌑 A gentle reflection</p>
-                                    <p className="text-white/70 text-[12px] leading-relaxed">
+                                    <p style={{ color: 'rgba(252,211,77,0.9)', fontSize: '10px', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase' as const, marginBottom: '8px', fontFamily: 'var(--font-display)' }}>🌑 A gentle reflection</p>
+                                    <p style={{ ...mutedTextStyle, fontSize: '12px', lineHeight: '1.6', color: 'rgba(255,255,255,0.7)' }}>
                                         {mindfulWarning.message}
                                     </p>
                                     <div className="flex gap-2 mt-3">
                                         <button
                                             onClick={() => startDrawRitual(true)}
-                                            className="flex-1 py-2 rounded-xl text-[11px] text-amber-200/70 border border-amber-400/15 hover:border-amber-400/30 transition-colors"
+                                            className="flex-1 py-2.5 transition-all active:scale-[0.97]"
+                                            style={{
+                                                background: 'linear-gradient(135deg, var(--color-gold-100), var(--color-gold-200))',
+                                                borderRadius: '12px',
+                                                fontSize: '12px',
+                                                fontWeight: 600,
+                                                color: '#0d0b22',
+                                                fontFamily: 'var(--font-display)',
+                                                border: '1px solid var(--color-gold-glow-med)',
+                                                boxShadow: '0 2px 12px rgba(212,175,55,0.25)',
+                                            }}
                                         >
                                             Continue anyway
                                         </button>
                                         <button
                                             onClick={() => setMindfulWarning(null)}
-                                            className="flex-1 py-2 rounded-xl text-[11px] text-white/40 border border-white/8 hover:border-white/15 transition-colors"
+                                            className="flex-1 py-2.5 transition-colors"
+                                            style={{
+                                                borderRadius: '12px',
+                                                fontSize: '12px',
+                                                color: 'rgba(255,255,255,0.4)',
+                                                border: '1px solid rgba(255,255,255,0.08)',
+                                                fontFamily: 'var(--font-display)',
+                                            }}
                                         >
                                             I'll sit with this
                                         </button>
@@ -419,7 +555,15 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange }
                         {/* Begin Ritual button */}
                         <button
                             onClick={() => startDrawRitual()}
-                            className="w-full mt-6 py-4 rounded-2xl font-display font-semibold text-base tracking-wide transition-all duration-300 bg-gradient-to-r from-altar-gold via-altar-gold-dim to-altar-gold text-altar-deep hover:shadow-[0_0_30px_rgba(255,215,0,0.3)] hover:scale-[1.01] active:scale-[0.99]"
+                            className="w-full mt-6 py-4 font-semibold text-base tracking-wide transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]"
+                            style={{
+                                background: 'linear-gradient(135deg, var(--color-gold-100), var(--color-gold-200))',
+                                borderRadius: '16px',
+                                border: '1px solid var(--color-gold-glow-med)',
+                                color: '#0d0b22',
+                                fontFamily: 'var(--font-display)',
+                                boxShadow: '0 4px 20px rgba(212,175,55,0.3)',
+                            }}
                         >
                             ✦ Begin the Ritual ✦
                         </button>

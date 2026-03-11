@@ -136,17 +136,30 @@ body {
 }
 
 @theme {
-  --color-altar-deep: #0d0618;
-  --color-altar-dark: #1a0b2e;
+  --color-altar-deep: #120224;
+  --color-altar-dark: #1F0D38;
   --color-altar-mid: #2d1b4e;
   --color-altar-bright: #432c7a;
-  --color-altar-gold-dim: #997d3d;
-  --color-altar-gold: #ffd700;
-  --color-altar-gold-light: #ffe55c;
+  --color-altar-gold-dim: #C59341;
+  --color-altar-gold: #F9E491;
+  --color-altar-gold-light: #F9E491;
   --color-altar-text: #e2e8f0;
   --color-altar-muted: #94a3b8;
-  --color-altar-border: rgba(255, 255, 255, 0.1);
-  --color-altar-purple: #3b0764;
+  --color-altar-border: rgba(212, 175, 55, 0.2);
+  --color-altar-purple: #2A0B4B;
+
+  /* 5-Tier Gold System */
+  --color-gold-100: #F9E491;
+  --color-gold-200: #D4A94E;
+  --color-gold-300: #C59341;
+  --color-gold-400: #A67B2E;
+  --color-gold-500: #8a6914;
+
+  /* Gold Glow System */
+  --color-gold-glow-soft: rgba(212,175,55, 0.08);
+  --color-gold-glow-med: rgba(212,175,55, 0.18);
+  --color-gold-glow-strong: rgba(212,175,55, 0.35);
+  --color-gold-glow-neon: rgba(249,228,145, 0.4);
 
   --font-display: "Cinzel", serif;
   --font-body: "Inter", sans-serif;
@@ -340,4 +353,31 @@ body {
   letter-spacing: 0.01em;
   color: rgba(255, 255, 255, 0.82);
   text-align: left;
+}
+
+/* ── Portal Card Gold SVG Icons ── */
+.portal-icon-gold svg {
+  width: 100%;
+  height: 100%;
+  stroke: var(--color-altar-gold);
+  stroke-width: 1.2;
+  fill: none;
+  filter: drop-shadow(0 0 6px rgba(212,175,55,0.25));
+  transition: filter 0.2s ease, stroke 0.2s ease;
+}
+button:hover .portal-icon-gold svg {
+  stroke: #f5e6b5;
+  filter: drop-shadow(0 0 10px rgba(212,175,55,0.45));
+}
+
+/* ── Shimmer Sweep (CTA button) ── */
+@keyframes shimmer-sweep {
+  0%, 100% { transform: translateX(-100%); }
+  50% { transform: translateX(100%); }
+}
+
+/* ── Breathe (cinematic glow pulse) ── */
+@keyframes breathe {
+  0%, 100% { opacity: 0.8; text-shadow: 0 0 30px rgba(212,175,55,0.25), 0 0 60px rgba(212,175,55,0.1); }
+  50% { opacity: 1; text-shadow: 0 0 40px rgba(212,175,55,0.45), 0 0 80px rgba(212,175,55,0.2); }
 }

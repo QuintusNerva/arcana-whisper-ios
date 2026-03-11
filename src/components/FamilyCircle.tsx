@@ -391,12 +391,24 @@ export function FamilyCircle({ onClose, onTabChange, subscription, onShowPremium
                     <>
                         {/* No birth data warning */}
                         {!parentData && (
-                            <div className="mx-5 mt-4 clay-card p-5 text-center animate-fade-up">
+                            <div className="mx-5 mt-4 rounded-[22px] p-5 text-center animate-fade-up" style={{
+                                background: 'linear-gradient(160deg, #1c1538, #130f2e 55%, #0d0b22)',
+                                border: '1px solid rgba(255,255,255,0.07)',
+                                boxShadow: '0 8px 28px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.08)',
+                            }}>
                                 <p className="text-3xl mb-2">⚠️</p>
-                                <p className="text-sm text-altar-text/70 mb-3">Set your birth data first to see family dynamics.</p>
+                                <p className="text-sm text-altar-text/70 mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>Set your birth data first to see family dynamics.</p>
                                 <button onClick={() => onTabChange('profile')}
-                                    className="clay-btn clay-btn-primary px-6 py-2 text-sm">
-                                    SET UP PROFILE
+                                    className="rounded-2xl px-6 py-2.5 font-display text-[11px] tracking-[2px] uppercase transition-all active:scale-[0.98]"
+                                    style={{
+                                        background: 'linear-gradient(180deg, #F9E491, #D4A94E 30%, #C59341 60%, #A67B2E)',
+                                        border: '2px solid rgba(212,175,55,0.6)',
+                                        color: '#1a0f2e',
+                                        fontWeight: 800,
+                                        boxShadow: '0 2px 0 #8a6914, 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.35)',
+                                    }}
+                                >
+                                    Set Up Profile
                                 </button>
                             </div>
                         )}
@@ -404,11 +416,20 @@ export function FamilyCircle({ onClose, onTabChange, subscription, onShowPremium
                         {/* Empty state */}
                         {family.length === 0 && parentData && (
                             <div className="mx-5 mt-8 text-center animate-fade-up">
-                                <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-amber-500/10 to-violet-500/10 border border-white/10 flex items-center justify-center">
-                                    <span className="text-3xl">👨‍👩‍👧‍👦</span>
+                                <div className="w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center" style={{
+                                    background: 'linear-gradient(135deg, rgba(197,147,65,0.08), rgba(61,29,90,0.4))',
+                                    border: '1px solid rgba(212,175,55,0.2)',
+                                    boxShadow: '0 0 30px rgba(212,175,55,0.08), 0 2px 8px rgba(0,0,0,0.3)',
+                                }}>
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#D4A94E" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                        <circle cx="9" cy="7" r="4" />
+                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                                    </svg>
                                 </div>
-                                <p className="text-sm text-altar-text/70 mb-1">Your family circle is empty</p>
-                                <p className="text-xs text-altar-muted mb-6">Add your children, siblings, or parents to discover<br />the cosmic bonds between you.</p>
+                                <p className="text-sm text-altar-text/70 mb-1" style={{ fontFamily: "'Inter', sans-serif" }}>Your family circle is empty</p>
+                                <p className="text-xs text-altar-muted mb-6" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 300 }}>Add your children, siblings, or parents to discover<br />the cosmic bonds between you.</p>
                             </div>
                         )}
 
@@ -442,9 +463,16 @@ export function FamilyCircle({ onClose, onTabChange, subscription, onShowPremium
                             <div className="mx-5 mt-6 animate-fade-up" style={{ animationDelay: `${Math.min(family.length, 5) * 0.1 + 0.2}s`, opacity: 0 }}>
                                 <button
                                     onClick={() => { resetForm(); setViewState('add'); }}
-                                    className="clay-btn clay-btn-primary w-full py-4 text-sm"
+                                    className="w-full rounded-2xl px-5 py-4 font-display text-[12px] tracking-[3px] uppercase transition-all active:scale-[0.98]"
+                                    style={{
+                                        background: 'linear-gradient(180deg, #F9E491, #D4A94E 30%, #C59341 60%, #A67B2E)',
+                                        border: '2px solid rgba(212,175,55,0.6)',
+                                        color: '#1a0f2e',
+                                        fontWeight: 800,
+                                        boxShadow: '0 2px 0 #8a6914, 0 4px 12px rgba(0,0,0,0.5), 0 0 40px rgba(212,175,55,0.08), inset 0 1px 0 rgba(255,255,255,0.35)',
+                                    }}
                                 >
-                                    + ADD FAMILY MEMBER
+                                    + Add Family Member
                                 </button>
                             </div>
                         )}
@@ -468,11 +496,18 @@ export function FamilyCircle({ onClose, onTabChange, subscription, onShowPremium
                                             setTimeout(() => setShareStatus('idle'), 2500);
                                         }
                                     }}
-                                    className="clay-btn w-full py-3.5 text-xs"
+                                    className="w-full rounded-2xl px-5 py-3.5 font-display text-[11px] tracking-[2px] uppercase transition-all active:scale-[0.98]"
+                                    style={{
+                                        background: 'rgba(61,29,90,0.35)',
+                                        border: '1px solid rgba(212,175,55,0.15)',
+                                        color: '#D4A94E',
+                                        backdropFilter: 'blur(12px)',
+                                        boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                                    }}
                                 >
-                                    {shareStatus === 'done' ? '✅ LINK COPIED!' : '📤 SHARE MY COSMIC CARD'}
+                                    {shareStatus === 'done' ? '✅ Link Copied!' : '📤 Share My Cosmic Card'}
                                 </button>
-                                <p className="text-[10px] text-altar-muted/40 text-center mt-2">Invite family to see your stars — they can add you instantly</p>
+                                <p className="text-[10px] text-altar-muted/40 text-center mt-2" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 300 }}>Invite family to see your stars — they can add you instantly</p>
                             </div>
                         )}
                     </>
@@ -480,94 +515,177 @@ export function FamilyCircle({ onClose, onTabChange, subscription, onShowPremium
 
                 {/* ═══ ADD/EDIT FORM ═══ */}
                 {viewState === 'add' && (
-                    <div className="mx-5 mt-4 space-y-4 animate-fade-up">
-                        {/* Name */}
-                        <div className="clay-card p-4">
-                            <label className="text-[9px] font-display text-altar-muted tracking-[2px] uppercase mb-2 block">Name</label>
-                            <input
-                                type="text" value={formName} onChange={e => setFormName(e.target.value)}
-                                placeholder="e.g. Emma"
-                                className="clay-inset w-full px-4 py-3 text-sm"
-                            />
-                        </div>
+                    <div className="mx-5 mt-4 space-y-5 animate-fade-up">
 
-                        {/* Relationship */}
-                        <div className="clay-card p-4">
-                            <label className="text-[9px] font-display text-altar-muted tracking-[2px] uppercase mb-2 block">Relationship</label>
-                            <div className="grid grid-cols-3 gap-2">
-                                {RELATIONSHIP_OPTIONS.map(opt => (
-                                    <button
-                                        key={opt.value}
-                                        onClick={() => setFormRelationship(opt.value)}
-                                        className={`clay-btn py-2.5 text-xs ${formRelationship === opt.value ? 'clay-btn-active' : ''}`}
-                                    >
-                                        {opt.emoji} {opt.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
+                        {/* ── Single consolidated form card ── */}
+                        <div className="rounded-[22px] overflow-hidden" style={{
+                            background: 'linear-gradient(160deg, #1c1538, #130f2e 55%, #0d0b22)',
+                            border: '1px solid var(--color-gold-glow-med)',
+                            boxShadow: '0 8px 28px rgba(0,0,0,0.5), 0 0 40px var(--color-gold-glow-soft), inset 0 1px 1px rgba(255,255,255,0.08)',
+                        }}>
 
-                        {/* Birthday */}
-                        <div className="clay-card p-4">
-                            <label className="text-[9px] font-display text-altar-muted tracking-[2px] uppercase mb-2 block">Date of Birth</label>
-                            <input
-                                type="date" value={formBirthday} onChange={e => setFormBirthday(e.target.value)}
-                                className="clay-inset w-full px-4 py-3 text-sm [color-scheme:dark]"
-                            />
-                        </div>
-
-                        {/* Birth Time (optional) */}
-                        <div className="clay-card p-4">
-                            <label className="text-[9px] font-display text-altar-muted tracking-[2px] uppercase mb-1 block">Birth Time <span className="text-altar-muted/50">(optional)</span></label>
-                            <p className="text-[10px] text-altar-muted/50 mb-2">Needed for accurate Moon & Rising sign</p>
-                            <input
-                                type="time" value={formBirthTime} onChange={e => setFormBirthTime(e.target.value)}
-                                className="clay-inset w-full px-4 py-3 text-sm [color-scheme:dark]"
-                            />
-                        </div>
-
-                        {/* Place of Birth */}
-                        <div className="clay-card p-4 relative" ref={cityDropdownRef}>
-                            <label className="text-[9px] font-display text-altar-muted tracking-[2px] uppercase mb-1 block">Place of Birth <span className="text-altar-muted/50">(optional)</span></label>
-                            <div className="relative">
+                            {/* Name */}
+                            <div className="px-6 pt-6 pb-5">
+                                <label className="text-[9px] font-display tracking-[3px] uppercase mb-3 block" style={{ color: 'var(--color-gold-200)' }}>Name</label>
                                 <input
-                                    type="text" value={cityQuery}
-                                    onChange={e => handleCitySearch(e.target.value)}
-                                    onFocus={() => citySuggestions.length > 0 && setShowCitySuggestions(true)}
-                                    placeholder="Search city…"
-                                    className="clay-inset w-full px-4 py-3 text-sm"
+                                    type="text" value={formName} onChange={e => setFormName(e.target.value)}
+                                    placeholder="e.g. Emma"
+                                    className="w-full px-4 py-3.5 text-[14px] rounded-xl focus:outline-none placeholder:text-altar-muted/30" style={{
+                                        background: 'rgba(18,2,36,0.6)',
+                                        border: '1px solid var(--color-gold-glow-med)',
+                                        color: 'var(--color-altar-text)',
+                                        fontFamily: 'var(--font-body)',
+                                        fontWeight: 400,
+                                        letterSpacing: '0.5px',
+                                    }}
                                 />
-                                {resolving && (
-                                    <span className="absolute right-3 top-3 text-xs text-altar-gold animate-pulse">…</span>
+                            </div>
+
+                            {/* Divider */}
+                            <div className="mx-6" style={{ height: '1px', background: 'linear-gradient(90deg, transparent 0%, var(--color-gold-glow-med) 30%, var(--color-gold-glow-med) 70%, transparent 100%)' }} />
+
+                            {/* Relationship */}
+                            <div className="px-6 py-5">
+                                <label className="text-[9px] font-display tracking-[3px] uppercase mb-3 block" style={{ color: 'var(--color-gold-200)' }}>Relationship</label>
+                                <div className="grid grid-cols-3 gap-2">
+                                    {RELATIONSHIP_OPTIONS.map(opt => (
+                                        <button
+                                            key={opt.value}
+                                            onClick={() => setFormRelationship(opt.value)}
+                                            className="py-2.5 text-[11px] font-display tracking-[1px] rounded-xl transition-all active:scale-[0.97]"
+                                            style={{
+                                                background: formRelationship === opt.value
+                                                    ? 'linear-gradient(160deg, rgba(197,147,65,0.2), rgba(197,147,65,0.08))'
+                                                    : 'rgba(18,2,36,0.5)',
+                                                border: formRelationship === opt.value
+                                                    ? '1px solid var(--color-gold-glow-strong)'
+                                                    : '1px solid rgba(255,255,255,0.06)',
+                                                color: formRelationship === opt.value ? 'var(--color-gold-100)' : 'var(--color-altar-muted)',
+                                                boxShadow: formRelationship === opt.value
+                                                    ? '0 0 12px var(--color-gold-glow-soft), inset 0 1px 0 rgba(249,228,145,0.08)'
+                                                    : 'none',
+                                            }}
+                                        >
+                                            {opt.emoji} {opt.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Divider */}
+                            <div className="mx-6" style={{ height: '1px', background: 'linear-gradient(90deg, transparent 0%, var(--color-gold-glow-med) 30%, var(--color-gold-glow-med) 70%, transparent 100%)' }} />
+
+                            {/* Birthday */}
+                            <div className="px-6 py-5">
+                                <label className="text-[9px] font-display tracking-[3px] uppercase mb-3 block" style={{ color: 'var(--color-gold-200)' }}>Date of Birth</label>
+                                <input
+                                    type="date" value={formBirthday} onChange={e => setFormBirthday(e.target.value)}
+                                    className="w-full px-4 py-3.5 text-[14px] rounded-xl [color-scheme:dark] focus:outline-none" style={{
+                                        background: 'rgba(18,2,36,0.6)',
+                                        border: '1px solid var(--color-gold-glow-med)',
+                                        color: 'var(--color-altar-text)',
+                                        fontFamily: 'var(--font-body)',
+                                        fontWeight: 400,
+                                    }}
+                                />
+                            </div>
+
+                            {/* Divider */}
+                            <div className="mx-6" style={{ height: '1px', background: 'linear-gradient(90deg, transparent 0%, var(--color-gold-glow-med) 30%, var(--color-gold-glow-med) 70%, transparent 100%)' }} />
+
+                            {/* Birth Time */}
+                            <div className="px-6 py-5">
+                                <label className="text-[9px] font-display tracking-[3px] uppercase mb-1 block" style={{ color: 'var(--color-gold-200)' }}>Birth Time <span style={{ color: 'var(--color-altar-muted)', opacity: 0.5 }}>(optional)</span></label>
+                                <p className="text-[10px] mb-3" style={{ color: 'var(--color-altar-muted)', opacity: 0.5, fontFamily: 'var(--font-body)', fontWeight: 300 }}>Needed for accurate Moon & Rising sign</p>
+                                <input
+                                    type="time" value={formBirthTime} onChange={e => setFormBirthTime(e.target.value)}
+                                    className="w-full px-4 py-3.5 text-[14px] rounded-xl [color-scheme:dark] focus:outline-none" style={{
+                                        background: 'rgba(18,2,36,0.6)',
+                                        border: '1px solid var(--color-gold-glow-med)',
+                                        color: 'var(--color-altar-text)',
+                                        fontFamily: 'var(--font-body)',
+                                        fontWeight: 400,
+                                    }}
+                                />
+                            </div>
+
+                            {/* Divider */}
+                            <div className="mx-6" style={{ height: '1px', background: 'linear-gradient(90deg, transparent 0%, var(--color-gold-glow-med) 30%, var(--color-gold-glow-med) 70%, transparent 100%)' }} />
+
+                            {/* Place of Birth */}
+                            <div className="px-6 pt-5 pb-6 relative">
+                                <label className="text-[9px] font-display tracking-[3px] uppercase mb-3 block" style={{ color: 'var(--color-gold-200)' }}>Place of Birth <span style={{ color: 'var(--color-altar-muted)', opacity: 0.5 }}>(optional)</span></label>
+                                <div className="relative">
+                                    <input
+                                        type="text" value={cityQuery}
+                                        onChange={e => handleCitySearch(e.target.value)}
+                                        onFocus={() => citySuggestions.length > 0 && setShowCitySuggestions(true)}
+                                        placeholder="Search city…"
+                                        className="w-full px-4 py-3.5 text-[14px] rounded-xl focus:outline-none placeholder:text-altar-muted/30" style={{
+                                            background: 'rgba(18,2,36,0.6)',
+                                            border: '1px solid var(--color-gold-glow-med)',
+                                            color: 'var(--color-altar-text)',
+                                            fontFamily: 'var(--font-body)',
+                                            fontWeight: 400,
+                                        }}
+                                    />
+                                    {resolving && (
+                                        <span className="absolute right-3 top-3.5 text-xs animate-pulse" style={{ color: 'var(--color-gold-200)' }}>…</span>
+                                    )}
+                                </div>
+                                {formLocation && !resolving && (
+                                    <p className="text-[10px] text-emerald-400/60 mt-2">✓ {formLocation}</p>
                                 )}
                             </div>
-                            {formLocation && !resolving && (
-                                <p className="text-[10px] text-emerald-400/60 mt-2">✓ {formLocation}</p>
-                            )}
                         </div>
 
-                        {/* City suggestions — rendered OUTSIDE the glass card so it doesn't overlap the save button */}
+                        {/* City suggestions — wrapped in ref so click-outside doesn't dismiss before onClick fires */}
+                        <div ref={cityDropdownRef}>
                         {showCitySuggestions && citySuggestions.length > 0 && (
-                            <div className="glass-strong rounded-xl border border-white/10 max-h-48 overflow-y-auto -mt-2">
+                            <div className="rounded-xl overflow-hidden -mt-3" style={{
+                                background: 'linear-gradient(160deg, #1c1538, #130f2e)',
+                                border: '1px solid var(--color-gold-glow-med)',
+                                boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+                            }}>
                                 {citySuggestions.map((s, i) => (
                                     <button
                                         key={i}
                                         onClick={() => handleCitySelect(s)}
-                                        className="w-full px-4 py-3 text-left text-xs text-altar-text/80 hover:bg-white/5 border-b border-white/5 last:border-0"
+                                        className="w-full px-4 py-3 text-left text-xs hover:bg-white/5 transition-colors"
+                                        style={{
+                                            color: 'var(--color-altar-text)',
+                                            opacity: 0.8,
+                                            fontFamily: 'var(--font-body)',
+                                            borderBottom: '1px solid rgba(255,255,255,0.04)',
+                                        }}
                                     >
                                         📍 {s.description}
                                     </button>
                                 ))}
                             </div>
                         )}
+                        </div>
 
                         {/* Save button */}
                         <button
                             onClick={handleSaveMember}
                             disabled={!formName || !formBirthday}
-                            className={`clay-btn w-full py-4 text-sm ${formName && formBirthday ? 'clay-btn-primary' : ''}`}
+                            className="w-full rounded-2xl py-4 font-display text-[12px] tracking-[3px] uppercase transition-all active:scale-[0.98] disabled:opacity-30"
+                            style={{
+                                background: formName && formBirthday
+                                    ? 'linear-gradient(180deg, #F9E491, #D4A94E 30%, #C59341 60%, #A67B2E)'
+                                    : 'rgba(61,29,90,0.35)',
+                                border: formName && formBirthday
+                                    ? '2px solid rgba(212,175,55,0.6)'
+                                    : '1px solid rgba(255,255,255,0.07)',
+                                color: formName && formBirthday ? '#1a0f2e' : '#e2e8f0',
+                                fontWeight: 800,
+                                boxShadow: formName && formBirthday
+                                    ? '0 2px 0 #8a6914, 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.35)'
+                                    : 'none',
+                            }}
                         >
-                            {editingId ? '✦ SAVE CHANGES' : '✦ ADD TO FAMILY'}
+                            {editingId ? '✦ Save Changes' : '✦ Add to Family'}
                         </button>
                     </div>
                 )}
@@ -576,15 +694,26 @@ export function FamilyCircle({ onClose, onTabChange, subscription, onShowPremium
                 {viewState === 'reading' && (
                     <div className="mx-5 mt-4 animate-fade-up">
                         {readingLoading ? (
-                            <div className="clay-card p-8 text-center mt-8">
-                                <div className="w-16 h-16 mx-auto mb-4 rounded-full clay-inset flex items-center justify-center animate-pulse">
+                            <div className="rounded-[22px] p-8 text-center mt-8" style={{
+                                background: 'linear-gradient(160deg, #1c1538, #130f2e 55%, #0d0b22)',
+                                border: '1px solid rgba(255,255,255,0.07)',
+                                boxShadow: '0 8px 28px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.08)',
+                            }}>
+                                <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center animate-pulse" style={{
+                                    background: 'rgba(61,29,90,0.4)',
+                                    border: '1px solid rgba(212,175,55,0.15)',
+                                }}>
                                     <span className="text-2xl">👨‍👩‍👧‍👦</span>
                                 </div>
-                                <p className="text-sm text-altar-text font-display tracking-[2px] mb-2">READING THE BONDS</p>
-                                <p className="text-xs text-altar-gold/60 animate-pulse">Channeling family dynamics…</p>
+                                <p className="text-sm text-altar-text font-display tracking-[2px] mb-2">Reading the Bonds</p>
+                                <p className="text-xs animate-pulse" style={{ color: '#D4A94E', opacity: 0.6 }}>Channeling family dynamics…</p>
                             </div>
                         ) : readingContent ? (
-                            <div className="clay-card p-5">
+                            <div className="rounded-[22px] p-5" style={{
+                                background: 'linear-gradient(160deg, #1c1538, #130f2e 55%, #0d0b22)',
+                                border: '1px solid rgba(255,255,255,0.07)',
+                                boxShadow: '0 8px 28px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.08)',
+                            }}>
                                 <AIResponseRenderer text={readingContent} />
                             </div>
                         ) : null}
@@ -592,9 +721,15 @@ export function FamilyCircle({ onClose, onTabChange, subscription, onShowPremium
                         {/* Back button */}
                         <button
                             onClick={() => { setViewState('list'); setReadingContent(null); setSiblingPair(null); }}
-                            className="clay-btn w-full mt-4 py-3 text-xs"
+                            className="w-full mt-4 rounded-2xl py-3 font-display text-[11px] tracking-[2px] uppercase transition-all active:scale-[0.98]"
+                            style={{
+                                background: 'rgba(61,29,90,0.35)',
+                                border: '1px solid rgba(212,175,55,0.15)',
+                                color: '#D4A94E',
+                                backdropFilter: 'blur(12px)',
+                            }}
                         >
-                            ← BACK TO FAMILY
+                            ← Back to Family
                         </button>
                     </div>
                 )}
@@ -623,9 +758,17 @@ function FamilyMemberCard({ member, index, onRead, onEdit, onDelete, hasParentDa
     }, [member.birthday, member.birthTime, member.location]);
 
     return (
-        <div className="clay-card p-4 animate-fade-up" style={{ animationDelay: `${index * 0.08}s`, opacity: 0 }}>
+        <div className="rounded-[22px] p-4 animate-fade-up" style={{
+            animationDelay: `${index * 0.08}s`, opacity: 0,
+            background: 'linear-gradient(160deg, #1c1538, #130f2e 55%, #0d0b22)',
+            border: '1px solid rgba(255,255,255,0.07)',
+            boxShadow: '0 8px 28px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.08)',
+        }}>
             <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-full clay-inset flex items-center justify-center flex-shrink-0">
+                <div className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0" style={{
+                    background: 'rgba(61,29,90,0.4)',
+                    border: '1px solid rgba(212,175,55,0.15)',
+                }}>
                     <span className="text-lg">{RELATIONSHIP_EMOJI[member.relationship] || '✦'}</span>
                 </div>
                 <div className="flex-1 min-w-0">
@@ -635,7 +778,7 @@ function FamilyMemberCard({ member, index, onRead, onEdit, onDelete, hasParentDa
                     </div>
                     {triad && (
                         <p className="text-[10px] text-altar-muted mt-0.5">
-                            ☉ {triad.sun.name} · ☽ {triad.moon.name} · ↑ {triad.rising.name} · <span className="text-altar-gold/70">LP {getLifePathNumber(member.birthday)}</span>
+                            ☉ {triad.sun.name} · ☽ {triad.moon.name} · ↑ {triad.rising.name} · <span style={{ color: '#D4A94E', opacity: 0.7 }}>LP {getLifePathNumber(member.birthday)}</span>
                         </p>
                     )}
                     <p className="text-[10px] text-altar-muted/50 mt-0.5">
@@ -651,16 +794,34 @@ function FamilyMemberCard({ member, index, onRead, onEdit, onDelete, hasParentDa
                 <div className="mt-3 pt-3 border-t border-white/5 flex gap-2">
                     {hasParentData && (
                         <button onClick={onRead}
-                            className="clay-btn clay-btn-primary flex-1 py-2 text-[10px]">
-                            ✦ YOUR BOND
+                            className="flex-1 py-2 text-[10px] font-display rounded-xl transition-all active:scale-[0.97]"
+                            style={{
+                                background: 'rgba(197,147,65,0.12)',
+                                border: '1px solid rgba(212,175,55,0.3)',
+                                color: '#F9E491',
+                            }}
+                        >
+                            ✦ Your Bond
                         </button>
                     )}
                     <button onClick={onEdit}
-                        className="clay-btn px-4 py-2 text-[10px]">
-                        EDIT
+                        className="px-4 py-2 text-[10px] font-display rounded-xl transition-all active:scale-[0.97]"
+                        style={{
+                            background: 'rgba(61,29,90,0.4)',
+                            border: '1px solid rgba(255,255,255,0.07)',
+                            color: '#e2e8f0',
+                        }}
+                    >
+                        Edit
                     </button>
                     <button onClick={onDelete}
-                        className="clay-btn px-4 py-2 text-[10px] !bg-red-500/20 !text-red-400">
+                        className="px-4 py-2 text-[10px] font-display rounded-xl transition-all active:scale-[0.97]"
+                        style={{
+                            background: 'rgba(220,38,38,0.12)',
+                            border: '1px solid rgba(220,38,38,0.25)',
+                            color: '#f87171',
+                        }}
+                    >
                         ✕
                     </button>
                 </div>
@@ -686,13 +847,18 @@ function SiblingSection({ family, onSelectPair }: {
 
     return (
         <div className="mx-5 mt-6 animate-fade-up" style={{ animationDelay: '0.3s', opacity: 0 }}>
-            <h3 className="font-display text-xs text-altar-muted tracking-[2px] uppercase mb-3">👫 SIBLING DYNAMICS</h3>
+            <h3 className="font-display text-[9px] tracking-[3px] uppercase mb-3 text-center" style={{ color: '#D4A94E', opacity: 0.6 }}>👫 Sibling Dynamics</h3>
             <div className="space-y-2">
                 {pairs.map(([a, b], i) => (
                     <button
                         key={`${a.id}-${b.id}`}
                         onClick={() => onSelectPair(a, b)}
-                        className="w-full clay-card p-3 flex items-center gap-3 text-left active:scale-[0.98] hover:shadow-[0_0_15px_rgba(218,165,32,0.15)] transition-all"
+                        className="w-full rounded-[22px] p-3 flex items-center gap-3 text-left active:scale-[0.98] transition-all"
+                        style={{
+                            background: 'linear-gradient(160deg, #1c1538, #130f2e 55%, #0d0b22)',
+                            border: '1px solid rgba(255,255,255,0.07)',
+                            boxShadow: '0 4px 16px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.08)',
+                        }}
                     >
                         <div className="flex items-center gap-1.5">
                             <span className="text-sm">{RELATIONSHIP_EMOJI[a.relationship]}</span>
@@ -701,9 +867,9 @@ function SiblingSection({ family, onSelectPair }: {
                         </div>
                         <div className="flex-1">
                             <p className="text-xs text-altar-text">{a.name} & {b.name}</p>
-                            <p className="text-[10px] text-altar-muted">Tap to read their sibling bond</p>
+                            <p className="text-[10px] text-altar-muted" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 300 }}>Tap to read their sibling bond</p>
                         </div>
-                        <span className="text-altar-gold/50 text-xs">→</span>
+                        <span className="text-xs" style={{ color: '#D4A94E', opacity: 0.5 }}>→</span>
                     </button>
                 ))}
             </div>

@@ -214,7 +214,7 @@ function EnergyInterpretation({ cards }: { cards: Card[] }) {
 
 
 /* ── Inline Premium CTA Banner ── */
-function PremiumBanner({ onClick }: { onClick: () => void }) {
+function PremiumBanner({ onClick, remaining }: { onClick: () => void; remaining: number }) {
     return (
         <div className="mx-5 my-4 animate-fade-up" style={{ animationDelay: '0.6s', opacity: 0 }}>
             <button
@@ -223,10 +223,15 @@ function PremiumBanner({ onClick }: { onClick: () => void }) {
             >
                 <div className="rounded-2xl px-5 py-4 bg-altar-dark/90 backdrop-blur-xl flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <span className="text-2xl">👑</span>
+                        <span className="inline-flex" style={{ width: 22, height: 22 }}>
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ fill: 'var(--color-altar-gold)', filter: 'drop-shadow(0 0 6px rgba(212,175,55,0.5))' }}>
+                                <path d="M12 2l3 7h7l-5.5 4.5 2 7L12 16l-6.5 4.5 2-7L2 9h7z" />
+                            </svg>
+                        </span>
                         <div className="text-left">
                             <span className="shimmer-text font-display text-sm font-semibold">Unlock Premium</span>
                             <p className="text-xs text-altar-muted mt-0.5">Deep Insights · Unlimited Readings</p>
+                            <p className="text-[10px] text-altar-text/50 mt-1">{remaining} of 3 free readings remaining today</p>
                         </div>
                     </div>
                     <div className="px-3 py-1.5 rounded-full bg-altar-gold/10 border border-altar-gold/30 text-xs text-altar-gold font-medium group-hover:border-altar-gold/60 transition-colors">
@@ -244,6 +249,7 @@ function App() {
     const [energyCards, setEnergyCards] = React.useState<Card[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [showCustomReading, setShowCustomReading] = React.useState(false);
+    const [preselectedSpread, setPreselectedSpread] = React.useState<string | null>(null);
     const [customReadingResult, setCustomReadingResult] = React.useState<Reading | null>(null);
     const [isShuffling, setIsShuffling] = React.useState(false);
     const [isInitialLoad, setIsInitialLoad] = React.useState(true);
@@ -387,11 +393,13 @@ function App() {
         setShowBlueprintScreen(false);
 
         setCurrentTab(tab);
-        if (tab === 'new') {
+        if (tab === 'new' || tab.startsWith('new:')) {
             if (!canDoReading(sub)) {
                 setShowPremiumOverlay(true);
                 return;
             }
+            const spreadId = tab.includes(':') ? tab.split(':')[1] : null;
+            setPreselectedSpread(spreadId);
             setShowCustomReading(true);
         }
         else if (tab === 'meanings') setShowCardLibrary(true);
@@ -656,14 +664,11 @@ function App() {
                             <div className="w-16" />
                         </div>
                         <div className="max-w-[500px] mx-auto">
-                            {/* Intro explanation */}
-                            <div className="mx-5 mt-6 mb-2 rounded-3xl p-5" style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.3)' }}>
-                                <p className="text-[9px] font-display tracking-[2px] text-indigo-300 uppercase mb-2">✦ Signs & Synchronicities</p>
-                                <p className="text-sm text-altar-text leading-relaxed mb-2">
-                                    Angel numbers are sequences the universe places in your path — on clocks, receipts, license plates — as coded messages.
-                                </p>
-                                <p className="text-xs text-altar-text/70 leading-relaxed">
-                                    Enter any number you keep seeing and receive a personalized interpretation woven with your natal chart and life path — because your numbers aren't random, they speak to <em>you</em>.
+                            {/* Condensed poetic intro */}
+                            <div className="mx-5 mt-6 mb-2 text-center">
+                                <p className="text-[11px] text-altar-text/70 leading-relaxed" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 300 }}>
+                                    Repeating numbers aren't random — they're messages.<br />
+                                    <span className="text-altar-gold/80">Tap one to decode yours.</span>
                                 </p>
                             </div>
                             <AngelNumbersSection />
@@ -740,23 +745,14 @@ function App() {
             <div className="page-scroll bg-gradient-to-b from-altar-deep via-altar-dark to-altar-purple text-altar-text">
                 <AltarParticles />
 
-                {/* Profile gear icon */}
-                <button
-                    onClick={() => setShowProfileModal(true)}
-                    className="absolute right-4 top-5 z-10 transition-opacity"
-                    style={{ opacity: 0.4, fontSize: '17px', lineHeight: 1 }}
-                    aria-label="Profile settings"
-                >
-                    ⚙️
-                </button>
-
                 {/* Overlays */}
                 {showCustomReading && (
                     <CustomReading
-                        onClose={() => { setShowCustomReading(false); setCurrentTab('home'); }}
+                        onClose={() => { setShowCustomReading(false); setPreselectedSpread(null); setCurrentTab('home'); }}
                         onComplete={handleCustomReadingComplete}
                         subscription={userProfile?.subscription || 'free'}
                         onTabChange={handleTabChange}
+                        initialSpread={preselectedSpread}
                     />
                 )}
                 {customReadingResult && (
@@ -785,6 +781,20 @@ function App() {
                 {/* ── Header — Compact with Greeting ── */}
                 <header className="relative text-center pt-5 pb-2 z-10 safe-top">
                     <div className="absolute inset-0 bg-gradient-to-b from-altar-deep to-transparent" />
+
+                    {/* Profile gear icon — inside header, above gradient overlay */}
+                    <button
+                        onClick={() => setShowProfileModal(true)}
+                        className="absolute right-4 top-5 z-20 transition-opacity hover:opacity-70 active:scale-90"
+                        style={{ opacity: 0.4, lineHeight: 1 }}
+                        aria-label="Profile settings"
+                    >
+                        <svg width={17} height={17} viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" style={{ fill: 'var(--color-altar-gold)', filter: 'drop-shadow(0 0 3px rgba(212,175,55,0.3))' }}>
+                            <path d="M10 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" />
+                            <path fillRule="evenodd" d="M8.5 1.5a1.5 1.5 0 00-1.415 1.002L6.72 3.598A7.536 7.536 0 005.18 4.5l-1.132-.441a1.5 1.5 0 00-1.792.68l-1.5 2.598a1.5 1.5 0 00.377 1.883l.834.606c-.057.437-.086.885-.086 1.338 0 .453.029.9.086 1.338l-.834.605a1.5 1.5 0 00-.377 1.883l1.5 2.598a1.5 1.5 0 001.792.68l1.133-.441c.48.38.998.71 1.54.994l.366 1.095A1.5 1.5 0 0010.12 20h3l.001-.002a1.5 1.5 0 001.414-1.002l.365-1.095a7.523 7.523 0 001.541-.994l1.133.441a1.5 1.5 0 001.792-.68l1.5-2.598a1.5 1.5 0 00-.377-1.883l-.834-.605c.057-.437.086-.885.086-1.338 0-.453-.029-.9-.086-1.338l.834-.606a1.5 1.5 0 00.377-1.883l-1.5-2.598a1.5 1.5 0 00-1.792-.68l-1.133.441a7.524 7.524 0 00-1.54-.994L11.5 2.502A1.5 1.5 0 0010 1.5H8.5zM10 14a4 4 0 100-8 4 4 0 000 8z" clipRule="evenodd" opacity={0.3} />
+                        </svg>
+                    </button>
+
                     <h1 className="relative font-display text-lg tracking-[5px] font-semibold">
                         <span className="text-altar-gold animate-pulse">✦</span>
                         <span className="shimmer-text mx-2">ARCANA WHISPER</span>
@@ -813,81 +823,66 @@ function App() {
 
                     {/* ── Portal Cards ── */}
                     <div className="mx-3 mb-4 animate-fade-up" style={{ animationDelay: '0.5s', opacity: 0 }}>
-                        <h3 className="font-display text-center text-sm tracking-[5px] text-altar-text/70 uppercase mb-4">
+                        <h3 className="font-display text-center text-sm tracking-[5px] text-altar-gold uppercase mb-4">
                             <span className="text-altar-gold">✦</span> Your Portal <span className="text-altar-gold">✦</span>
                         </h3>
                         <div className="grid grid-cols-3 gap-2.5">
                             {[
                                 {
-                                    icon: '🔮', label: 'Tarot', tagline: "Today's energy + spreads", tab: 'tarot',
-                                    grad: 'radial-gradient(ellipse at 50% 30%, #6d28d9 0%, #3b0764 40%, #0c0118 100%)',
-                                    shadow: '0 16px 40px rgba(109,40,217,0.65), 0 4px 12px rgba(0,0,0,0.8)',
-                                    halo: 'rgba(167,139,250,0.8)',
+                                    label: 'Tarot', tagline: "Today's energy + spreads", tab: 'tarot',
+                                    svgIcon: <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg"><path d="M18 2 L22.5 13 L34 13 L24.5 20.5 L28 32 L18 25 L8 32 L11.5 20.5 L2 13 L13.5 13 Z" strokeLinejoin="round"/><circle cx={18} cy={18} r={8} opacity={0.3}/></svg>,
                                 },
                                 {
-                                    icon: '💞', label: 'Relationships', tagline: 'Cosmic bonds', tab: 'compatibility',
-                                    grad: 'radial-gradient(ellipse at 50% 30%, #9f1239 0%, #4c0519 40%, #0d0108 100%)',
-                                    shadow: '0 16px 40px rgba(159,18,57,0.65), 0 4px 12px rgba(0,0,0,0.8)',
-                                    halo: 'rgba(251,113,133,0.8)',
+                                    label: 'Relationships', tagline: 'Cosmic bonds', tab: 'compatibility',
+                                    svgIcon: <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg"><path d="M18 28 C12 22, 2 18, 8 10 C12 6, 18 10, 18 14" strokeLinejoin="round"/><path d="M18 28 C24 22, 34 18, 28 10 C24 6, 18 10, 18 14" strokeLinejoin="round"/><path d="M10 20 Q18 8, 26 20" opacity={0.25} strokeDasharray="2 3"/></svg>,
                                 },
                                 {
-                                    icon: '🔢', label: 'Angel Numbers', tagline: 'Signs & synchronicities', tab: 'angelnumbers',
-                                    grad: 'radial-gradient(ellipse at 50% 30%, #1e3a5f 0%, #0b1f35 40%, #020810 100%)',
-                                    shadow: '0 16px 40px rgba(99,102,241,0.55), 0 4px 12px rgba(0,0,0,0.8)',
-                                    halo: 'rgba(165,180,252,0.8)',
+                                    label: 'Angel Numbers', tagline: 'Signs & synchronicities', tab: 'angelnumbers',
+                                    svgIcon: <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg"><circle cx={18} cy={12} r={7} opacity={0.7}/><circle cx={12} cy={23} r={7} opacity={0.7}/><circle cx={24} cy={23} r={7} opacity={0.7}/><circle cx={18} cy={18} r={2.5} opacity={0.4}/></svg>,
                                 },
                                 {
-                                    icon: '🌙', label: 'Natal', tagline: 'Your birth blueprint', tab: 'natal',
-                                    grad: 'radial-gradient(ellipse at 50% 30%, #0f766e 0%, #042f2e 40%, #010d0c 100%)',
-                                    shadow: '0 16px 40px rgba(15,118,110,0.65), 0 4px 12px rgba(0,0,0,0.8)',
-                                    halo: 'rgba(94,234,212,0.8)',
+                                    label: 'Natal', tagline: 'Your birth blueprint', tab: 'natal',
+                                    svgIcon: <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg"><path d="M22 6 C14 8, 10 16, 14 24 C18 32, 28 30, 32 24 C26 28, 18 26, 16 18 C14 10, 18 6, 22 6 Z" strokeLinejoin="round"/><circle cx={26} cy={10} r={1.5} fill="var(--color-altar-gold)" stroke="none" opacity={0.6}/><circle cx={28} cy={14} r={0.8} fill="var(--color-altar-gold)" stroke="none" opacity={0.4}/></svg>,
                                 },
                                 {
-                                    icon: '👨‍👩‍👧‍👦', label: 'Family', tagline: 'Circle of souls', tab: 'family',
-                                    grad: 'radial-gradient(ellipse at 50% 30%, #86198f 0%, #3b0764 40%, #0d0114 100%)',
-                                    shadow: '0 16px 40px rgba(134,25,143,0.65), 0 4px 12px rgba(0,0,0,0.8)',
-                                    halo: 'rgba(240,171,252,0.8)',
+                                    label: 'Family', tagline: 'Circle of souls', tab: 'family',
+                                    svgIcon: <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg"><line x1={18} y1={32} x2={18} y2={16}/><path d="M18 16 Q10 14, 8 8" strokeLinecap="round"/><path d="M18 16 Q26 14, 28 8" strokeLinecap="round"/><path d="M18 20 Q12 18, 10 14" strokeLinecap="round" opacity={0.6}/><path d="M18 20 Q24 18, 26 14" strokeLinecap="round" opacity={0.6}/><circle cx={8} cy={8} r={3} opacity={0.35}/><circle cx={28} cy={8} r={3} opacity={0.35}/><circle cx={18} cy={6} r={4} opacity={0.25}/><path d="M14 33 Q18 29, 22 33" opacity={0.4} strokeLinecap="round"/></svg>,
                                 },
                                 {
-                                    icon: '💼', label: 'Career', tagline: 'Your true calling', tab: 'career',
-                                    grad: 'radial-gradient(ellipse at 50% 30%, #065f46 0%, #022c22 40%, #010d09 100%)',
-                                    shadow: '0 16px 40px rgba(6,95,70,0.65), 0 4px 12px rgba(0,0,0,0.8)',
-                                    halo: 'rgba(110,231,183,0.8)',
+                                    label: 'Career', tagline: 'Your true calling', tab: 'career',
+                                    svgIcon: <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg"><circle cx={18} cy={18} r={13} opacity={0.3}/><circle cx={18} cy={18} r={2} opacity={0.5}/><line x1={18} y1={3} x2={18} y2={10} strokeLinecap="round"/><line x1={18} y1={26} x2={18} y2={33} strokeLinecap="round"/><line x1={3} y1={18} x2={10} y2={18} strokeLinecap="round"/><line x1={26} y1={18} x2={33} y2={18} strokeLinecap="round"/><line x1={7.5} y1={7.5} x2={12} y2={12} strokeLinecap="round" opacity={0.5}/><line x1={24} y1={24} x2={28.5} y2={28.5} strokeLinecap="round" opacity={0.5}/><line x1={28.5} y1={7.5} x2={24} y2={12} strokeLinecap="round" opacity={0.5}/><line x1={7.5} y1={28.5} x2={12} y2={24} strokeLinecap="round" opacity={0.5}/></svg>,
                                 },
                             ].map(item => (
                                 <button
                                     key={item.tab}
                                     onClick={() => handleTabChange(item.tab)}
-                                    className="relative flex flex-col items-center justify-between rounded-2xl px-2 pt-3.5 pb-3 transition-all duration-200 hover:scale-[1.04] active:scale-[0.96] overflow-hidden"
+                                    className="relative flex flex-col items-center justify-center gap-2.5 rounded-[20px] px-2.5 pt-5 pb-4 transition-all duration-250 overflow-hidden active:scale-[0.96]"
                                     style={{
-                                        background: item.grad,
-                                        boxShadow: `${item.shadow}, inset 0 1.5px 0 rgba(255,255,255,0.22), inset 0 -5px 15px rgba(0,0,0,0.5)`,
-                                        aspectRatio: '1 / 0.88',
+                                        background: 'linear-gradient(165deg, rgba(35,20,60,0.85) 0%, rgba(18,10,40,0.95) 100%)',
+                                        border: '1px solid rgba(212,175,55,0.12)',
+                                        boxShadow: '0 8px 32px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -3px 10px rgba(0,0,0,0.3)',
+                                        aspectRatio: '1 / 1.15',
+                                        backdropFilter: 'blur(8px)',
+                                        WebkitBackdropFilter: 'blur(8px)',
                                     }}
                                 >
-                                    {/* Specular top-edge shine — lacquer catch-light */}
-                                    <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-white/35 to-transparent" />
-                                    <div className="absolute top-0 left-1/4 right-1/4 h-[1px] bg-white/20" />
-                                    {/* Soft top inner glow */}
-                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-12 blur-2xl opacity-15"
-                                        style={{ background: 'white' }} />
+                                    {/* Gold top accent shine */}
+                                    <div className="absolute top-0 left-0 right-0" style={{ height: 1, background: 'linear-gradient(to right, transparent 10%, rgba(212,175,55,0.35) 50%, transparent 90%)' }} />
+                                    {/* Subtle gold top glow */}
+                                    <div className="absolute top-[-10px] left-1/2 -translate-x-1/2" style={{ width: '60%', height: 30, filter: 'blur(20px)', opacity: 0.08, background: 'var(--color-altar-gold)', pointerEvents: 'none' }} />
 
-                                    {/* Icon bubble — dark circle with luminous halo */}
-                                    <div
-                                        className="w-12 h-12 rounded-full flex items-center justify-center text-2xl relative z-10 flex-shrink-0"
-                                        style={{
-                                            background: 'rgba(0,0,0,0.5)',
-                                            boxShadow: `0 0 24px ${item.halo}, 0 0 10px ${item.halo}, inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 14px rgba(0,0,0,0.6)`,
-                                        }}
-                                    >
-                                        {item.icon}
+                                    {/* SVG icon — gold stroked, no circle bubble */}
+                                    <div className="relative z-10 flex items-center justify-center flex-shrink-0 portal-icon-gold" style={{ width: 44, height: 44 }}>
+                                        <div style={{ width: 36, height: 36 }}>
+                                            {item.svgIcon}
+                                        </div>
                                     </div>
 
                                     <div className="relative z-10 flex flex-col items-center gap-1">
-                                        <span className="text-[12px] font-semibold text-white leading-tight text-center tracking-wide">
+                                        <span className="font-display text-[11px] font-semibold text-altar-gold leading-tight text-center tracking-[2px] uppercase">
                                             {item.label}
                                         </span>
-                                        <span className="text-[9px] text-white/55 leading-snug text-center px-1">
+                                        <span className="text-[10px] text-altar-text/65 leading-snug text-center px-0.5" style={{ fontWeight: 300 }}>
                                             {item.tagline}
                                         </span>
                                     </div>
@@ -896,18 +891,11 @@ function App() {
                         </div>
                     </div>
 
+
+
                     {/* Premium Banner — only for free users */}
                     {sub !== 'premium' && (
-                        <PremiumBanner onClick={() => setShowPremiumOverlay(true)} />
-                    )}
-
-                    {/* Daily reading counter — free users only */}
-                    {sub !== 'premium' && (
-                        <div className="mx-5 mb-2 text-center">
-                            <span className="text-xs text-altar-text/60">
-                                {getRemainingReadings()} of 3 free readings remaining today
-                            </span>
-                        </div>
+                        <PremiumBanner onClick={() => setShowPremiumOverlay(true)} remaining={getRemainingReadings()} />
                     )}
 
                     {/* Spacer for bottom nav */}

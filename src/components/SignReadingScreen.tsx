@@ -204,7 +204,16 @@ export function SignReadingScreen({ focus, onClose, onTabChange }: SignReadingSc
                             {/* Link to full Natal Chart */}
                             <button
                                 onClick={() => onTabChange('natal')}
-                                className="w-full py-3.5 rounded-2xl clay-btn flex items-center justify-center gap-2 mb-2"
+                                className="w-full py-3.5 flex items-center justify-center gap-2 mb-2 transition-all hover:scale-[1.01] active:scale-[0.99]"
+                                style={{
+                                    background: 'linear-gradient(135deg, var(--color-gold-100), var(--color-gold-200))',
+                                    borderRadius: '16px',
+                                    border: '1px solid var(--color-gold-glow-med)',
+                                    color: '#0d0b22',
+                                    fontFamily: 'var(--font-display)',
+                                    fontWeight: 600,
+                                    boxShadow: '0 4px 20px rgba(212,175,55,0.3)',
+                                }}
                             >
                                 <span>🌙</span> View Full Natal Chart
                             </button>

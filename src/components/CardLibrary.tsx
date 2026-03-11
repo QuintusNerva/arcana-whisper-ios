@@ -26,16 +26,22 @@ export function CardLibrary({ onClose, onViewCard, currentTab, onTabChange }: Ca
         setCards(tarotService.getAllCards());
     }, []);
 
+    const elements = ['Fire', 'Water', 'Air', 'Earth'];
+
     const filteredCards = cards.filter(card => {
         const matchesSearch = !search ||
             card.name.toLowerCase().includes(search.toLowerCase()) ||
             card.description.toLowerCase().includes(search.toLowerCase());
-        const matchesFilter = selectedFilter === 'All' || card.suit === selectedFilter;
+        let matchesFilter = true;
+        if (selectedFilter !== 'All') {
+            if (elements.includes(selectedFilter)) {
+                matchesFilter = card.element === selectedFilter;
+            } else {
+                matchesFilter = card.suit === selectedFilter;
+            }
+        }
         return matchesSearch && matchesFilter;
     });
-
-    // Group by element for visual sections
-    const elements = ['Fire', 'Water', 'Air', 'Earth'];
 
     return (
         <div className="page-frame">
@@ -58,7 +64,7 @@ export function CardLibrary({ onClose, onViewCard, currentTab, onTabChange }: Ca
                     </div>
 
                     {/* Filter pills */}
-                    <div className="flex gap-2 mt-3 overflow-x-auto scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
+                    <div className="flex flex-nowrap gap-2 mt-3 pb-2 overflow-x-auto scrollbar-hide" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
                         {SUIT_FILTERS.map(filter => (
                             <button
                                 key={filter}

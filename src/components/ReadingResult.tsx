@@ -56,6 +56,49 @@ function getYesNoVerdict(cardId: string): 'yes' | 'no' | 'maybe' {
     return 'maybe';
 }
 
+/* ── Sacred Fintech Design System Styles ── */
+const primaryCardStyle: React.CSSProperties = {
+    background: 'linear-gradient(135deg, #1c1538 0%, #130f2e 50%, #0d0b22 100%)',
+    border: '1px solid rgba(255,255,255,0.06)',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03)',
+    borderRadius: '16px',
+};
+
+const goldCardStyle: React.CSSProperties = {
+    background: 'linear-gradient(135deg, #1c1538 0%, #130f2e 50%, #0d0b22 100%)',
+    border: '1px solid var(--color-gold-glow-med)',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(212,175,55,0.08)',
+    borderRadius: '16px',
+};
+
+const insetStyle: React.CSSProperties = {
+    background: 'linear-gradient(135deg, rgba(13,11,34,0.6) 0%, rgba(19,15,46,0.4) 100%)',
+    border: '1px solid rgba(255,255,255,0.04)',
+    boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.3)',
+    borderRadius: '16px',
+};
+
+const goldBtnStyle: React.CSSProperties = {
+    background: 'linear-gradient(135deg, rgba(212,175,55,0.15) 0%, rgba(184,134,11,0.08) 100%)',
+    border: '1px solid var(--color-gold-glow-med)',
+    borderRadius: '12px',
+    color: 'var(--color-gold-100)',
+    fontFamily: 'var(--font-display)',
+};
+
+const headerStyle: React.CSSProperties = {
+    fontFamily: 'var(--font-display)',
+    color: 'var(--color-gold-200)',
+    letterSpacing: '3px',
+    textTransform: 'uppercase' as const,
+};
+
+const mutedTextStyle: React.CSSProperties = {
+    color: 'var(--color-altar-muted)',
+    fontFamily: 'var(--font-body)',
+    fontWeight: 300,
+};
+
 export function ReadingResult({ reading, onClose, onTabChange, subscription, onShowPremium }: ReadingResultProps) {
     const [revealedCards, setRevealedCards] = React.useState<Set<number>>(new Set());
     const [allRevealed, setAllRevealed] = React.useState(false);
@@ -96,8 +139,6 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
         return () => timers.forEach(clearTimeout);
     }, [reading.cards]);
 
-    // Spread reading is now triggered manually via the 'Deep Dive' button
-
     const handleSave = () => {
         const tarotService = new TarotService();
         tarotService.saveReading(reading);
@@ -132,12 +173,15 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
             <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(circle_at_50%_30%,transparent_0%,rgba(13,6,24,0.7)_70%)]" />
 
             {/* Header */}
-            <header className="sticky top-0 z-30 bg-altar-deep/95 backdrop-blur-xl border-b border-white/5 safe-top">
+            <header className="sticky top-0 z-30 backdrop-blur-xl safe-top" style={{
+                background: 'rgba(13,6,24,0.95)',
+                borderBottom: '1px solid rgba(255,255,255,0.05)',
+            }}>
                 <div className="flex items-center justify-between px-4 py-3 max-w-[500px] mx-auto">
-                    <button onClick={onClose} className="text-altar-muted hover:text-white transition-colors text-sm font-display tracking-wide">
+                    <button onClick={onClose} style={{ ...mutedTextStyle, fontSize: '14px', fontFamily: 'var(--font-display)', letterSpacing: '1px' }} className="hover:text-white transition-colors">
                         ✕ Close
                     </button>
-                    <h2 className="font-display text-sm text-altar-gold tracking-[3px]">YOUR READING</h2>
+                    <h2 style={{ ...headerStyle, fontSize: '14px' }}>YOUR READING</h2>
                     <div className="w-12" />
                 </div>
             </header>
@@ -155,9 +199,9 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
 
                 {/* Reading info */}
                 {reading.question && (
-                    <div className="glass rounded-2xl p-4 mt-4 mb-2">
-                        <p className="text-xs text-altar-muted font-display tracking-[2px] uppercase mb-1">Your Question</p>
-                        <p className="text-sm text-altar-text/90 italic">"{reading.question}"</p>
+                    <div className="mt-4 mb-2 p-4" style={goldCardStyle}>
+                        <p style={{ ...headerStyle, fontSize: '10px', marginBottom: '4px' }}>Your Question</p>
+                        <p style={{ ...mutedTextStyle, fontSize: '14px', fontStyle: 'italic', color: 'rgba(226,232,240,0.9)' }}>"{reading.question}"</p>
                     </div>
                 )}
 
@@ -215,8 +259,8 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
                                     }}
                                 >
                                     {/* Position label */}
-                                    <span className={`text-[10px] font-display text-altar-muted tracking-[2px] uppercase mb-2 transition-opacity duration-500 ${isRevealed ? 'opacity-100' : 'opacity-0'
-                                        }`}>
+                                    <span className={`transition-opacity duration-500 ${isRevealed ? 'opacity-100' : 'opacity-0'}`}
+                                        style={{ ...headerStyle, fontSize: '10px', marginBottom: '8px' }}>
                                         {positions[i]}
                                     </span>
 
@@ -239,23 +283,31 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
                                         >
                                             {/* Card back */}
                                             <div
-                                                className="absolute inset-0 rounded-xl bg-gradient-to-br from-altar-mid to-altar-bright border border-altar-gold/20 flex items-center justify-center shadow-lg"
-                                                style={{ backfaceVisibility: 'hidden' }}
+                                                className="absolute inset-0 rounded-xl flex items-center justify-center"
+                                                style={{
+                                                    backfaceVisibility: 'hidden',
+                                                    background: 'linear-gradient(135deg, #1c1538 0%, #130f2e 100%)',
+                                                    border: '1px solid var(--color-gold-glow-med)',
+                                                    boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
+                                                }}
                                             >
                                                 <div className="text-center">
-                                                    <span className="text-2xl text-altar-gold/50">✦</span>
-                                                    <div className="w-8 h-[1px] bg-altar-gold/20 mx-auto my-2" />
-                                                    <span className="text-xs text-altar-gold/30 font-display">ARCANA</span>
+                                                    <span style={{ fontSize: '24px', color: 'var(--color-gold-100)', opacity: 0.5 }}>✦</span>
+                                                    <div style={{ width: '32px', height: '1px', background: 'rgba(212,175,55,0.2)', margin: '8px auto' }} />
+                                                    <span style={{ ...headerStyle, fontSize: '10px', opacity: 0.3 }}>ARCANA</span>
                                                 </div>
                                             </div>
 
                                             {/* Card front */}
                                             <div
-                                                className={`absolute inset-0 rounded-xl overflow-hidden shadow-lg transition-shadow duration-500 ${isRevealed ? 'shadow-[0_0_20px_rgba(139,95,191,0.3)]' : ''
-                                                    }`}
+                                                className={`absolute inset-0 rounded-xl overflow-hidden transition-shadow duration-500`}
                                                 style={{
                                                     backfaceVisibility: 'hidden',
                                                     transform: 'rotateY(180deg)',
+                                                    border: '1px solid var(--color-gold-glow-med)',
+                                                    boxShadow: isRevealed
+                                                        ? '0 4px 20px rgba(0,0,0,0.4), 0 0 15px rgba(212,175,55,0.15)'
+                                                        : '0 4px 20px rgba(0,0,0,0.4)',
                                                 }}
                                             >
                                                 <img
@@ -268,7 +320,7 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
                                                 />
                                                 <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-black/70 to-transparent" />
                                                 <div className="absolute bottom-2 left-2 right-2">
-                                                    <p className="text-[10px] text-white font-display truncate">{card.name}</p>
+                                                    <p style={{ ...headerStyle, fontSize: '10px', color: 'white' }} className="truncate">{card.name}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -284,23 +336,23 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
                     const verdict = getYesNoVerdict(reading.cards[0].id);
                     const isYes = verdict === 'yes';
                     const isMaybe = verdict === 'maybe';
+                    const accentColor = isYes ? 'rgba(74,222,128,0.25)' : isMaybe ? 'rgba(251,191,36,0.25)' : 'rgba(248,113,113,0.25)';
+                    const textColor = isYes ? '#4ade80' : isMaybe ? '#fbbf24' : '#f87171';
                     return (
                         <div className="mt-6 animate-fade-up">
-                            <div className={`text-center py-6 px-4 rounded-2xl border ${isYes
-                                ? 'bg-green-500/10 border-green-500/30'
-                                : isMaybe
-                                    ? 'bg-amber-500/10 border-amber-500/30'
-                                    : 'bg-red-500/10 border-red-500/30'
-                                }`}>
+                            <div className="text-center py-6 px-4" style={{
+                                ...primaryCardStyle,
+                                border: `1px solid ${accentColor}`,
+                                boxShadow: `0 8px 32px rgba(0,0,0,0.5), 0 0 20px ${accentColor}`,
+                            }}>
                                 <span className="text-4xl block mb-2">
                                     {isYes ? '✅' : isMaybe ? '🔮' : '❌'}
                                 </span>
-                                <h3 className={`font-display text-3xl tracking-[5px] font-bold mb-2 ${isYes ? 'text-green-400' : isMaybe ? 'text-amber-400' : 'text-red-400'
-                                    }`}>
+                                <h3 className="font-display text-3xl tracking-[5px] font-bold mb-2" style={{ color: textColor }}>
                                     {isYes ? 'YES' : isMaybe ? 'MAYBE' : 'NO'}
                                 </h3>
-                                <p className="text-xs text-altar-muted">
-                                    The <span className="text-altar-gold">{reading.cards[0].name}</span> {isYes ? 'affirms your question' : isMaybe ? 'suggests uncertainty — more clarity is needed' : 'advises caution or reconsideration'}
+                                <p style={{ ...mutedTextStyle, fontSize: '12px' }}>
+                                    The <span style={{ color: 'var(--color-gold-100)' }}>{reading.cards[0].name}</span> {isYes ? 'affirms your question' : isMaybe ? 'suggests uncertainty — more clarity is needed' : 'advises caution or reconsideration'}
                                 </p>
                             </div>
                         </div>
@@ -309,28 +361,28 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
 
                 {/* Expanded card detail */}
                 {selectedCardIdx !== null && (
-                    <div className="mt-6 glass-strong rounded-2xl p-5 animate-fade-up">
+                    <div className="mt-6 p-5 animate-fade-up" style={goldCardStyle}>
                         <div className="flex items-start gap-4">
                             <div className="flex-1">
-                                <p className="text-[10px] font-display text-altar-muted tracking-[2px] uppercase mb-1">
+                                <p style={{ ...headerStyle, fontSize: '10px', marginBottom: '4px' }}>
                                     {positions[selectedCardIdx]}
                                 </p>
-                                <h3 className="font-display text-lg text-altar-gold mb-2">
+                                <h3 style={{ fontFamily: 'var(--font-display)', color: 'var(--color-gold-100)', fontSize: '18px', marginBottom: '8px' }}>
                                     {reading.cards[selectedCardIdx].name}
                                 </h3>
-                                <p className="text-sm text-altar-text/80 leading-relaxed mb-3">
+                                <p style={{ ...mutedTextStyle, fontSize: '14px', lineHeight: '1.6', marginBottom: '12px', color: 'rgba(226,232,240,0.8)' }}>
                                     {reading.cards[selectedCardIdx].meaning}
                                 </p>
 
                                 {/* AI Insight / Free tease */}
                                 {isPremium ? (
                                     <div className="mt-3">
-                                        <p className="text-xs text-altar-muted mb-1">
-                                            <span className="text-altar-gold">✦</span> Reversed: <span className="italic text-white/60">{reading.cards[selectedCardIdx].reversed}</span>
+                                        <p style={{ ...mutedTextStyle, fontSize: '12px', marginBottom: '4px' }}>
+                                            <span style={{ color: 'var(--color-gold-100)' }}>✦</span> Reversed: <span style={{ fontStyle: 'italic', color: 'rgba(255,255,255,0.6)' }}>{reading.cards[selectedCardIdx].reversed}</span>
                                         </p>
                                         {cardInsight ? (
-                                            <div className="bg-altar-gold/5 border border-altar-gold/15 rounded-xl p-3 mt-2">
-                                                <p className="text-[10px] font-display text-altar-gold tracking-[2px] uppercase mb-1">✨ Mystic Insight</p>
+                                            <div className="mt-2 p-3" style={insetStyle}>
+                                                <p style={{ ...headerStyle, fontSize: '10px', marginBottom: '4px' }}>✨ Mystic Insight</p>
                                                 <AIResponseRenderer text={cardInsight} compact />
                                             </div>
                                         ) : (
@@ -353,7 +405,8 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
                                                     }
                                                 }}
                                                 disabled={cardInsightLoading}
-                                                className="mt-2 w-full py-2.5 rounded-xl bg-gradient-to-r from-altar-gold/10 to-altar-bright/10 border border-altar-gold/20 text-xs text-altar-gold font-display tracking-wide hover:border-altar-gold/40 transition-all flex items-center justify-center gap-2"
+                                                className="mt-2 w-full py-2.5 text-xs tracking-wide transition-all flex items-center justify-center gap-2"
+                                                style={goldBtnStyle}
                                             >
                                                 {cardInsightLoading ? (
                                                     <div className="space-y-2 w-full">
@@ -365,14 +418,14 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
                                                 )}
                                             </button>
                                         )}
-                                        {aiError && <p className="text-xs text-red-400 mt-2">{aiError}</p>}
+                                        {aiError && <p className="text-xs mt-2" style={{ color: '#f87171' }}>{aiError}</p>}
                                     </div>
                                 ) : (
-                                    <div className="bg-altar-gold/5 border border-altar-gold/15 rounded-xl p-3 mt-3">
-                                        <p className="text-xs text-altar-muted mb-2">
-                                            <span className="text-altar-gold">✦</span> Reversed meaning: <span className="italic text-white/50">{reading.cards[selectedCardIdx].reversed?.slice(0, 30)}…</span>
+                                    <div className="mt-3 p-3" style={insetStyle}>
+                                        <p style={{ ...mutedTextStyle, fontSize: '12px', marginBottom: '8px' }}>
+                                            <span style={{ color: 'var(--color-gold-100)' }}>✦</span> Reversed meaning: <span style={{ fontStyle: 'italic', color: 'rgba(255,255,255,0.5)' }}>{reading.cards[selectedCardIdx].reversed?.slice(0, 30)}…</span>
                                         </p>
-                                        <button onClick={onShowPremium} className="text-xs text-altar-gold font-display tracking-wide hover:underline">
+                                        <button onClick={onShowPremium} style={{ fontSize: '12px', color: 'var(--color-gold-100)', fontFamily: 'var(--font-display)', letterSpacing: '1px' }} className="hover:underline">
                                             Unlock Premium Insight →
                                         </button>
                                     </div>
@@ -389,20 +442,29 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
                     if (!prefix) return null;
                     return (
                         <div className="mt-6 animate-fade-up">
-                            <div className="relative overflow-hidden rounded-2xl border border-altar-gold/15 bg-gradient-to-br from-altar-gold/5 via-altar-mid/10 to-altar-bright/5 p-5">
+                            <div className="relative overflow-hidden p-5" style={goldCardStyle}>
                                 {/* Subtle glow */}
-                                <div className="absolute top-0 right-0 w-24 h-24 bg-altar-gold/5 rounded-full blur-3xl" />
+                                <div className="absolute top-0 right-0 w-24 h-24 rounded-full blur-3xl" style={{ background: 'rgba(212,175,55,0.05)' }} />
                                 <div className="relative">
-                                    <p className="text-[10px] font-display text-altar-gold/70 tracking-[3px] uppercase mb-2 flex items-center gap-1.5">
+                                    <p className="flex items-center gap-1.5 mb-2" style={{ ...headerStyle, fontSize: '10px', opacity: 0.7 }}>
                                         <span className="animate-pulse">✦</span> The Cards Remember
                                     </p>
-                                    <p className="text-sm text-altar-text/85 leading-relaxed italic">
+                                    <p style={{ ...mutedTextStyle, fontSize: '14px', lineHeight: '1.6', fontStyle: 'italic', color: 'rgba(226,232,240,0.85)' }}>
                                         {prefix}
                                     </p>
                                     {profile.topKeywords.length > 0 && (
                                         <div className="flex flex-wrap gap-1.5 mt-3">
                                             {profile.topKeywords.slice(0, 3).map(kw => (
-                                                <span key={kw} className="text-[9px] px-2 py-0.5 rounded-full bg-altar-gold/8 border border-altar-gold/10 text-altar-gold/60 font-display tracking-wide">
+                                                <span key={kw} style={{
+                                                    fontSize: '9px',
+                                                    padding: '2px 8px',
+                                                    borderRadius: '9999px',
+                                                    background: 'rgba(212,175,55,0.08)',
+                                                    border: '1px solid rgba(212,175,55,0.1)',
+                                                    color: 'rgba(212,175,55,0.6)',
+                                                    fontFamily: 'var(--font-display)',
+                                                    letterSpacing: '1px',
+                                                }}>
                                                     {kw}
                                                 </span>
                                             ))}
@@ -417,7 +479,7 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
                 {/* Post-draw actions — show after all revealed */}
                 {allRevealed && (
                     <div className="mt-8 space-y-3 animate-fade-up">
-                        <h3 className="font-display text-center text-sm text-altar-muted tracking-[3px] uppercase mb-4">
+                        <h3 className="text-center mb-4" style={{ ...headerStyle, fontSize: '14px' }}>
                             ✧ Your ritual is complete ✧
                         </h3>
 
@@ -426,22 +488,28 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
                             <button
                                 onClick={handleSave}
                                 disabled={saved}
-                                className={`flex-1 py-3 rounded-xl font-display text-sm font-semibold tracking-wide transition-all duration-300 flex items-center justify-center gap-2 ${saved
-                                    ? 'bg-green-500/15 border border-green-500/30 text-green-300'
-                                    : 'glass border border-white/10 text-altar-text hover:border-altar-gold/30 hover:scale-[1.02] active:scale-[0.98]'
-                                    }`}
+                                className="flex-1 py-3 text-sm font-semibold tracking-wide transition-all duration-300 flex items-center justify-center gap-2 active:scale-[0.97]"
+                                style={{
+                                    ...primaryCardStyle,
+                                    border: saved ? '1px solid rgba(74,222,128,0.3)' : '1px solid var(--color-gold-glow-med)',
+                                    color: saved ? '#4ade80' : 'var(--color-gold-100)',
+                                    fontFamily: 'var(--font-display)',
+                                }}
                             >
                                 {saved ? '✅ Saved' : '📜 Save to Past'}
                             </button>
 
-                            {/* Share to Social */}
+                            {/* Share */}
                             <button
                                 onClick={handleShare}
                                 disabled={shared}
-                                className={`flex-1 py-3 rounded-xl font-display text-sm font-semibold tracking-wide transition-all duration-300 flex items-center justify-center gap-2 ${shared
-                                    ? 'bg-blue-500/15 border border-blue-500/30 text-blue-300'
-                                    : 'glass border border-white/10 text-altar-text hover:border-altar-gold/30 hover:scale-[1.02] active:scale-[0.98]'
-                                    }`}
+                                className="flex-1 py-3 text-sm font-semibold tracking-wide transition-all duration-300 flex items-center justify-center gap-2 active:scale-[0.97]"
+                                style={{
+                                    ...primaryCardStyle,
+                                    border: shared ? '1px solid rgba(96,165,250,0.3)' : '1px solid var(--color-gold-glow-med)',
+                                    color: shared ? '#60a5fa' : 'var(--color-gold-100)',
+                                    fontFamily: 'var(--font-display)',
+                                }}
                             >
                                 {shared ? '✅ Shared' : '📤 Share'}
                             </button>
@@ -449,8 +517,8 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
 
                         {/* Spread Reading — manual trigger */}
                         {spreadInsightLoading ? (
-                            <div className="glass-strong rounded-2xl p-5">
-                                <h4 className="font-display text-sm text-altar-gold tracking-[2px] uppercase mb-3 flex items-center gap-2">
+                            <div className="p-5" style={goldCardStyle}>
+                                <h4 className="flex items-center gap-2 mb-3" style={{ ...headerStyle, fontSize: '14px' }}>
                                     <span>🔮</span> Reading Your Spread…
                                 </h4>
                                 <div className="space-y-2.5 py-1">
@@ -462,8 +530,8 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
                                 </div>
                             </div>
                         ) : spreadInsight ? (
-                            <div className="glass-strong rounded-2xl p-5">
-                                <h4 className="font-display text-sm text-altar-gold tracking-[2px] uppercase mb-3 flex items-center gap-2">
+                            <div className="p-5" style={goldCardStyle}>
+                                <h4 className="flex items-center gap-2 mb-3" style={{ ...headerStyle, fontSize: '14px' }}>
                                     <span>🔮</span> Your Spread Reading
                                 </h4>
                                 <AIResponseRenderer text={spreadInsight} />
@@ -498,22 +566,38 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
                                         setSpreadInsightLoading(false);
                                     }
                                 }}
-                                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-altar-gold/10 to-altar-bright/10 border border-altar-gold/20 text-center transition-all hover:border-altar-gold/40 hover:scale-[1.01] active:scale-[0.99]"
+                                className="w-full py-4 text-center transition-all hover:scale-[1.01] active:scale-[0.99]"
+                                style={{
+                                    background: 'linear-gradient(135deg, var(--color-gold-100), var(--color-gold-200))',
+                                    borderRadius: '16px',
+                                    border: '1px solid var(--color-gold-glow-med)',
+                                    color: '#0d0b22',
+                                    fontFamily: 'var(--font-display)',
+                                    boxShadow: '0 4px 20px rgba(212,175,55,0.3)',
+                                }}
                             >
-                                <span className="shimmer-text font-display text-sm font-semibold tracking-wide flex items-center justify-center gap-2">
+                                <span className="font-display text-sm font-semibold tracking-wide flex items-center justify-center gap-2" style={{ color: '#0d0b22' }}>
                                     {isPremium ? '✨' : '👑'} {isPremium ? 'Get Deep Dive Reading' : 'Unlock Deep Dive Reading'}
                                 </span>
-                                <p className="text-[10px] text-altar-muted mt-0.5">
+                                <p style={{ fontSize: '10px', marginTop: '2px', color: 'rgba(13,11,34,0.6)' }}>
                                     {isPremium ? 'Unlock the mystic synthesis of your spread' : 'Premium mystic synthesis of your spread'}
                                 </p>
                             </button>
                         )}
-                        {aiError && <p className="text-xs text-red-400 text-center mt-2">{aiError}</p>}
+                        {aiError && <p className="text-xs text-center mt-2" style={{ color: '#f87171' }}>{aiError}</p>}
 
                         {/* Draw again */}
                         <button
                             onClick={() => { onClose(); onTabChange('new'); }}
-                            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-altar-mid to-altar-bright text-white font-display text-sm font-semibold tracking-wide border border-altar-gold/15 hover:border-altar-gold/30 hover:scale-[1.01] active:scale-[0.99] transition-all"
+                            className="w-full py-3.5 text-sm font-semibold tracking-wide transition-all hover:scale-[1.01] active:scale-[0.99]"
+                            style={{
+                                background: 'linear-gradient(135deg, rgba(212,175,55,0.2) 0%, rgba(184,134,11,0.1) 100%)',
+                                border: '1px solid var(--color-gold-glow-med)',
+                                borderRadius: '12px',
+                                color: 'var(--color-gold-100)',
+                                fontFamily: 'var(--font-display)',
+                                boxShadow: '0 4px 16px rgba(0,0,0,0.4), 0 0 12px rgba(212,175,55,0.08)',
+                            }}
                         >
                             ✦ Draw Again ✦
                         </button>

@@ -125,9 +125,9 @@ function getLunarData() {
 // ── Manifestation Windows (transit-aware) ──────────────────────────────────
 
 const WINDOW_PLANET_MSG: Record<string, { title: string; msg: string; color: string }> = {
-    jupiter: { title: '🌟 Expansion Window', msg: 'Jupiter opens doors. Ask for more than you think you deserve.', color: 'rgba(251,191,36,0.15)' },
-    venus: { title: '🌹 Abundance Window', msg: 'Venus aligns beauty, love, and material blessings. Call in abundance now.', color: 'rgba(236,72,153,0.12)' },
-    saturn: { title: '⏳ Structure Window', msg: 'Saturn harmonizes. Set long-term intentions — what you build now lasts years.', color: 'rgba(167,139,250,0.15)' },
+    jupiter: { title: 'Expansion Window', msg: 'Jupiter opens doors. Ask for more than you think you deserve.', color: 'rgba(251,191,36,0.15)' },
+    venus: { title: 'Abundance Window', msg: 'Venus aligns beauty, love, and material blessings. Call in abundance now.', color: 'rgba(236,72,153,0.12)' },
+    saturn: { title: 'Structure Window', msg: 'Saturn harmonizes. Set long-term intentions — what you build now lasts years.', color: 'rgba(167,139,250,0.15)' },
 };
 
 // ── Props ──────────────────────────────────────────────────────────────────
@@ -151,57 +151,131 @@ function NewManifestationModal({ onClose, onCreate }: {
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-end justify-center p-4"
-            style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
+            style={{
+                position: 'fixed', inset: 0, zIndex: 50,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                padding: '24px 16px',
+                background: 'rgba(0,0,0,0.75)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+            }}
             onClick={onClose}
         >
             <div
-                className="w-full max-w-md rounded-3xl p-6 animate-fade-up"
                 style={{
-                    background: 'linear-gradient(145deg, #150d2e 0%, #0c0818 100%)',
-                    border: '1px solid rgba(212,175,55,0.25)',
-                    boxShadow: '0 -20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(212,175,55,0.08)',
-                    marginBottom: 'env(safe-area-inset-bottom, 0px)',
+                    width: '100%', maxWidth: '400px',
+                    borderRadius: '22px',
+                    padding: '32px 24px 24px',
+                    background: 'linear-gradient(160deg, #1c1538 0%, #130f2e 55%, #0d0b22 100%)',
+                    border: '1px solid rgba(255,255,255,0.07)',
+                    boxShadow: '0 8px 28px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.08), inset 0 -2px 5px rgba(0,0,0,0.35), 0 0 60px rgba(212,175,55,0.06)',
+                    animation: 'fade-up 0.3s ease-out both',
                 }}
                 onClick={e => e.stopPropagation()}
             >
-                <div className="text-center mb-5">
-                    <div className="text-3xl mb-2">✨</div>
-                    <h3 className="font-display text-lg text-altar-gold tracking-[2px]">Call Something In</h3>
-                    <p className="text-xs text-altar-muted mt-1">Speak directly to the universe. Be specific.</p>
+                {/* Header */}
+                <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                    <div style={{ fontSize: '32px', marginBottom: '10px', filter: 'drop-shadow(0 0 12px rgba(212,175,55,0.3))' }}>✨</div>
+                    <h3 style={{
+                        fontFamily: 'var(--font-display)',
+                        fontSize: '18px', fontWeight: 700,
+                        color: '#F9E491',
+                        letterSpacing: '3px',
+                        textShadow: '0 0 20px rgba(212,175,55,0.2)',
+                        marginBottom: '6px',
+                    }}>Call Something In</h3>
+                    <p style={{ fontSize: '12px', color: '#94a3b8', fontWeight: 300, letterSpacing: '0.5px' }}>
+                        Speak directly to the universe. Be specific.
+                    </p>
                 </div>
 
-                {/* Starter prompt */}
-                <p className="text-xs text-altar-gold/60 font-display tracking-wider mb-2 uppercase">I am calling in…</p>
+                {/* Starter prompt label */}
+                <p style={{
+                    fontFamily: 'var(--font-display)',
+                    fontSize: '9px', letterSpacing: '3px',
+                    textTransform: 'uppercase' as const,
+                    color: 'rgba(212,175,55,0.5)',
+                    marginBottom: '8px',
+                }}>I am calling in…</p>
+
+                {/* Textarea */}
                 <textarea
                     autoFocus
                     value={text}
                     onChange={e => setText(e.target.value.slice(0, maxLen))}
                     placeholder="...financial clarity and abundance that flows easily into my life."
-                    className="w-full rounded-2xl p-4 text-sm text-altar-text bg-white/5 border border-white/10 focus:border-altar-gold/40 focus:outline-none resize-none leading-relaxed"
                     rows={4}
+                    style={{
+                        width: '100%',
+                        borderRadius: '16px',
+                        padding: '16px',
+                        fontSize: '14px',
+                        color: '#e2e8f0',
+                        fontFamily: 'var(--font-body)',
+                        fontWeight: 400,
+                        lineHeight: 1.6,
+                        background: 'rgba(255,255,255,0.04)',
+                        border: '1px solid rgba(197,147,65,0.25)',
+                        outline: 'none',
+                        resize: 'none' as const,
+                        boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.3)',
+                    }}
                 />
-                <p className="text-[10px] text-altar-muted text-right mt-1">{text.length}/{maxLen}</p>
 
-                <p className="text-[10px] text-altar-muted/60 text-center mt-2 italic">
+                {/* Character count */}
+                <p style={{ fontSize: '10px', color: '#94a3b8', textAlign: 'right', marginTop: '6px' }}>
+                    {text.length}/{maxLen}
+                </p>
+
+                {/* Guidance text */}
+                <p style={{
+                    fontSize: '10px', color: 'rgba(148,163,184,0.5)',
+                    textAlign: 'center', marginTop: '8px',
+                    fontStyle: 'italic', fontWeight: 300,
+                }}>
                     State it as already true. Feel it as you write it.
                 </p>
 
-                <div className="flex gap-3 mt-5">
+                {/* Action buttons */}
+                <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
                     <button
                         onClick={onClose}
-                        className="flex-1 py-3 rounded-2xl text-sm text-altar-muted border border-white/10 font-display tracking-wide"
+                        style={{
+                            flex: 1, padding: '14px',
+                            borderRadius: '16px',
+                            fontFamily: 'var(--font-display)',
+                            fontSize: '11px', letterSpacing: '1.5px',
+                            textTransform: 'uppercase' as const,
+                            textAlign: 'center',
+                            background: 'rgba(255,255,255,0.03)',
+                            color: '#9ca3af',
+                            border: '1px solid rgba(255,255,255,0.08)',
+                            cursor: 'pointer',
+                        }}
                     >
                         Cancel
                     </button>
                     <button
                         onClick={() => { if (text.trim().length > 5) { onCreate(text.trim()); onClose(); } }}
                         disabled={text.trim().length <= 5}
-                        className="flex-1 py-3 rounded-2xl text-sm font-display tracking-wide transition-all disabled:opacity-30"
                         style={{
-                            background: 'linear-gradient(135deg, rgba(212,175,55,0.9), rgba(251,191,36,0.8))',
-                            color: '#0c0818',
-                            fontWeight: 700,
+                            flex: 1, padding: '14px',
+                            borderRadius: '16px',
+                            fontFamily: 'var(--font-display)',
+                            fontSize: '11px', letterSpacing: '1.5px',
+                            textTransform: 'uppercase' as const,
+                            textAlign: 'center',
+                            background: 'linear-gradient(180deg, #F9E491 0%, #D4A94E 30%, #C59341 60%, #A67B2E 100%)',
+                            color: '#120224',
+                            fontWeight: 800,
+                            border: '1.5px solid rgba(212,175,55,0.6)',
+                            boxShadow: '0 2px 0 #8a6914, 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.35)',
+                            textShadow: '0 1px 0 rgba(255,255,255,0.25)',
+                            cursor: 'pointer',
+                            opacity: text.trim().length <= 5 ? 0.3 : 1,
+                            transition: 'opacity 0.2s ease',
+                            position: 'relative' as const,
+                            overflow: 'hidden',
                         }}
                     >
                         Plant This Seed 🌱
@@ -232,58 +306,111 @@ function ManifestCard({ entry, onRefresh }: {
 
     return (
         <div
-            className="rounded-3xl overflow-hidden"
+            className="overflow-hidden transition-all duration-300 relative"
             style={{
-                background: isActive
-                    ? 'linear-gradient(145deg, rgba(212,175,55,0.08) 0%, rgba(13,6,24,0.95) 100%)'
-                    : 'rgba(255,255,255,0.03)',
-                border: isActive ? '1px solid rgba(212,175,55,0.2)' : '1px solid rgba(255,255,255,0.06)',
-                opacity: isActive ? 1 : 0.6,
+                borderRadius: '22px',
+                background: 'linear-gradient(160deg, #1c1538 0%, #130f2e 55%, #0d0b22 100%)',
+                border: isActive ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(255,255,255,0.04)',
+                borderLeft: isActive ? '1.5px solid rgba(197,147,65,0.4)' : undefined,
+                boxShadow: isActive
+                    ? '0 8px 28px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.08), inset 0 -2px 5px rgba(0,0,0,0.35)'
+                    : '0 4px 16px rgba(0,0,0,0.3)',
+                opacity: isActive ? 1 : 0.5,
             }}
         >
+            {/* Gold accent line at top of active cards */}
+            {isActive && (
+                <div style={{
+                    position: 'absolute', top: 0, left: '20px', right: '20px', height: '1px',
+                    background: 'linear-gradient(90deg, transparent, #C59341, transparent)',
+                    opacity: 0.5,
+                }} />
+            )}
+
+            {/* Gold chevron — tap affordance */}
+            {isActive && !expanded && (
+                <span style={{
+                    position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)',
+                    fontSize: '16px', fontWeight: 300, color: '#D4A94E', opacity: 0.4,
+                    fontFamily: 'var(--font-body)', lineHeight: 1,
+                }}>›</span>
+            )}
+
             {/* Card header — always visible */}
             <button
-                className="w-full text-left p-4"
+                className="w-full text-left"
+                style={{ padding: '24px', paddingRight: isActive ? '44px' : '24px' }}
                 onClick={() => setExpanded(!expanded)}
             >
-                <div className="flex items-start justify-between gap-2">
+                <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                        <p className="text-[9px] font-display tracking-[3px] uppercase mb-1.5"
-                            style={{ color: isActive ? '#d4af37' : '#9ca3af' }}>
-                            {isActive ? '✨ Active' : entry.status === 'manifested' ? '🎉 Manifested' : '🌿 Released'}
-                        </p>
-                        <p className="text-sm text-altar-text leading-snug font-medium">
+                        <p style={{
+                            fontFamily: 'var(--font-display)',
+                            fontSize: '16px',
+                            fontWeight: 400,
+                            color: '#e2e8f0',
+                            lineHeight: 1.45,
+                            marginBottom: '16px',
+                        }}>
                             "{entry.declaration}"
                         </p>
                     </div>
-                    <span className="text-altar-muted text-sm shrink-0 mt-0.5">{expanded ? '▾' : '▸'}</span>
+                    {expanded && <span style={{ color: 'rgba(148,163,184,0.4)', fontSize: '14px', flexShrink: 0, marginTop: '4px' }}>▾</span>}
                 </div>
 
-                {/* Stats row */}
-                <div className="flex items-center gap-3 mt-3 flex-wrap">
-                    <span className="text-[9px] px-2 py-0.5 rounded-full"
-                        style={{ background: 'rgba(255,255,255,0.06)', color: '#9ca3af', border: '1px solid rgba(255,255,255,0.08)' }}>
+                {/* Progress bar row — exact prototype values */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span style={{
+                        fontFamily: 'var(--font-display)',
+                        fontSize: '10px',
+                        letterSpacing: '1px',
+                        padding: '5px 12px',
+                        borderRadius: '10px',
+                        background: 'rgba(100,80,120,0.45)',
+                        color: '#e0d0f0',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        whiteSpace: 'nowrap' as const,
+                        boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.05), 0 2px 6px rgba(0,0,0,0.3)',
+                    }}>
                         Day {daysActive}
                     </span>
-                    {entry.linkedReadingIds.length > 0 && (
-                        <span className="text-[9px] px-2 py-0.5 rounded-full"
-                            style={{ background: 'rgba(99,102,241,0.15)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.2)' }}>
-                            🔮 {entry.linkedReadingIds.length} reading{entry.linkedReadingIds.length !== 1 ? 's' : ''}
-                        </span>
-                    )}
-                    {actTotal > 0 && (
-                        <span className="text-[9px] px-2 py-0.5 rounded-full"
-                            style={{ background: 'rgba(52,211,153,0.12)', color: '#6ee7b7', border: '1px solid rgba(52,211,153,0.2)' }}>
-                            ✓ {actDone}/{actTotal} actions
-                        </span>
-                    )}
+                    <div style={{
+                        flex: 1, height: '8px', borderRadius: '8px',
+                        background: 'rgba(197,147,65,0.1)', overflow: 'hidden', position: 'relative' as const,
+                    }}>
+                        <div style={{
+                            height: '100%', borderRadius: '8px',
+                            width: `${Math.max(pct, 8)}%`,
+                            background: 'linear-gradient(90deg, #C59341, #D4A94E, #F9E491, #D4A94E)',
+                            boxShadow: '0 0 14px rgba(212,175,55,0.18), 0 0 4px rgba(212,175,55,0.35)',
+                            transition: 'width 1.2s cubic-bezier(0.22,1,0.36,1)',
+                        }} />
+                    </div>
                 </div>
 
-                {/* Progress bar */}
-                {actTotal > 0 && (
-                    <div className="mt-2 h-1 rounded-full bg-white/5 overflow-hidden">
-                        <div className="h-full rounded-full transition-all duration-500"
-                            style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #d4af37, #fbbf24)' }} />
+                {/* Stats badges — exact prototype */}
+                {(entry.linkedReadingIds.length > 0 || actTotal > 0) && (
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '12px', flexWrap: 'wrap' as const }}>
+                        {entry.linkedReadingIds.length > 0 && (
+                            <span style={{
+                                fontSize: '10px', padding: '3px 10px', borderRadius: '20px',
+                                fontWeight: 500, letterSpacing: '0.3px',
+                                background: 'rgba(99,102,241,0.1)', color: '#a5b4fc',
+                                border: '1px solid rgba(99,102,241,0.15)',
+                            }}>
+                                🔮 {entry.linkedReadingIds.length} reading{entry.linkedReadingIds.length !== 1 ? 's' : ''}
+                            </span>
+                        )}
+                        {actTotal > 0 && (
+                            <span style={{
+                                fontSize: '10px', padding: '3px 10px', borderRadius: '20px',
+                                fontWeight: 500, letterSpacing: '0.3px',
+                                background: 'rgba(52,211,153,0.08)', color: '#6ee7b7',
+                                border: '1px solid rgba(52,211,153,0.15)',
+                            }}>
+                                ✓ {actDone}/{actTotal} actions
+                            </span>
+                        )}
                     </div>
                 )}
             </button>
@@ -366,13 +493,13 @@ function ManifestCard({ entry, onRefresh }: {
                             <button
                                 onClick={() => { updateManifestationStatus(entry.id, 'manifested'); onRefresh(); }}
                                 className="flex-1 py-2.5 rounded-2xl text-[10px] font-display tracking-wide"
-                                style={{ background: 'rgba(52,211,153,0.15)', color: '#6ee7b7', border: '1px solid rgba(52,211,153,0.2)' }}>
-                                🎉 It manifested!
+                                style={{ background: 'rgba(197,147,65,0.10)', color: '#D4A94E', border: '1px solid rgba(197,147,65,0.2)' }}>
+                                ✨ It manifested!
                             </button>
                             <button
                                 onClick={() => { updateManifestationStatus(entry.id, 'released'); onRefresh(); }}
                                 className="flex-1 py-2.5 rounded-2xl text-[10px] font-display tracking-wide"
-                                style={{ background: 'rgba(255,255,255,0.04)', color: '#9ca3af', border: '1px solid rgba(255,255,255,0.08)' }}>
+                                style={{ background: 'rgba(255,255,255,0.03)', color: '#9ca3af', border: '1px solid rgba(255,255,255,0.08)' }}>
                                 🌿 Release
                             </button>
                         </div>
@@ -426,54 +553,141 @@ export function CreateTab({ onClose, onTabChange, subscription, onShowPremium }:
     return (
         <>
             <div className="page-frame">
-                <div className="page-scroll bg-gradient-to-b from-altar-deep via-altar-dark to-altar-purple text-altar-text">
+                <div className="page-scroll bg-gradient-to-b from-altar-deep via-altar-dark to-altar-purple text-altar-text" style={{ position: 'relative' }}>
+                    {/* Sacred geometry background overlay — more visible like mockup */}
+                    <div style={{
+                        position: 'absolute',
+                        inset: 0,
+                        opacity: 0.05,
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg width='300' height='300' viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='150' cy='150' r='140' stroke='%23d4af37' fill='none' stroke-width='0.4'/%3E%3Ccircle cx='150' cy='150' r='120' stroke='%23d4af37' fill='none' stroke-width='0.3'/%3E%3Ccircle cx='150' cy='150' r='100' stroke='%23d4af37' fill='none' stroke-width='0.3'/%3E%3Ccircle cx='150' cy='150' r='60' stroke='%23d4af37' fill='none' stroke-width='0.3'/%3E%3Cpolygon points='150,30 260,200 40,200' stroke='%23d4af37' fill='none' stroke-width='0.4'/%3E%3Cpolygon points='150,270 40,100 260,100' stroke='%23d4af37' fill='none' stroke-width='0.4'/%3E%3Cline x1='150' y1='10' x2='150' y2='290' stroke='%23d4af37' stroke-width='0.2'/%3E%3Cline x1='10' y1='150' x2='290' y2='150' stroke='%23d4af37' stroke-width='0.2'/%3E%3C/svg%3E")`,
+                        backgroundSize: '300px 300px',
+                        pointerEvents: 'none',
+                    }} />
+
                     <PageHeader title="CREATE" onClose={onClose} titleSize="lg" />
 
-                    <div className="max-w-[500px] mx-auto px-4">
-                        {/* Hero */}
-                        <div className="text-center mt-4 mb-5 animate-fade-up">
-                            <div className="w-16 h-16 rounded-full mx-auto mb-3 flex items-center justify-center text-3xl"
-                                style={{
-                                    background: 'linear-gradient(135deg, rgba(212,175,55,0.2) 0%, rgba(99,40,217,0.15) 100%)',
-                                    border: '1px solid rgba(212,175,55,0.2)',
-                                    boxShadow: '0 0 30px rgba(212,175,55,0.1)',
-                                }}>
-                                ✨
+                    <div className="max-w-[500px] mx-auto px-4" style={{ position: 'relative', zIndex: 1 }}>
+                        {/* Hero — Sri Yantra Mandala (matching mockup) */}
+                        <div className="text-center animate-fade-up" style={{ padding: '20px 24px 4px' }}>
+                            <div className="relative mx-auto" style={{ width: '100px', height: '100px', marginBottom: '16px' }}>
+                                {/* Ambient glow */}
+                                <div className="absolute inset-0" style={{
+                                    background: 'radial-gradient(circle, rgba(212,175,55,0.2) 0%, rgba(212,175,55,0.05) 40%, transparent 70%)',
+                                    transform: 'scale(1.6)',
+                                    animation: 'pulse 4s ease-in-out infinite',
+                                }} />
+                                {/* Sacred Flower-Atom Mandala Glyph */}
+                                <svg viewBox="0 0 200 200" className="absolute inset-0 w-full h-full" style={{ filter: 'drop-shadow(0 0 14px rgba(212,175,55,0.35))' }}>
+                                    <defs>
+                                        <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" stopColor="#F9E491" />
+                                            <stop offset="50%" stopColor="#D4A94E" />
+                                            <stop offset="100%" stopColor="#C59341" />
+                                        </linearGradient>
+                                    </defs>
+                                    {/* Outer lotus flower petals (8 petals with cusp tips) */}
+                                    {[0, 45, 90, 135, 180, 225, 270, 315].map(deg => (
+                                        <g key={`petal-${deg}`} transform={`rotate(${deg} 100 100)`}>
+                                            {/* Each petal: two arcs creating a pointed leaf shape */}
+                                            <path
+                                                d="M100,12 Q125,40 100,55 Q75,40 100,12 Z"
+                                                stroke="url(#goldGrad)" fill="none" strokeWidth="1.8" opacity="0.75"
+                                            />
+                                        </g>
+                                    ))}
+                                    {/* Inner flower petals (8 smaller, rotated 22.5°) */}
+                                    {[22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5].map(deg => (
+                                        <g key={`inner-petal-${deg}`} transform={`rotate(${deg} 100 100)`}>
+                                            <path
+                                                d="M100,28 Q118,48 100,60 Q82,48 100,28 Z"
+                                                stroke="url(#goldGrad)" fill="none" strokeWidth="1.2" opacity="0.5"
+                                            />
+                                        </g>
+                                    ))}
+                                    {/* Orbital ellipses (atom-like rings) */}
+                                    <ellipse cx="100" cy="100" rx="58" ry="30"
+                                        transform="rotate(0 100 100)"
+                                        stroke="#d4af37" fill="none" strokeWidth="1.4" opacity="0.7" />
+                                    <ellipse cx="100" cy="100" rx="58" ry="30"
+                                        transform="rotate(60 100 100)"
+                                        stroke="#d4af37" fill="none" strokeWidth="1.4" opacity="0.7" />
+                                    <ellipse cx="100" cy="100" rx="58" ry="30"
+                                        transform="rotate(120 100 100)"
+                                        stroke="#d4af37" fill="none" strokeWidth="1.4" opacity="0.7" />
+                                    {/* Additional inner orbital ring */}
+                                    <ellipse cx="100" cy="100" rx="42" ry="22"
+                                        transform="rotate(30 100 100)"
+                                        stroke="#C59341" fill="none" strokeWidth="0.8" opacity="0.4" />
+                                    <ellipse cx="100" cy="100" rx="42" ry="22"
+                                        transform="rotate(90 100 100)"
+                                        stroke="#C59341" fill="none" strokeWidth="0.8" opacity="0.4" />
+                                    <ellipse cx="100" cy="100" rx="42" ry="22"
+                                        transform="rotate(150 100 100)"
+                                        stroke="#C59341" fill="none" strokeWidth="0.8" opacity="0.4" />
+                                    {/* Center atom cluster (3 circles + central dot) */}
+                                    <circle cx="100" cy="100" r="6" fill="#d4af37" opacity="0.85" />
+                                    <circle cx="92" cy="108" r="3.5" fill="#C59341" opacity="0.7" />
+                                    <circle cx="108" cy="108" r="3.5" fill="#C59341" opacity="0.7" />
+                                    <circle cx="100" cy="92" r="3.5" fill="#C59341" opacity="0.7" />
+                                    {/* Outer bounding circle */}
+                                    <circle cx="100" cy="100" r="88" stroke="#d4af37" fill="none" strokeWidth="0.6" opacity="0.2" />
+                                </svg>
                             </div>
-                            <h2 className="font-display text-lg text-altar-gold tracking-[3px]">Manifestation Hub</h2>
-                            <p className="text-[10px] text-altar-muted mt-1">
+                            <h2 className="font-display text-altar-gold"
+                                style={{ fontSize: '20px', fontWeight: 700, letterSpacing: '5px', textShadow: '0 0 30px rgba(212,175,55,0.2)', marginBottom: '6px' }}>
+                                Manifestation Hub
+                            </h2>
+                            <p style={{ fontSize: '12px', color: '#94a3b8', letterSpacing: '0.5px', fontWeight: 300 }}>
                                 You speak to the universe here.
                             </p>
                         </div>
 
                         {/* Single scroll manifestation content */}
                         <div className="animate-fade-up space-y-4" style={{ animationDelay: '0.1s', opacity: 0 }}>
-                            {/* New intention button */}
+                            {/* CTA — Embossed metallic gold button (matching mockup) */}
                             <button
                                 onClick={() => setShowNewModal(true)}
-                                className="w-full py-4 rounded-3xl font-display tracking-[2px] text-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
+                                className="w-full font-display tracking-[3.5px] text-[14px] transition-all hover:scale-[1.02] active:scale-[0.98] relative overflow-hidden"
                                 style={{
-                                    background: 'linear-gradient(135deg, rgba(212,175,55,0.12) 0%, rgba(212,175,55,0.06) 100%)',
-                                    border: '1px dashed rgba(212,175,55,0.3)',
-                                    color: '#d4af37',
+                                    borderRadius: '20px',
+                                    padding: '18px 24px',
+                                    background: 'linear-gradient(180deg, #F9E491 0%, #D4A94E 30%, #C59341 60%, #A67B2E 100%)',
+                                    color: '#120224',
+                                    fontWeight: 800,
+                                    boxShadow: '0 2px 0 #8a6914, 0 4px 12px rgba(0,0,0,0.5), 0 0 40px rgba(212,175,55,0.08), inset 0 1px 0 rgba(255,255,255,0.35)',
+                                    border: '2px solid rgba(212,175,55,0.6)',
+                                    textShadow: '0 1px 0 rgba(255,255,255,0.25)',
+                                    marginBottom: '24px',
                                 }}>
-                                + Call Something In
+                                {/* Shimmer overlay */}
+                                <div style={{
+                                    position: 'absolute', inset: 0,
+                                    background: 'linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.2) 45%, rgba(255,255,255,0.35) 50%, rgba(255,255,255,0.2) 55%, transparent 65%)',
+                                    animation: 'shimmer 3s ease-in-out infinite',
+                                }} />
+                                <span style={{ position: 'relative', zIndex: 1 }}>+ Call Something In</span>
                             </button>
 
                             {/* Active manifestations */}
                             {active.length > 0 ? (
-                                <div className="space-y-3">
-                                    <p className="text-[9px] text-altar-muted font-display tracking-[3px] uppercase">Active</p>
+                                <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '16px' }}>
                                     {active.map(m => (
                                         <ManifestCard key={`${m.id}-${tick}`} entry={m} onRefresh={refresh} />
                                     ))}
                                 </div>
                             ) : (
-                                <div className="rounded-3xl p-8 text-center"
-                                    style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                    <p className="text-4xl mb-3">🌱</p>
-                                    <p className="text-sm text-altar-text/60">Nothing planted yet.</p>
-                                    <p className="text-[10px] text-altar-muted mt-1 italic">
+                                <div style={{
+                                    borderRadius: '24px',
+                                    padding: '48px 24px',
+                                    textAlign: 'center' as const,
+                                    background: 'linear-gradient(145deg, rgba(212,175,55,0.08) 0%, rgba(255,255,255,0.01) 100%)',
+                                    border: '1px solid rgba(212,175,55,0.08)',
+                                    boxShadow: 'inset 0 0 50px rgba(0,0,0,0.25)',
+                                    backdropFilter: 'blur(8px)',
+                                }}>
+                                    <p style={{ fontSize: '40px', marginBottom: '14px', filter: 'drop-shadow(0 0 12px rgba(52,211,153,0.3))' }}>🌱</p>
+                                    <p style={{ fontSize: '14px', color: 'rgba(226,232,240,0.6)', fontWeight: 500, marginBottom: '6px' }}>Nothing planted yet.</p>
+                                    <p style={{ fontSize: '11px', color: '#94a3b8', fontStyle: 'italic', fontWeight: 300 }}>
                                         Your first intention is the most powerful one.
                                     </p>
                                 </div>
@@ -481,33 +695,112 @@ export function CreateTab({ onClose, onTabChange, subscription, onShowPremium }:
 
                             {/* History */}
                             {history.length > 0 && (
-                                <div className="space-y-2 mt-2">
-                                    <p className="text-[9px] text-altar-muted/60 font-display tracking-[3px] uppercase">History</p>
+                                <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column' as const, gap: '16px' }}>
                                     {history.map(m => (
                                         <ManifestCard key={`${m.id}-${tick}`} entry={m} onRefresh={refresh} />
                                     ))}
                                 </div>
                             )}
 
-                            {/* Cosmic timing windows (inline) */}
+                            {/* Cosmic timing windows — premium intelligence feed */}
                             {transitWindows.length > 0 && (
-                                <div className="mt-2">
-                                    <p className="text-[9px] text-altar-muted/60 font-display tracking-[3px] uppercase mb-2">⚡ Cosmic Timing</p>
-                                    <div className="space-y-1.5">
+                                <div style={{ marginTop: '24px' }}>
+                                    <p style={{
+                                        fontFamily: 'var(--font-display)',
+                                        fontSize: '9px',
+                                        letterSpacing: '5px',
+                                        textTransform: 'uppercase' as const,
+                                        color: '#D4A94E',
+                                        opacity: 0.5,
+                                        textShadow: '0 0 10px rgba(212,175,55,0.08)',
+                                        marginBottom: '10px',
+                                    }}>
+                                        ⚡ Cosmic Timing
+                                    </p>
+                                    <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '8px' }}>
                                         {transitWindows.map((hit, i) => {
                                             const wInfo = WINDOW_PLANET_MSG[hit.transitPlanet.id];
                                             if (!wInfo) return null;
+                                            const isNow = !hit.isApplying;
                                             return (
-                                                <div key={i} className="rounded-2xl p-3 flex items-center gap-3"
-                                                    style={{ background: wInfo.color, border: '1px solid rgba(255,255,255,0.08)' }}>
-                                                    <span className="text-lg shrink-0">{hit.transitPlanet.glyph}</span>
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="text-[10px] text-altar-text/80 font-display">{wInfo.title}</p>
-                                                        <p className="text-[9px] text-altar-muted truncate">{wInfo.msg}</p>
+                                                <div key={i} className="flex items-center gap-3"
+                                                    style={{
+                                                        padding: '14px 16px',
+                                                        borderRadius: '16px',
+                                                        background: isNow
+                                                            ? 'linear-gradient(135deg, rgba(197,147,65,0.08) 0%, rgba(61,29,90,0.4) 100%)'
+                                                            : 'rgba(61,29,90,0.35)',
+                                                        border: isNow
+                                                            ? '1px solid rgba(212,175,55,0.18)'
+                                                            : '1px solid rgba(212,175,55,0.10)',
+                                                        backdropFilter: 'blur(12px)',
+                                                        boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                                                    }}>
+                                                    {/* Planet icon */}
+                                                    <div style={{
+                                                        width: '40px', height: '40px', borderRadius: '50%', flexShrink: 0,
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                        fontSize: '18px',
+                                                        border: `1.5px solid rgba(197,147,65,${isNow ? '0.5' : '0.35'})`,
+                                                        background: `radial-gradient(circle, rgba(197,147,65,${isNow ? '0.12' : '0.06'}) 0%, transparent 70%)`,
+                                                        boxShadow: isNow ? '0 0 14px rgba(212,175,55,0.08), 0 0 6px rgba(197,147,65,0.15)' : 'none',
+                                                    }}>
+                                                        <span style={{ color: '#C59341' }}>{hit.transitPlanet.glyph}</span>
                                                     </div>
-                                                    <span className="text-[8px] text-altar-muted/60 shrink-0">
-                                                        {hit.isApplying ? 'Coming' : 'Now'}
-                                                    </span>
+                                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                                        <p style={{
+                                                            fontFamily: 'var(--font-display)',
+                                                            fontSize: '11px',
+                                                            fontWeight: 600,
+                                                            letterSpacing: '2px',
+                                                            textTransform: 'uppercase' as const,
+                                                            color: 'rgba(226,232,240,0.85)',
+                                                            marginBottom: '3px',
+                                                        }}>
+                                                            ✨ {wInfo.title}
+                                                        </p>
+                                                        <p style={{
+                                                            fontSize: '11px',
+                                                            color: 'rgba(148,163,184,0.65)',
+                                                            fontWeight: 300,
+                                                            lineHeight: 1.45,
+                                                            display: '-webkit-box',
+                                                            WebkitLineClamp: 2,
+                                                            WebkitBoxOrient: 'vertical' as const,
+                                                            overflow: 'hidden',
+                                                        }}>{wInfo.msg}</p>
+                                                    </div>
+                                                    {/* Status pill */}
+                                                    <div style={{ flexShrink: 0 }}>
+                                                        <span style={{
+                                                            display: 'flex', alignItems: 'center', gap: '5px',
+                                                            fontFamily: 'var(--font-display)',
+                                                            fontSize: '9px',
+                                                            letterSpacing: '1.5px',
+                                                            textTransform: 'uppercase' as const,
+                                                            padding: '4px 10px',
+                                                            borderRadius: '20px',
+                                                            ...(isNow ? {
+                                                                background: 'rgba(197,147,65,0.12)',
+                                                                color: '#D4A94E',
+                                                                border: '1px solid rgba(197,147,65,0.25)',
+                                                            } : {
+                                                                background: 'rgba(148,163,184,0.06)',
+                                                                color: 'rgba(180,170,200,0.5)',
+                                                                border: '1px solid rgba(255,255,255,0.06)',
+                                                            }),
+                                                        }}>
+                                                            {isNow && (
+                                                                <span style={{
+                                                                    width: '6px', height: '6px', borderRadius: '50%',
+                                                                    background: '#D4A94E',
+                                                                    animation: 'livePulse 2s ease-in-out infinite',
+                                                                    boxShadow: '0 0 4px rgba(212,175,55,0.18)',
+                                                                }} />
+                                                            )}
+                                                            {isNow ? 'Now' : 'Coming'}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             );
                                         })}
@@ -515,19 +808,48 @@ export function CreateTab({ onClose, onTabChange, subscription, onShowPremium }:
                                 </div>
                             )}
 
-                            {/* Slim moon context banner */}
-                            <div className="rounded-2xl p-3 flex items-center gap-3 mt-2"
-                                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                                <span className="text-xl">{lunarData.currentPhase.emoji}</span>
-                                <div>
-                                    <p className="text-[9px] text-altar-gold/60 font-display tracking-wider uppercase">{lunarData.currentPhase.name} Energy</p>
-                                    <p className="text-[10px] text-altar-muted italic">{lunarData.currentPhase.guidance}</p>
-                                </div>
-                            </div>
                         </div>
 
-                        <div className="h-8" />
+                        {/* Moon phase banner — exact prototype */}
+                        <div style={{
+                            display: 'flex', alignItems: 'center', gap: '14px',
+                            padding: '14px 16px',
+                            borderRadius: '16px',
+                            margin: '4px 20px 0',
+                            background: 'rgba(61,29,90,0.35)',
+                            border: '1px solid rgba(212,175,55,0.10)',
+                            backdropFilter: 'blur(12px)',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                        }}>
+                            <span style={{
+                                fontSize: '30px', flexShrink: 0,
+                                filter: 'drop-shadow(0 0 8px rgba(200,200,200,0.3)) drop-shadow(0 0 20px rgba(197,147,65,0.12))',
+                            }}>{lunarData.currentPhase.emoji}</span>
+                            <p style={{ fontSize: '12px', lineHeight: 1.5 }}>
+                                <span style={{
+                                    fontFamily: 'var(--font-display)', fontWeight: 700,
+                                    color: '#F9E491', letterSpacing: '2px',
+                                    textTransform: 'uppercase' as const, fontSize: '11px',
+                                }}>{lunarData.currentPhase.name} Energy</span>
+                                <span style={{ color: 'rgba(148,163,184,0.5)' }}> — </span>
+                                <span style={{ fontStyle: 'italic', color: 'rgba(148,163,184,0.7)', fontWeight: 300 }}>{lunarData.currentPhase.guidance}</span>
+                            </p>
+                        </div>
+
+                        <div className="h-10" />
                     </div>
+
+                    {/* CSS Animations */}
+                    <style>{`
+                        @keyframes shimmer {
+                            0%, 100% { transform: translateX(-100%); }
+                            50% { transform: translateX(100%); }
+                        }
+                        @keyframes livePulse {
+                            0%, 100% { opacity: 1; transform: scale(1); }
+                            50% { opacity: 0.5; transform: scale(0.8); }
+                        }
+                    `}</style>
                 </div>
                 <BottomNav currentTab="create" onTabChange={onTabChange} />
             </div>

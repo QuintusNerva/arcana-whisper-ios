@@ -49,27 +49,7 @@ const SUN_ARCHETYPE_PREVIEW: Record<string, { name: string; tagline: string }> =
     pisces: { name: 'The Creative Oracle', tagline: 'Your instincts are always three moves ahead.' },
 };
 
-// ── Gradient per element ────────────────────────────────────────
-
-function elementGradient(element: string) {
-    switch (element.toLowerCase()) {
-        case 'fire': return 'linear-gradient(135deg, rgba(180,50,0,0.15) 0%, rgba(240,100,20,0.08) 100%)';
-        case 'earth': return 'linear-gradient(135deg, rgba(40,100,30,0.15) 0%, rgba(80,140,50,0.08) 100%)';
-        case 'air': return 'linear-gradient(135deg, rgba(30,100,180,0.15) 0%, rgba(80,160,220,0.08) 100%)';
-        case 'water': return 'linear-gradient(135deg, rgba(20,60,160,0.15) 0%, rgba(80,120,220,0.08) 100%)';
-        default: return 'linear-gradient(135deg, rgba(212,175,55,0.12) 0%, rgba(160,120,20,0.06) 100%)';
-    }
-}
-
-function elementAccent(element: string) {
-    switch (element.toLowerCase()) {
-        case 'fire': return '#f97316';
-        case 'earth': return '#86efac';
-        case 'air': return '#93c5fd';
-        case 'water': return '#818cf8';
-        default: return '#d4af37';
-    }
-}
+// ── Element glyph ────────────────────────────────────────────────
 
 function elementGlyph(element: string) {
     switch (element.toLowerCase()) {
@@ -148,9 +128,25 @@ export function CareerAlignment({ onClose, onTabChange, subscription, onShowPrem
         }
     }
 
-    const accent = triad ? elementAccent(triad.sun.element) : '#d4af37';
-    const gradBg = triad ? elementGradient(triad.sun.element) : elementGradient('');
     const glyph = triad ? elementGlyph(triad.sun.element) : '✦';
+
+    /* ── Sacred Fintech design system styles ── */
+    const primaryCardStyle: React.CSSProperties = {
+        background: 'linear-gradient(135deg, #1c1538 0%, #130f2e 50%, #0d0b22 100%)',
+        border: '1px solid rgba(255,255,255,0.06)',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03)',
+    };
+
+    const goldCardStyle: React.CSSProperties = {
+        background: 'linear-gradient(135deg, #1c1538 0%, #130f2e 50%, #0d0b22 100%)',
+        border: '1px solid var(--color-gold-glow-med)',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(212,175,55,0.08)',
+    };
+
+    const insetStyle: React.CSSProperties = {
+        background: 'rgba(18,2,36,0.6)',
+        border: '1px solid rgba(255,255,255,0.05)',
+    };
 
     return (
         <div className="page-frame">
@@ -165,13 +161,19 @@ export function CareerAlignment({ onClose, onTabChange, subscription, onShowPrem
                     {!birthData && (
                         <div className="text-center mt-16 px-4">
                             <div className="text-4xl mb-4">💼</div>
-                            <h2 className="font-display text-lg text-altar-gold tracking-[3px] mb-3">ADD YOUR BIRTH DATA</h2>
-                            <p className="text-sm text-altar-muted leading-relaxed mb-5">
+                            <h2 className="font-display text-lg tracking-[3px] mb-3" style={{ color: 'var(--color-gold-100)' }}>ADD YOUR BIRTH DATA</h2>
+                            <p className="text-sm leading-relaxed mb-5" style={{ color: 'var(--color-altar-muted)', fontFamily: 'var(--font-body)', fontWeight: 300 }}>
                                 Your career alignment reading is calculated from your natal chart. Add your birth date in your profile to unlock it.
                             </p>
                             <button
                                 onClick={() => onTabChange('natal')}
-                                className="px-6 py-3 rounded-full font-display text-sm tracking-[2px] clay-btn-gold"
+                                className="px-6 py-3 rounded-full font-display text-sm tracking-[2px] transition-all active:scale-[0.97]"
+                                style={{
+                                    background: 'linear-gradient(135deg, rgba(212,175,55,0.25), rgba(180,140,20,0.15))',
+                                    border: '1px solid var(--color-gold-glow-med)',
+                                    color: 'var(--color-gold-100)',
+                                    boxShadow: '0 0 20px rgba(212,175,55,0.1)',
+                                }}
                             >
                                 → Set Up Natal Chart
                             </button>
@@ -183,36 +185,35 @@ export function CareerAlignment({ onClose, onTabChange, subscription, onShowPrem
 
                             {/* Hero Archetype Card */}
                             <div
-                                className="relative clay-card rounded-[2rem] overflow-hidden p-6 text-center"
+                                className="relative rounded-[2rem] overflow-hidden p-6 text-center"
                                 style={{
-                                    background: gradBg,
-                                    borderColor: `${accent}30`,
-                                    boxShadow: `0 0 60px ${accent}10`,
+                                    ...goldCardStyle,
+                                    boxShadow: '0 8px 32px rgba(0,0,0,0.5), 0 0 30px rgba(212,175,55,0.1)',
                                 }}
                             >
                                 {/* Background glow */}
                                 <div
                                     className="absolute inset-0 blur-[80px] pointer-events-none"
-                                    style={{ background: `radial-gradient(ellipse at 50% 50%, ${accent}15, transparent 70%)` }}
+                                    style={{ background: 'radial-gradient(ellipse at 50% 50%, rgba(212,175,55,0.08), transparent 70%)' }}
                                 />
 
                                 {/* Glyph */}
-                                <div className="relative text-4xl mb-3" style={{ filter: `drop-shadow(0 0 20px ${accent}60)` }}>
+                                <div className="relative text-4xl mb-3" style={{ filter: 'drop-shadow(0 0 20px rgba(212,175,55,0.4))' }}>
                                     {glyph}
                                 </div>
 
                                 {/* Archetype name */}
                                 <div className="relative">
-                                    <p className="text-[9px] font-display tracking-[3px] uppercase mb-1" style={{ color: `${accent}80` }}>
+                                    <p className="text-[9px] font-display tracking-[3px] uppercase mb-1" style={{ color: 'var(--color-gold-200)' }}>
                                         Your Career Archetype
                                     </p>
                                     <h2
                                         className="font-display text-2xl font-bold mb-2"
-                                        style={{ color: accent, textShadow: `0 0 30px ${accent}50` }}
+                                        style={{ color: 'var(--color-gold-100)', textShadow: '0 0 30px rgba(212,175,55,0.3)' }}
                                     >
                                         {reading?.archetypeName || preview?.name || '— Unknown —'}
                                     </h2>
-                                    <p className="text-sm text-altar-text/80 leading-relaxed italic">
+                                    <p className="text-sm leading-relaxed italic" style={{ color: 'rgba(226,232,240,0.8)', fontFamily: 'var(--font-body)' }}>
                                         {reading?.archetypeTagline || preview?.tagline}
                                     </p>
                                 </div>
@@ -227,15 +228,15 @@ export function CareerAlignment({ onClose, onTabChange, subscription, onShowPrem
                                     ].map(p => (
                                         <div
                                             key={p.label}
-                                            className="clay-pill px-3 py-1.5 flex items-center gap-1.5 text-[10px] font-display tracking-wide border-white/5"
+                                            className="px-3 py-1.5 flex items-center gap-1.5 text-[10px] font-display tracking-wide rounded-full"
                                             style={{
-                                                background: 'rgba(255,255,255,0.05)',
-                                                borderColor: `${accent}20`,
-                                                color: 'rgba(255,255,255,0.65)',
+                                                background: 'rgba(212,175,55,0.08)',
+                                                border: '1px solid var(--color-gold-glow-med)',
+                                                color: 'rgba(226,232,240,0.7)',
                                             }}
                                         >
                                             <span>{p.glyph}</span>
-                                            <span className="text-white/40">{p.label}</span>
+                                            <span style={{ color: 'var(--color-altar-muted)' }}>{p.label}</span>
                                             <span>{p.value}</span>
                                         </div>
                                     ))}
@@ -244,20 +245,21 @@ export function CareerAlignment({ onClose, onTabChange, subscription, onShowPrem
 
                             {/* Unlock CTA — if no reading yet */}
                             {!unlocked && !loading && (
-                                <div className="clay-card rounded-3xl p-5 text-center">
-                                    <p className="text-xs text-altar-text/60 leading-relaxed mb-4">
+                                <div className="rounded-3xl p-5 text-center" style={primaryCardStyle}>
+                                    <p className="text-xs leading-relaxed mb-4" style={{ color: 'rgba(226,232,240,0.6)', fontFamily: 'var(--font-body)', fontWeight: 300 }}>
                                         Your static archetype is shown above. Get your full reading — work style, where you thrive, what drains you, and the question to unlock your next chapter.
                                     </p>
                                     {error && (
-                                        <p className="text-[11px] text-red-400/80 mb-3 leading-relaxed">{error}</p>
+                                        <p className="text-[11px] leading-relaxed mb-3" style={{ color: 'rgba(248,113,113,0.8)' }}>{error}</p>
                                     )}
                                     <button
                                         onClick={handleGetReading}
-                                        className="w-full py-4 rounded-xl clay-btn font-display tracking-[2px] text-sm transition-all"
+                                        className="w-full py-4 rounded-xl font-display tracking-[2px] text-sm transition-all active:scale-[0.97]"
                                         style={{
-                                            background: `linear-gradient(135deg, ${accent}30, ${accent}15)`,
-                                            border: `1px solid ${accent}40`,
-                                            color: accent,
+                                            background: 'linear-gradient(135deg, rgba(212,175,55,0.25), rgba(180,140,20,0.15))',
+                                            border: '1px solid var(--color-gold-glow-med)',
+                                            color: 'var(--color-gold-100)',
+                                            boxShadow: '0 0 20px rgba(212,175,55,0.1)',
                                         }}
                                     >
                                         ✦ Reveal Full Reading
@@ -267,13 +269,13 @@ export function CareerAlignment({ onClose, onTabChange, subscription, onShowPrem
 
                             {/* Loading skeleton */}
                             {loading && (
-                                <div className="clay-card rounded-3xl p-5 space-y-3">
+                                <div className="rounded-3xl p-5 space-y-3" style={primaryCardStyle}>
                                     <div className="flex items-center gap-2 mb-2">
-                                        <span className="w-3 h-3 border-2 border-altar-gold/30 border-t-altar-gold rounded-full animate-spin" />
-                                        <span className="text-[10px] font-display tracking-[2px] text-altar-gold/50 uppercase">Consulting the stars…</span>
+                                        <span className="w-3 h-3 rounded-full animate-spin" style={{ border: '2px solid rgba(212,175,55,0.3)', borderTopColor: 'var(--color-gold-200)' }} />
+                                        <span className="text-[10px] font-display tracking-[2px] uppercase" style={{ color: 'rgba(212,175,55,0.5)' }}>Consulting the stars…</span>
                                     </div>
                                     {[100, 90, 75, 85, 60].map((w, i) => (
-                                        <div key={i} className={`h-3 shimmer-skeleton`} style={{ width: `${w}%` }} />
+                                        <div key={i} className="h-3 shimmer-skeleton" style={{ width: `${w}%` }} />
                                     ))}
                                 </div>
                             )}
@@ -282,38 +284,32 @@ export function CareerAlignment({ onClose, onTabChange, subscription, onShowPrem
                             {unlocked && reading && (
                                 <>
                                     {/* Work Style */}
-                                    <div
-                                        className="clay-card rounded-3xl p-5"
-                                        style={{
-                                            background: 'rgba(255,255,255,0.03)',
-                                            borderColor: `${accent}18`,
-                                        }}
-                                    >
-                                        <h3 className="font-display text-[10px] tracking-[3px] uppercase mb-3 flex items-center gap-1.5" style={{ color: `${accent}80` }}>
+                                    <div className="rounded-3xl p-5" style={primaryCardStyle}>
+                                        <h3 className="font-display text-[10px] tracking-[3px] uppercase mb-3 flex items-center gap-1.5" style={{ color: 'var(--color-gold-200)' }}>
                                             <span>{glyph}</span> How You Work Best
                                         </h3>
                                         <AIResponseRenderer text={reading.workStyle} />
                                     </div>
 
-                                    {/* Thrive + Struggle grid */}
+                                    {/* Thrive + Struggle grid — border-only accents */}
                                     <div className="grid grid-cols-2 gap-3">
-                                        <div className="clay-inset rounded-2xl p-4" style={{ background: 'rgba(34,197,94,0.08)' }}>
-                                            <p className="text-[9px] font-display text-green-400/70 tracking-[2px] uppercase mb-3">✦ You Thrive When</p>
+                                        <div className="rounded-2xl p-4" style={{ ...insetStyle, border: '1px solid rgba(74,222,128,0.25)' }}>
+                                            <p className="text-[9px] font-display tracking-[2px] uppercase mb-3" style={{ color: 'rgba(74,222,128,0.7)' }}>✦ You Thrive When</p>
                                             <ul className="space-y-1.5">
                                                 {reading.thrive.map((item, i) => (
-                                                    <li key={i} className="text-[11px] text-altar-text/80 leading-snug flex gap-1.5">
-                                                        <span className="text-green-400/50 shrink-0 mt-0.5">·</span>
+                                                    <li key={i} className="text-[11px] leading-snug flex gap-1.5" style={{ color: 'rgba(226,232,240,0.8)' }}>
+                                                        <span className="shrink-0 mt-0.5" style={{ color: 'rgba(74,222,128,0.5)' }}>·</span>
                                                         <span>{item}</span>
                                                     </li>
                                                 ))}
                                             </ul>
                                         </div>
-                                        <div className="clay-inset rounded-2xl p-4" style={{ background: 'rgba(239,68,68,0.08)' }}>
-                                            <p className="text-[9px] font-display text-red-400/70 tracking-[2px] uppercase mb-3">✦ You Struggle With</p>
+                                        <div className="rounded-2xl p-4" style={{ ...insetStyle, border: '1px solid rgba(248,113,113,0.25)' }}>
+                                            <p className="text-[9px] font-display tracking-[2px] uppercase mb-3" style={{ color: 'rgba(248,113,113,0.7)' }}>✦ You Struggle With</p>
                                             <ul className="space-y-1.5">
                                                 {reading.struggle.map((item, i) => (
-                                                    <li key={i} className="text-[11px] text-altar-text/80 leading-snug flex gap-1.5">
-                                                        <span className="text-red-400/40 shrink-0 mt-0.5">·</span>
+                                                    <li key={i} className="text-[11px] leading-snug flex gap-1.5" style={{ color: 'rgba(226,232,240,0.8)' }}>
+                                                        <span className="shrink-0 mt-0.5" style={{ color: 'rgba(248,113,113,0.4)' }}>·</span>
                                                         <span>{item}</span>
                                                     </li>
                                                 ))}
@@ -322,31 +318,24 @@ export function CareerAlignment({ onClose, onTabChange, subscription, onShowPrem
                                     </div>
 
                                     {/* Blind Spot */}
-                                    <div
-                                        className="clay-card rounded-3xl p-5"
-                                        style={{
-                                            background: 'rgba(251,191,36,0.04)',
-                                            borderColor: 'rgba(251,191,36,0.15)',
-                                        }}
-                                    >
-                                        <p className="text-[9px] font-display tracking-[2px] uppercase mb-2 text-amber-400/70">⚡ The Blind Spot</p>
+                                    <div className="rounded-3xl p-5" style={{ ...primaryCardStyle, border: '1px solid rgba(251,191,36,0.2)' }}>
+                                        <p className="text-[9px] font-display tracking-[2px] uppercase mb-2" style={{ color: 'rgba(251,191,36,0.7)' }}>⚡ The Blind Spot</p>
                                         <AIResponseRenderer text={reading.blindSpot} compact />
                                     </div>
 
                                     {/* Closing Question */}
                                     <div
-                                        className="clay-card rounded-3xl p-6 text-center"
+                                        className="rounded-3xl p-6 text-center"
                                         style={{
-                                            background: `linear-gradient(135deg, ${accent}08, transparent)`,
-                                            borderColor: `${accent}20`,
+                                            ...goldCardStyle,
                                         }}
                                     >
-                                        <p className="text-[9px] font-display tracking-[2px] uppercase mb-3" style={{ color: `${accent}60` }}>
+                                        <p className="text-[9px] font-display tracking-[2px] uppercase mb-3" style={{ color: 'var(--color-gold-200)' }}>
                                             ✦ The Question to Sit With
                                         </p>
                                         <p
                                             className="text-sm leading-relaxed italic"
-                                            style={{ color: `${accent}90` }}
+                                            style={{ color: 'var(--color-gold-100)', fontFamily: 'var(--font-body)' }}
                                         >
                                             {reading.theQuestion}
                                         </p>
@@ -358,7 +347,8 @@ export function CareerAlignment({ onClose, onTabChange, subscription, onShowPrem
                                             setReading(null);
                                             setUnlocked(false);
                                         }}
-                                        className="w-full text-center text-[10px] text-altar-muted/40 hover:text-altar-muted/70 transition-colors py-2 font-display tracking-wide"
+                                        className="w-full text-center text-[10px] hover:text-altar-muted/70 transition-colors py-2 font-display tracking-wide"
+                                        style={{ color: 'rgba(226,232,240,0.3)' }}
                                     >
                                         Regenerate reading
                                     </button>
@@ -366,9 +356,9 @@ export function CareerAlignment({ onClose, onTabChange, subscription, onShowPrem
                             )}
 
                             {/* Coaching upsell */}
-                            <div className="clay-inset rounded-2xl p-5 text-center mt-2 border-white/5">
-                                <p className="text-[9px] font-display text-altar-gold/40 tracking-[2px] uppercase mb-2">✦ Go Deeper</p>
-                                <p className="text-[11px] text-altar-muted/60 leading-relaxed">
+                            <div className="rounded-2xl p-5 text-center mt-2" style={insetStyle}>
+                                <p className="text-[9px] font-display tracking-[2px] uppercase mb-2" style={{ color: 'var(--color-gold-200)' }}>✦ Go Deeper</p>
+                                <p className="text-[11px] leading-relaxed" style={{ color: 'var(--color-altar-muted)', fontFamily: 'var(--font-body)', fontWeight: 300 }}>
                                     Share this reading with a career coach or mentor to turn cosmic insight into a concrete plan.
                                 </p>
                             </div>

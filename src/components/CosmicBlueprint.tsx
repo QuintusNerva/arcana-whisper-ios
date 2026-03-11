@@ -14,6 +14,8 @@ interface CosmicBlueprintProps {
 const clayCard = '0 8px 32px rgba(0,0,0,0.55), 0 2px 6px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.07), inset 0 -2px 6px rgba(0,0,0,0.35)';
 const clayPill = (r: number, g: number, b: number) =>
     `inset 0 1px 1px rgba(255,255,255,0.12), inset 0 -2px 4px rgba(0,0,0,0.35), 0 4px 12px rgba(${r},${g},${b},0.35), 0 1px 3px rgba(0,0,0,0.4)`;
+const glowPill = (r: number, g: number, b: number) =>
+    `0 0 18px rgba(${r},${g},${b},0.35), 0 0 40px rgba(${r},${g},${b},0.12), inset 0 1px 1px rgba(255,255,255,0.06), inset 0 -1px 3px rgba(0,0,0,0.3)`;
 
 // Personal Year → Manifestation Season
 const PY_MANIFESTATION: Record<number, string> = {
@@ -29,6 +31,22 @@ const PY_MANIFESTATION: Record<number, string> = {
     11: 'Inspire others — illuminate as you manifest',
     22: 'Master builder year — turn grand visions into reality',
     33: 'Selfless creation — your gifts are the manifestation',
+};
+
+// Personal Year → Theme detail (desc + focus + watchFor) to balance against Life Path card
+const PY_THEME: Record<number, { desc: string; focus: string; watchFor: string }> = {
+    1: { desc: 'A year of fresh starts and bold independence. You are planting the seeds of a new nine-year chapter.', focus: 'Initiative, new ventures, self-trust', watchFor: 'Impatience, rushing outcomes' },
+    2: { desc: 'A year of partnerships, patience, and quiet growth. Trust the process — real progress happens behind the scenes.', focus: 'Cooperation, diplomacy, inner knowing', watchFor: 'Over-giving, self-doubt' },
+    3: { desc: 'A year of creative expansion and social magnetism. Your voice carries extra power to inspire and attract.', focus: 'Self-expression, joy, visibility', watchFor: 'Scattered energy, surface-level connections' },
+    4: { desc: 'A year of building solid foundations. Discipline and structure now create lasting results for years to come.', focus: 'Planning, commitment, steady effort', watchFor: 'Rigidity, burnout from overwork' },
+    5: { desc: 'A year of change, travel, and liberation. Expect the unexpected — freedom is your theme and your reward.', focus: 'Adaptability, risk-taking, exploration', watchFor: 'Restlessness, impulsive decisions' },
+    6: { desc: 'A year centered on love, family, and responsibility. Your heart is the compass — follow it home.', focus: 'Nurturing, beauty, service to others', watchFor: 'Self-sacrifice, perfectionism' },
+    7: { desc: 'A year of deep inner work and spiritual discovery. Solitude and reflection reveal wisdom you cannot rush.', focus: 'Introspection, study, spiritual growth', watchFor: 'Isolation, overthinking' },
+    8: { desc: 'A year of power, abundance, and karmic reward. Your efforts are ripe for harvest — step into your authority.', focus: 'Financial growth, leadership, manifesting', watchFor: 'Materialism, control issues' },
+    9: { desc: 'A year of completion, release, and compassionate closure. Let go of what no longer serves your highest path.', focus: 'Forgiveness, generosity, transformation', watchFor: 'Clinging to the past, emotional heaviness' },
+    11: { desc: 'A master year of heightened intuition and spiritual awakening. You are a channel for inspiration and light.', focus: 'Vision, illumination, inspired action', watchFor: 'Nervous tension, spiritual bypassing' },
+    22: { desc: 'A master builder year of extraordinary potential. Grand visions can become reality if you match ambition with discipline.', focus: 'Legacy projects, practical mastery, big goals', watchFor: 'Overwhelm, unrealistic expectations' },
+    33: { desc: 'A master teacher year of selfless service and creative healing. Your gifts uplift everyone around you.', focus: 'Compassion, mentorship, spiritual mastery', watchFor: 'Martyrdom, emotional exhaustion' },
 };
 
 // ── Element colors for Sun / Moon / Rising signs ──
@@ -50,35 +68,35 @@ const ELEMENT_STYLE: Record<Element, {
     r: number; g: number; b: number;
 }> = {
     Fire: {
-        grad: 'linear-gradient(145deg, #7c1d06 0%, #5a1504 60%, #2d0c02 100%)',
-        border: 'rgba(251,146,60,0.22)',
+        grad: 'rgba(15,10,30, 0.85)',
+        border: 'rgba(251,146,60,0.15)',
         labelColor: 'rgba(253,186,116,0.85)',
         valueColor: 'rgb(253,186,116)',
-        shadow: clayPill(239, 68, 68),
+        shadow: glowPill(239, 68, 68),
         r: 239, g: 68, b: 68,
     },
     Earth: {
-        grad: 'linear-gradient(145deg, #1a3311 0%, #122509 60%, #090f05 100%)',
-        border: 'rgba(134,239,172,0.2)',
+        grad: 'rgba(15,10,30, 0.85)',
+        border: 'rgba(134,239,172,0.12)',
         labelColor: 'rgba(134,239,172,0.8)',
         valueColor: 'rgb(134,239,172)',
-        shadow: clayPill(22, 163, 74),
+        shadow: glowPill(22, 163, 74),
         r: 22, g: 163, b: 74,
     },
     Air: {
-        grad: 'linear-gradient(145deg, #0c2a45 0%, #071d33 60%, #030e1a 100%)',
-        border: 'rgba(147,197,253,0.2)',
+        grad: 'rgba(15,10,30, 0.85)',
+        border: 'rgba(147,197,253,0.12)',
         labelColor: 'rgba(147,197,253,0.8)',
         valueColor: 'rgb(147,197,253)',
-        shadow: clayPill(59, 130, 246),
+        shadow: glowPill(59, 130, 246),
         r: 59, g: 130, b: 246,
     },
     Water: {
-        grad: 'linear-gradient(145deg, #0d2a3a 0%, #081d28 60%, #030d14 100%)',
-        border: 'rgba(94,234,212,0.2)',
+        grad: 'rgba(15,10,30, 0.85)',
+        border: 'rgba(94,234,212,0.12)',
         labelColor: 'rgba(94,234,212,0.8)',
         valueColor: 'rgb(94,234,212)',
-        shadow: clayPill(20, 184, 166),
+        shadow: glowPill(20, 184, 166),
         r: 20, g: 184, b: 166,
     },
 };
@@ -233,6 +251,7 @@ export function CosmicBlueprint({ onTabChange }: CosmicBlueprintProps) {
             <div
                 className="rounded-3xl overflow-hidden"
                 style={{
+                    position: 'relative',
                     background: 'linear-gradient(160deg, #1c1538 0%, #130f2e 50%, #0d0b22 100%)',
                     boxShadow: clayCard,
                     border: '1px solid rgba(255,255,255,0.07)',
@@ -241,8 +260,17 @@ export function CosmicBlueprint({ onTabChange }: CosmicBlueprintProps) {
                 {/* Header */}
                 <div className="p-5 pb-3">
                     <div className="flex items-start justify-between mb-1">
-                        <h3 className="font-display text-sm text-altar-gold tracking-[3px] uppercase flex items-center gap-2">
-                            <span className="text-lg">🌌</span> Cosmic Blueprint
+                        <h3 className="font-display text-[14px] text-altar-gold tracking-[3px] uppercase flex items-center gap-2">
+                            <span className="inline-flex" style={{ width: 18, height: 18 }}>
+                                <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" style={{ stroke: 'var(--color-altar-gold)', strokeWidth: 1.2, fill: 'none' }}>
+                                    <circle cx="10" cy="10" r="8" opacity={0.3} />
+                                    <circle cx="10" cy="10" r="3" opacity={0.5} />
+                                    <line x1="10" y1="1" x2="10" y2="4" strokeLinecap="round" />
+                                    <line x1="10" y1="16" x2="10" y2="19" strokeLinecap="round" />
+                                    <line x1="1" y1="10" x2="4" y2="10" strokeLinecap="round" />
+                                    <line x1="16" y1="10" x2="19" y2="10" strokeLinecap="round" />
+                                </svg>
+                            </span> Cosmic Blueprint
                         </h3>
                         {/* Moon phase indicator — top right */}
                         <button
@@ -254,7 +282,11 @@ export function CosmicBlueprint({ onTabChange }: CosmicBlueprintProps) {
                                 border: '1px solid rgba(167,139,250,0.15)',
                             }}
                         >
-                            <span className="text-sm">{lunarData.currentPhase.emoji}</span>
+                            <span className="inline-flex items-center" style={{ width: 14, height: 14 }}>
+                                <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" style={{ fill: 'var(--color-altar-gold)', filter: 'drop-shadow(0 0 4px rgba(212,175,55,0.4))' }}>
+                                    <path d="M15 3c-4.5 1-7.5 5-7.5 9.5s3 7.5 7.5 8.5c-6 0-11-4.5-11-10S6 1 12 1c1 0 2.1.3 3 .7V3z" />
+                                </svg>
+                            </span>
                             <span className="text-[9px] text-violet-200/80 font-display tracking-wider">{lunarData.currentPhase.name}</span>
                             <span className="text-[8px] text-violet-300/60">→</span>
                         </button>
@@ -275,11 +307,11 @@ export function CosmicBlueprint({ onTabChange }: CosmicBlueprintProps) {
                                     minHeight: '58px',
                                 }}
                             >
-                                <p className="text-[9px] font-display tracking-[2px] uppercase mb-0.5"
+                                <p className="text-[10px] font-display tracking-[2px] uppercase mb-0.5"
                                     style={{ color: item.style.labelColor, opacity: 1 }}>
                                     {item.label}
                                 </p>
-                                <p className="text-[11px] font-bold leading-tight whitespace-nowrap overflow-hidden text-ellipsis" style={{ color: item.style.valueColor }}>
+                                <p className="text-[13px] font-bold leading-tight whitespace-nowrap overflow-hidden text-ellipsis" style={{ color: item.style.valueColor }}>
                                     {item.glyph} {item.value}
                                 </p>
                             </button>
@@ -293,26 +325,26 @@ export function CosmicBlueprint({ onTabChange }: CosmicBlueprintProps) {
                             onClick={() => onTabChange('numerology')}
                             className="rounded-xl p-3 text-left transition-all duration-200 hover:brightness-110 hover:scale-[1.02] active:scale-[0.97]"
                             style={{
-                                background: 'linear-gradient(145deg, #3d2007 0%, #2a1505 100%)',
-                                boxShadow: clayPill(146, 64, 14),
-                                border: '1px solid rgba(251,191,36,0.25)',
+                                background: 'linear-gradient(145deg, #22164d 0%, #170f38 100%)',
+                                boxShadow: `${clayPill(109, 40, 217)}, 0 0 25px rgba(212,175,55,0.15), 0 0 50px rgba(212,175,55,0.08)`,
+                                border: '1px solid rgba(167,139,250,0.25)',
                             }}
                         >
-                            <p className="text-[10px] text-amber-200 font-display tracking-[2px] uppercase mb-1 flex items-center justify-between">
-                                Life Path <span className="text-[8px] opacity-60">→</span>
+                            <p className="text-[10px] text-altar-gold font-display tracking-[2px] uppercase mb-1 flex items-center justify-between">
+                                Life Path <span className="text-[10px] opacity-80">→</span>
                             </p>
-                            <p className="text-sm text-amber-100 font-bold text-left">
-                                #{lifePath} <span className="text-[10px] font-normal text-amber-200/80">— {lifePathMeaning.title}</span>
+                            <p className="text-sm text-violet-100 font-bold text-left">
+                                #{lifePath} <span className="text-[10px] font-normal text-altar-gold">— {lifePathMeaning.title}</span>
                             </p>
-                            <p className="text-[9px] text-amber-100/70 mt-1.5 leading-snug">
+                            <p className="text-[11px] text-violet-100/70 mt-1.5 leading-snug">
                                 {lifePathMeaning.desc}
                             </p>
                             <div className="mt-2 flex flex-col gap-1">
-                                <p className="text-[9px] text-amber-200/75 leading-snug">
-                                    <span className="text-amber-200">✦</span> {lifePathMeaning.strengths}
+                                <p className="text-[10px] text-violet-200/75 leading-snug">
+                                    <span className="text-altar-gold">✦</span> {lifePathMeaning.strengths}
                                 </p>
-                                <p className="text-[9px] text-amber-200/75 leading-snug">
-                                    <span className="text-amber-200">⚡</span> {lifePathMeaning.challenges}
+                                <p className="text-[10px] text-violet-200/75 leading-snug">
+                                    <span className="text-altar-gold">⚡</span> {lifePathMeaning.challenges}
                                 </p>
                             </div>
                         </button>
@@ -327,21 +359,40 @@ export function CosmicBlueprint({ onTabChange }: CosmicBlueprintProps) {
                                 border: '1px solid rgba(167,139,250,0.25)',
                             }}
                         >
-                            <p className="text-[10px] text-violet-200 font-display tracking-[2px] uppercase mb-1 flex items-center justify-between">
-                                Personal Year <span className="text-[8px] opacity-60">→</span>
+                            <p className="text-[10px] text-altar-gold font-display tracking-[2px] uppercase mb-1 flex items-center justify-between">
+                                Personal Year <span className="text-[10px] opacity-80">→</span>
                             </p>
                             <p className="text-sm text-violet-100 font-bold">
-                                #{personalYear} <span className="text-[10px] font-normal text-violet-200/80">— {new Date().getFullYear()} Cycle</span>
+                                #{personalYear} <span className="text-[10px] font-normal text-altar-gold">— {new Date().getFullYear()} Cycle</span>
                             </p>
-                            {PY_MANIFESTATION[personalYear] && (
-                                <p className="text-[9px] text-violet-100/75 mt-1 leading-snug italic">
-                                    {PY_MANIFESTATION[personalYear]}
+                            {PY_THEME[personalYear] && (
+                                <p className="text-[11px] text-violet-100/70 mt-1.5 leading-snug">
+                                    {PY_THEME[personalYear].desc}
                                 </p>
+                            )}
+                            {PY_THEME[personalYear] && (
+                                <div className="mt-2 flex flex-col gap-1">
+                                    <p className="text-[10px] text-violet-200/75 leading-snug">
+                                        <span className="text-violet-200">✦</span> {PY_THEME[personalYear].focus}
+                                    </p>
+                                    <p className="text-[10px] text-violet-200/75 leading-snug">
+                                        <span className="text-violet-200">⚡</span> {PY_THEME[personalYear].watchFor}
+                                    </p>
+                                </div>
                             )}
                         </button>
                     </div>
 
                     {/* Moon phase details moved to dedicated MoonScreen */}
+
+                    {/* Sacred geometry divider */}
+                    <div style={{ margin: '8px 20px 0', height: 1, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, transparent, rgba(212,175,55,0.2), transparent)' }} />
+                        <svg width={14} height={14} viewBox="0 0 14 14" style={{ position: 'relative', zIndex: 1 }}>
+                            <rect x={3.5} y={3.5} width={7} height={7} transform="rotate(45 7 7)" stroke="rgba(212,175,55,0.4)" strokeWidth={0.8} fill="rgba(212,175,55,0.06)" />
+                            <circle cx={7} cy={7} r={1.5} fill="rgba(212,175,55,0.3)" />
+                        </svg>
+                    </div>
 
                 </div>
 
@@ -356,7 +407,7 @@ export function CosmicBlueprint({ onTabChange }: CosmicBlueprintProps) {
                                 border: '1px solid rgba(255,255,255,0.06)',
                             }}
                         >
-                            <p className="text-[9px] font-display text-altar-gold/60 tracking-[2px] uppercase mb-2">✦ Your Cosmic Blueprint</p>
+                            <p className="text-[13px] font-display text-altar-gold tracking-[3px] uppercase mb-3 text-center">✦ Your Cosmic Blueprint ✦</p>
                             <div className={collapsed ? 'max-h-[100px] overflow-hidden relative' : ''}>
                                 <AIResponseRenderer text={reading} />
                                 {collapsed && (
@@ -394,37 +445,57 @@ export function CosmicBlueprint({ onTabChange }: CosmicBlueprintProps) {
                             )}
                             <button
                                 onClick={handleReveal}
-                                className="w-full py-3.5 rounded-2xl text-sm text-altar-gold font-display tracking-wide transition-all hover:brightness-110 active:scale-[0.98] flex items-center justify-center gap-2"
+                                className="w-full relative overflow-hidden rounded-[20px] flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
                                 style={{
-                                    background: 'linear-gradient(145deg, #2d1f6e 0%, #1e1454 50%, #130d3a 100%)',
-                                    boxShadow: '0 6px 20px rgba(109,40,217,0.45), 0 2px 4px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.14), inset 0 -2px 5px rgba(0,0,0,0.4)',
-                                    border: '1px solid rgba(212,175,55,0.2)',
+                                    background: 'linear-gradient(180deg, #F9E491, #D4A94E 30%, #C59341 60%, #A67B2E)',
+                                    border: '2px solid rgba(212,175,55,0.6)',
+                                    padding: '18px 24px',
+                                    boxShadow: '0 2px 0 #8a6b25, 0 4px 12px rgba(0,0,0,0.5), 0 0 40px rgba(212,175,55,0.15), inset 0 1px 0 rgba(255,255,255,0.35)',
+                                    fontFamily: "'Cinzel', serif",
+                                    fontWeight: 800,
+                                    fontSize: '14px',
+                                    letterSpacing: '3.5px',
+                                    textTransform: 'uppercase' as const,
+                                    color: '#1a0f2e',
                                 }}
                             >
-                                <span>🌌</span> Reveal Your Blueprint
+                                {/* Shimmer sweep */}
+                                <div className="absolute top-0 left-0 right-0 bottom-0" style={{
+                                    width: '200%',
+                                    background: 'linear-gradient(90deg, transparent 30%, rgba(255,255,255,0.22) 50%, transparent 70%)',
+                                    animation: 'shimmer-sweep 3.5s ease-in-out infinite',
+                                }} />
+                                <span className="inline-flex relative z-10" style={{ width: 18, height: 18 }}>
+                                    <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" style={{ stroke: '#1a0f2e', strokeWidth: 1.2, fill: 'none' }}>
+                                        <circle cx={10} cy={10} r={7} opacity={0.4} />
+                                        <circle cx={10} cy={10} r={2.5} opacity={0.6} />
+                                        <line x1={10} y1={2} x2={10} y2={5} strokeLinecap="round" />
+                                        <line x1={10} y1={15} x2={10} y2={18} strokeLinecap="round" />
+                                        <line x1={2} y1={10} x2={5} y2={10} strokeLinecap="round" />
+                                        <line x1={15} y1={10} x2={18} y2={10} strokeLinecap="round" />
+                                    </svg>
+                                </span>
+                                <span className="relative z-10">Reveal Your Blueprint</span>
                             </button>
                         </>
                     )}
                 </div>
+            </div>
 
-                {/* ── View Full Blueprint Reading ── */}
-                <button
-                    onClick={() => onTabChange('blueprint')}
-                    className="w-full flex items-center justify-center gap-2 px-5 py-2.5 transition-colors hover:bg-white/[0.04]"
-                    style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
-                >
-                    <span className="text-[9px] text-altar-gold/50 font-display tracking-[2px] uppercase">🌌 View Full Blueprint Reading</span>
-                    <span className="text-[9px] text-altar-gold/30 font-display">→</span>
-                </button>
-
-                {/* ── Manifestation Scripting Shortcut ── */}
+            {/* ── Scripting Shortcut (outside card, tightened gap) ── */}
+            <div style={{ margin: '4px 0 0' }}>
                 <button
                     onClick={() => onTabChange('journal')}
-                    className="w-full flex items-center justify-between px-5 py-3.5 transition-colors hover:bg-white/[0.04] group"
-                    style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
+                    className="w-full flex items-center justify-between px-5 py-3.5 rounded-2xl transition-all hover:bg-white/[0.04] active:scale-[0.98] group"
+                    style={{ background: 'rgba(35,20,60,0.5)', border: '1px solid rgba(212,175,55,0.08)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
                 >
                     <span className="flex items-center gap-2 text-[11px] font-display italic" style={{ color: 'rgba(212,175,55,0.75)' }}>
-                        <span className="text-base" style={{ filter: 'drop-shadow(0 0 6px rgba(212,175,55,0.5))' }}>✍</span>
+                        <span className="inline-flex items-center" style={{ width: 16, height: 16 }}>
+                            <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" style={{ stroke: 'var(--color-altar-gold)', strokeWidth: 1.3, fill: 'none', filter: 'drop-shadow(0 0 6px rgba(212,175,55,0.5))' }}>
+                                <path d="M3 17 L3 14 L14 3 L17 6 L6 17 Z" strokeLinejoin="round" />
+                                <line x1={12} y1={5} x2={15} y2={8} opacity={0.4} />
+                            </svg>
+                        </span>
                         What are you scripting today?
                     </span>
                     <span className="text-[9px] text-altar-gold/40 group-hover:text-altar-gold/60 transition-colors font-display">Create →</span>
