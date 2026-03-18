@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Arcana Whisper — Altar Daily Hooks Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+/* ═══════════════════════════════════════════════════════════════════
+   SACRED FINTECH — ALTAR v5 (CLEAN)
+   Only 2 hooks on Witness: Altar Shift + Script Row
+   ═══════════════════════════════════════════════════════════════════ */
+:root {
+    --color-altar-deep:#120224; --color-altar-dark:#1F0D38;
+    --gold-100:#F9E491; --gold-200:#D4A94E; --gold-300:#C59341; --gold-400:#A67B2E; --gold-500:#8a6914;
+    --gold-glow-soft:rgba(212,175,55,.08); --gold-glow-med:rgba(212,175,55,.18);
+    --text:#e2e8f0; --muted:#94a3b8; --muted-dim:rgba(148,163,184,.5);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:linear-gradient(180deg,var(--color-altar-deep) 0%,#0d0a1a 50%,var(--color-altar-deep) 100%);color:var(--text);min-height:100vh;display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
+.phone{width:100%;max-width:500px;min-height:100vh;position:relative;overflow-y:auto;overflow-x:hidden}
+.content{position:relative;z-index:1;padding-bottom:90px}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes pulseSoft{0%,100%{opacity:.5}50%{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{opacity:0;animation:fadeUp .8s ease-out forwards}
+
+.particles{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.particle{position:absolute;width:2px;height:2px;border-radius:50%;background:var(--gold-200);opacity:.15;animation:float 8s ease-in-out infinite}
+.particle:nth-child(1){top:15%;left:20%}.particle:nth-child(2){top:30%;left:70%;animation-delay:1.5s;width:3px;height:3px}
+.particle:nth-child(3){top:55%;left:40%;animation-delay:3s}.particle:nth-child(4){top:75%;left:85%;animation-delay:4.5s}
+
+/* ═══ Header ═══ */
+.app-header{text-align:center;padding:20px 20px 8px;position:relative;background:linear-gradient(180deg,var(--color-altar-deep) 0%,transparent 100%)}
+.app-title{font-family:'Cinzel',serif;font-size:18px;font-weight:600;letter-spacing:5px}
+.app-title .star{color:var(--gold-200)}
+.shimmer-text{background:linear-gradient(90deg,var(--gold-100),var(--gold-200),#fff8e1,var(--gold-200),var(--gold-100));background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.greeting{font-size:13px;color:rgba(226,232,240,.75);margin-top:6px}
+.gear-btn{position:absolute;right:16px;top:20px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:.4}
+.gear-btn svg{width:17px;height:17px;fill:var(--gold-200);filter:drop-shadow(0 0 3px rgba(212,175,55,.3))}
+
+/* ═══ Daily Status Strip (side by side) ═══ */
+.daily-strip{display:flex;gap:10px;margin:0 12px 8px}
+
+.altar-shift{flex:1;padding:14px 14px;border-radius:16px;background:rgba(61,29,90,.35);border:1px solid rgba(212,175,55,.10);backdrop-filter:blur(12px);display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.altar-shift-emoji{font-size:24px;filter:drop-shadow(0 0 10px rgba(212,175,55,.15));animation:float 8s ease-in-out infinite}
+.altar-shift-phase{font-family:'Cinzel',serif;font-size:10px;font-weight:600;letter-spacing:1.5px;color:var(--gold-100)}
+.altar-shift-energy{font-family:'Inter',sans-serif;font-size:9px;font-weight:300;color:var(--muted);line-height:1.5;margin-top:2px}
+.altar-shift-pill{display:inline-block;padding:3px 8px;border-radius:10px;font-family:'Cinzel',serif;font-size:7px;letter-spacing:1px;text-transform:uppercase;background:rgba(197,147,65,.12);color:var(--gold-200);border:1px solid rgba(197,147,65,.25);margin-top:6px}
+
+.script-card{flex:1;padding:14px 14px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;cursor:pointer;transition:all .3s}
+.script-card:hover{border-color:rgba(197,147,65,.15);background:rgba(197,147,65,.03)}
+.script-card-icon{font-size:24px;filter:drop-shadow(0 0 8px rgba(197,147,65,.15))}
+.script-card-title{font-family:'Cinzel',serif;font-size:10px;font-weight:500;color:var(--text);letter-spacing:1px}
+.script-card-sub{font-family:'Inter',sans-serif;font-size:9px;font-weight:300;color:var(--muted);line-height:1.4}
+.script-card-action{font-family:'Cinzel',serif;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold-200);opacity:.5;margin-top:2px}
+
+/* ═══ Cosmic Blueprint ═══ */
+.cosmic-blueprint{margin:8px 12px 0;padding:20px;border-radius:22px;background:linear-gradient(160deg,#1c1538,#130f2e 55%,#0d0b22);border:1px solid rgba(255,255,255,.07);box-shadow:0 8px 28px rgba(0,0,0,.5),0 2px 6px rgba(0,0,0,.4),inset 0 1px 1px rgba(255,255,255,.08),inset 0 -2px 5px rgba(0,0,0,.35)}
+.bp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.bp-title{font-family:'Cinzel',serif;font-size:13px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:var(--gold-100);display:flex;align-items:center;gap:8px}
+.bp-title-icon{font-size:16px;filter:drop-shadow(0 0 6px rgba(212,175,55,.3))}
+.moon-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;background:rgba(197,147,65,.12);border:1px solid rgba(197,147,65,.25);font-family:'Cinzel',serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold-200)}
+.sign-row{display:flex;gap:8px;margin-bottom:14px}
+.sign-pill{flex:1;text-align:center;padding:8px 4px;border-radius:14px;background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.15)}
+.sign-pill-label{font-family:'Cinzel',serif;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:rgba(165,180,252,.6);display:block;margin-bottom:4px}
+.sign-pill-value{font-family:'Cinzel',serif;font-size:12px;font-weight:600;color:var(--text);display:flex;align-items:center;justify-content:center;gap:4px}
+.sign-pill-value .glyph{font-size:14px}
+.bp-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.bp-card{padding:14px 16px;border-radius:16px;background:rgba(61,29,90,.35);border:1px solid rgba(212,175,55,.10);backdrop-filter:blur(12px)}
+.bp-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.bp-card-label{font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold-200);opacity:.5}
+.bp-card-arrow{color:var(--gold-200);opacity:.3;font-size:12px}
+.bp-card-number{font-family:'Cinzel',serif;font-size:16px;font-weight:700;color:var(--text);margin-bottom:2px}
+.bp-card-desc{font-family:'Inter',sans-serif;font-size:10px;font-weight:300;color:rgba(226,232,240,.6);line-height:1.7}
+.bp-card-traits{margin-top:8px;font-family:'Inter',sans-serif;font-size:9px;font-weight:300;line-height:1.8}
+.bp-card-traits .positive{color:var(--gold-200);opacity:.7}
+.bp-card-traits .shadow{color:rgba(251,191,36,.5)}
+.gold-cta{display:block;width:100%;padding:18px 24px;border-radius:20px;background:linear-gradient(180deg,#F9E491,#D4A94E 30%,#C59341 60%,#A67B2E);border:2px solid rgba(212,175,55,.6);font-family:'Cinzel',serif;font-size:13px;font-weight:800;letter-spacing:3.5px;text-transform:uppercase;color:var(--color-altar-deep);text-align:center;cursor:pointer;box-shadow:0 2px 0 var(--gold-500),0 4px 12px rgba(0,0,0,.5),0 0 40px var(--gold-glow-soft),inset 0 1px 0 rgba(255,255,255,.35);position:relative;overflow:hidden;transition:transform .15s}
+.gold-cta:active{transform:scale(.98)}
+.gold-cta .shimmer-bar{position:absolute;top:0;left:0;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);animation:shimmer 3.5s ease-in-out infinite}
+.gold-cta-icon{display:inline-flex;align-items:center;gap:8px;position:relative;z-index:1}
+
+/* ═══ Expand panel (for script) ═══ */
+
+.expand-panel{max-height:0;overflow:hidden;opacity:0;transition:max-height .4s ease,opacity .3s ease,margin .3s ease;margin-top:0}
+.expand-panel.open{max-height:350px;opacity:1;margin-top:8px}
+.expand-inner{margin:0 20px;padding:16px;border-radius:16px;background:linear-gradient(160deg,rgba(28,21,56,.95),rgba(13,11,34,.98));border:1px solid rgba(255,255,255,.07)}
+.expand-question{font-family:'Cinzel',serif;font-size:13px;font-weight:500;color:var(--text);line-height:1.6;margin-bottom:12px}
+.expand-textarea{width:100%;min-height:70px;padding:12px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);color:var(--text);font-family:'Inter',sans-serif;font-size:11px;font-weight:300;line-height:1.8;resize:none;outline:none;transition:border-color .3s}
+.expand-textarea::placeholder{color:var(--muted-dim)}
+.expand-textarea:focus{border-color:rgba(197,147,65,.25)}
+.expand-footer{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+.save-btn{padding:8px 16px;border-radius:12px;background:linear-gradient(135deg,rgba(197,147,65,.20),rgba(197,147,65,.08));border:1px solid rgba(197,147,65,.3);font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold-200);cursor:pointer;transition:all .3s}
+.save-btn:hover{background:linear-gradient(135deg,rgba(197,147,65,.30),rgba(197,147,65,.15))}
+.char-count{font-family:'Inter',sans-serif;font-size:9px;color:var(--muted-dim)}
+
+/* ── Action CTA ── */
+.action-cta{display:none;margin:10px 20px 0;padding:12px 16px;border-radius:14px;background:linear-gradient(135deg,rgba(212,175,55,.08),rgba(197,147,65,.04));border:1px solid rgba(212,175,55,.18);cursor:pointer;transition:all .3s;align-items:center;gap:12px}
+.action-cta.visible{display:flex;animation:slideUp .4s ease-out forwards}
+.action-cta:hover{border-color:rgba(212,175,55,.35);transform:translateY(-1px)}
+.action-cta-icon{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,rgba(212,175,55,.15),rgba(212,175,55,.05));border:1px solid rgba(212,175,55,.2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.action-cta-body{flex:1}
+.action-cta-label{font-family:'Cinzel',serif;font-size:10px;font-weight:600;letter-spacing:1.5px;color:var(--gold-100)}
+.action-cta-desc{font-family:'Inter',sans-serif;font-size:9px;font-weight:300;color:var(--muted);margin-top:2px}
+.action-cta-arrow{font-family:'Cinzel',serif;font-size:11px;color:var(--gold-200);opacity:.6;display:flex;align-items:center;gap:4px}
+.action-cta-arrow .tab-name{font-size:8px;letter-spacing:2px;text-transform:uppercase;opacity:.7}
+
+/* ═══ Portal Grid ═══ */
+.portal-section{margin:16px 12px 16px}
+.portal-title{font-family:'Cinzel',serif;font-size:13px;font-weight:400;letter-spacing:5px;text-transform:uppercase;color:var(--gold-200);text-align:center;margin-bottom:16px}
+.portal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.portal-card{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:20px 10px 16px;border-radius:20px;background:linear-gradient(165deg,rgba(35,20,60,.85),rgba(18,10,40,.95));border:1px solid rgba(212,175,55,.12);box-shadow:0 8px 32px rgba(0,0,0,.45),0 2px 8px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.06),inset 0 -3px 10px rgba(0,0,0,.3);cursor:pointer;transition:all .3s;position:relative;overflow:hidden;aspect-ratio:1/1.15}
+.portal-card:active{transform:scale(.96)}
+.portal-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(to right,transparent 10%,rgba(212,175,55,.35) 50%,transparent 90%)}
+.portal-card-icon{width:88px;height:88px;border-radius:14px;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(212,175,55,.25))}
+.portal-card-label{font-family:'Cinzel',serif;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--gold-200);text-align:center}
+.portal-card-desc{font-family:'Inter',sans-serif;font-size:10px;font-weight:300;color:rgba(226,232,240,.65);text-align:center}
+
+/* ═══ Bottom Nav ═══ */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:500px;display:flex;align-items:center;justify-content:space-around;padding:12px 0 24px;background:rgba(18,2,36,.85);backdrop-filter:blur(16px);border-top:1px solid rgba(255,255,255,.04);z-index:20}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted-dim);cursor:pointer;position:relative;transition:color .3s}
+.nav-item.active{color:var(--gold-200)}
+.nav-item.active::before{content:'';position:absolute;top:-12px;left:50%;transform:translateX(-50%);width:28px;height:3px;border-radius:2px;background:var(--gold-200);box-shadow:0 0 8px var(--gold-glow-med)}
+.nav-icon{font-size:18px}
+</style>
+</head>
+<body>
+
+<div class="particles"><div class="particle"></div><div class="particle"></div><div class="particle"></div><div class="particle"></div></div>
+
+<div class="phone">
+<div class="content">
+
+    <!-- ═══ Header ═══ -->
+    <header class="app-header fade-up">
+        <button class="gear-btn"><svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z"/><path fill-rule="evenodd" d="M8.5 1.5a1.5 1.5 0 00-1.415 1.002L6.72 3.598A7.536 7.536 0 005.18 4.5l-1.132-.441a1.5 1.5 0 00-1.792.68l-1.5 2.598a1.5 1.5 0 00.377 1.883l.834.606c-.057.437-.086.885-.086 1.338 0 .453.029.9.086 1.338l-.834.605a1.5 1.5 0 00-.377 1.883l1.5 2.598a1.5 1.5 0 001.792.68l1.133-.441c.48.38.998.71 1.54.994l.366 1.095A1.5 1.5 0 0010.12 20h3l.001-.002a1.5 1.5 0 001.414-1.002l.365-1.095a7.523 7.523 0 001.541-.994l1.133.441a1.5 1.5 0 001.792-.68l1.5-2.598a1.5 1.5 0 00-.377-1.883l-.834-.605c.057-.437.086-.885.086-1.338 0-.453-.029-.9-.086-1.338l.834-.606a1.5 1.5 0 00.377-1.883l-1.5-2.598a1.5 1.5 0 00-1.792-.68l-1.133.441a7.524 7.524 0 00-1.54-.994L11.5 2.502A1.5 1.5 0 0010 1.5H8.5z" clip-rule="evenodd" opacity=".3"/></svg></button>
+        <h1 class="app-title"><span class="star">✦</span> <span class="shimmer-text">ARCANA WHISPER</span> <span class="star">✦</span></h1>
+        <p class="greeting">Good afternoon, Traveler · Thursday, March 12</p>
+    </header>
+
+    <!-- ═══ Daily Status Strip (side by side) ═══ -->
+    <div class="daily-strip fade-up" style="animation-delay:.1s">
+        <div class="altar-shift">
+            <span class="altar-shift-emoji">🌗</span>
+            <p class="altar-shift-phase">Last Quarter Moon</p>
+            <p class="altar-shift-energy">Release what didn't serve this cycle.</p>
+            <span class="altar-shift-pill"><span style="display:inline-flex;align-items:center;gap:3px"><span style="width:5px;height:5px;border-radius:50%;background:var(--gold-200);animation:pulseSoft 2s infinite"></span>Release</span></span>
+        </div>
+        <div class="script-card" onclick="toggleExpand()">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 6px rgba(212,175,55,.3))">
+                <path d="M32 8l8 8-22 22H10v-8L32 8z" stroke="#D4A94E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                <path d="M28 12l8 8" stroke="#D4A94E" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M10 30l8 8" stroke="#D4A94E" stroke-width="1.2" stroke-linecap="round" opacity=".5"/>
+                <path d="M8 40l4-2-2-2-2 4z" fill="#D4A94E" opacity=".7"/>
+                <circle cx="38" cy="10" r="1.5" fill="#F9E491" opacity=".8"/>
+                <circle cx="40" cy="8" r="1" fill="#F9E491" opacity=".5"/>
+            </svg>
+            <p class="script-card-title">Daily Script</p>
+            <p class="script-card-sub">"What am I ready to release?"</p>
+            <span class="script-card-action">Write →</span>
+        </div>
+    </div>
+
+    <!-- ═══ Cosmic Blueprint ═══ -->
+    <div class="cosmic-blueprint fade-up" style="animation-delay:.15s">
+        <div class="bp-header">
+            <span class="bp-title"><span class="bp-title-icon">⚙️</span> Cosmic Blueprint</span>
+            <span class="moon-pill">🌗 Waning Gibbous →</span>
+        </div>
+        <div class="sign-row">
+            <div class="sign-pill"><span class="sign-pill-label">Sun</span><span class="sign-pill-value"><span class="glyph">♐</span> Sagittarius</span></div>
+            <div class="sign-pill"><span class="sign-pill-label">Moon</span><span class="sign-pill-value"><span class="glyph">♈</span> Aries</span></div>
+            <div class="sign-pill"><span class="sign-pill-label">Rising</span><span class="sign-pill-value"><span class="glyph">♊</span> Gemini</span></div>
+        </div>
+        <div class="bp-cards">
+            <div class="bp-card">
+                <div class="bp-card-header"><span class="bp-card-label">Life Path</span><span class="bp-card-arrow">→</span></div>
+                <p class="bp-card-number">#11 <span style="font-size:12px;font-weight:400;color:var(--muted)">— The Illuminator</span></p>
+                <p class="bp-card-desc">A master number — you carry heightened intuition and spiritual insight. Your path is about enlightenment and inspiration.</p>
+                <div class="bp-card-traits"><div class="positive">✦ Visionary, inspirational, psychic</div><div class="shadow">⚡ Anxiety, self-doubt, nervous energy</div></div>
+            </div>
+            <div class="bp-card">
+                <div class="bp-card-header"><span class="bp-card-label">Personal Year</span><span class="bp-card-arrow">→</span></div>
+                <p class="bp-card-number">#8 <span style="font-size:12px;font-weight:400;color:var(--muted)">— 2026 Cycle</span></p>
+                <p class="bp-card-desc">A year of power, abundance, and karmic reward. Your efforts are ripe for harvest — step into your authority.</p>
+                <div class="bp-card-traits"><div class="positive">✦ Financial growth, leadership, manifesting</div><div class="shadow">⚡ Materialism, control issues</div></div>
+            </div>
+        </div>
+        <button class="gold-cta"><div class="shimmer-bar"></div><span class="gold-cta-icon">⚙️ Reveal Your Blueprint</span></button>
+    </div>
+    <div class="expand-panel" id="scripting-panel">
+        <div class="expand-inner">
+            <p class="expand-question">"What am I holding onto that I'm ready to release? Write it down, then let it go."</p>
+            <textarea class="expand-textarea" id="scripting-input" placeholder="Write as the version of yourself who has already released it..." oninput="updateCharCount()"></textarea>
+            <div class="expand-footer">
+                <button class="save-btn" onclick="event.stopPropagation(); saveScript()">✦ Save</button>
+                <span class="char-count" id="char-count">0 / 500</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script → Create CTA (appears after save) -->
+    <div class="action-cta" id="script-cta" onclick="goToCreate()">
+        <div class="action-cta-icon">🔥</div>
+        <div class="action-cta-body">
+            <p class="action-cta-label">Release Ritual</p>
+            <p class="action-cta-desc">Turn this into a guided ceremony · pairs with tonight's moon</p>
+        </div>
+        <div class="action-cta-arrow"><span class="tab-name">Create</span> →</div>
+    </div>
+
+    <!-- ═══ Portal Grid ═══ -->
+    <div class="portal-section fade-up" style="animation-delay:.3s">
+        <p class="portal-title"><span style="color:var(--gold-200)">✦</span> Your Portal <span style="color:var(--gold-200)">✦</span></p>
+        <div class="portal-grid">
+            <div class="portal-card"><img class="portal-card-icon" src="../src/assets/icons/tarot.png" alt="Tarot"><span class="portal-card-label">Tarot</span><span class="portal-card-desc">Today's energy + spreads</span></div>
+            <div class="portal-card"><img class="portal-card-icon" src="../src/assets/icons/relationships.png" alt="Relationships"><span class="portal-card-label">Relationships</span><span class="portal-card-desc">Cosmic bonds</span></div>
+            <div class="portal-card"><img class="portal-card-icon" src="../src/assets/icons/angel-numbers.png" alt="Angel Numbers"><span class="portal-card-label">Angel Numbers</span><span class="portal-card-desc">Signs &amp; synchronicities</span></div>
+            <div class="portal-card"><img class="portal-card-icon" src="../src/assets/icons/natal.png" alt="Natal"><span class="portal-card-label">Natal</span><span class="portal-card-desc">Your birth blueprint</span></div>
+            <div class="portal-card"><img class="portal-card-icon" src="../src/assets/icons/family.png" alt="Family"><span class="portal-card-label">Family</span><span class="portal-card-desc">Circle of souls</span></div>
+            <div class="portal-card"><img class="portal-card-icon" src="../src/assets/icons/career.png" alt="Career"><span class="portal-card-label">Career</span><span class="portal-card-desc">Your true calling</span></div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ═══ Bottom Nav ═══ -->
+<div class="bottom-nav">
+    <div class="nav-item active"><span class="nav-icon">🏠</span> Witness</div>
+    <div class="nav-item"><span class="nav-icon">✦</span> Create</div>
+    <div class="nav-item"><span class="nav-icon">📖</span> School</div>
+</div>
+</div>
+
+<script>
+function toggleExpand() {
+    const panel = document.getElementById('scripting-panel');
+    panel.classList.toggle('open');
+}
+function updateCharCount() {
+    const input = document.getElementById('scripting-input');
+    document.getElementById('char-count').textContent = `${input.value.length} / 500`;
+}
+function saveScript() {
+    const input = document.getElementById('scripting-input');
+    if (input.value.trim()) {
+        const btn = event.target;
+        btn.textContent = '✓ Saved'; btn.style.borderColor = 'rgba(52,211,153,.4)'; btn.style.color = '#6ee7b7';
+        document.getElementById('script-cta').classList.add('visible');
+        setTimeout(() => { btn.textContent = '✦ Save'; btn.style.borderColor = ''; btn.style.color = ''; }, 2000);
+    }
+}
+function goToCreate() {
+    const createTab = document.querySelectorAll('.nav-item')[1];
+    createTab.style.color = 'var(--gold-100)';
+    createTab.style.textShadow = '0 0 12px rgba(212,175,55,.4)';
+    createTab.querySelector('.nav-icon').style.transform = 'scale(1.3)';
+    setTimeout(() => { createTab.style.color = ''; createTab.style.textShadow = ''; createTab.querySelector('.nav-icon').style.transform = ''; }, 1500);
+}
+</script>
+</body>
+</html>

@@ -45,8 +45,8 @@ export default function CourageCard({ crisisCardNames, onDismiss }: CourageCardP
             className="mx-4 mb-5 rounded-2xl overflow-hidden relative"
             style={{
                 background: 'linear-gradient(135deg, rgba(120,53,15,0.25) 0%, rgba(180,83,9,0.15) 50%, rgba(30,20,5,0.8) 100%)',
-                border: '1px solid rgba(251,191,36,0.2)',
-                boxShadow: '0 0 30px rgba(180,83,9,0.15), 0 4px 16px rgba(0,0,0,0.4)',
+                border: '1px solid #f59e0b',
+                boxShadow: '0 0 40px rgba(245,158,11,0.2), 0 0 20px rgba(245,158,11,0.1), 0 4px 16px rgba(0,0,0,0.4)',
             }}
         >
             {/* Amber top highlight */}

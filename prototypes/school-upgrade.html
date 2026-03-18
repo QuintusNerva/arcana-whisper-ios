@@ -1,0 +1,2557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=500, initial-scale=1.0" />
+<title>Arcana Whisper — School (Prototype)</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+/* ── RESET ─────────────────────────────────────────────────────── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ── DESIGN SYSTEM TOKENS ──────────────────────────────────────── */
+:root {
+  /* Brand Purples */
+  --color-altar-deep:   #120224;
+  --color-altar-dark:   #1F0D38;
+  --color-altar-mid:    #2d1b4e;
+  --color-altar-bright: #432c7a;
+  --color-altar-purple: #2A0B4B;
+
+  /* 5-Tier Gold */
+  --gold-100: #F9E491;
+  --gold-200: #D4A94E;
+  --gold-300: #C59341;
+  --gold-400: #A67B2E;
+  --gold-500: #8a6914;
+
+  /* Gold Glow */
+  --gold-glow-soft:   rgba(212,175,55, 0.08);
+  --gold-glow-med:    rgba(212,175,55, 0.18);
+  --gold-glow-strong: rgba(212,175,55, 0.35);
+  --gold-glow-neon:   rgba(249,228,145, 0.4);
+
+  /* Text */
+  --text:      #e2e8f0;
+  --muted:     #94a3b8;
+  --muted-dim: rgba(148,163,184, 0.5);
+
+  /* Spacing Scale */
+  --sp-xs:  4px;
+  --sp-sm:  8px;
+  --sp-md:  12px;
+  --sp-lg:  16px;
+  --sp-xl:  20px;
+  --sp-2xl: 24px;
+  --sp-3xl: 28px;
+}
+
+/* ── BASE ──────────────────────────────────────────────────────── */
+body {
+  width: 500px;
+  min-height: 100vh;
+  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(180deg, var(--color-altar-deep) 0%, var(--color-altar-dark) 40%, var(--color-altar-purple) 100%);
+  color: var(--text);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── ANIMATIONS ────────────────────────────────────────────────── */
+@keyframes breathe {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
+@keyframes shimmer-sweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes live-pulse {
+  0%, 100% { opacity: 0.4; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+@keyframes particle-float {
+  0% { transform: translateY(0) translateX(0); opacity: 0; }
+  15% { opacity: 0.7; }
+  85% { opacity: 0.7; }
+  100% { transform: translateY(-600px) translateX(60px); opacity: 0; }
+}
+
+.anim-fade-up {
+  animation: fade-up 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+/* ── AMBIENT PARTICLES ─────────────────────────────────────────── */
+.particles {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 0; overflow: hidden;
+}
+.particle {
+  position: absolute;
+  width: 2px; height: 2px;
+  border-radius: 50%;
+  background: var(--gold-200);
+  opacity: 0;
+  animation: particle-float linear infinite;
+}
+.particle:nth-child(1) { left: 10%; bottom: -10px; animation-duration: 14s; animation-delay: 0s; }
+.particle:nth-child(2) { left: 30%; bottom: -10px; animation-duration: 18s; animation-delay: 2s; width: 3px; height: 3px; }
+.particle:nth-child(3) { left: 55%; bottom: -10px; animation-duration: 16s; animation-delay: 5s; }
+.particle:nth-child(4) { left: 75%; bottom: -10px; animation-duration: 20s; animation-delay: 1s; width: 1.5px; height: 1.5px; }
+.particle:nth-child(5) { left: 90%; bottom: -10px; animation-duration: 12s; animation-delay: 8s; }
+.particle:nth-child(6) { left: 45%; bottom: -10px; animation-duration: 22s; animation-delay: 3s; width: 2.5px; height: 2.5px; }
+
+/* ── PAGE HEADER ───────────────────────────────────────────────── */
+.page-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--sp-lg) var(--sp-xl);
+  position: relative; z-index: 2;
+}
+.page-header .back-btn {
+  font-family: 'Cinzel', serif;
+  font-size: 11px; font-weight: 400;
+  letter-spacing: 2px; color: var(--muted);
+  background: none; border: none; cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  transition: color 0.3s;
+}
+.page-header .back-btn:hover { color: var(--gold-200); }
+.page-header .page-title {
+  font-family: 'Cinzel', serif;
+  font-size: 13px; font-weight: 700;
+  letter-spacing: 6px; text-transform: uppercase;
+  color: var(--gold-100);
+  text-shadow: 0 0 20px var(--gold-glow-soft);
+}
+
+/* ── HERO SECTION ──────────────────────────────────────────────── */
+.hero {
+  text-align: center;
+  padding: var(--sp-lg) var(--sp-xl) var(--sp-2xl);
+  position: relative; z-index: 2;
+}
+.hero-icon {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  margin: 0 auto var(--sp-lg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px;
+  background: linear-gradient(135deg, rgba(197,147,65,0.15) 0%, rgba(13,6,24,0.9) 100%);
+  border: 1px solid rgba(197,147,65,0.25);
+  box-shadow: 0 0 40px var(--gold-glow-soft);
+  animation: breathe 4s ease-in-out infinite;
+}
+.hero h2 {
+  font-family: 'Cinzel', serif;
+  font-size: 20px; font-weight: 700;
+  letter-spacing: 5px; color: var(--gold-100);
+  text-shadow: 0 0 18px var(--gold-glow-med);
+  margin-bottom: var(--sp-sm);
+}
+.hero .subtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px; font-weight: 300;
+  letter-spacing: 0.5px; color: var(--muted);
+  line-height: 1.6;
+}
+
+
+
+/* ── SUB-TAB BAR ───────────────────────────────────────────────── */
+.subtab-bar {
+  display: flex; gap: 6px;
+  padding: 4px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  margin: 0 var(--sp-xl) var(--sp-2xl);
+  position: relative; z-index: 2;
+}
+.subtab {
+  flex: 1;
+  padding: 10px 0;
+  border-radius: 16px;
+  font-family: 'Cinzel', serif;
+  font-size: 10px; font-weight: 400;
+  letter-spacing: 1.5px;
+  text-align: center;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+  background: transparent;
+  color: rgba(255,255,255,0.35);
+}
+.subtab.active {
+  background: rgba(197,147,65,0.12);
+  color: var(--gold-200);
+  border-color: rgba(197,147,65,0.25);
+  text-shadow: 0 0 10px var(--gold-glow-soft);
+}
+.subtab:hover:not(.active) {
+  color: rgba(255,255,255,0.55);
+  background: rgba(255,255,255,0.03);
+}
+
+/* ── SECTION LABEL ─────────────────────────────────────────────── */
+.section-label {
+  font-family: 'Cinzel', serif;
+  font-size: 9px; font-weight: 400;
+  letter-spacing: 5px; text-transform: uppercase;
+  color: var(--gold-200); opacity: 0.5;
+  text-shadow: 0 0 10px var(--gold-glow-soft);
+  padding: 0 var(--sp-xl);
+  margin-bottom: var(--sp-md);
+}
+
+/* ── PRIMARY CARD (Teaching Card) ──────────────────────────────── */
+.teachings-list {
+  padding: 0 var(--sp-xl);
+  display: flex; flex-direction: column;
+  gap: var(--sp-lg);
+  position: relative; z-index: 2;
+}
+.teaching-card {
+  background: linear-gradient(160deg, #1c1538, #130f2e 55%, #0d0b22);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 22px;
+  padding: var(--sp-2xl);
+  padding-right: 44px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.35s ease;
+  box-shadow:
+    0 8px 28px rgba(0,0,0, 0.5),
+    0 2px 6px  rgba(0,0,0, 0.4),
+    inset 0  1px 1px rgba(255,255,255, 0.08),
+    inset 0 -2px 5px rgba(0,0,0, 0.35);
+}
+.teaching-card:hover {
+  border-color: rgba(197,147,65,0.15);
+  transform: translateY(-1px);
+}
+.teaching-card.expanded {
+  border-left: 1.5px solid rgba(197,147,65, 0.4);
+}
+.teaching-card .chevron {
+  position: absolute; right: 16px; top: 28px;
+  font-size: 16px;
+  color: var(--gold-200);
+  opacity: 0.4;
+  transition: transform 0.3s, opacity 0.3s;
+}
+.teaching-card.expanded .chevron {
+  opacity: 0.7;
+  transform: rotate(90deg);
+}
+.card-header {
+  display: flex; align-items: flex-start; gap: var(--sp-md);
+}
+.card-emoji {
+  font-size: 28px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.card-meta {
+  flex: 1; min-width: 0;
+}
+.card-subtitle {
+  font-family: 'Cinzel', serif;
+  font-size: 9px; font-weight: 400;
+  letter-spacing: 5px; text-transform: uppercase;
+  color: var(--gold-200); opacity: 0.5;
+  text-shadow: 0 0 10px var(--gold-glow-soft);
+  margin-bottom: var(--sp-xs);
+}
+.card-title {
+  font-family: 'Cinzel', serif;
+  font-size: 16px; font-weight: 400;
+  letter-spacing: 0;
+  color: var(--text);
+  margin-bottom: var(--sp-sm);
+}
+.card-preview {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px; font-weight: 300;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  line-height: 1.6;
+  font-style: italic;
+}
+/* Teaching number badge — Moonly-inspired */
+.teaching-num {
+  font-family: 'Cinzel', serif;
+  font-size: 9px; font-weight: 600;
+  letter-spacing: 1.5px;
+  color: var(--gold-300);
+  opacity: 0.35;
+  display: inline-block;
+  margin-bottom: var(--sp-xs);
+}
+/* Read-time badge */
+.read-time {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: 'Inter', sans-serif;
+  font-size: 9px; font-weight: 400;
+  color: var(--muted-dim);
+  margin-left: 8px;
+}
+.card-content {
+  margin-top: var(--sp-lg);
+  padding-top: var(--sp-lg);
+  border-top: 1px solid rgba(255,255,255,0.05);
+  display: none;
+}
+.teaching-card.expanded .card-content {
+  display: block;
+}
+.card-content p {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px; font-weight: 300;
+  letter-spacing: 0.5px;
+  color: rgba(226,232,240,0.8);
+  line-height: 1.75;
+  margin-bottom: var(--sp-md);
+}
+.card-content p:last-child { margin-bottom: 0; }
+.card-content strong {
+  color: var(--gold-200);
+  font-weight: 500;
+}
+/* PRACTICE BLOCK — Info Card variant inside expanded content */
+.practice-block {
+  margin-top: var(--sp-lg);
+  padding: var(--sp-md) var(--sp-lg);
+  border-radius: 14px;
+  background: rgba(197,147,65, 0.06);
+  border: 1px solid rgba(197,147,65, 0.12);
+  border-left: 2px solid rgba(197,147,65, 0.3);
+}
+.practice-block .practice-label {
+  font-family: 'Cinzel', serif;
+  font-size: 9px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--gold-200); opacity: 0.7;
+  margin-bottom: var(--sp-xs);
+}
+.practice-block p {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px; font-weight: 400;
+  color: rgba(226,232,240,0.75);
+  line-height: 1.65;
+  margin-bottom: 0;
+}
+/* Secondary button (for Sounds YouTube) */
+.secondary-btn {
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(197,147,65, 0.25);
+  background: rgba(197,147,65, 0.10);
+  font-family: 'Cinzel', serif;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--gold-200);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.secondary-btn:hover {
+  background: rgba(197,147,65, 0.18);
+  border-color: rgba(197,147,65, 0.35);
+}
+
+/* ── INFO CARD (Sounds — Cosmic Rec) ───────────────────────────── */
+.info-card {
+  background: rgba(61,29,90, 0.35);
+  border: 1px solid rgba(212,175,55, 0.10);
+  border-radius: 16px;
+  padding: 14px 16px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 2px 8px rgba(0,0,0, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+.info-card.active-variant {
+  background: linear-gradient(135deg, rgba(197,147,65,0.08), rgba(61,29,90,0.4));
+}
+.info-card-label {
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: var(--sp-sm);
+}
+.live-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--gold-200);
+  animation: live-pulse 2s ease-in-out infinite;
+}
+.info-card-title {
+  font-family: 'Cinzel', serif;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--gold-200); opacity: 0.6;
+}
+.info-card h4 {
+  font-family: 'Cinzel', serif;
+  font-size: 16px; font-weight: 400;
+  color: var(--text);
+  margin-bottom: var(--sp-xs);
+}
+.info-card .desc {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px; font-weight: 300;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  line-height: 1.6;
+  font-style: italic;
+}
+
+/* ── GOLD CTA BUTTON ───────────────────────────────────────────── */
+.gold-cta {
+  display: block;
+  width: 100%;
+  padding: 18px 24px;
+  border-radius: 20px;
+  border: 2px solid rgba(212,175,55, 0.6);
+  background: linear-gradient(180deg, #F9E491, #D4A94E 30%, #C59341 60%, #A67B2E);
+  font-family: 'Cinzel', serif;
+  font-size: 14px; font-weight: 800;
+  letter-spacing: 3.5px; text-transform: uppercase;
+  color: var(--color-altar-deep);
+  text-align: center;
+  cursor: pointer;
+  position: relative; overflow: hidden;
+  box-shadow:
+    0 2px 0 var(--gold-500),
+    0 4px 12px rgba(0,0,0, 0.5),
+    0 0 40px var(--gold-glow-soft),
+    inset 0 1px 0 rgba(255,255,255, 0.35);
+  transition: transform 0.2s;
+}
+.gold-cta:active { transform: scale(0.98); }
+.gold-cta .shimmer {
+  position: absolute; top: 0; left: 0;
+  width: 40%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  animation: shimmer-sweep 3.5s ease-in-out infinite;
+}
+
+/* ── STATUS PILLS ──────────────────────────────────────────────── */
+.status-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-family: 'Cinzel', serif;
+  font-size: 9px; font-weight: 400;
+  letter-spacing: 1.5px; text-transform: uppercase;
+}
+.status-pill.active-pill {
+  background: rgba(197,147,65, 0.12);
+  color: var(--gold-200);
+  border: 1px solid rgba(197,147,65, 0.25);
+}
+.status-pill.inactive-pill {
+  background: rgba(148,163,184, 0.06);
+  color: rgba(180,170,200, 0.5);
+  border: 1px solid rgba(255,255,255, 0.06);
+}
+
+/* ── STAT BADGES  ──────────────────────────────────────────────── */
+.stat-badges {
+  display: flex; gap: var(--sp-sm);
+  flex-wrap: wrap;
+}
+.stat-badge {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 0.3px;
+}
+.stat-badge.readings {
+  background: rgba(99,102,241, 0.1);
+  color: #a5b4fc;
+  border: 1px solid rgba(99,102,241, 0.15);
+}
+.stat-badge.manifested {
+  background: rgba(197,147,65, 0.10);
+  color: var(--gold-200);
+  border: 1px solid rgba(197,147,65, 0.2);
+}
+
+/* ── SOUND CHIPS ───────────────────────────────────────────────── */
+.chips-scroll {
+  display: flex; gap: var(--sp-sm);
+  overflow-x: auto; padding-bottom: var(--sp-sm);
+  scrollbar-width: none;
+}
+.chips-scroll::-webkit-scrollbar { display: none; }
+.sound-chip {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  border-radius: 16px;
+  font-family: 'Cinzel', serif;
+  font-size: 10px; font-weight: 400;
+  letter-spacing: 1px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.09);
+  color: rgba(255,255,255,0.7);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.sound-chip:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.15);
+  transform: scale(1.03);
+}
+.sound-chip.featured {
+  background: linear-gradient(135deg, rgba(197,147,65,0.12) 0%, rgba(61,29,90,0.15) 100%);
+  border-color: rgba(212,175,55,0.3);
+  color: var(--gold-200);
+}
+
+/* ── SEARCH BAR ────────────────────────────────────────────────── */
+.search-row {
+  display: flex; gap: var(--sp-sm);
+}
+.search-input {
+  flex: 1;
+  padding: 12px 16px;
+  border-radius: 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px; font-weight: 300;
+  color: var(--text);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.10);
+  outline: none;
+  transition: border-color 0.3s;
+}
+.search-input::placeholder { color: var(--muted-dim); }
+.search-input:focus { border-color: rgba(197,147,65,0.3); }
+.search-go {
+  padding: 12px 18px;
+  border-radius: 16px;
+  font-family: 'Cinzel', serif;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 1px;
+  background: rgba(197,147,65,0.15);
+  border: 1px solid rgba(197,147,65,0.25);
+  color: var(--gold-200);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.search-go:hover { background: rgba(197,147,65,0.25); }
+
+/* ── BOTTOM NAV ────────────────────────────────────────────────── */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 500px;
+  display: flex; align-items: center; justify-content: space-around;
+  padding: 12px 0 20px;
+  background: rgba(18,2,36, 0.95);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 100;
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.nav-icon { font-size: 18px; }
+.nav-label {
+  font-family: 'Cinzel', serif;
+  font-size: 8px; font-weight: 400;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--muted-dim);
+}
+.nav-item.active .nav-label {
+  color: var(--gold-200);
+}
+.nav-item.active .nav-icon {
+  filter: drop-shadow(0 0 6px var(--gold-glow-med));
+}
+
+/* ── PAGE CONTENT ──────────────────────────────────────────────── */
+.page-content {
+  padding-bottom: 100px;
+  position: relative; z-index: 2;
+}
+.content-section {
+  padding: 0 var(--sp-xl);
+  margin-bottom: var(--sp-2xl);
+}
+
+/* ── SOUNDS TAB CONTENT ────────────────────────────────────────── */
+.sounds-section { display: none; }
+.sounds-section.visible { display: block; }
+.teachings-section { display: block; }
+.teachings-section.hidden { display: none; }
+
+/* ── RECENTLY PLAYED ROWS ──────────────────────────────────────── */
+.recent-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.recent-row:hover {
+  background: rgba(255,255,255,0.06);
+  transform: scale(1.01);
+}
+.recent-row .row-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px; font-weight: 400;
+  color: rgba(226,232,240,0.8);
+}
+.recent-row .row-date {
+  font-family: 'Inter', sans-serif;
+  font-size: 9px; color: var(--muted-dim);
+}
+.recent-row .fav-star {
+  font-size: 14px; color: var(--gold-200);
+  cursor: pointer; transition: transform 0.2s;
+}
+.recent-row .fav-star:hover { transform: scale(1.2); }
+
+/* ── SOUNDS HERO CARD ─────────────────────────────────────────────── */
+.sounds-hero {
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  padding: 0;
+  min-height: 280px;
+}
+.sounds-hero-bg {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(197,147,65,0.15) 0%, transparent 60%),
+    linear-gradient(160deg, #1c1538 0%, #120224 40%, #0d0b22 100%);
+  border: 1px solid rgba(197,147,65, 0.15);
+  border-radius: 24px;
+}
+.sounds-hero-bg::after {
+  content: '';
+  position: absolute; top: -1px; left: -1px; right: -1px; bottom: -1px;
+  border-radius: 24px;
+  border: 1px solid rgba(197,147,65, 0.08);
+  box-shadow:
+    0 8px 32px rgba(0,0,0,0.6),
+    0 0 60px rgba(197,147,65, 0.06),
+    inset 0 1px 1px rgba(255,255,255, 0.06);
+}
+.sounds-hero-content {
+  position: relative; z-index: 2;
+  padding: var(--sp-2xl) var(--sp-xl);
+  text-align: center;
+}
+.sounds-hero-label {
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px; margin-bottom: var(--sp-lg);
+}
+.sounds-hero-icon {
+  font-size: 56px;
+  margin-bottom: var(--sp-md);
+  animation: breathe 4s ease-in-out infinite;
+  filter: drop-shadow(0 0 20px rgba(249,228,145,0.3));
+}
+.sounds-hero-title {
+  font-family: 'Cinzel', serif;
+  font-size: 22px; font-weight: 500;
+  color: var(--text);
+  margin-bottom: var(--sp-sm);
+  letter-spacing: 0.5px;
+}
+.sounds-hero-desc {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px; font-weight: 300;
+  color: var(--muted);
+  line-height: 1.6;
+  font-style: italic;
+  margin-bottom: var(--sp-lg);
+}
+.sounds-hero-meta {
+  display: flex; align-items: center; justify-content: center;
+  gap: var(--sp-sm);
+  margin-bottom: var(--sp-xl);
+}
+.sounds-meta-pill {
+  font-family: 'Cinzel', serif;
+  font-size: 9px; font-weight: 400;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: rgba(197,147,65, 0.08);
+  color: var(--gold-200);
+  border: 1px solid rgba(197,147,65, 0.15);
+}
+.sounds-hero-actions {
+  display: flex; gap: var(--sp-sm); justify-content: center;
+}
+.sounds-play-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 14px 24px;
+  border-radius: 20px;
+  border: 1px solid rgba(197,147,65, 0.30);
+  background: linear-gradient(160deg, rgba(197,147,65, 0.15), rgba(197,147,65, 0.05));
+  font-family: 'Cinzel', serif;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--gold-200);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.sounds-play-btn:hover {
+  background: linear-gradient(160deg, rgba(197,147,65, 0.25), rgba(197,147,65, 0.10));
+  border-color: rgba(197,147,65, 0.45);
+  transform: scale(1.02);
+}
+.sounds-play-btn .play-icon {
+  font-size: 14px;
+  filter: drop-shadow(0 0 4px rgba(249,228,145,0.3));
+}
+.sounds-timer-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 14px 16px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  font-family: 'Cinzel', serif;
+  font-size: 10px; font-weight: 400;
+  letter-spacing: 1px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.sounds-timer-btn:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.15);
+}
+
+/* ── UPGRADED INTENTION CHIPS ─────────────────────────────────────── */
+.intention-chip {
+  flex-shrink: 0;
+  padding: 12px 18px;
+  border-radius: 20px;
+  font-family: 'Cinzel', serif;
+  font-size: 11px; font-weight: 400;
+  letter-spacing: 1px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.10);
+  color: rgba(255,255,255,0.75);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.intention-chip:hover {
+  background: linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
+  border-color: rgba(255,255,255,0.18);
+  transform: scale(1.04);
+  color: var(--text);
+}
+.intention-chip.featured {
+  background: linear-gradient(135deg, rgba(197,147,65,0.15), rgba(61,29,90,0.2));
+  border-color: rgba(212,175,55,0.35);
+  color: var(--gold-200);
+  text-shadow: 0 0 8px var(--gold-glow-soft);
+}
+.intention-chip.featured:hover {
+  background: linear-gradient(135deg, rgba(197,147,65,0.25), rgba(61,29,90,0.3));
+  border-color: rgba(212,175,55,0.5);
+}
+
+/* ── BRANDED SEARCH ───────────────────────────────────────────────── */
+.sounds-search {
+  display: flex; align-items: center;
+  gap: var(--sp-sm);
+  padding: 12px 16px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: all 0.3s;
+}
+.sounds-search:focus-within {
+  border-color: rgba(197,147,65,0.25);
+  background: rgba(255,255,255,0.06);
+  box-shadow: 0 0 20px rgba(197,147,65,0.05);
+}
+.search-icon {
+  font-size: 14px;
+  opacity: 0.4;
+}
+.sounds-search-input {
+  flex: 1;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px; font-weight: 300;
+  color: var(--text);
+  background: transparent;
+  border: none;
+  outline: none;
+}
+.sounds-search-input::placeholder { color: var(--muted-dim); }
+
+/* ── RECENTLY PLAYED CARDS ────────────────────────────────────────── */
+.recent-cards {
+  display: flex; flex-direction: column;
+  gap: var(--sp-sm);
+}
+.recent-card {
+  display: flex; align-items: center;
+  gap: var(--sp-md);
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.06);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.recent-card:hover {
+  background: linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
+  border-color: rgba(197,147,65,0.12);
+  transform: translateY(-1px);
+}
+.recent-card-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(197,147,65,0.10), rgba(61,29,90,0.25));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.recent-card-info {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; gap: 3px;
+}
+.recent-card-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px; font-weight: 500;
+  color: rgba(226,232,240,0.9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.recent-card-date {
+  font-family: 'Inter', sans-serif;
+  font-size: 9px; font-weight: 400;
+  color: var(--muted-dim);
+  letter-spacing: 0.3px;
+}
+.recent-card-actions {
+  display: flex; align-items: center; gap: var(--sp-sm);
+  flex-shrink: 0;
+}
+.recent-play {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: rgba(197,147,65,0.12);
+  border: 1px solid rgba(197,147,65,0.20);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  color: var(--gold-200);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.recent-play:hover {
+  background: rgba(197,147,65,0.22);
+  border-color: rgba(197,147,65,0.35);
+  transform: scale(1.1);
+}
+.recent-card .fav-star {
+  font-size: 14px;
+  color: rgba(255,255,255,0.15);
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.recent-card .fav-star.active {
+  color: var(--gold-200);
+  text-shadow: 0 0 8px var(--gold-glow-med);
+}
+.recent-card .fav-star:hover {
+  color: var(--gold-200);
+  transform: scale(1.3);
+  text-shadow: 0 0 12px var(--gold-glow-strong);
+}
+.recent-card .fav-star.active:hover {
+  transform: scale(1.3) rotate(15deg);
+}
+
+/* ── SHARE ICON ON CARDS ─────────────────────────────────────────── */
+.recent-share {
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  color: var(--muted-dim);
+  cursor: pointer;
+  transition: all 0.3s;
+  border-radius: 50%;
+}
+.recent-share:hover {
+  color: var(--gold-200);
+  background: rgba(197,147,65,0.08);
+  transform: scale(1.15);
+}
+
+/* ── DOWNLOAD INDICATOR ──────────────────────────────────────────── */
+.download-indicator {
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px;
+  color: var(--muted-dim);
+  border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.08);
+  transition: all 0.3s;
+  cursor: pointer;
+}
+.download-indicator:hover {
+  border-color: rgba(197,147,65,0.3);
+  color: var(--gold-200);
+}
+.download-indicator.downloaded {
+  border-color: rgba(197,147,65,0.4);
+  color: var(--gold-200);
+  background: rgba(197,147,65,0.08);
+}
+
+/* ── CHIP ACTIVE/SELECTION STATE (Moonly-inspired) ───────────────── */
+.intention-chip.active {
+  background: linear-gradient(135deg, rgba(197,147,65,0.25), rgba(197,147,65,0.12));
+  border-color: rgba(212,175,55,0.45);
+  color: var(--color-altar-deep);
+  color: var(--gold-100);
+  text-shadow: 0 0 8px var(--gold-glow-soft);
+  box-shadow: 0 0 18px rgba(197,147,65,0.12);
+  transform: scale(1.02);
+}
+
+/* ── FROSTED HERO BG UPGRADE ─────────────────────────────────────── */
+.sounds-hero-bg {
+  backdrop-filter: blur(30px) saturate(1.3);
+  -webkit-backdrop-filter: blur(30px) saturate(1.3);
+}
+.sounds-search {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ── NOW PLAYING MINI BAR ────────────────────────────────────────── */
+@keyframes now-playing-pulse {
+  0%, 100% { height: 8px; }
+  50% { height: 16px; }
+}
+.now-playing-bar {
+  position: fixed; bottom: 72px; left: 50%; transform: translateX(-50%);
+  width: 480px;
+  display: none; align-items: center; gap: var(--sp-md);
+  padding: 10px 16px;
+  border-radius: 16px 16px 0 0;
+  background: rgba(28,21,56,0.95);
+  border: 1px solid rgba(197,147,65,0.12);
+  border-bottom: none;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 99;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.now-playing-bar.visible { display: flex; }
+.now-playing-bar:hover { background: rgba(28,21,56,0.98); }
+.now-playing-eq {
+  display: flex; align-items: flex-end; gap: 2px;
+  height: 18px;
+}
+.now-playing-eq span {
+  width: 3px;
+  background: var(--gold-200);
+  border-radius: 2px;
+  animation: now-playing-pulse 0.8s ease-in-out infinite;
+}
+.now-playing-eq span:nth-child(1) { animation-delay: 0s; height: 8px; }
+.now-playing-eq span:nth-child(2) { animation-delay: 0.2s; height: 14px; }
+.now-playing-eq span:nth-child(3) { animation-delay: 0.4s; height: 10px; }
+.now-playing-info {
+  flex: 1; min-width: 0;
+}
+.now-playing-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px; font-weight: 500;
+  color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.now-playing-artist {
+  font-family: 'Inter', sans-serif;
+  font-size: 9px; font-weight: 300;
+  color: var(--muted);
+}
+.now-playing-controls {
+  display: flex; align-items: center; gap: var(--sp-sm);
+}
+.np-btn {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  color: var(--gold-200);
+  background: rgba(197,147,65,0.10);
+  border: 1px solid rgba(197,147,65,0.15);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.np-btn:hover {
+  background: rgba(197,147,65,0.20);
+  transform: scale(1.1);
+}
+.np-progress {
+  position: absolute; bottom: 0; left: 16px; right: 16px;
+  height: 2px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 1px;
+}
+.np-progress-fill {
+  height: 100%; width: 35%;
+  background: linear-gradient(90deg, var(--gold-400), var(--gold-200));
+  border-radius: 1px;
+  transition: width 0.5s;
+}
+
+/* ── FULL-SCREEN AUDIO PLAYER OVERLAY ────────────────────────────── */
+@keyframes player-slide-up {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes vinyl-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.player-overlay {
+  position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+  width: 500px; height: 100vh;
+  background: linear-gradient(180deg, #0d0a1a 0%, var(--color-altar-deep) 30%, #120224 100%);
+  z-index: 200;
+  display: none;
+  flex-direction: column;
+  animation: player-slide-up 0.4s ease-out;
+}
+.player-overlay.visible { display: flex; }
+.player-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px;
+}
+.player-close {
+  font-size: 20px; color: var(--muted);
+  background: none; border: none; cursor: pointer;
+  transition: color 0.3s;
+}
+.player-close:hover { color: var(--gold-200); }
+.player-share {
+  font-size: 16px; color: var(--muted);
+  background: none; border: none; cursor: pointer;
+  transition: color 0.3s;
+}
+.player-share:hover { color: var(--gold-200); }
+.player-source {
+  font-family: 'Cinzel', serif;
+  font-size: 9px; font-weight: 400;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--gold-200); opacity: 0.5;
+}
+.player-artwork {
+  flex: 1;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px 40px;
+}
+.artwork-container {
+  width: 280px; height: 280px;
+  border-radius: 24px;
+  background:
+    linear-gradient(135deg, #1c1538, #0d0a1a);
+  border: 1.5px solid rgba(197,147,65,0.20);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 80px;
+  box-shadow:
+    0 0 60px rgba(197,147,65,0.06),
+    0 20px 60px rgba(0,0,0,0.5);
+  position: relative;
+  overflow: hidden;
+}
+.player-info {
+  text-align: center;
+  padding: 0 40px;
+}
+.player-title {
+  font-family: 'Cinzel', serif;
+  font-size: 20px; font-weight: 500;
+  color: var(--text);
+  margin-bottom: var(--sp-xs);
+}
+.player-subtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px; font-weight: 300;
+  color: var(--muted);
+  letter-spacing: 1px; text-transform: uppercase;
+}
+.player-scrubber {
+  padding: 24px 40px 8px;
+}
+.scrubber-track {
+  width: 100%; height: 4px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px;
+  position: relative;
+  cursor: pointer;
+}
+.scrubber-fill {
+  height: 100%; width: 25%;
+  background: linear-gradient(90deg, var(--gold-400), var(--gold-200));
+  border-radius: 2px;
+  position: relative;
+}
+.scrubber-fill::after {
+  content: '';
+  position: absolute; right: -6px; top: -4px;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: var(--gold-200);
+  box-shadow: 0 0 8px var(--gold-glow-med);
+}
+.scrubber-times {
+  display: flex; justify-content: space-between;
+  margin-top: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 9px; font-weight: 400;
+  color: var(--muted-dim);
+}
+.player-controls {
+  display: flex; align-items: center; justify-content: center;
+  gap: 24px;
+  padding: 16px 0;
+}
+.ctrl-secondary {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.ctrl-secondary:hover {
+  background: rgba(255,255,255,0.08);
+  color: var(--text);
+}
+.ctrl-secondary.active {
+  border-color: rgba(197,147,65,0.3);
+  color: var(--gold-200);
+  background: rgba(197,147,65,0.08);
+}
+.ctrl-play {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(197,147,65,0.20), rgba(197,147,65,0.08));
+  border: 2px solid rgba(197,147,65,0.35);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  color: var(--gold-200);
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 0 30px rgba(197,147,65,0.10);
+}
+.ctrl-play:hover {
+  background: linear-gradient(135deg, rgba(197,147,65,0.30), rgba(197,147,65,0.15));
+  border-color: rgba(197,147,65,0.5);
+  transform: scale(1.05);
+  box-shadow: 0 0 40px rgba(197,147,65,0.15);
+}
+.player-bottom {
+  padding: 12px 40px 40px;
+  text-align: center;
+}
+.player-stories-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 20px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  font-family: 'Cinzel', serif;
+  font-size: 9px; font-weight: 400;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.player-stories-btn:hover {
+  background: rgba(255,255,255,0.08);
+  color: var(--text);
+}
+
+/* ── AMBIENT SOUNDSCAPES SECTION ─────────────────────────────────── */
+.soundscape-cards {
+  display: flex; gap: var(--sp-md);
+  overflow-x: auto;
+  padding-bottom: var(--sp-sm);
+  scrollbar-width: none;
+}
+.soundscape-cards::-webkit-scrollbar { display: none; }
+.soundscape-card {
+  flex-shrink: 0;
+  width: 130px;
+  border-radius: 18px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.soundscape-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(197,147,65,0.15);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+.soundscape-visual {
+  height: 100px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  position: relative;
+  background-size: cover;
+  background-position: center;
+}
+.soundscape-visual.rain {
+  background-image: url('rain-thunder.png');
+  background-size: cover;
+  background-position: center;
+}
+.soundscape-visual.rain::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 40%, rgba(13,26,45,0.6) 100%);
+}
+.soundscape-visual.rain-fallback { background: linear-gradient(135deg, #1a2a4a, #0d1a2d); }
+.soundscape-visual.forest {
+  background-image: url('forest-night.png');
+  background-size: cover;
+  background-position: center;
+}
+.soundscape-visual.forest::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 40%, rgba(13,42,26,0.6) 100%);
+}
+.soundscape-visual.ocean {
+  background-image: url('ocean-waves.png');
+  background-size: cover;
+  background-position: center;
+}
+.soundscape-visual.ocean::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 40%, rgba(13,26,42,0.6) 100%);
+}
+.soundscape-visual.fire {
+  background-image: url('crackling-fire.png');
+  background-size: cover;
+  background-position: center;
+}
+.soundscape-visual.fire::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 40%, rgba(42,26,13,0.6) 100%);
+}
+.soundscape-visual.space {
+  background-image: url('deep-space.png');
+  background-size: cover;
+  background-position: center;
+}
+.soundscape-visual.space::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 40%, rgba(13,10,26,0.6) 100%);
+}
+.soundscape-label {
+  padding: 10px 12px;
+  background: rgba(0,0,0,0.3);
+}
+.soundscape-label .sc-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px; font-weight: 500;
+  color: var(--text);
+  display: block;
+}
+.soundscape-label .sc-duration {
+  font-family: 'Inter', sans-serif;
+  font-size: 9px; font-weight: 300;
+  color: var(--muted-dim);
+}
+
+/* ── FEATURED ARTISTS / SOCIAL PROOF ─────────────────────────────── */
+.artists-row {
+  display: flex; gap: var(--sp-lg);
+  overflow-x: auto;
+  padding-bottom: var(--sp-sm);
+  scrollbar-width: none;
+}
+.artists-row::-webkit-scrollbar { display: none; }
+.artist-item {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 6px;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.artist-item:hover { transform: translateY(-2px); }
+.artist-avatar {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  border: 2px solid rgba(255,255,255,0.08);
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+  transition: all 0.3s;
+}
+.artist-item:hover .artist-avatar {
+  border-color: rgba(197,147,65,0.3);
+  box-shadow: 0 0 20px rgba(197,147,65,0.1);
+}
+.artist-avatar.purple {
+  background-image: url('guide-mystic-ra.png');
+  background-size: cover;
+  background-position: center;
+}
+.artist-avatar.blue {
+  background-image: url('guide-luna-tides.png');
+  background-size: cover;
+  background-position: center;
+}
+.artist-avatar.green {
+  background-image: url('guide-earth-song.png');
+  background-size: cover;
+  background-position: center;
+}
+.artist-avatar.gold {
+  background-image: url('guide-sol-wisdom.png');
+  background-size: cover;
+  background-position: center;
+}
+.artist-avatar.pink {
+  background-image: url('guide-veda-light.png');
+  background-size: cover;
+  background-position: center;
+}
+.artist-name {
+  font-family: 'Inter', sans-serif;
+  font-size: 9px; font-weight: 400;
+  color: var(--muted);
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* ── BOTTOM NAV FROSTED UPGRADE ──────────────────────────────────── */
+.bottom-nav {
+  border-radius: 20px 20px 0 0;
+  background: rgba(18,2,36, 0.85);
+}
+.nav-item.active {
+  position: relative;
+}
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  top: -2px; left: 50%; transform: translateX(-50%);
+  width: 28px; height: 3px;
+  border-radius: 2px;
+  background: var(--gold-200);
+  box-shadow: 0 0 8px var(--gold-glow-med);
+}
+
+/* ── TEACHINGS: STREAK + XP BAR ── */
+.streak-xp-bar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 var(--sp-xl); margin-bottom: var(--sp-lg);
+  position: relative; z-index: 2;
+}
+.streak-pill, .xp-pill {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 14px; border-radius: 20px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.streak-flame { font-size: 16px; }
+.streak-count { font-family: 'Cinzel', serif; font-size: 18px; font-weight: 700; color: #f59e0b; }
+.streak-label { font-size: 10px; color: var(--muted); letter-spacing: 0.5px; }
+.xp-star { color: var(--gold-200); font-size: 14px; }
+.xp-count { font-family: 'Cinzel', serif; font-size: 16px; font-weight: 600; color: var(--gold-100); }
+.xp-label { font-size: 10px; color: var(--muted); letter-spacing: 0.5px; }
+.level-badge {
+  margin-left: auto;
+  padding: 6px 14px; border-radius: 12px;
+  background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(139,92,246,0.08));
+  border: 1px solid rgba(139,92,246,0.3);
+  font-family: 'Cinzel', serif; font-size: 10px; font-weight: 600;
+  letter-spacing: 2px; color: #a78bfa; text-transform: uppercase;
+}
+
+/* ── TEACHINGS: STREAK CALENDAR ── */
+.streak-calendar {
+  display: flex; justify-content: center; gap: 12px;
+  padding: 0 var(--sp-xl); margin-bottom: var(--sp-2xl);
+  position: relative; z-index: 2;
+}
+.cal-day {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.25);
+}
+.cal-day.done span:first-child { color: var(--gold-200); }
+.cal-day.today span:first-child { color: #fff; }
+.cal-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);
+}
+.cal-dot.filled { background: var(--gold-300); border-color: var(--gold-200); box-shadow: 0 0 6px var(--gold-glow-soft); }
+.cal-dot.current { background: #8b5cf6; border-color: #a78bfa; box-shadow: 0 0 8px rgba(139,92,246,0.4); animation: breathe 2s ease-in-out infinite; }
+
+/* ── TEACHINGS: STORY HERO CARD ── */
+.story-hero-card {
+  position: relative; border-radius: 24px; overflow: hidden;
+  min-height: 300px; cursor: pointer;
+  border: 1px solid rgba(197,147,65,0.15);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.story-hero-card:hover { transform: translateY(-2px); box-shadow: 0 16px 50px rgba(0,0,0,0.6); }
+.story-hero-bg {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, #1a0a3e 0%, #0d0b22 50%, #1c0f30 100%);
+}
+.story-hero-overlay {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 30%, rgba(197,147,65,0.08) 0%, transparent 70%);
+}
+.story-hero-content { position: relative; z-index: 1; padding: 24px; text-align: center; }
+.story-guide-badge {
+  display: flex; align-items: center; gap: 8px;
+  justify-content: center; margin-bottom: 16px;
+}
+.guide-avatar-sm { width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgba(197,147,65,0.3); }
+.story-guide-badge span { font-size: 11px; color: var(--muted); letter-spacing: 1px; }
+.story-hero-emoji { font-size: 56px; margin-bottom: 12px; }
+.story-hero-title {
+  font-family: 'Cinzel', serif; font-size: 22px; font-weight: 700;
+  color: var(--gold-100); letter-spacing: 2px;
+  text-shadow: 0 0 20px var(--gold-glow-med); margin-bottom: 8px;
+}
+.story-hero-desc { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 16px; }
+.story-hero-meta { display: flex; gap: 8px; justify-content: center; margin-bottom: 20px; }
+.story-meta-pill {
+  padding: 4px 12px; border-radius: 12px; font-size: 10px;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+  color: var(--muted); letter-spacing: 0.5px;
+}
+.story-start-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 28px; border-radius: 16px; border: none; cursor: pointer;
+  background: linear-gradient(135deg, var(--gold-400), var(--gold-300));
+  color: #120224; font-family: 'Cinzel', serif; font-size: 12px;
+  font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+  box-shadow: 0 4px 16px rgba(197,147,65,0.3);
+  transition: all 0.3s;
+}
+.story-start-btn:hover { box-shadow: 0 6px 24px rgba(197,147,65,0.4); transform: translateY(-1px); }
+.story-progress-dots {
+  display: flex; gap: 6px; justify-content: center;
+  position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+}
+.story-progress-dots .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(255,255,255,0.2); transition: background 0.3s;
+}
+
+/* ── TEACHINGS: MASTERY RINGS ── */
+.mastery-rings { display: flex; gap: 12px; justify-content: center; }
+.mastery-ring-card {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 16px 12px; border-radius: 18px;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+  flex: 1;
+}
+.ring-visual { position: relative; width: 64px; height: 64px; }
+.ring-svg { width: 100%; height: 100%; }
+.ring-percent {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-family: 'Cinzel', serif; font-size: 13px; font-weight: 700; color: #fff;
+}
+.ring-label { font-size: 10px; color: var(--muted); letter-spacing: 1px; }
+
+/* ── TEACHINGS: CONTINUE LEARNING CARD ── */
+.continue-card {
+  display: flex; align-items: center; gap: 14px;
+  padding: 18px 20px; border-radius: 18px;
+  background: linear-gradient(160deg, #1c1538, #130f2e);
+  border: 1px solid rgba(255,255,255,0.07); cursor: pointer;
+  transition: all 0.3s;
+}
+.continue-card:hover { border-color: rgba(197,147,65,0.15); transform: translateY(-1px); }
+.continue-icon { font-size: 28px; }
+.continue-info { flex: 1; }
+.continue-title { font-family: 'Cinzel', serif; font-size: 14px; font-weight: 600; color: var(--gold-100); margin-bottom: 4px; }
+.continue-sub { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+.continue-progress-track { height: 4px; border-radius: 2px; background: rgba(255,255,255,0.08); }
+.continue-progress-fill { height: 100%; border-radius: 2px; background: var(--gold-300); transition: width 0.5s; }
+.continue-arrow { font-size: 18px; color: var(--muted); }
+
+/* ── TEACHINGS: REVIEW CARD ── */
+.review-card {
+  display: flex; align-items: center; gap: 14px;
+  padding: 18px 20px; border-radius: 18px;
+  background: linear-gradient(160deg, rgba(139,92,246,0.08), rgba(139,92,246,0.02));
+  border: 1px solid rgba(139,92,246,0.15); cursor: pointer;
+  transition: all 0.3s;
+}
+.review-card:hover { border-color: rgba(139,92,246,0.3); transform: translateY(-1px); }
+.review-icon { font-size: 28px; }
+.review-info { flex: 1; }
+.review-title { font-family: 'Cinzel', serif; font-size: 13px; font-weight: 600; color: #c4b5fd; margin-bottom: 3px; }
+.review-sub { font-size: 11px; color: var(--muted); }
+.review-badge {
+  padding: 5px 14px; border-radius: 12px; font-size: 10px;
+  font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+  background: rgba(139,92,246,0.15); color: #a78bfa;
+  border: 1px solid rgba(139,92,246,0.25);
+}
+
+/* ── TEACHINGS: LEARNING PATHS ── */
+.learning-paths-scroll { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 8px; -webkit-overflow-scrolling: touch; }
+.learning-paths-scroll::-webkit-scrollbar { display: none; }
+.path-card {
+  min-width: 160px; padding: 20px 16px; border-radius: 20px;
+  background: linear-gradient(160deg, #1c1538, #130f2e);
+  border: 1px solid rgba(255,255,255,0.07); flex-shrink: 0;
+  cursor: pointer; transition: all 0.3s;
+}
+.path-card:hover { border-color: rgba(197,147,65,0.15); transform: translateY(-2px); }
+.path-icon { font-size: 32px; margin-bottom: 12px; }
+.path-title { font-family: 'Cinzel', serif; font-size: 13px; font-weight: 600; color: var(--gold-100); margin-bottom: 4px; line-height: 1.3; }
+.path-meta { font-size: 10px; color: var(--muted); margin-bottom: 12px; letter-spacing: 0.5px; }
+.path-progress-track { height: 4px; border-radius: 2px; background: rgba(255,255,255,0.08); margin-bottom: 6px; }
+.path-progress-fill { height: 100%; border-radius: 2px; background: var(--gold-300); }
+.path-status { font-size: 10px; color: var(--muted-dim); }
+
+/* ── STORY OVERLAY (Full-Screen) ── */
+.story-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: #0a0520; display: none;
+  flex-direction: column;
+  animation: fade-up 0.35s ease-out;
+}
+.story-overlay.visible { display: flex; }
+.story-top-bar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 16px 16px 10px; position: relative; z-index: 10;
+}
+.story-progress-bar { display: flex; gap: 4px; flex: 1; }
+.story-seg {
+  flex: 1; height: 3px; border-radius: 2px;
+  background: rgba(255,255,255,0.15); transition: background 0.3s;
+}
+.story-seg.done { background: var(--gold-200); }
+.story-seg.active { background: var(--gold-300); }
+.story-close {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(255,255,255,0.08); border: none;
+  color: #fff; font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.story-cards-container { flex: 1; position: relative; overflow: hidden; }
+.story-card {
+  position: absolute; inset: 0; display: none;
+  flex-direction: column; justify-content: center;
+}
+.story-card.active { display: flex; }
+.sc-visual-bg { position: absolute; inset: 0; }
+.sc-content {
+  position: relative; z-index: 1; padding: 40px 28px;
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; justify-content: center; min-height: 100%;
+}
+
+/* Story Hook Card */
+.sc-guide-line {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11px; color: var(--muted); letter-spacing: 1px; margin-bottom: 32px;
+}
+.sc-guide-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold-300); }
+.sc-big-emoji { font-size: 80px; margin-bottom: 20px; }
+.sc-title { font-family: 'Cinzel', serif; font-size: 32px; font-weight: 700; color: var(--gold-100); letter-spacing: 4px; text-shadow: 0 0 30px var(--gold-glow-med); margin-bottom: 8px; }
+.sc-subtitle { font-size: 14px; color: var(--muted); letter-spacing: 2px; margin-bottom: 40px; }
+.sc-hint { font-size: 12px; color: rgba(255,255,255,0.25); letter-spacing: 1px; animation: breathe 3s ease-in-out infinite; }
+
+/* Story Teach Cards */
+.sc-teach { align-items: flex-start; text-align: left; justify-content: flex-start; padding-top: 60px; }
+.sc-card-number { font-size: 11px; color: var(--gold-300); letter-spacing: 2px; margin-bottom: 20px; text-transform: uppercase; }
+.sc-teach-title { font-family: 'Cinzel', serif; font-size: 22px; font-weight: 700; color: var(--gold-100); letter-spacing: 1px; margin-bottom: 20px; line-height: 1.3; }
+.sc-teach-body { font-size: 15px; color: var(--text); line-height: 1.7; }
+.sc-key-insight {
+  display: flex; gap: 12px; align-items: flex-start;
+  margin-top: 24px; padding: 18px; border-radius: 16px;
+  background: rgba(197,147,65,0.06); border: 1px solid rgba(197,147,65,0.15);
+}
+.sc-key-icon { color: var(--gold-200); font-size: 18px; flex-shrink: 0; margin-top: 2px; }
+.sc-key-insight p { font-size: 13px; color: var(--gold-100); line-height: 1.6; font-style: italic; }
+
+/* Story Quiz Card */
+.sc-quiz { align-items: center; text-align: center; justify-content: center; }
+.sc-quiz-label {
+  font-family: 'Cinzel', serif; font-size: 12px; font-weight: 600;
+  color: var(--gold-200); letter-spacing: 3px; margin-bottom: 24px;
+}
+.sc-quiz-question {
+  font-family: 'Cinzel', serif; font-size: 20px; font-weight: 600;
+  color: #fff; line-height: 1.4; margin-bottom: 28px;
+}
+.quiz-options { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+.quiz-option {
+  padding: 16px 20px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04); color: var(--text); font-size: 14px;
+  cursor: pointer; transition: all 0.3s; text-align: left;
+}
+.quiz-option:hover { border-color: rgba(197,147,65,0.3); background: rgba(197,147,65,0.06); }
+.quiz-option.correct { border-color: #22c55e; background: rgba(34,197,94,0.12); color: #86efac; }
+.quiz-option.wrong { border-color: #ef4444; background: rgba(239,68,68,0.08); color: #fca5a5; }
+.quiz-option.disabled { pointer-events: none; opacity: 0.5; }
+.quiz-feedback {
+  margin-top: 16px; padding: 14px 20px; border-radius: 14px;
+  font-size: 14px; font-weight: 600; letter-spacing: 1px; display: none;
+}
+.quiz-feedback.show { display: block; }
+.quiz-feedback.success { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2); color: #86efac; }
+.quiz-feedback.fail { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); color: #fca5a5; }
+
+/* Story Apply Card */
+.sc-apply { align-items: center; text-align: center; justify-content: center; }
+.sc-apply-label { font-size: 16px; margin-bottom: 12px; }
+.sc-apply-title {
+  font-family: 'Cinzel', serif; font-size: 24px; font-weight: 700;
+  color: var(--gold-100); letter-spacing: 2px; margin-bottom: 16px;
+}
+.sc-apply-body { font-size: 14px; color: var(--muted); line-height: 1.6; }
+.sc-apply-prompt {
+  font-family: 'Cinzel', serif; font-size: 18px; font-style: italic;
+  color: var(--gold-100); margin-top: 16px; padding: 20px;
+  border-radius: 16px; background: rgba(197,147,65,0.06);
+  border: 1px solid rgba(197,147,65,0.15);
+  text-shadow: 0 0 10px var(--gold-glow-soft);
+}
+.sc-xp-reward {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 24px; font-family: 'Cinzel', serif;
+  font-size: 16px; color: var(--gold-200); letter-spacing: 1px;
+}
+.sc-complete-btn {
+  margin-top: 20px; padding: 14px 36px; border-radius: 16px;
+  border: none; cursor: pointer;
+  background: linear-gradient(135deg, var(--gold-400), var(--gold-300));
+  color: #120224; font-family: 'Cinzel', serif; font-size: 13px;
+  font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+  box-shadow: 0 4px 16px rgba(197,147,65,0.3);
+}
+
+/* Story Tap Zones */
+.story-tap-left, .story-tap-right {
+  position: absolute; top: 60px; bottom: 0; z-index: 5; cursor: pointer;
+}
+.story-tap-left { left: 0; width: 30%; }
+.story-tap-right { right: 0; width: 70%; }
+
+/* ── AI NARRATOR GUIDE CARDS ── */
+.guides-scroll {
+  display: flex; gap: 14px; overflow-x: auto;
+  padding-bottom: 8px; -webkit-overflow-scrolling: touch;
+}
+.guides-scroll::-webkit-scrollbar { display: none; }
+.guide-card {
+  min-width: 130px; padding: 20px 14px 16px;
+  border-radius: 20px; flex-shrink: 0;
+  background: linear-gradient(160deg, #1c1538, #130f2e);
+  border: 1px solid rgba(255,255,255,0.07);
+  text-align: center; cursor: pointer;
+  transition: all 0.35s ease;
+}
+.guide-card:hover { border-color: rgba(197,147,65,0.2); transform: translateY(-2px); }
+.guide-card.active-guide {
+  border-color: rgba(197,147,65,0.35);
+  background: linear-gradient(160deg, #241848, #1a1040);
+  box-shadow: 0 0 20px rgba(197,147,65,0.1), 0 8px 28px rgba(0,0,0,0.4);
+}
+.guide-avatar-ring {
+  width: 60px; height: 60px; margin: 0 auto 10px;
+  border-radius: 50%; padding: 3px; position: relative;
+  background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+}
+.guide-card.active-guide .guide-avatar-ring {
+  background: linear-gradient(135deg, var(--gold-300), var(--gold-400));
+  box-shadow: 0 0 14px var(--gold-glow-soft);
+}
+.guide-avatar-lg {
+  width: 100%; height: 100%; border-radius: 50%;
+  background-color: rgba(255,255,255,0.05);
+}
+.guide-live-indicator {
+  position: absolute; bottom: 1px; right: 1px;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: #22c55e; border: 2px solid #130f2e;
+  animation: live-pulse 2s ease-in-out infinite;
+}
+.guide-name {
+  font-family: 'Cinzel', serif; font-size: 12px; font-weight: 600;
+  color: var(--gold-100); margin-bottom: 2px; letter-spacing: 0.5px;
+}
+.guide-domain {
+  font-size: 10px; color: var(--muted); letter-spacing: 1px;
+  text-transform: uppercase; margin-bottom: 4px;
+}
+.guide-lesson-count {
+  font-size: 9px; color: var(--muted-dim); letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+.guide-style {
+  font-size: 10px; color: rgba(197,147,65,0.6); font-style: italic;
+  line-height: 1.4;
+}
+.guide-card.active-guide .guide-style { color: var(--gold-200); }
+</style>
+</head>
+<body>
+
+<!-- Ambient Particles (Animation 1 of 2) -->
+<div class="particles">
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+</div>
+
+<!-- ═══ PAGE HEADER ═══ -->
+<header class="page-header anim-fade-up">
+  <button class="back-btn">← Altar</button>
+  <span class="page-title">School</span>
+  <div style="width: 60px;"></div><!-- spacer -->
+</header>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero anim-fade-up" style="animation-delay: 0.1s;">
+  <div class="hero-icon">📖</div>
+  <h2>Manifestation School</h2>
+  <p class="subtitle">Wisdom you return to. Practices that deepen over time.</p>
+</section>
+
+
+
+<!-- ═══ SUB-TAB BAR ═══ -->
+<div class="subtab-bar anim-fade-up" style="animation-delay: 0.2s;">
+  <button class="subtab active" onclick="switchTab('teachings')" id="tab-teachings">📖 Teachings</button>
+  <button class="subtab" onclick="switchTab('sounds')" id="tab-sounds">🔊 Sounds</button>
+</div>
+
+<!-- ═══ TEACHINGS SECTION (Spiritual Stories) ═══ -->
+<div class="page-content teachings-section" id="teachings-section">
+
+  <!-- ── STREAK + XP BAR ── -->
+  <div class="streak-xp-bar anim-fade-up" style="animation-delay: 0.25s;">
+    <div class="streak-pill">
+      <span class="streak-flame">🔥</span>
+      <span class="streak-count">14</span>
+      <span class="streak-label">Day Streak</span>
+    </div>
+    <div class="xp-pill">
+      <span class="xp-star">✦</span>
+      <span class="xp-count">1,240</span>
+      <span class="xp-label">XP</span>
+    </div>
+    <div class="level-badge">Adept</div>
+  </div>
+
+  <!-- ── STREAK CALENDAR ── -->
+  <div class="streak-calendar anim-fade-up" style="animation-delay: 0.28s;">
+    <div class="cal-day done"><span>M</span><span class="cal-dot filled"></span></div>
+    <div class="cal-day done"><span>T</span><span class="cal-dot filled"></span></div>
+    <div class="cal-day done"><span>W</span><span class="cal-dot filled"></span></div>
+    <div class="cal-day done"><span>T</span><span class="cal-dot filled"></span></div>
+    <div class="cal-day done"><span>F</span><span class="cal-dot filled"></span></div>
+    <div class="cal-day today"><span>S</span><span class="cal-dot current"></span></div>
+    <div class="cal-day"><span>S</span><span class="cal-dot"></span></div>
+  </div>
+
+  <!-- ── AI NARRATOR GUIDES ── -->
+  <div class="content-section anim-fade-up" style="animation-delay: 0.30s;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--sp-md);">
+      <p class="section-label" style="padding: 0; margin-bottom: 0;">Your Guides</p>
+      <span style="font-size: 10px; color: var(--muted); letter-spacing: 1px; cursor: pointer;">ALL GUIDES →</span>
+    </div>
+    <div class="guides-scroll">
+      <div class="guide-card active-guide" onclick="selectGuide(this, 'mystic-ra')">
+        <div class="guide-avatar-ring">
+          <div class="guide-avatar-lg" style="background-image: url('guide-mystic-ra.png'); background-size: cover; background-position: center;"></div>
+          <div class="guide-live-indicator"></div>
+        </div>
+        <div class="guide-name">Mystic Ra</div>
+        <div class="guide-domain">Astrology</div>
+        <div class="guide-lesson-count">12 teachings</div>
+        <div class="guide-style">"The cosmos speaks — I translate."</div>
+      </div>
+      <div class="guide-card" onclick="selectGuide(this, 'luna-tides')">
+        <div class="guide-avatar-ring">
+          <div class="guide-avatar-lg" style="background-image: url('guide-luna-tides.png'); background-size: cover; background-position: center;"></div>
+        </div>
+        <div class="guide-name">Luna Tides</div>
+        <div class="guide-domain">Moon Rituals</div>
+        <div class="guide-lesson-count">8 teachings</div>
+        <div class="guide-style">"Flow with the phases."</div>
+      </div>
+      <div class="guide-card" onclick="selectGuide(this, 'earth-song')">
+        <div class="guide-avatar-ring">
+          <div class="guide-avatar-lg" style="background-image: url('guide-earth-song.png'); background-size: cover; background-position: center;"></div>
+        </div>
+        <div class="guide-name">Earth Song</div>
+        <div class="guide-domain">Manifestation</div>
+        <div class="guide-lesson-count">15 teachings</div>
+        <div class="guide-style">"Ground your dreams in action."</div>
+      </div>
+      <div class="guide-card" onclick="selectGuide(this, 'sol-wisdom')">
+        <div class="guide-avatar-ring">
+          <div class="guide-avatar-lg" style="background-image: url('guide-sol-wisdom.png'); background-size: cover; background-position: center;"></div>
+        </div>
+        <div class="guide-name">Sol Wisdom</div>
+        <div class="guide-domain">Numerology</div>
+        <div class="guide-lesson-count">10 teachings</div>
+        <div class="guide-style">"Every number tells a story."</div>
+      </div>
+      <div class="guide-card" onclick="selectGuide(this, 'veda-light')">
+        <div class="guide-avatar-ring">
+          <div class="guide-avatar-lg" style="background-image: url('guide-veda-light.png'); background-size: cover; background-position: center;"></div>
+        </div>
+        <div class="guide-name">Veda Light</div>
+        <div class="guide-domain">Tarot</div>
+        <div class="guide-lesson-count">21 teachings</div>
+        <div class="guide-style">"The cards reveal what you already know."</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TODAY'S TEACHING (Hero Card) ── -->
+  <div class="content-section anim-fade-up" style="animation-delay: 0.32s;">
+    <p class="section-label" style="padding: 0; margin-bottom: var(--sp-md);">Today's Teaching</p>
+    <div class="story-hero-card" onclick="openStory()">
+      <div class="story-hero-bg"></div>
+      <div class="story-hero-overlay"></div>
+      <div class="story-hero-content">
+        <div class="story-guide-badge">
+          <div class="guide-avatar-sm" style="background-image: url('guide-veda-light.png'); background-size: cover; background-position: center;"></div>
+          <span>Veda Light</span>
+        </div>
+        <div class="story-hero-emoji">🌙</div>
+        <h3 class="story-hero-title">The Moon Card: Hidden Truths</h3>
+        <p class="story-hero-desc">Discover what the Moon reveals about your subconscious fears, illusions, and intuition.</p>
+        <div class="story-hero-meta">
+          <span class="story-meta-pill">6 cards</span>
+          <span class="story-meta-pill">3 min</span>
+          <span class="story-meta-pill">+45 XP</span>
+        </div>
+        <button class="story-start-btn">
+          <span class="play-icon">▶</span>
+          Begin Teaching
+        </button>
+      </div>
+      <div class="story-progress-dots">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── YOUR JOURNEY (Mastery Rings) ── -->
+  <div class="content-section anim-fade-up" style="animation-delay: 0.38s;">
+    <p class="section-label" style="padding: 0; margin-bottom: var(--sp-md);">Your Journey</p>
+    <div class="mastery-rings">
+      <div class="mastery-ring-card">
+        <div class="ring-visual">
+          <svg viewBox="0 0 80 80" class="ring-svg"><circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="5"/><circle cx="40" cy="40" r="34" fill="none" stroke="var(--gold-200)" stroke-width="5" stroke-dasharray="213.6" stroke-dashoffset="42.7" stroke-linecap="round" transform="rotate(-90 40 40)"/></svg>
+          <span class="ring-percent">80%</span>
+        </div>
+        <span class="ring-label">Tarot</span>
+      </div>
+      <div class="mastery-ring-card">
+        <div class="ring-visual">
+          <svg viewBox="0 0 80 80" class="ring-svg"><circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="5"/><circle cx="40" cy="40" r="34" fill="none" stroke="#8b5cf6" stroke-width="5" stroke-dasharray="213.6" stroke-dashoffset="149.5" stroke-linecap="round" transform="rotate(-90 40 40)"/></svg>
+          <span class="ring-percent">30%</span>
+        </div>
+        <span class="ring-label">Astrology</span>
+      </div>
+      <div class="mastery-ring-card">
+        <div class="ring-visual">
+          <svg viewBox="0 0 80 80" class="ring-svg"><circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="5"/><circle cx="40" cy="40" r="34" fill="none" stroke="#06b6d4" stroke-width="5" stroke-dasharray="213.6" stroke-dashoffset="106.8" stroke-linecap="round" transform="rotate(-90 40 40)"/></svg>
+          <span class="ring-percent">50%</span>
+        </div>
+        <span class="ring-label">Numerology</span>
+      </div>
+      <div class="mastery-ring-card">
+        <div class="ring-visual">
+          <svg viewBox="0 0 80 80" class="ring-svg"><circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="5"/><circle cx="40" cy="40" r="34" fill="none" stroke="#f59e0b" stroke-width="5" stroke-dasharray="213.6" stroke-dashoffset="192.2" stroke-linecap="round" transform="rotate(-90 40 40)"/></svg>
+          <span class="ring-percent">10%</span>
+        </div>
+        <span class="ring-label">Moon</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CONTINUE LEARNING ── -->
+  <div class="content-section anim-fade-up" style="animation-delay: 0.42s;">
+    <p class="section-label" style="padding: 0; margin-bottom: var(--sp-md);">Continue Learning</p>
+    <div class="continue-card" onclick="openStory()">
+      <div class="continue-icon">♈</div>
+      <div class="continue-info">
+        <div class="continue-title">Houses of the Zodiac</div>
+        <div class="continue-sub">3 of 7 cards remaining</div>
+        <div class="continue-progress-track"><div class="continue-progress-fill" style="width: 57%;"></div></div>
+      </div>
+      <div class="continue-arrow">→</div>
+    </div>
+  </div>
+
+  <!-- ── QUICK REVIEW ── -->
+  <div class="content-section anim-fade-up" style="animation-delay: 0.46s;">
+    <div class="review-card" onclick="openStory()">
+      <div class="review-icon">🧠</div>
+      <div class="review-info">
+        <div class="review-title">5 concepts to review</div>
+        <div class="review-sub">Strengthen your memory · +25 XP</div>
+      </div>
+      <div class="review-badge">Review</div>
+    </div>
+  </div>
+
+  <!-- ── LEARNING PATHS ── -->
+  <div class="content-section anim-fade-up" style="animation-delay: 0.50s;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--sp-md);">
+      <p class="section-label" style="padding: 0; margin-bottom: 0;">Learning Paths</p>
+      <span style="font-size: 10px; color: var(--muted); letter-spacing: 1px; cursor: pointer;">VIEW ALL →</span>
+    </div>
+    <div class="learning-paths-scroll">
+      <div class="path-card">
+        <div class="path-icon">🃏</div>
+        <div class="path-title">Tarot Foundations</div>
+        <div class="path-meta">21 days · 42 lessons</div>
+        <div class="path-progress-track"><div class="path-progress-fill" style="width: 80%;"></div></div>
+        <div class="path-status">16 of 21 complete</div>
+      </div>
+      <div class="path-card">
+        <div class="path-icon">⭐</div>
+        <div class="path-title">Astrology 101</div>
+        <div class="path-meta">30 days · 60 lessons</div>
+        <div class="path-progress-track"><div class="path-progress-fill" style="width: 30%;"></div></div>
+        <div class="path-status">9 of 30 complete</div>
+      </div>
+      <div class="path-card">
+        <div class="path-icon">🔢</div>
+        <div class="path-title">Numerology Basics</div>
+        <div class="path-meta">14 days · 28 lessons</div>
+        <div class="path-progress-track"><div class="path-progress-fill" style="width: 0%;"></div></div>
+        <div class="path-status">Not started</div>
+      </div>
+      <div class="path-card">
+        <div class="path-icon">🌙</div>
+        <div class="path-title">Moon Rituals</div>
+        <div class="path-meta">28 days · 56 lessons</div>
+        <div class="path-progress-track"><div class="path-progress-fill" style="width: 10%;"></div></div>
+        <div class="path-status">3 of 28 complete</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height: 100px;"></div>
+</div>
+
+<!-- ═══ STORY OVERLAY (Full-Screen Teaching) ═══ -->
+<div class="story-overlay" id="story-overlay">
+  <div class="story-top-bar">
+    <div class="story-progress-bar">
+      <div class="story-seg" id="seg-0"></div>
+      <div class="story-seg" id="seg-1"></div>
+      <div class="story-seg" id="seg-2"></div>
+      <div class="story-seg" id="seg-3"></div>
+      <div class="story-seg" id="seg-4"></div>
+      <div class="story-seg" id="seg-5"></div>
+    </div>
+    <button class="story-close" onclick="closeStory()">✕</button>
+  </div>
+  <div class="story-cards-container" id="story-cards">
+    <!-- Card 0: Visual Hook -->
+    <div class="story-card active" data-index="0">
+      <div class="sc-visual-bg" style="background: linear-gradient(180deg, #1a0a3e 0%, #0a0520 60%, #120830 100%);"></div>
+      <div class="sc-content sc-hook">
+        <div class="sc-guide-line"><span class="sc-guide-dot"></span> Veda Light · Tarot Foundations</div>
+        <div class="sc-big-emoji">🌙</div>
+        <h2 class="sc-title">The Moon Card</h2>
+        <p class="sc-subtitle">Hidden Truths & Subconscious Fears</p>
+        <p class="sc-hint">Tap to continue →</p>
+      </div>
+    </div>
+    <!-- Card 1: Teach 1 -->
+    <div class="story-card" data-index="1">
+      <div class="sc-visual-bg" style="background: linear-gradient(180deg, #0d0825 0%, #1a0e38 100%);"></div>
+      <div class="sc-content sc-teach">
+        <div class="sc-card-number">1 of 3</div>
+        <h3 class="sc-teach-title">The Moon Speaks in Symbols</h3>
+        <p class="sc-teach-body">The Moon card (XVIII) represents the subconscious mind, illusions, and things hidden beneath the surface. When it appears in a reading, it's asking you to look deeper.</p>
+        <div class="sc-key-insight"><span class="sc-key-icon">✦</span><p>Key Insight: The Moon doesn't reveal truth directly — it reveals that something is being hidden, even from yourself.</p></div>
+      </div>
+    </div>
+    <!-- Card 2: Teach 2 -->
+    <div class="story-card" data-index="2">
+      <div class="sc-visual-bg" style="background: linear-gradient(180deg, #120830 0%, #1c0f3a 100%);"></div>
+      <div class="sc-content sc-teach">
+        <div class="sc-card-number">2 of 3</div>
+        <h3 class="sc-teach-title">Upright vs. Reversed</h3>
+        <p class="sc-teach-body"><strong>Upright:</strong> Intuition, dreams, the unconscious. Trust your gut even when logic can't explain it.</p>
+        <p class="sc-teach-body" style="margin-top: 12px;"><strong>Reversed:</strong> Release of fear, clarity returning. The fog is lifting — truth is coming to the surface.</p>
+        <div class="sc-key-insight"><span class="sc-key-icon">✦</span><p>The Moon reversed is often a positive sign — it means you're finally seeing what was hidden.</p></div>
+      </div>
+    </div>
+    <!-- Card 3: Teach 3 -->
+    <div class="story-card" data-index="3">
+      <div class="sc-visual-bg" style="background: linear-gradient(180deg, #1a0e38 0%, #0d0820 100%);"></div>
+      <div class="sc-content sc-teach">
+        <div class="sc-card-number">3 of 3</div>
+        <h3 class="sc-teach-title">The Moon in Spreads</h3>
+        <p class="sc-teach-body">In a <strong>past position:</strong> unresolved fears. In a <strong>present position:</strong> confusion or deception. In a <strong>future position:</strong> trust your intuition for what's coming.</p>
+        <div class="sc-key-insight"><span class="sc-key-icon">✦</span><p>When The Moon appears with The High Priestess, your intuition is especially powerful. Pay close attention to dreams.</p></div>
+      </div>
+    </div>
+    <!-- Card 4: QUIZ -->
+    <div class="story-card" data-index="4">
+      <div class="sc-visual-bg" style="background: linear-gradient(180deg, #120224 0%, #1a0a3e 100%);"></div>
+      <div class="sc-content sc-quiz">
+        <div class="sc-quiz-label">✦ Knowledge Check</div>
+        <h3 class="sc-quiz-question">What does The Moon card primarily represent?</h3>
+        <div class="quiz-options" id="quiz-options">
+          <button class="quiz-option" onclick="selectAnswer(this, false)">Material wealth and success</button>
+          <button class="quiz-option" onclick="selectAnswer(this, true)">Subconscious fears and hidden truths</button>
+          <button class="quiz-option" onclick="selectAnswer(this, false)">New beginnings and fresh starts</button>
+          <button class="quiz-option" onclick="selectAnswer(this, false)">Travel and adventure</button>
+        </div>
+        <div class="quiz-feedback" id="quiz-feedback"></div>
+      </div>
+    </div>
+    <!-- Card 5: APPLY -->
+    <div class="story-card" data-index="5">
+      <div class="sc-visual-bg" style="background: linear-gradient(180deg, #1a0a3e 0%, #0d0520 60%, #120830 100%);"></div>
+      <div class="sc-content sc-apply">
+        <div class="sc-apply-label">🧘 Apply This</div>
+        <h3 class="sc-apply-title">Tonight's Practice</h3>
+        <p class="sc-apply-body">Before sleep, ask yourself:</p>
+        <div class="sc-apply-prompt">"What hidden truth am I ready to face?"</div>
+        <p class="sc-apply-body" style="margin-top: 16px;">Journal one thing you've been avoiding. The Moon rewards honesty with clarity.</p>
+        <div class="sc-xp-reward"><span class="xp-star">✦</span> +45 XP earned</div>
+        <button class="sc-complete-btn" onclick="completeStory()">Complete Teaching</button>
+      </div>
+    </div>
+  </div>
+  <div class="story-tap-left" onclick="prevCard()"></div>
+  <div class="story-tap-right" onclick="nextCard()"></div>
+</div>
+
+<!-- ═══ SOUNDS SECTION ═══ -->
+<div class="page-content sounds-section" id="sounds-section">
+
+  <!-- ═══ HERO: Cosmic Recommendation ═══ -->
+  <div class="content-section anim-fade-up" style="animation-delay: 0.25s;">
+    <div class="sounds-hero">
+      <div class="sounds-hero-bg"></div>
+      <div class="sounds-hero-content">
+        <div class="sounds-hero-label">
+          <div class="live-dot"></div>
+          <span class="info-card-title">Cosmic Recommendation</span>
+        </div>
+        <div class="sounds-hero-icon">🌕</div>
+        <h3 class="sounds-hero-title">Release &amp; Receive</h3>
+        <p class="sounds-hero-desc">Maximum illumination. Release what blocks. Receive what's coming.</p>
+        <div class="sounds-hero-meta">
+          <span class="sounds-meta-pill">✦ Full Moon</span>
+          <span class="sounds-meta-pill">⏱ 15 min</span>
+          <span class="sounds-meta-pill">✧ Healing</span>
+        </div>
+        <div class="sounds-hero-actions">
+          <button class="sounds-play-btn" onclick="openPlayer('Release & Receive', 'FULL MOON · HEALING', '🌕', 15)">
+            <span class="play-icon">▶</span>
+            Play Now
+          </button>
+          <button class="sounds-timer-btn">⏱ Timer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ BROWSE BY INTENTION ═══ -->
+  <div class="content-section anim-fade-up" style="animation-delay: 0.3s;">
+    <p class="section-label" style="padding: 0; margin-bottom: var(--sp-md);">Browse by Intention</p>
+    <div class="chips-scroll" id="intention-chips">
+      <button class="intention-chip featured active" onclick="selectChip(this)">🌙 Arcana ✦</button>
+      <button class="intention-chip" onclick="selectChip(this)">🌙 Sleep</button>
+      <button class="intention-chip" onclick="selectChip(this)">🧠 Focus</button>
+      <button class="intention-chip" onclick="selectChip(this)">✨ Healing</button>
+      <button class="intention-chip" onclick="selectChip(this)">🌿 Release</button>
+      <button class="intention-chip" onclick="selectChip(this)">🔮 Ritual</button>
+      <button class="intention-chip" onclick="selectChip(this)">528Hz</button>
+      <button class="intention-chip" onclick="selectChip(this)">Binaural</button>
+    </div>
+  </div>
+
+  <!-- ═══ AMBIENT SOUNDSCAPES (Tier 3) ═══ -->
+  <div class="content-section anim-fade-up" style="animation-delay: 0.33s;">
+    <p class="section-label" style="padding: 0; margin-bottom: var(--sp-md);">Ambient Soundscapes</p>
+    <div class="soundscape-cards">
+      <div class="soundscape-card" onclick="openPlayer('Rain & Thunder', 'AMBIENT · LOOP', '🌧️', 60, 'rain-thunder.png')">
+        <div class="soundscape-visual rain"></div>
+        <div class="soundscape-label">
+          <span class="sc-title">Rain & Thunder</span>
+          <span class="sc-duration">∞ Loop</span>
+        </div>
+      </div>
+      <div class="soundscape-card" onclick="openPlayer('Forest Night', 'AMBIENT · LOOP', '🌲', 60, 'forest-night.png')">
+        <div class="soundscape-visual forest"></div>
+        <div class="soundscape-label">
+          <span class="sc-title">Forest Night</span>
+          <span class="sc-duration">∞ Loop</span>
+        </div>
+      </div>
+      <div class="soundscape-card" onclick="openPlayer('Ocean Waves', 'AMBIENT · LOOP', '🌊', 60, 'ocean-waves.png')">
+        <div class="soundscape-visual ocean"></div>
+        <div class="soundscape-label">
+          <span class="sc-title">Ocean Waves</span>
+          <span class="sc-duration">∞ Loop</span>
+        </div>
+      </div>
+      <div class="soundscape-card" onclick="openPlayer('Crackling Fire', 'AMBIENT · LOOP', '🔥', 60, 'crackling-fire.png')">
+        <div class="soundscape-visual fire"></div>
+        <div class="soundscape-label">
+          <span class="sc-title">Crackling Fire</span>
+          <span class="sc-duration">∞ Loop</span>
+        </div>
+      </div>
+      <div class="soundscape-card" onclick="openPlayer('Deep Space', 'AMBIENT · LOOP', '🪐', 60, 'deep-space.png')">
+        <div class="soundscape-visual space"></div>
+        <div class="soundscape-label">
+          <span class="sc-title">Deep Space</span>
+          <span class="sc-duration">∞ Loop</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SEARCH ═══ -->
+  <div class="content-section anim-fade-up" style="animation-delay: 0.35s;">
+    <div class="sounds-search">
+      <span class="search-icon">🔍</span>
+      <input class="sounds-search-input" placeholder="Find frequencies, meditations, artists..." />
+    </div>
+  </div>
+
+  <!-- ═══ FEATURED GUIDES (Tier 3 — Social Proof) ═══ -->
+  <div class="content-section anim-fade-up" style="animation-delay: 0.38s;">
+    <p class="section-label" style="padding: 0; margin-bottom: var(--sp-md);">Featured Guides</p>
+    <div class="artists-row">
+      <div class="artist-item">
+        <div class="artist-avatar purple"></div>
+        <span class="artist-name">Mystic Ra</span>
+      </div>
+      <div class="artist-item">
+        <div class="artist-avatar blue"></div>
+        <span class="artist-name">Luna Tides</span>
+      </div>
+      <div class="artist-item">
+        <div class="artist-avatar green"></div>
+        <span class="artist-name">Earth Song</span>
+      </div>
+      <div class="artist-item">
+        <div class="artist-avatar gold"></div>
+        <span class="artist-name">Sol Wisdom</span>
+      </div>
+      <div class="artist-item">
+        <div class="artist-avatar pink"></div>
+        <span class="artist-name">Veda Light</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ RECENTLY PLAYED ═══ -->
+  <div class="content-section anim-fade-up" style="animation-delay: 0.4s;">
+    <p class="section-label" style="padding: 0; margin-bottom: var(--sp-md);">Recently Played</p>
+    <div class="recent-cards">
+
+      <div class="recent-card" onclick="openPlayer('528Hz Healing Frequency', 'FREQUENCY · 12 MIN', '🎵', 12)">
+        <div class="recent-card-icon">🎵</div>
+        <div class="recent-card-info">
+          <span class="recent-card-title">528Hz Healing Frequency</span>
+          <span class="recent-card-date">Mar 10 · 12 min</span>
+        </div>
+        <div class="recent-card-actions">
+          <span class="download-indicator downloaded" title="Downloaded" onclick="event.stopPropagation()">↓</span>
+          <span class="recent-share" title="Share" onclick="event.stopPropagation()">↗</span>
+          <span class="recent-play" onclick="event.stopPropagation(); openPlayer('528Hz Healing Frequency', 'FREQUENCY · 12 MIN', '🎵', 12)">▶</span>
+          <span class="fav-star active" onclick="event.stopPropagation(); toggleStar(this)">★</span>
+        </div>
+      </div>
+
+      <div class="recent-card" onclick="openPlayer('Full Moon Release Meditation', 'MEDITATION · 20 MIN', '🌕', 20)">
+        <div class="recent-card-icon">🌕</div>
+        <div class="recent-card-info">
+          <span class="recent-card-title">Full Moon Release Meditation</span>
+          <span class="recent-card-date">Mar 8 · 20 min</span>
+        </div>
+        <div class="recent-card-actions">
+          <span class="download-indicator" title="Download" onclick="event.stopPropagation(); this.classList.toggle('downloaded')">↓</span>
+          <span class="recent-share" title="Share" onclick="event.stopPropagation()">↗</span>
+          <span class="recent-play" onclick="event.stopPropagation(); openPlayer('Full Moon Release Meditation', 'MEDITATION · 20 MIN', '🌕', 20)">▶</span>
+          <span class="fav-star" onclick="event.stopPropagation(); toggleStar(this)">★</span>
+        </div>
+      </div>
+
+      <div class="recent-card" onclick="openPlayer('Morning Intention Setting', 'PRACTICE · 8 MIN', '🧘', 8)">
+        <div class="recent-card-icon">🧘</div>
+        <div class="recent-card-info">
+          <span class="recent-card-title">Morning Intention Setting</span>
+          <span class="recent-card-date">Mar 5 · 8 min</span>
+        </div>
+        <div class="recent-card-actions">
+          <span class="download-indicator" title="Download" onclick="event.stopPropagation(); this.classList.toggle('downloaded')">↓</span>
+          <span class="recent-share" title="Share" onclick="event.stopPropagation()">↗</span>
+          <span class="recent-play" onclick="event.stopPropagation(); openPlayer('Morning Intention Setting', 'PRACTICE · 8 MIN', '🧘', 8)">▶</span>
+          <span class="fav-star" onclick="event.stopPropagation(); toggleStar(this)">★</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══ NOW PLAYING MINI BAR (Tier 2) ═══ -->
+<div class="now-playing-bar" id="now-playing-bar" onclick="openPlayer()">
+  <div class="now-playing-eq">
+    <span></span><span></span><span></span>
+  </div>
+  <div class="now-playing-info">
+    <span class="now-playing-title" id="np-title">528Hz Healing Frequency</span>
+    <span class="now-playing-artist" id="np-artist">FREQUENCY · 12 MIN</span>
+  </div>
+  <div class="now-playing-controls">
+    <button class="np-btn" onclick="event.stopPropagation()" title="Pause">⏸</button>
+  </div>
+  <div class="np-progress">
+    <div class="np-progress-fill" id="np-progress-fill"></div>
+  </div>
+</div>
+
+<!-- ═══ FULL-SCREEN AUDIO PLAYER (Tier 2) ═══ -->
+<div class="player-overlay" id="player-overlay">
+  <div class="player-header">
+    <button class="player-close" onclick="closePlayer()">⌄</button>
+    <span class="player-source" id="player-source">FREQUENCY · 12 MIN</span>
+    <button class="player-share">↗</button>
+  </div>
+  <div class="player-artwork">
+    <div class="artwork-container" id="player-artwork-emoji">🎵</div>
+  </div>
+  <div class="player-info">
+    <h2 class="player-title" id="player-title">528Hz Healing Frequency</h2>
+    <p class="player-subtitle" id="player-subtitle">FREQUENCY · 12 MIN</p>
+  </div>
+  <div class="player-scrubber">
+    <div class="scrubber-track">
+      <div class="scrubber-fill" id="scrubber-fill"></div>
+    </div>
+    <div class="scrubber-times">
+      <span id="scrubber-elapsed">3:42</span>
+      <span id="scrubber-total">12:00</span>
+    </div>
+  </div>
+  <div class="player-controls">
+    <button class="ctrl-secondary" id="ctrl-download" title="Download" onclick="this.classList.toggle('active')">↓</button>
+    <button class="ctrl-play" id="ctrl-play" onclick="togglePlayPause()">▶</button>
+    <button class="ctrl-secondary" id="ctrl-bookmark" title="Bookmark" onclick="this.classList.toggle('active')">★</button>
+  </div>
+  <div class="player-bottom">
+    <button class="player-stories-btn">✦ Share to Stories</button>
+  </div>
+</div>
+
+<!-- ═══ BOTTOM NAV ═══ -->
+<nav class="bottom-nav">
+  <div class="nav-item">
+    <span class="nav-icon">🏛️</span>
+    <span class="nav-label">Altar</span>
+  </div>
+  <div class="nav-item">
+    <span class="nav-icon">✍️</span>
+    <span class="nav-label">Create</span>
+  </div>
+  <div class="nav-item active">
+    <span class="nav-icon">📖</span>
+    <span class="nav-label">School</span>
+  </div>
+</nav>
+
+<script>
+// ── TAB SWITCHING ──
+function switchTab(tab) {
+  const teachingsEl = document.getElementById('teachings-section');
+  const soundsEl = document.getElementById('sounds-section');
+  const tabTeachings = document.getElementById('tab-teachings');
+  const tabSounds = document.getElementById('tab-sounds');
+
+  if (tab === 'teachings') {
+    teachingsEl.classList.remove('hidden');
+    teachingsEl.classList.add('teachings-section');
+    soundsEl.classList.remove('visible');
+    tabTeachings.classList.add('active');
+    tabSounds.classList.remove('active');
+  } else {
+    teachingsEl.classList.add('hidden');
+    soundsEl.classList.add('visible');
+    tabSounds.classList.add('active');
+    tabTeachings.classList.remove('active');
+  }
+}
+
+// ── CARD EXPAND/COLLAPSE ──
+function toggleCard(card) {
+  const wasExpanded = card.classList.contains('expanded');
+  document.querySelectorAll('.teaching-card').forEach(c => c.classList.remove('expanded'));
+  if (!wasExpanded) card.classList.add('expanded');
+}
+
+// ── CHIP SELECTION (Moonly-inspired active state) ──
+function selectChip(chip) {
+  document.querySelectorAll('#intention-chips .intention-chip').forEach(c => {
+    c.classList.remove('active');
+  });
+  chip.classList.add('active');
+}
+
+// ── STAR TOGGLE (animated) ──
+function toggleStar(star) {
+  star.classList.toggle('active');
+  // Bounce animation
+  star.style.transform = 'scale(1.5)';
+  setTimeout(() => { star.style.transform = ''; }, 200);
+}
+
+// ── FULL-SCREEN PLAYER ──
+let currentTrack = { title: '', subtitle: '', emoji: '', duration: 0, image: null };
+let isPlaying = false;
+
+function openPlayer(title, subtitle, emoji, duration, image) {
+  if (title) {
+    currentTrack = { title, subtitle, emoji, duration, image: image || null };
+  }
+  const overlay = document.getElementById('player-overlay');
+  const artwork = document.getElementById('player-artwork-emoji');
+  document.getElementById('player-title').textContent = currentTrack.title;
+  document.getElementById('player-subtitle').textContent = currentTrack.subtitle;
+  document.getElementById('player-source').textContent = currentTrack.subtitle;
+  document.getElementById('scrubber-total').textContent = currentTrack.duration + ':00';
+
+  // Image artwork or emoji fallback
+  if (currentTrack.image) {
+    artwork.textContent = '';
+    artwork.style.backgroundImage = 'url(' + currentTrack.image + ')';
+    artwork.style.backgroundSize = 'cover';
+    artwork.style.backgroundPosition = 'center';
+    artwork.style.fontSize = '0';
+  } else {
+    artwork.textContent = currentTrack.emoji;
+    artwork.style.backgroundImage = 'none';
+    artwork.style.fontSize = '80px';
+  }
+
+  overlay.classList.add('visible');
+  overlay.style.display = 'flex';
+  // Show now-playing
+  showNowPlaying(currentTrack.title, currentTrack.subtitle);
+  isPlaying = true;
+  document.getElementById('ctrl-play').textContent = '⏸';
+}
+
+function closePlayer() {
+  const overlay = document.getElementById('player-overlay');
+  overlay.classList.remove('visible');
+  overlay.style.display = 'none';
+}
+
+function togglePlayPause() {
+  const btn = document.getElementById('ctrl-play');
+  isPlaying = !isPlaying;
+  btn.textContent = isPlaying ? '⏸' : '▶';
+}
+
+// ── NOW PLAYING MINI BAR ──
+function showNowPlaying(title, artist) {
+  const bar = document.getElementById('now-playing-bar');
+  document.getElementById('np-title').textContent = title;
+  document.getElementById('np-artist').textContent = artist;
+  bar.classList.add('visible');
+  // Simulate progress
+  let progress = 0;
+  const fill = document.getElementById('np-progress-fill');
+  clearInterval(window.npInterval);
+  window.npInterval = setInterval(() => {
+    progress = Math.min(progress + 0.5, 100);
+    fill.style.width = progress + '%';
+  }, 500);
+}
+
+// ── STORY OVERLAY (Spiritual Stories) ──
+let currentCardIndex = 0;
+const totalCards = 6;
+
+function openStory() {
+  currentCardIndex = 0;
+  const overlay = document.getElementById('story-overlay');
+  overlay.classList.add('visible');
+  overlay.style.display = 'flex';
+  updateStoryUI();
+  // Reset quiz state
+  document.querySelectorAll('.quiz-option').forEach(o => {
+    o.classList.remove('correct', 'wrong', 'disabled');
+  });
+  const fb = document.getElementById('quiz-feedback');
+  fb.classList.remove('show', 'success', 'fail');
+  fb.textContent = '';
+}
+
+function closeStory() {
+  const overlay = document.getElementById('story-overlay');
+  overlay.classList.remove('visible');
+  overlay.style.display = 'none';
+}
+
+function nextCard() {
+  if (currentCardIndex < totalCards - 1) {
+    currentCardIndex++;
+    updateStoryUI();
+  }
+}
+
+function prevCard() {
+  if (currentCardIndex > 0) {
+    currentCardIndex--;
+    updateStoryUI();
+  }
+}
+
+function updateStoryUI() {
+  // Update cards
+  document.querySelectorAll('.story-card').forEach(card => {
+    card.classList.remove('active');
+    if (parseInt(card.dataset.index) === currentCardIndex) {
+      card.classList.add('active');
+    }
+  });
+  // Update progress segments
+  for (let i = 0; i < totalCards; i++) {
+    const seg = document.getElementById('seg-' + i);
+    seg.classList.remove('done', 'active');
+    if (i < currentCardIndex) seg.classList.add('done');
+    if (i === currentCardIndex) seg.classList.add('active');
+  }
+}
+
+function selectAnswer(btn, isCorrect) {
+  // Disable all options
+  document.querySelectorAll('.quiz-option').forEach(o => {
+    o.classList.add('disabled');
+  });
+  const fb = document.getElementById('quiz-feedback');
+  if (isCorrect) {
+    btn.classList.add('correct');
+    fb.textContent = '✦ Correct! +15 XP';
+    fb.className = 'quiz-feedback show success';
+    // Animate XP in streak bar
+    const xpEl = document.querySelector('.xp-count');
+    if (xpEl) {
+      const current = parseInt(xpEl.textContent.replace(',', ''));
+      xpEl.textContent = (current + 15).toLocaleString();
+      xpEl.style.transform = 'scale(1.3)';
+      xpEl.style.color = '#22c55e';
+      setTimeout(() => {
+        xpEl.style.transform = '';
+        xpEl.style.color = '';
+      }, 600);
+    }
+  } else {
+    btn.classList.add('wrong');
+    // Highlight correct answer
+    document.querySelectorAll('.quiz-option').forEach(o => {
+      if (o.onclick && o.onclick.toString().includes('true')) {
+        o.classList.add('correct');
+      }
+    });
+    fb.textContent = 'Not quite — the answer is highlighted above';
+    fb.className = 'quiz-feedback show fail';
+  }
+  // Auto-advance after delay
+  setTimeout(() => {
+    if (currentCardIndex < totalCards - 1) {
+      nextCard();
+    }
+  }, 2000);
+}
+
+function completeStory() {
+  closeStory();
+  // Update XP
+  const xpEl = document.querySelector('.xp-count');
+  if (xpEl) {
+    const current = parseInt(xpEl.textContent.replace(',', ''));
+    xpEl.textContent = (current + 30).toLocaleString();
+    xpEl.style.transform = 'scale(1.3)';
+    xpEl.style.color = '#22c55e';
+    setTimeout(() => {
+      xpEl.style.transform = '';
+      xpEl.style.color = '';
+    }, 800);
+  }
+  // Update streak calendar — mark today as done
+  const todayDot = document.querySelector('.cal-day.today .cal-dot');
+  if (todayDot) {
+    todayDot.classList.remove('current');
+    todayDot.classList.add('filled');
+  }
+}
+
+// ── SELECT GUIDE ──
+function selectGuide(card, guideId) {
+  document.querySelectorAll('.guide-card').forEach(c => c.classList.remove('active-guide'));
+  card.classList.add('active-guide');
+  // Bounce animation
+  const ring = card.querySelector('.guide-avatar-ring');
+  if (ring) {
+    ring.style.transform = 'scale(1.15)';
+    setTimeout(() => { ring.style.transform = ''; }, 250);
+  }
+}
+</script>
+
+</body>
+</html>

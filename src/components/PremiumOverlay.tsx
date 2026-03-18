@@ -7,10 +7,10 @@ interface PremiumOverlayProps {
 }
 
 const FEATURES = [
-    { icon: '🔮', text: 'Unlimited Deep Insights' },
-    { icon: '♾️', text: 'Unlimited Daily Readings' },
-    { icon: '📊', text: 'Advanced Spreads & Analytics' },
-    { icon: '🌙', text: 'Cosmic Blueprint & Year Ahead' },
+    { icon: '🌙', text: 'Year Ahead Forecast — personalized to your chart' },
+    { icon: '🔮', text: 'Unlimited Tarot — all spreads, no daily cap' },
+    { icon: '📊', text: 'Celtic Cross, Career Path & Compatibility' },
+    { icon: '🎵', text: 'Full Sound Library — Solfeggio & Breathwork Codex' },
 ];
 
 export function PremiumOverlay({ onClose, onSubscribe }: PremiumOverlayProps) {
@@ -106,7 +106,7 @@ export function PremiumOverlay({ onClose, onSubscribe }: PremiumOverlayProps) {
                 </div>
 
                 {/* Content */}
-                <div className="relative z-10 p-6">
+                <div className="relative z-10 p-5 pb-4">
                     {/* Close button */}
                     <button
                         onClick={handleClose}
@@ -116,52 +116,72 @@ export function PremiumOverlay({ onClose, onSubscribe }: PremiumOverlayProps) {
                     </button>
 
                     {/* Header */}
-                    <div className="text-center mb-5">
-                        <div className="text-3xl mb-2">👑</div>
-                        <h2 className="font-display text-2xl shimmer-text font-semibold tracking-wide">
+                    <div className="text-center mb-3">
+                        <div className="text-2xl mb-1">👑</div>
+                        <h2 className="font-display text-xl shimmer-text font-semibold tracking-wide">
                             Unlock Premium
                         </h2>
-                        <p className="text-sm text-altar-muted mt-2">
+                        <p className="text-xs text-altar-muted mt-1">
                             Elevate your mystical journey
                         </p>
                     </div>
 
                     {/* Features */}
-                    <div className="space-y-3 mb-6">
+                    <div className="space-y-2 mb-3">
                         {FEATURES.map((feature, i) => (
                             <div
                                 key={i}
-                                className="flex items-center gap-3 glass rounded-xl px-4 py-3 animate-fade-up"
+                                className="flex items-center gap-2.5 glass rounded-xl px-3 py-2.5 animate-fade-up"
                                 style={{ animationDelay: `${i * 0.1}s`, opacity: 0 }}
                             >
-                                <span className="text-lg">{feature.icon}</span>
-                                <span className="text-sm text-altar-text font-medium">{feature.text}</span>
+                                <span className="text-base">{feature.icon}</span>
+                                <span className="text-[13px] text-altar-text font-medium leading-tight">{feature.text}</span>
                             </div>
                         ))}
                     </div>
 
+                    {/* Social Proof */}
+                    <div className="text-center mb-3 animate-fade-up" style={{ animationDelay: '0.5s', opacity: 0 }}>
+                        <div className="flex justify-center gap-0.5 mb-1">
+                            {[1,2,3,4,5].map(i => <span key={i} className="text-xs" style={{ color: '#d4af37' }}>★</span>)}
+                        </div>
+                        <p className="text-[11px] text-altar-muted italic">"This app changed my entire morning ritual" · <span className="not-italic text-altar-muted/50">Join thousands of seekers</span></p>
+                    </div>
+
+                    {/* Free Trial Badge */}
+                    <div className="flex justify-center mb-3">
+                        <div className="px-3.5 py-1 rounded-full text-[10px] font-display tracking-wider"
+                            style={{
+                                background: 'linear-gradient(135deg, rgba(212,175,55,0.15), rgba(212,175,55,0.05))',
+                                border: '1px solid rgba(212,175,55,0.3)',
+                                color: '#d4af37',
+                            }}>
+                            ✦ 7-Day Free Trial — Cancel Anytime
+                        </div>
+                    </div>
+
                     {/* Plan Selector */}
-                    <div className="grid grid-cols-2 gap-3 mb-5">
+                    <div className="grid grid-cols-2 gap-2.5 mb-4">
                         {(['MONTHLY', 'YEARLY'] as const).map((key) => {
                             const plan = PRODUCTS[key];
                             return (
                                 <button
                                     key={key}
                                     onClick={() => setSelectedPlan(key)}
-                                    className={`relative rounded-2xl p-4 text-center transition-all border-2 ${selectedPlan === key
+                                    className={`relative rounded-2xl p-3 text-center transition-all border-2 ${selectedPlan === key
                                         ? 'border-altar-gold bg-altar-gold/10 shadow-[0_0_20px_rgba(255,215,0,0.15)]'
                                         : 'border-white/10 glass hover:border-white/20'
                                         }`}
                                 >
                                     {plan.savings && (
-                                        <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-green-500 text-[10px] text-white font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
+                                        <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-green-500 text-[9px] text-white font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
                                             {plan.savings}
                                         </span>
                                     )}
-                                    <div className="text-xs text-altar-muted mb-1 font-medium">{plan.label}</div>
-                                    <div className="font-display text-lg text-white font-semibold">
+                                    <div className="text-[11px] text-altar-muted mb-0.5 font-medium">{plan.label}</div>
+                                    <div className="font-display text-base text-white font-semibold">
                                         {plan.price}
-                                        <span className="text-xs text-altar-muted font-sans">{plan.period}</span>
+                                        <span className="text-[11px] text-altar-muted font-sans">{plan.period}</span>
                                     </div>
                                 </button>
                             );
@@ -179,7 +199,7 @@ export function PremiumOverlay({ onClose, onSubscribe }: PremiumOverlayProps) {
                     <button
                         onClick={handlePurchase}
                         disabled={isProcessing || isRestoring}
-                        className={`w-full py-4 rounded-2xl font-display font-bold text-lg tracking-wide transition-all ${!isProcessing && !isRestoring
+                        className={`w-full py-3.5 rounded-2xl font-display font-bold text-base tracking-wide transition-all ${!isProcessing && !isRestoring
                             ? 'bg-gradient-to-r from-altar-gold via-altar-gold-dim to-altar-gold text-altar-deep hover:shadow-[0_0_30px_rgba(255,215,0,0.4)] hover:scale-[1.02] active:scale-[0.98]'
                             : 'bg-white/10 text-white/30 cursor-not-allowed'
                             }`}
@@ -190,7 +210,7 @@ export function PremiumOverlay({ onClose, onSubscribe }: PremiumOverlayProps) {
                                 Processing…
                             </span>
                         ) : (
-                            `Subscribe — ${PRODUCTS[selectedPlan].price}${PRODUCTS[selectedPlan].period}`
+                            `Start Free Trial — then ${PRODUCTS[selectedPlan].price}${PRODUCTS[selectedPlan].period}`
                         )}
                     </button>
 
@@ -198,11 +218,11 @@ export function PremiumOverlay({ onClose, onSubscribe }: PremiumOverlayProps) {
                     <button
                         onClick={handleRestore}
                         disabled={isProcessing || isRestoring}
-                        className="w-full mt-3 py-2.5 rounded-xl text-sm text-altar-muted hover:text-white transition-colors disabled:opacity-50"
+                        className="w-full mt-2 py-2 rounded-xl text-xs text-altar-muted hover:text-white transition-colors disabled:opacity-50"
                     >
                         {isRestoring ? (
                             <span className="flex items-center justify-center gap-2">
-                                <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                 Restoring…
                             </span>
                         ) : (
@@ -211,24 +231,23 @@ export function PremiumOverlay({ onClose, onSubscribe }: PremiumOverlayProps) {
                     </button>
 
                     {/* Subscription terms — REQUIRED for auto-renewable subscriptions */}
-                    <div className="mt-4 space-y-2">
-                        <p className="text-center text-[10px] text-white/30 leading-relaxed">
-                            Payment will be charged to your Apple ID account at confirmation of purchase.
-                            Subscription automatically renews unless it is cancelled at least 24 hours before
-                            the end of the current period. Your account will be charged for renewal within
-                            24 hours prior to the end of the current period.
+                    <div className="mt-2">
+                        <p className="text-center text-[8px] text-white/25 leading-snug">
+                            Payment charged to Apple ID at purchase. Auto-renews unless cancelled 24 hrs before period ends. Manage in App Store settings.
                         </p>
-                        <p className="text-center text-[10px] text-white/30 leading-relaxed">
-                            You can manage and cancel your subscriptions by going to your App Store account
-                            settings after purchase.
-                        </p>
-                        <div className="flex items-center justify-center gap-2 text-[10px]">
-                            <button className="text-altar-gold/50 hover:text-altar-gold transition-colors underline">
-                                Terms of Service
+                        <div className="flex items-center justify-center gap-2 text-[9px] mt-1.5">
+                            <button
+                                onClick={async (e) => { e.stopPropagation(); try { const m = await (Function('return import("@capacitor/browser")')() as Promise<any>); await m.Browser.open({ url: '/terms.html' }); } catch { window.open('/terms.html', '_blank'); } }}
+                                className="text-altar-gold/40 hover:text-altar-gold transition-colors underline"
+                            >
+                                Terms
                             </button>
-                            <span className="text-white/10">|</span>
-                            <button className="text-altar-gold/50 hover:text-altar-gold transition-colors underline">
-                                Privacy Policy
+                            <span className="text-white/10">·</span>
+                            <button
+                                onClick={async (e) => { e.stopPropagation(); try { const m = await (Function('return import("@capacitor/browser")')() as Promise<any>); await m.Browser.open({ url: '/privacy.html' }); } catch { window.open('/privacy.html', '_blank'); } }}
+                                className="text-altar-gold/40 hover:text-altar-gold transition-colors underline"
+                            >
+                                Privacy
                             </button>
                         </div>
                     </div>

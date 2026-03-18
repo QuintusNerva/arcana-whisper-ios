@@ -299,6 +299,7 @@ export function CosmicBlueprint({ onTabChange }: CosmicBlueprintProps) {
                             <button
                                 key={item.label}
                                 onClick={() => onTabChange(item.tab)}
+                                {...(item.label === 'Sun' ? { 'data-coach': 'sun-sign' } : {})}
                                 className="rounded-xl p-2.5 text-center transition-all duration-200 hover:brightness-110 hover:scale-[1.03] active:scale-[0.97] flex flex-col items-center justify-center"
                                 style={{
                                     background: item.style.grad,
@@ -485,6 +486,7 @@ export function CosmicBlueprint({ onTabChange }: CosmicBlueprintProps) {
             {/* ── Scripting Shortcut (outside card, tightened gap) ── */}
             <div style={{ margin: '4px 0 0' }}>
                 <button
+                    data-coach="scripting"
                     onClick={() => onTabChange('journal')}
                     className="w-full flex items-center justify-between px-5 py-3.5 rounded-2xl transition-all hover:bg-white/[0.04] active:scale-[0.98] group"
                     style={{ background: 'rgba(35,20,60,0.5)', border: '1px solid rgba(212,175,55,0.08)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}

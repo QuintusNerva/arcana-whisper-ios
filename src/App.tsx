@@ -32,6 +32,7 @@ import { TarotTab } from './components/TarotTab';
 import { AngelNumbersSection } from './components/AngelNumbersSection';
 import { SignReadingScreen } from './components/SignReadingScreen';
 import { MoonScreen } from './components/MoonScreen';
+import { CoachMarkTutorial, useCoachMark } from './components/CoachMarkTutorial';
 import { canDoReading, incrementReadingCount, getRemainingReadings, AIService, dailyCache } from './services/ai.service';
 import { recordReading } from './services/memory.service';
 import { fireReminder } from './services/reminder.service';
@@ -40,6 +41,14 @@ import { fireJournalReminder, getJournalEntries, getPatternProgress } from './se
 import { getDreamEntries } from './services/dream-journal.service';
 import { getBirthData, getSunSign, getDailyHoroscope, ZODIAC_SIGNS } from './services/astrology.service';
 import { initializePurchases } from './services/storekit.service';
+
+/* ── Portal card icons ── */
+import iconTarot from './assets/icons/tarot.png';
+import iconRelationships from './assets/icons/relationships.png';
+import iconAngelNumbers from './assets/icons/angel-numbers.png';
+import iconNatal from './assets/icons/natal.png';
+import iconFamily from './assets/icons/family.png';
+import iconCareer from './assets/icons/career.png';
 
 /* ── Ambient particle backdrop ── */
 function AltarParticles() {
@@ -266,7 +275,7 @@ function App() {
     const [showCompatibility, setShowCompatibility] = React.useState(false);
     const [showTransitFeed, setShowTransitFeed] = React.useState(false);
     const [showJournal, setShowJournal] = React.useState(false);
-    const [journalInitialSubTab, setJournalInitialSubTab] = React.useState<'journal' | 'dreams'>('journal');
+
 
     const [showYearAhead, setShowYearAhead] = React.useState(false);
     const [showFamily, setShowFamily] = React.useState(false);
@@ -279,6 +288,7 @@ function App() {
     const [showMoonReading, setShowMoonReading] = React.useState(false);
     const [showRisingReading, setShowRisingReading] = React.useState(false);
     const [showBlueprintScreen, setShowBlueprintScreen] = React.useState(false);
+    const coachMark = useCoachMark();
 
     // ── Cosmic Card Invite detection ──
     const [inviteData, setInviteData] = React.useState(() => {
@@ -378,7 +388,7 @@ function App() {
         setShowCompatibility(false);
         setShowTransitFeed(false);
         setShowJournal(false);
-        setJournalInitialSubTab('journal');
+
 
         setShowYearAhead(false);
         setShowFamily(false);
@@ -599,9 +609,8 @@ function App() {
         if (showJournal) {
             return (
                 <JournalTab
-                    onClose={() => { setShowJournal(false); setJournalInitialSubTab('journal'); setCurrentTab('home'); }}
+                    onClose={() => { setShowJournal(false); setCurrentTab('home'); }}
                     onTabChange={handleTabChange}
-                    initialSubTab={journalInitialSubTab}
                     subscription={sub}
                     onShowPremium={() => setShowPremiumOverlay(true)}
                 />
@@ -828,30 +837,12 @@ function App() {
                         </h3>
                         <div className="grid grid-cols-3 gap-2.5">
                             {[
-                                {
-                                    label: 'Tarot', tagline: "Today's energy + spreads", tab: 'tarot',
-                                    svgIcon: <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg"><path d="M18 2 L22.5 13 L34 13 L24.5 20.5 L28 32 L18 25 L8 32 L11.5 20.5 L2 13 L13.5 13 Z" strokeLinejoin="round"/><circle cx={18} cy={18} r={8} opacity={0.3}/></svg>,
-                                },
-                                {
-                                    label: 'Relationships', tagline: 'Cosmic bonds', tab: 'compatibility',
-                                    svgIcon: <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg"><path d="M18 28 C12 22, 2 18, 8 10 C12 6, 18 10, 18 14" strokeLinejoin="round"/><path d="M18 28 C24 22, 34 18, 28 10 C24 6, 18 10, 18 14" strokeLinejoin="round"/><path d="M10 20 Q18 8, 26 20" opacity={0.25} strokeDasharray="2 3"/></svg>,
-                                },
-                                {
-                                    label: 'Angel Numbers', tagline: 'Signs & synchronicities', tab: 'angelnumbers',
-                                    svgIcon: <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg"><circle cx={18} cy={12} r={7} opacity={0.7}/><circle cx={12} cy={23} r={7} opacity={0.7}/><circle cx={24} cy={23} r={7} opacity={0.7}/><circle cx={18} cy={18} r={2.5} opacity={0.4}/></svg>,
-                                },
-                                {
-                                    label: 'Natal', tagline: 'Your birth blueprint', tab: 'natal',
-                                    svgIcon: <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg"><path d="M22 6 C14 8, 10 16, 14 24 C18 32, 28 30, 32 24 C26 28, 18 26, 16 18 C14 10, 18 6, 22 6 Z" strokeLinejoin="round"/><circle cx={26} cy={10} r={1.5} fill="var(--color-altar-gold)" stroke="none" opacity={0.6}/><circle cx={28} cy={14} r={0.8} fill="var(--color-altar-gold)" stroke="none" opacity={0.4}/></svg>,
-                                },
-                                {
-                                    label: 'Family', tagline: 'Circle of souls', tab: 'family',
-                                    svgIcon: <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg"><line x1={18} y1={32} x2={18} y2={16}/><path d="M18 16 Q10 14, 8 8" strokeLinecap="round"/><path d="M18 16 Q26 14, 28 8" strokeLinecap="round"/><path d="M18 20 Q12 18, 10 14" strokeLinecap="round" opacity={0.6}/><path d="M18 20 Q24 18, 26 14" strokeLinecap="round" opacity={0.6}/><circle cx={8} cy={8} r={3} opacity={0.35}/><circle cx={28} cy={8} r={3} opacity={0.35}/><circle cx={18} cy={6} r={4} opacity={0.25}/><path d="M14 33 Q18 29, 22 33" opacity={0.4} strokeLinecap="round"/></svg>,
-                                },
-                                {
-                                    label: 'Career', tagline: 'Your true calling', tab: 'career',
-                                    svgIcon: <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg"><circle cx={18} cy={18} r={13} opacity={0.3}/><circle cx={18} cy={18} r={2} opacity={0.5}/><line x1={18} y1={3} x2={18} y2={10} strokeLinecap="round"/><line x1={18} y1={26} x2={18} y2={33} strokeLinecap="round"/><line x1={3} y1={18} x2={10} y2={18} strokeLinecap="round"/><line x1={26} y1={18} x2={33} y2={18} strokeLinecap="round"/><line x1={7.5} y1={7.5} x2={12} y2={12} strokeLinecap="round" opacity={0.5}/><line x1={24} y1={24} x2={28.5} y2={28.5} strokeLinecap="round" opacity={0.5}/><line x1={28.5} y1={7.5} x2={24} y2={12} strokeLinecap="round" opacity={0.5}/><line x1={7.5} y1={28.5} x2={12} y2={24} strokeLinecap="round" opacity={0.5}/></svg>,
-                                },
+                                { label: 'Tarot', tagline: "Today's energy + spreads", tab: 'tarot', icon: iconTarot },
+                                { label: 'Relationships', tagline: 'Cosmic bonds', tab: 'compatibility', icon: iconRelationships },
+                                { label: 'Angel Numbers', tagline: 'Signs & synchronicities', tab: 'angelnumbers', icon: iconAngelNumbers },
+                                { label: 'Natal', tagline: 'Your birth blueprint', tab: 'natal', icon: iconNatal },
+                                { label: 'Family', tagline: 'Circle of souls', tab: 'family', icon: iconFamily },
+                                { label: 'Career', tagline: 'Your true calling', tab: 'career', icon: iconCareer },
                             ].map(item => (
                                 <button
                                     key={item.tab}
@@ -871,11 +862,9 @@ function App() {
                                     {/* Subtle gold top glow */}
                                     <div className="absolute top-[-10px] left-1/2 -translate-x-1/2" style={{ width: '60%', height: 30, filter: 'blur(20px)', opacity: 0.08, background: 'var(--color-altar-gold)', pointerEvents: 'none' }} />
 
-                                    {/* SVG icon — gold stroked, no circle bubble */}
-                                    <div className="relative z-10 flex items-center justify-center flex-shrink-0 portal-icon-gold" style={{ width: 44, height: 44 }}>
-                                        <div style={{ width: 36, height: 36 }}>
-                                            {item.svgIcon}
-                                        </div>
+                                    {/* Portal card icon — true alpha transparency */}
+                                    <div className="relative z-10 flex items-center justify-center flex-shrink-0" style={{ width: 84, height: 84 }}>
+                                        <img src={item.icon} alt={item.label} style={{ width: 80, height: 80, objectFit: 'contain', filter: 'drop-shadow(0 0 8px rgba(212,175,55,0.35))' }} />
                                     </div>
 
                                     <div className="relative z-10 flex flex-col items-center gap-1">
@@ -903,6 +892,9 @@ function App() {
                 </main>
             </div >
             <BottomNav currentTab={currentTab} onTabChange={handleTabChange} />
+            {coachMark.shouldShow && (
+                <CoachMarkTutorial onComplete={coachMark.dismiss} />
+            )}
         </div >
     );
 }

@@ -106,7 +106,7 @@ function TarotIcon({ className }: { className?: string }) {
 
 const TABS = [
     { id: 'home', label: 'Witness', icon: HomeIcon },
-    { id: 'create', label: 'Create', icon: SparkleIcon },
+    { id: 'create', label: 'Manifest', icon: SparkleIcon },
     { id: 'school', label: 'School', icon: BookIcon },
 ];
 

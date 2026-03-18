@@ -32,17 +32,10 @@ async function loadRevenueCat() {
 
 // ── Product Configuration ──
 export const PRODUCTS = {
-    WEEKLY: {
-        id: 'com.arcanawhisper.premium.weekly',
-        label: 'Weekly',
-        price: '$4.99',
-        period: '/wk',
-        savings: '',
-    },
     MONTHLY: {
         id: 'com.arcanawhisper.premium.monthly',
         label: 'Monthly',
-        price: '$12.99',
+        price: '$9.99',
         period: '/mo',
         savings: '',
     },
@@ -51,7 +44,7 @@ export const PRODUCTS = {
         label: 'Yearly',
         price: '$49.99',
         period: '/yr',
-        savings: 'Save 68%',
+        savings: 'Save 58%',
         popular: true,
     },
 } as const;
@@ -204,11 +197,9 @@ export async function purchaseProduct(productId: ProductId): Promise<{ success: 
     console.warn('[StoreKit] Web mode — simulating purchase');
     try {
         await new Promise(resolve => setTimeout(resolve, 1500));
-        const isWeekly = productId === PRODUCTS.WEEKLY.id;
         const isMonthly = productId === PRODUCTS.MONTHLY.id;
         const expiresAt = new Date();
-        if (isWeekly) expiresAt.setDate(expiresAt.getDate() + 7);
-        else if (isMonthly) expiresAt.setMonth(expiresAt.getMonth() + 1);
+        if (isMonthly) expiresAt.setMonth(expiresAt.getMonth() + 1);
         else expiresAt.setFullYear(expiresAt.getFullYear() + 1);
 
         const status: SubscriptionStatus = {

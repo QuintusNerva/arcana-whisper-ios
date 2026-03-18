@@ -11,75 +11,9 @@ import React from 'react';
 import { BottomNav } from './BottomNav';
 import { PageHeader } from './PageHeader';
 import { safeStorage } from '../services/storage.service';
+import { TeachingsSection } from './TeachingsSection';
 
-// ── TEACHINGS DATA ─────────────────────────────────────────────────────────
-
-const TEACHINGS = [
-    {
-        id: 'two-part-formula',
-        title: 'The Two-Part Formula',
-        subtitle: 'Intention × Alignment',
-        emoji: '⚗️',
-        preview: 'Manifestation is not wishing. It has two active ingredients — and most people only use one.',
-        content: `Most people treat manifestation like ordering from a menu: you state what you want and wait. That's half the formula.\n\nThe full equation is: **Intention × Alignment**. Intention is the *what* — the specific, declared outcome you're calling in. Alignment is the *who* — becoming the version of yourself for whom this outcome is natural.\n\nA person with a clear intention but zero alignment is like a radio transmitting on one frequency while living on another. The signal never reaches its destination.\n\n**Practice**: Write your intention. Then ask: "What would someone who already has this *believe* about themselves?" Start believing that today. Alignment is a decision, not a consequence.`,
-    },
-    {
-        id: 'clarity-beats-desire',
-        title: 'Clarity Beats Desire',
-        subtitle: 'Why specificity is the signal',
-        emoji: '🔬',
-        preview: '"I want more money" is noise. "I am calling in $8,000 for my creative work by June" is a signal.',
-        content: `The universe doesn't respond to vague longing — it responds to a clear signal. Desire is fuel, but clarity is the frequency.\n\nWhen you say "I want to be happy" or "I want more abundance," you're transmitting static. The field can't lock on to it. When you say "I am calling in a fulfilling remote creative role that pays $90K+, working with people who value depth and craft" — that is a signal it can match.\n\n**Why specificity works**: It forces you to confront resistance. The moment you get specific, every belief that says "I'm not the kind of person who gets that" surfaces. Those beliefs are the actual blockage. Vagueness lets you avoid them.\n\n**Practice**: Revisit your active intention. Make it 3x more specific. Notice what feeling comes up when you do.`,
-    },
-    {
-        id: 'contrast-method',
-        title: 'The Contrast Method',
-        subtitle: 'Use what you don\'t want',
-        emoji: '🌗',
-        preview: 'Your dissatisfaction is one of the most valuable data sources you have.',
-        content: `Every experience you don't want is showing you, with perfect precision, what you do want. This is the contrast method: adversity as a compass.\n\nWhen you're frustrated that someone isn't communicating openly with you, the contrast has just revealed what you actually want: deep, honest connection. When work feels hollow, the contrast is showing you that you want work that feels alive with purpose.\n\n**The mistake**: Most people spend their energy on the contrast (the frustration, the complaint, the story about what's wrong). They broadcast that frequency constantly and wonder why they keep attracting more of the same.\n\n**The shift**: Stay with the contrast just long enough to extract the clarity. Then pivot immediately to the desire it pointed to. Write it. Feel it. Transmit that instead.\n\n**Practice**: List 3 things frustrating you right now. For each one, write: "This is showing me that I want ___."`,
-    },
-    {
-        id: 'gratitude-frequency',
-        title: 'Gratitude as a Frequency',
-        subtitle: 'The most powerful amplifier',
-        emoji: '🌟',
-        preview: 'Gratitude doesn\'t just feel good. It changes what you can receive.',
-        content: `Gratitude isn't a spiritual nicety — it's a receiving mechanism. When you're genuinely grateful, your nervous system shifts out of scarcity and into abundance. That state makes you magneticically different.\n\nHere's the key insight most people miss: gratitude for things you *haven't received yet* is the advanced practice. This is called **prospective gratitude** — feeling the thankfulness as if it's already arrived.\n\nThis works because your subconscious doesn't distinguish clearly between vivid imagination and reality. When you feel genuinely grateful for something before it arrives, you've already begun living as someone who has received it. That identity shift is what accelerates manifestation.\n\n**Practice**: Each morning, write 3 things you're grateful for *as if they've already happened*, including at least one current active intention. "I am so grateful for the financial clarity I now have. It feels like freedom."`,
-    },
-    {
-        id: 'detachment',
-        title: 'Detachment Is Not Abandonment',
-        subtitle: 'Surrendering the how',
-        emoji: '🌊',
-        preview: 'You hold the vision tightly. You hold the timeline and method loosely. These are not the same thing.',
-        content: `The instruction to "detach" confuses people because it sounds like giving up. It isn't. Detachment has a very specific meaning: releasing your grip on *how* and *when*, while keeping full clarity on *what* and *who*.\n\nThe universe has access to pathways you can't currently see. When you fix on one rigid path to your intention, you block those alternate routes. Every time you catch yourself thinking "it has to happen this specific way by this exact date or it's not working" — you've just narrowed the field of possibilities from infinite to one.\n\n**The analogy**: You book a flight to Paris. You trust that the pilots know how to get there. You don't stand at the cockpit door demanding to see the flight plan every 20 minutes. You hold the destination (Paris) firmly. You release the route (trusting the professionals who do this daily).\n\nThe universe is the pilot. Your job is the destination.\n\n**Practice**: Find where you're gripping the *how*. Write it down. Then write: "I release the path. I trust that what's mine will find me."`,
-    },
-    {
-        id: 'signs-synchronicities',
-        title: 'Reading the Signs',
-        subtitle: 'How to recognize alignment',
-        emoji: '✦',
-        preview: 'Synchronicities are the universe\'s way of confirming your signal is landing.',
-        content: `A synchronicity isn't a coincidence. It's a confirmation. When you set a clear intention and then start noticing recurring numbers, unexpected conversations, books falling open to the right page, songs playing at the right moment — these are responses.\n\nThe mistake is to treat synchronicities as proof that manifestation works. That's putting them in the wrong position. They're not proof — they're dialogue. The universe is in a conversation with you, and signs are how it responds when you've broadcast a clear signal.\n\n**How to work with signs**:\n1. Notice them without attaching fate to them\n2. Acknowledge them with gratitude\n3. Ask what they're pointing toward\n4. Take action in that direction\n\nThe Angel Number log in this app is a practical tool for this — tracking your sightings over time reveals patterns, and patterns become guidance.\n\n**The test**: If you're noticing nothing, ask yourself: "How clear and consistent is my signal?" Signs follow strong signals. Noise attracts silence.`,
-    },
-    {
-        id: 'identity-shift',
-        title: 'The Quantum Shift',
-        subtitle: 'Be it before you see it',
-        emoji: '⚡',
-        preview: 'The fastest path to any outcome is to become — at the identity level — the person who already has it.',
-        content: `Everything you currently have in your life is a perfect match to who you currently believe yourself to be. Every income level, every relationship dynamic, every opportunity — these are outputs of an identity.\n\nThis means: if you want different outputs, you need a different identity. *Not a different strategy. A different self-concept.*\n\nQuantum physics has a principle: the observer affects the observed. Who you believe yourself to be affects what you observe as possible. A person who believes they are "someone who struggles financially" will filter every financial opportunity through that lens — and often not even see the ones that would shift things.\n\n**The shift**: Stop asking "How do I get X?" Start asking "Who am I when X is already true?" Then live as that person — in decisions, in language, in how you spend your time — before the physical evidence arrives.\n\n**Practice**: Write: "I am the kind of person who ___." Fill that in not with what you want to have, but who you want to be. Meditate on that identity for 5 minutes today.`,
-    },
-    {
-        id: 'moon-as-os',
-        title: 'The Moon as an Operating System',
-        subtitle: 'Using 8 phases as a manifestation calendar',
-        emoji: '🌙',
-        preview: 'The most powerful practitioners don\'t manifest randomly. They use the lunar calendar as their rhythm.',
-        content: `The moon completes a full cycle every 29.5 days. Each phase has a distinct energetic quality, and skilled manifestors use these phases as a structured operating system rather than working against the current.\n\nThe framework:\n- **New Moon**: Plant new intentions. Maximum receptivity. Write what you're calling in.\n- **Waxing Crescent**: Take the first action. The energy is building.\n- **First Quarter**: Push through the obstacle. Resistance now means you're real.\n- **Waxing Gibbous**: Amplify and affirm. Feel it as already done.\n- **Full Moon**: Release. Celebrate what's coming. Let go of what blocks it.\n- **Waning phases**: Integrate, reflect, rest. Download the lessons.\n\nWhen you align your intention-setting to the New Moon and your releasing to the Full Moon, you stop fighting the current and start swimming with it.\n\nThe Moon tab in this app gives you live lunar data and the ritual practice for each phase. Your job: show up consistently.`,
-    },
-];
+// ── TEACHINGS DATA — moved to teachings.service.ts ──
 
 // ── ANGEL NUMBERS DATA ─────────────────────────────────────────────────────
 
@@ -136,16 +70,114 @@ function getMoonPhaseKey(): string {
     return keys[Math.floor(((elapsed % synodic) / synodic) * 8) % 8];
 }
 
-const COSMIC_RECS: Record<string, { title: string; reason: string; query: string }> = {
-    'new': { title: 'Plant Your Seeds 🌑', reason: 'Intention is highest right now. Use this silence to declare what you\'re calling in.', query: 'new moon intention setting guided meditation' },
-    'waxing-crescent': { title: 'Build Momentum 🌒', reason: 'Energy is rising. Activate with frequencies that match forward motion.', query: '432hz motivation law of attraction activation' },
-    'first-quarter': { title: 'Clear the Resistance 🌓', reason: 'The half-point brings challenges. Use sound to dissolve what\'s blocking you.', query: 'limiting belief release subliminal theta waves' },
-    'waxing-gibbous': { title: 'Amplify Your Signal 🌔', reason: 'You\'re 80% through the cycle. Amplify and feel it as already done.', query: '528hz amplify manifestation affirmations' },
-    'full': { title: 'Release & Receive 🌕', reason: 'Maximum illumination. Release what blocks. Receive what\'s coming.', query: 'full moon release meditation sound bath' },
-    'waning-gibbous': { title: 'Integrate the Teaching 🌖', reason: 'The peak has passed. Let the lesson download while you rest.', query: 'delta waves integration deep healing sleep' },
-    'last-quarter': { title: 'Let Go 🌗', reason: 'Release what didn\'t serve this cycle. Clear space for what\'s next.', query: 'let go forgiveness frequency healing meditation' },
-    'waning-crescent': { title: 'Sacred Rest 🌘', reason: 'The cycle completes. Rest, reflect, and prepare to begin again.', query: 'yoga nidra deep rest restoration sleep meditation' },
+const COSMIC_RECS: Record<string, { title: string; reason: string; query: string; freq: string }> = {
+    'new': { title: 'Plant Your Seeds 🌑', reason: 'Intention is highest right now. Use this silence to declare what you\'re calling in.', query: 'new moon intention setting guided meditation', freq: '528 Hz · Miracles' },
+    'waxing-crescent': { title: 'Build Momentum 🌒', reason: 'Energy is rising. Activate with frequencies that match forward motion.', query: '432hz motivation law of attraction activation', freq: '432 Hz · Harmony' },
+    'first-quarter': { title: 'Clear the Resistance 🌓', reason: 'The half-point brings challenges. Use sound to dissolve what\'s blocking you.', query: 'limiting belief release subliminal theta waves', freq: '417 Hz · Change' },
+    'waxing-gibbous': { title: 'Amplify Your Signal 🌔', reason: 'You\'re 80% through the cycle. Amplify and feel it as already done.', query: '528hz amplify manifestation affirmations', freq: '528 Hz · Miracles' },
+    'full': { title: 'Release & Receive 🌕', reason: 'Maximum illumination. Release what blocks. Receive what\'s coming.', query: 'full moon release meditation sound bath', freq: '396 Hz · Liberation' },
+    'waning-gibbous': { title: 'Integrate the Teaching 🌖', reason: 'The peak has passed. Let the lesson download while you rest.', query: 'delta waves integration deep healing sleep', freq: '852 Hz · Intuition' },
+    'last-quarter': { title: 'Let Go 🌗', reason: 'Release what didn\'t serve this cycle. Clear space for what\'s next.', query: 'let go forgiveness frequency healing meditation', freq: '396 Hz · Liberation' },
+    'waning-crescent': { title: 'Sacred Rest 🌘', reason: 'The cycle completes. Rest, reflect, and prepare to begin again.', query: 'yoga nidra deep rest restoration sleep meditation', freq: '174 Hz · Foundation' },
 };
+
+// ── AMBIENT SOUNDSCAPES DATA ────────────────────────────────────────────────
+
+const AMBIENT_SOUNDSCAPES = [
+    { id: 'rain', emoji: '🌧️', image: '/rain-thunder.png', title: 'Rain & Thunder', query: 'rain thunder ambient sleep loop', gradient: 'linear-gradient(135deg, #1a2a4a, #0d1a2d)' },
+    { id: 'forest', emoji: '🌲', image: '/forest-night.png', title: 'Forest Night', query: 'forest night nature ambient loop', gradient: 'linear-gradient(135deg, #1a3a2a, #0d2a1a)' },
+    { id: 'ocean', emoji: '🌊', image: '/ocean-waves.png', title: 'Ocean Waves', query: 'ocean waves ambient sleep loop', gradient: 'linear-gradient(135deg, #1a2a3a, #0d1a2a)' },
+    { id: 'fire', emoji: '🔥', image: '/crackling-fire.png', title: 'Crackling Fire', query: 'crackling fire ambient relaxation loop', gradient: 'linear-gradient(135deg, #3a2a1a, #2a1a0d)' },
+    { id: 'space', emoji: '🪐', image: '/deep-space.png', title: 'Deep Space', query: 'deep space ambient meditation loop', gradient: 'linear-gradient(135deg, #1a0d2a, #0d0a1a)' },
+];
+
+// ── SOLFEGGIO FREQUENCIES DATA ──────────────────────────────────────────────
+
+const SOLFEGGIO_FREQUENCIES = [
+    { hz: 174, name: 'Foundation', desc: 'Pain relief & security', color: '#ef4444', query: '174hz solfeggio pain relief meditation', emoji: '🔴' },
+    { hz: 285, name: 'Restoration', desc: 'Tissue healing & energy', color: '#f97316', query: '285hz solfeggio tissue healing energy', emoji: '🟠' },
+    { hz: 396, name: 'Liberation', desc: 'Release guilt & fear', color: '#eab308', query: '396hz solfeggio liberation guilt fear release', emoji: '🟡' },
+    { hz: 417, name: 'Change', desc: 'Undo situations & facilitate change', color: '#22c55e', query: '417hz solfeggio facilitate change transformation', emoji: '🟢' },
+    { hz: 432, name: 'Harmony', desc: 'Universal tuning & calm', color: '#06b6d4', query: '432hz universal harmony natural tuning meditation', emoji: '🩵' },
+    { hz: 528, name: 'Miracles', desc: 'Transformation & DNA repair', color: '#8b5cf6', query: '528hz solfeggio miracle tone DNA repair love', emoji: '💜' },
+    { hz: 639, name: 'Connection', desc: 'Reconnecting & relationships', color: '#ec4899', query: '639hz solfeggio connection relationships harmony', emoji: '💗' },
+    { hz: 741, name: 'Expression', desc: 'Problem solving & clarity', color: '#3b82f6', query: '741hz solfeggio expression problem solving awakening', emoji: '🔵' },
+    { hz: 852, name: 'Intuition', desc: 'Spiritual order & awareness', color: '#a855f7', query: '852hz solfeggio intuition spiritual order third eye', emoji: '🟣' },
+    { hz: 963, name: 'Divine', desc: 'Pineal activation & oneness', color: '#d4af37', query: '963hz solfeggio crown chakra divine consciousness', emoji: '✦' },
+];
+
+// ── MICRO-DOSES DATA ────────────────────────────────────────────────────────
+
+const MICRO_DOSES = [
+    { id: 'burst528', name: '528Hz Burst', duration: '30s', desc: 'Quick miracle tone reset', query: '528hz 30 second burst frequency', color: '#8b5cf6' },
+    { id: 'ground', name: 'Grounding', duration: '1 min', desc: 'Root chakra stabilize', query: '256hz grounding frequency 1 minute root chakra', color: '#22c55e' },
+    { id: 'cordcut', name: 'Cord Cut', duration: '2 min', desc: 'Release attachments', query: '417hz cord cutting frequency 2 minute release', color: '#ef4444' },
+    { id: 'anxiety', name: 'Anxiety Dissolve', duration: '90s', desc: 'Nervous system calm', query: '432hz anxiety relief 90 second calm frequency', color: '#06b6d4' },
+    { id: 'clarity', name: 'Mental Clarity', duration: '1 min', desc: 'Clear the fog', query: '741hz mental clarity 1 minute focus frequency', color: '#3b82f6' },
+    { id: 'heart', name: 'Heart Open', duration: '2 min', desc: 'Expand love frequency', query: '639hz heart opening 2 minute love frequency', color: '#ec4899' },
+];
+
+// ── SOUND RX MOODS DATA ─────────────────────────────────────────────────────
+
+const SOUND_RX_MOODS = [
+    { id: 'anxious', emoji: '😰', label: 'Anxious', freq: '432 Hz', freqName: 'Universal Harmony', breathwork: '4-7-8 Breathing', duration: '3 min', query: '432hz anxiety relief 4 7 8 breathing calm', reason: 'Aligns your nervous system to Earth\'s natural resonance' },
+    { id: 'tired', emoji: '😴', label: 'Tired', freq: '285 Hz', freqName: 'Restoration', breathwork: 'Deep Belly Breaths', duration: '5 min', query: '285hz energy restoration solfeggio recharge', reason: 'Restores depleted energy at the cellular level' },
+    { id: 'scattered', emoji: '🌪️', label: 'Scattered', freq: '741 Hz', freqName: 'Expression', breathwork: 'Box Breathing', duration: '2 min', query: '741hz focus mental clarity box breathing', reason: 'Cuts through mental noise and sharpens signal' },
+    { id: 'heavy', emoji: '🪨', label: 'Heavy', freq: '396 Hz', freqName: 'Liberation', breathwork: 'Extended Exhale', duration: '4 min', query: '396hz release guilt fear liberation solfeggio', reason: 'Dissolves the weight of guilt, shame, and stuck energy' },
+    { id: 'restless', emoji: '⚡', label: 'Restless', freq: '528 Hz', freqName: 'Miracles', breathwork: 'Wim Hof Light', duration: '3 min', query: '528hz transformation miracle tone meditation', reason: 'Channels restless energy into creative transformation' },
+    { id: 'disconnected', emoji: '🌫️', label: 'Disconnected', freq: '963 Hz', freqName: 'Divine', breathwork: 'Alternate Nostril', duration: '5 min', query: '963hz crown chakra divine connection meditation', reason: 'Reconnects you to source energy and higher self' },
+];
+
+// ── BREATHWORK PATTERNS DATA (Guided Breath Codex) ───────────────────────────────────────
+
+const BREATHWORK_PATTERNS = [
+    {
+        id: 'box', name: 'Box Breathing', desc: 'Calm focus & reset',
+        origin: 'Used by Navy SEALs to stay calm under fire. Four equal sides — like a box — bring your nervous system into perfect symmetry.',
+        science: 'Activates the vagus nerve, balances CO\u2082 levels, and synchronizes heart rate variability.',
+        lineage: 'Ancient pranayama \u2022 Military performance \u2022 Clinical anxiety therapy',
+        difficulty: 'Beginner',
+        phases: [
+            { label: 'Inhale', seconds: 4, coach: 'Draw energy up from the earth through your roots' },
+            { label: 'Hold', seconds: 4, coach: 'Let the energy build — feel it filling every cell' },
+            { label: 'Exhale', seconds: 4, coach: 'Release what no longer serves you' },
+            { label: 'Hold', seconds: 4, coach: 'Rest in the stillness between breaths' },
+        ], rounds: 6, color: '#06b6d4',
+    },
+    {
+        id: '478', name: '4-7-8 Method', desc: 'Deep relaxation & sleep',
+        origin: 'Created by Dr. Andrew Weil, based on ancient yogic pranayama. Called "nature\'s tranquilizer" — the extended exhale activates your body\'s rest mode.',
+        science: 'The 1:1.75:2 ratio forces parasympathetic dominance, reducing cortisol and blood pressure within 60 seconds.',
+        lineage: 'Yogic pranayama \u2022 Dr. Andrew Weil \u2022 Integrative medicine',
+        difficulty: 'Intermediate',
+        phases: [
+            { label: 'Inhale', seconds: 4, coach: 'Breathe in golden light through the crown' },
+            { label: 'Hold', seconds: 7, coach: 'Let the light saturate every layer of your being' },
+            { label: 'Exhale', seconds: 8, coach: 'Slowly dissolve all tension into the void' },
+        ], rounds: 4, color: '#8b5cf6',
+    },
+    {
+        id: 'wim', name: 'Wim Hof Light', desc: 'Energy & activation',
+        origin: 'From Wim "The Iceman" Hof, who climbed Everest in shorts. This controlled hyperventilation floods your body with oxygen and awakens dormant energy.',
+        science: 'Temporarily alkalizes blood pH, triggers adrenaline release, and boosts immune cell count by up to 300%.',
+        lineage: 'Tummo meditation \u2022 Wim Hof Method \u2022 Cold exposure science',
+        difficulty: 'Advanced',
+        phases: [
+            { label: 'Power Inhale', seconds: 2, coach: 'Pull fire into your solar plexus — fill completely' },
+            { label: 'Quick Exhale', seconds: 1, coach: 'Release sharply — let the energy crackle' },
+        ], rounds: 15, color: '#f97316',
+    },
+];
+
+// ── FEATURED GUIDES DATA ────────────────────────────────────────────────────
+
+const FEATURED_GUIDES = [
+    { name: 'Mystic Ra', emoji: '🧙', image: '/guide-mystic-ra.png', color: 'linear-gradient(135deg, #2d1b4e, #432c7a)' },
+    { name: 'Luna Tides', emoji: '🌊', image: '/guide-luna-tides.png', color: 'linear-gradient(135deg, #1a2a4a, #2d4a7a)' },
+    { name: 'Earth Song', emoji: '🌿', image: '/guide-earth-song.png', color: 'linear-gradient(135deg, #1a3a1a, #2d5a2d)' },
+    { name: 'Sol Wisdom', emoji: '✦', image: '/guide-sol-wisdom.png', color: 'linear-gradient(135deg, #3a2a0d, #5a4a1d)' },
+    { name: 'Veda Light', emoji: '🔮', image: '/guide-veda-light.png', color: 'linear-gradient(135deg, #3a1a2a, #5a2d4a)' },
+];
 
 const SOUND_FAV_KEY = 'arcana_sound_favorites';
 const SOUND_HIST_KEY = 'arcana_sound_history';
@@ -175,14 +207,13 @@ interface SchoolTabProps {
 }
 
 export function SchoolTab({ onClose, onTabChange, subscription, onShowPremium }: SchoolTabProps) {
-    const [activeSubTab, setActiveSubTab] = React.useState<'teachings' | 'numbers' | 'sounds'>('teachings');
+    const [activeSubTab, setActiveSubTab] = React.useState<'teachings' | 'sounds'>('teachings');
     const [expandedTeaching, setExpandedTeaching] = React.useState<string | null>(null);
 
-    // Angel Numbers state
-    const [angelLog, setAngelLog] = React.useState<AngelSighting[]>([]);
-    const [showAngelPicker, setShowAngelPicker] = React.useState(false);
-    const [selectedAngel, setSelectedAngel] = React.useState<string | null>(null);
-    const [angelNote, setAngelNote] = React.useState('');
+    // Solfeggio play counter for soft gate
+    const [solfeggioPlays, setSolfeggioPlays] = React.useState(() => {
+        try { return parseInt(safeStorage.getItem('arcana_solfeggio_plays') || '0', 10); } catch { return 0; }
+    });
 
     // Sound Library state
     const moonPhase = React.useMemo(() => getMoonPhaseKey(), []);
@@ -198,13 +229,28 @@ export function SchoolTab({ onClose, onTabChange, subscription, onShowPremium }:
     const [isOnline, setIsOnline] = React.useState(navigator.onLine);
     const [nightMode, setNightMode] = React.useState(false);
     const [soundSearch, setSoundSearch] = React.useState('');
+    const [selectedChip, setSelectedChip] = React.useState<string>('arcana');
     // In-app video player state
     const [videoModal, setVideoModal] = React.useState<{ videoId: string; title: string } | null>(null);
     const [searchModal, setSearchModal] = React.useState<{ results: YTItem[]; title: string } | null>(null);
     const [isSearching, setIsSearching] = React.useState(false);
 
+    // ── Sound Rx state ──
+    const [selectedMood, setSelectedMood] = React.useState<string | null>(null);
+
+    // ── Breathwork state ──
+    const [showBreathwork, setShowBreathwork] = React.useState(false);
+    const [breathPattern, setBreathPattern] = React.useState(BREATHWORK_PATTERNS[0]);
+    const [breathPhaseIdx, setBreathPhaseIdx] = React.useState(0);
+    const [breathSecs, setBreathSecs] = React.useState(BREATHWORK_PATTERNS[0].phases[0].seconds);
+    const [breathRound, setBreathRound] = React.useState(1);
+    const [breathActive, setBreathActive] = React.useState(false);
+    const breathRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
+    const [breathLearnMode, setBreathLearnMode] = React.useState(true); // first round is guided
+    const [breathShowInfo, setBreathShowInfo] = React.useState(true); // show pre-session card
+
     React.useEffect(() => {
-        setAngelLog(getAngelLog());
+
         const onLine = () => setIsOnline(true);
         const offLine = () => setIsOnline(false);
         window.addEventListener('online', onLine);
@@ -216,17 +262,45 @@ export function SchoolTab({ onClose, onTabChange, subscription, onShowPremium }:
         };
     }, []);
 
-    const logAngel = (number: string, note?: string) => {
-        const sighting: AngelSighting = {
-            id: `angel_${Date.now()}`,
-            number,
-            timestamp: new Date().toISOString(),
-            note,
-        };
-        const updated = [sighting, ...getAngelLog()].slice(0, 50);
-        saveAngelLog(updated);
-        setAngelLog(updated);
-    };
+    // ── Breathwork timer logic (learn mode = 2x slower on round 1) ──
+    React.useEffect(() => {
+        if (!breathActive) {
+            if (breathRef.current) clearInterval(breathRef.current);
+            return;
+        }
+        const speed = (breathLearnMode && breathRound === 1) ? 2000 : 1000;
+        breathRef.current = setInterval(() => {
+            setBreathSecs(prev => {
+                if (prev <= 1) {
+                    // Advance to next phase
+                    setBreathPhaseIdx(pi => {
+                        const nextPi = pi + 1;
+                        if (nextPi >= breathPattern.phases.length) {
+                            // Next round
+                            setBreathRound(r => {
+                                if (r >= breathPattern.rounds) {
+                                    // All rounds done
+                                    setBreathActive(false);
+                                    return r;
+                                }
+                                // After round 1, turn off learn mode
+                                if (r === 1 && breathLearnMode) setBreathLearnMode(false);
+                                return r + 1;
+                            });
+                            setBreathSecs(breathPattern.phases[0].seconds);
+                            return 0;
+                        }
+                        setBreathSecs(breathPattern.phases[nextPi].seconds);
+                        return nextPi;
+                    });
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, speed);
+        return () => { if (breathRef.current) clearInterval(breathRef.current); };
+    }, [breathActive, breathPattern, breathLearnMode, breathRound]);
+
 
     const openYouTube = async (query: string, label: string) => {
         if (!isOnline) return;
@@ -292,7 +366,7 @@ export function SchoolTab({ onClose, onTabChange, subscription, onShowPremium }:
 
     const fmtTimer = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 
-    const SubTab = ({ id, label }: { id: 'teachings' | 'numbers' | 'sounds'; label: string }) => (
+    const SubTab = ({ id, label }: { id: 'teachings' | 'sounds'; label: string }) => (
         <button
             onClick={() => setActiveSubTab(id)}
             className="flex-1 py-2 rounded-2xl text-[10px] font-display tracking-wider transition-all"
@@ -336,164 +410,15 @@ export function SchoolTab({ onClose, onTabChange, subscription, onShowPremium }:
                             <SubTab id="sounds" label="🔊 Sounds" />
                         </div>
 
-                        {/* ── TEACHINGS ── */}
+                        {/* ── TEACHINGS (Spiritual Stories) ── */}
                         {activeSubTab === 'teachings' && (
-                            <div className="space-y-3 animate-fade-up" style={{ opacity: 0 }}>
-                                <p className="text-[10px] text-altar-muted/60 text-center italic mb-4">
-                                    Eight principles that shift how you create.
-                                </p>
-                                {TEACHINGS.map((t, i) => (
-                                    <div key={t.id}
-                                        className="rounded-3xl overflow-hidden cursor-pointer transition-all"
-                                        style={{
-                                            background: expandedTeaching === t.id
-                                                ? 'linear-gradient(145deg, rgba(99,102,241,0.1) 0%, rgba(13,6,24,0.98) 100%)'
-                                                : 'rgba(255,255,255,0.03)',
-                                            border: expandedTeaching === t.id
-                                                ? '1px solid rgba(99,102,241,0.25)'
-                                                : '1px solid rgba(255,255,255,0.06)',
-                                        }}
-                                        onClick={() => setExpandedTeaching(expandedTeaching === t.id ? null : t.id)}
-                                    >
-                                        <div className="p-4">
-                                            <div className="flex items-start gap-3">
-                                                <span className="text-2xl shrink-0 mt-0.5">{t.emoji}</span>
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center justify-between gap-2">
-                                                        <p className="text-[9px] text-altar-muted font-display tracking-[2px] uppercase">{t.subtitle}</p>
-                                                        <span className="text-altar-muted text-sm shrink-0">{expandedTeaching === t.id ? '▾' : '▸'}</span>
-                                                    </div>
-                                                    <p className="text-sm text-altar-text font-display mt-0.5">{t.title}</p>
-                                                    {expandedTeaching !== t.id && (
-                                                        <p className="text-[10px] text-altar-muted/70 mt-1 leading-snug italic">{t.preview}</p>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            {expandedTeaching === t.id && (
-                                                <div className="mt-4 space-y-3 border-t border-white/5 pt-4">
-                                                    {t.content.split('\n\n').map((para, pi) => (
-                                                        <p key={pi} className="text-xs text-altar-text/80 leading-relaxed"
-                                                            dangerouslySetInnerHTML={{
-                                                                __html: para
-                                                                    .replace(/\*\*(.*?)\*\*/g, '<strong style="color:rgba(212,175,55,0.9)">$1</strong>')
-                                                                    .replace(/^- /, '• ')
-                                                            }}
-                                                        />
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                ))}
-                                <div className="h-4" />
-                            </div>
+                            <TeachingsSection />
                         )}
 
-                        {/* ── ANGEL NUMBERS ── */}
-                        {activeSubTab === 'numbers' && (
-                            <div className="animate-fade-up space-y-4" style={{ opacity: 0 }}>
-                                <p className="text-[10px] text-altar-muted/60 text-center italic">
-                                    Log a sighting to receive its message.
-                                </p>
-
-                                {/* Log button */}
-                                <button
-                                    onClick={() => setShowAngelPicker(true)}
-                                    className="w-full py-4 rounded-3xl font-display tracking-[2px] text-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
-                                    style={{
-                                        background: 'linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(99,102,241,0.06) 100%)',
-                                        border: '1px dashed rgba(99,102,241,0.35)',
-                                        color: '#a5b4fc',
-                                    }}>
-                                    + I just saw a number
-                                </button>
-
-                                {/* Quick number grid — most common */}
-                                <div>
-                                    <p className="text-[9px] text-altar-muted font-display tracking-[3px] uppercase mb-3">Quick Log</p>
-                                    <div className="grid grid-cols-4 gap-2">
-                                        {['111', '222', '333', '444', '555', '666', '777', '888', '999', '000', '1111', '1212'].map(n => (
-                                            <button
-                                                key={n}
-                                                onClick={() => { setSelectedAngel(n); setShowAngelPicker(false); }}
-                                                className="py-3 rounded-2xl text-xs font-display tracking-wide transition-all hover:scale-105 active:scale-95"
-                                                style={{
-                                                    background: 'rgba(99,102,241,0.08)',
-                                                    border: '1px solid rgba(99,102,241,0.15)',
-                                                    color: '#c4b5fd',
-                                                }}>
-                                                {n}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Selected angel number — show meaning */}
-                                {selectedAngel && ANGEL_NUMBERS[selectedAngel] && (
-                                    <div className="rounded-3xl p-5 animate-fade-up"
-                                        style={{
-                                            background: 'linear-gradient(145deg, rgba(99,102,241,0.12) 0%, rgba(13,6,24,0.97) 100%)',
-                                            border: '1px solid rgba(99,102,241,0.25)',
-                                        }}>
-                                        <div className="text-center mb-4">
-                                            <p className="font-display text-2xl text-altar-gold mb-1">{selectedAngel}</p>
-                                            <p className="text-[9px] text-indigo-400/60 font-display tracking-[3px] uppercase">{ANGEL_NUMBERS[selectedAngel].title}</p>
-                                        </div>
-                                        <p className="text-sm text-altar-text/85 leading-relaxed mb-3">{ANGEL_NUMBERS[selectedAngel].message}</p>
-                                        <div className="rounded-2xl p-3"
-                                            style={{ background: 'rgba(212,175,55,0.06)', border: '1px solid rgba(212,175,55,0.12)' }}>
-                                            <p className="text-[9px] text-altar-gold/60 font-display tracking-[2px] uppercase mb-1">Invitation</p>
-                                            <p className="text-[10px] text-altar-gold/80 italic">{ANGEL_NUMBERS[selectedAngel].action}</p>
-                                        </div>
-                                        <div className="flex gap-2 mt-4">
-                                            <input
-                                                value={angelNote}
-                                                onChange={e => setAngelNote(e.target.value)}
-                                                placeholder="Add a note (optional)..."
-                                                className="flex-1 rounded-xl px-3 py-2 text-xs text-altar-text bg-white/5 border border-white/10 focus:outline-none focus:border-indigo-500/40"
-                                            />
-                                            <button
-                                                onClick={() => {
-                                                    logAngel(selectedAngel, angelNote || undefined);
-                                                    setSelectedAngel(null);
-                                                    setAngelNote('');
-                                                }}
-                                                className="px-4 py-2 rounded-xl text-xs font-display text-indigo-300 border border-indigo-500/25"
-                                                style={{ background: 'rgba(99,102,241,0.12)' }}>
-                                                Log ✓
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Log history */}
-                                {angelLog.length > 0 && (
-                                    <div>
-                                        <p className="text-[9px] text-altar-muted font-display tracking-[3px] uppercase mb-3">Recent Sightings</p>
-                                        <div className="space-y-2">
-                                            {angelLog.slice(0, 10).map(s => (
-                                                <div key={s.id} className="rounded-2xl p-3 flex items-center gap-3"
-                                                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                                                    <span className="font-display text-indigo-300 text-sm w-12 text-center">{s.number}</span>
-                                                    <div className="flex-1">
-                                                        <p className="text-[9px] text-altar-muted">{ANGEL_NUMBERS[s.number]?.title || 'Angel Number'}</p>
-                                                        {s.note && <p className="text-[10px] text-altar-text/60 italic mt-0.5">"{s.note}"</p>}
-                                                    </div>
-                                                    <p className="text-[9px] text-altar-muted/50 shrink-0">
-                                                        {new Date(s.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                                                    </p>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-                                <div className="h-4" />
-                            </div>
-                        )}
 
                         {/* ── SOUNDS ── */}
                         {activeSubTab === 'sounds' && (
-                            <div className="animate-fade-up space-y-4" style={{ opacity: 0 }}>
+                            <div className="animate-fade-up space-y-5" style={{ opacity: 0 }}>
 
                                 {/* Offline banner */}
                                 {!isOnline && (
@@ -524,33 +449,55 @@ export function SchoolTab({ onClose, onTabChange, subscription, onShowPremium }:
                                     </div>
                                 )}
 
-                                {/* Cosmic Recommendation */}
-                                <div className="rounded-3xl overflow-hidden" style={{ background: 'linear-gradient(145deg, rgba(212,175,55,0.08) 0%, rgba(13,6,24,0.97) 100%)', border: '1px solid rgba(212,175,55,0.2)' }}>
+                                {/* Cosmic Recommendation — upgraded hero */}
+                                <div className="sounds-hero-card rounded-3xl overflow-hidden" style={{
+                                    background: 'linear-gradient(145deg, rgba(212,175,55,0.10) 0%, rgba(13,6,24,0.97) 100%)',
+                                    border: '1px solid rgba(212,175,55,0.2)',
+                                    backdropFilter: 'blur(30px) saturate(1.3)',
+                                    WebkitBackdropFilter: 'blur(30px) saturate(1.3)',
+                                }}>
                                     <div className="p-5">
-                                        <div className="flex items-center gap-2 mb-2">
+                                        <div className="flex items-center gap-2 mb-3">
                                             <div className="w-1.5 h-1.5 rounded-full bg-altar-gold animate-pulse" />
                                             <p className="text-[9px] font-display tracking-[3px] uppercase" style={{ color: 'rgba(212,175,55,0.6)' }}>Cosmic Recommendation</p>
                                         </div>
-                                        <p className="font-display text-sm text-altar-text mb-1">{cosmicRec.title}</p>
-                                        <p className="text-[10px] text-altar-muted/70 italic leading-snug mb-4">{cosmicRec.reason}</p>
-                                        <div className="flex gap-2 flex-wrap">
+                                        <div className="text-center mb-3">
+                                            <span className="text-4xl">{cosmicRec.title.split(' ').pop()}</span>
+                                        </div>
+                                        <p className="font-display text-lg text-altar-text text-center mb-1">{cosmicRec.title.replace(/\s*[\u{1F300}-\u{1F9FF}]/gu, '')}</p>
+                                        <p className="text-[11px] text-altar-muted/70 italic leading-snug text-center mb-4">{cosmicRec.reason}</p>
+                                        <div className="flex justify-center gap-2 mb-4 flex-wrap">
+                                            <span className="px-2.5 py-1 rounded-full text-[9px] font-display tracking-wider" style={{ background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.2)', color: 'rgba(212,175,55,0.7)' }}>
+                                                ✦ {moonPhase.replace(/-/g, ' ').replace(/^\w/, c => c.toUpperCase())}
+                                            </span>
+                                            <span className="px-2.5 py-1 rounded-full text-[9px] font-display tracking-wider" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)' }}>
+                                                ⏱ 15 min
+                                            </span>
+                                            <span className="px-2.5 py-1 rounded-full text-[9px] font-display tracking-wider" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)' }}>
+                                                ✧ Healing
+                                            </span>
+                                            <span className="px-2.5 py-1 rounded-full text-[9px] font-display tracking-wider" style={{ background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.2)', color: 'rgba(196,181,253,0.7)' }}>
+                                                🎵 {cosmicRec.freq}
+                                            </span>
+                                        </div>
+                                        <div className="flex gap-2 justify-center flex-wrap">
                                             <button
                                                 onClick={() => isOnline ? openYouTube(cosmicRec.query, cosmicRec.title) : undefined}
                                                 disabled={!isOnline}
-                                                className="flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-display tracking-wide transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-30"
+                                                className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-display tracking-wide transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-30"
                                                 style={{ background: 'linear-gradient(135deg, rgba(212,175,55,0.2) 0%, rgba(212,175,55,0.08) 100%)', border: '1px solid rgba(212,175,55,0.3)', color: '#d4af37' }}>
-                                                ▶ Open in YouTube
+                                                ▶ Play Now
                                             </button>
                                             <button
                                                 onClick={() => setShowTimerPicker(prev => !prev)}
-                                                className="flex items-center gap-1.5 px-3 py-2 rounded-2xl text-xs font-display tracking-wide transition-all"
-                                                style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)', color: '#a5b4fc' }}>
+                                                className="flex items-center gap-1.5 px-3 py-2.5 rounded-2xl text-xs font-display tracking-wide transition-all"
+                                                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)' }}>
                                                 ⏱ {sleepTimerMins ? fmtTimer(sleepTimerSecs) : 'Timer'}
                                             </button>
                                         </div>
                                         {showTimerPicker && (
-                                            <div className="mt-3 flex gap-2 flex-wrap">
-                                                <p className="text-[9px] text-altar-muted w-full">Stop after:</p>
+                                            <div className="mt-3 flex gap-2 flex-wrap justify-center">
+                                                <p className="text-[9px] text-altar-muted w-full text-center">Stop after:</p>
                                                 {[5, 10, 20, 30, 60].map(m => (
                                                     <button key={m} onClick={() => startTimer(m)}
                                                         className="px-3 py-1.5 rounded-xl text-[11px] font-display transition-all hover:scale-105"
@@ -563,46 +510,284 @@ export function SchoolTab({ onClose, onTabChange, subscription, onShowPremium }:
                                     </div>
                                 </div>
 
-                                {/* Category chips */}
+                                {/* ── SOUND RX — How Do You Feel? (moved up — most user-friendly entry) ── */}
                                 <div>
-                                    <p className="text-[9px] text-altar-muted font-display tracking-[3px] uppercase mb-3">Browse by Intention</p>
-                                    <div className="flex gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
-                                        {SOUND_CATEGORIES.map(cat => (
-                                            <button key={cat.id}
-                                                onClick={() => {
-                                                    if (cat.id === 'arcana') { setShowArcanaSheet(true); return; }
-                                                    if (cat.query) openYouTube(cat.query, cat.label);
-                                                }}
-                                                className="shrink-0 px-3.5 py-2 rounded-2xl text-[11px] font-display tracking-wide transition-all hover:scale-105 active:scale-95"
-                                                style={{
-                                                    background: cat.id === 'arcana' ? 'linear-gradient(135deg, rgba(212,175,55,0.12) 0%, rgba(99,102,241,0.08) 100%)' : 'rgba(255,255,255,0.05)',
-                                                    border: cat.id === 'arcana' ? '1px solid rgba(212,175,55,0.3)' : '1px solid rgba(255,255,255,0.09)',
-                                                    color: cat.id === 'arcana' ? '#d4af37' : 'rgba(255,255,255,0.7)',
-                                                    opacity: !isOnline && cat.id !== 'arcana' ? 0.4 : 1,
-                                                }}>
-                                                {cat.label}
+                                    <div className="flex justify-between items-center mb-3">
+                                        <p className="text-[9px] text-altar-muted font-display tracking-[3px] uppercase">Sound Rx</p>
+                                        <span className="text-[9px] text-altar-muted/40 tracking-wider">💊 Prescriptions</span>
+                                    </div>
+                                    <div className="rounded-3xl overflow-hidden" style={{
+                                        background: 'linear-gradient(160deg, rgba(139,92,246,0.08), rgba(13,6,24,0.95))',
+                                        border: '1px solid rgba(139,92,246,0.15)',
+                                    }}>
+                                        <div className="p-4">
+                                            <p className="font-display text-sm text-center mb-3" style={{ color: 'rgba(196,181,253,0.9)' }}>
+                                                How do you feel?
+                                            </p>
+                                            <div className="flex gap-2 flex-wrap justify-center mb-2">
+                                                {SOUND_RX_MOODS.map(mood => (
+                                                    <button key={mood.id}
+                                                        onClick={() => setSelectedMood(selectedMood === mood.id ? null : mood.id)}
+                                                        className="flex flex-col items-center gap-1 px-3 py-2 rounded-2xl transition-all hover:scale-105 active:scale-95"
+                                                        style={{
+                                                            background: selectedMood === mood.id
+                                                                ? 'rgba(139,92,246,0.2)' : 'rgba(255,255,255,0.03)',
+                                                            border: selectedMood === mood.id
+                                                                ? '1px solid rgba(139,92,246,0.4)' : '1px solid rgba(255,255,255,0.06)',
+                                                            minWidth: 72,
+                                                        }}>
+                                                        <span style={{ fontSize: 22 }}>{mood.emoji}</span>
+                                                        <span className="text-[10px]" style={{
+                                                            color: selectedMood === mood.id ? '#c4b5fd' : 'rgba(255,255,255,0.45)',
+                                                        }}>{mood.label}</span>
+                                                    </button>
+                                                ))}
+                                            </div>
+
+                                            {/* Prescription card — appears when mood selected */}
+                                            {selectedMood && (() => {
+                                                const rx = SOUND_RX_MOODS.find(m => m.id === selectedMood)!;
+                                                return (
+                                                    <div className="mt-3 rounded-2xl p-4 animate-fade-up" style={{
+                                                        background: 'rgba(0,0,0,0.3)',
+                                                        border: '1px solid rgba(139,92,246,0.2)',
+                                                        opacity: 0,
+                                                    }}>
+                                                        <p className="text-[9px] text-altar-muted font-display tracking-[2px] uppercase mb-2">Your Prescription</p>
+                                                        <div className="flex items-center gap-3 mb-3">
+                                                            <div className="flex flex-col">
+                                                                <span className="font-display text-lg" style={{ color: '#c4b5fd' }}>{rx.freq}</span>
+                                                                <span className="text-[10px] text-altar-muted/60">{rx.freqName}</span>
+                                                            </div>
+                                                            <span className="text-altar-muted/30">+</span>
+                                                            <div className="flex flex-col">
+                                                                <span className="font-display text-sm" style={{ color: '#c4b5fd' }}>{rx.breathwork}</span>
+                                                                <span className="text-[10px] text-altar-muted/60">{rx.duration}</span>
+                                                            </div>
+                                                        </div>
+                                                        <p className="text-[11px] text-altar-muted/60 italic mb-3">{rx.reason}</p>
+                                                        <div className="flex gap-2">
+                                                            <button
+                                                                onClick={() => isOnline ? openYouTube(rx.query, `Sound Rx: ${rx.label}`) : undefined}
+                                                                disabled={!isOnline}
+                                                                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-display tracking-wide transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-30"
+                                                                style={{ background: 'rgba(139,92,246,0.2)', border: '1px solid rgba(139,92,246,0.3)', color: '#c4b5fd' }}>
+                                                                ▶ Play Frequency
+                                                            </button>
+                                                            <button
+                                                                onClick={() => {
+                                                                    const pattern = BREATHWORK_PATTERNS.find(p => p.name === rx.breathwork) || BREATHWORK_PATTERNS[0];
+                                                                    setBreathPattern(pattern);
+                                                                    setBreathPhaseIdx(0);
+                                                                    setBreathSecs(pattern.phases[0].seconds);
+                                                                    setBreathRound(1);
+                                                                    setBreathActive(false);
+                                                                    setShowBreathwork(true);
+                                                                }}
+                                                                className="px-3 py-2.5 rounded-xl text-xs font-display tracking-wide transition-all hover:scale-[1.02] active:scale-[0.98]"
+                                                                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)' }}>
+                                                                🫁
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })()}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* ── Ambient Soundscapes ── */}
+                                <div>
+                                    <p className="text-[9px] text-altar-muted font-display tracking-[3px] uppercase mb-3">Ambient Soundscapes</p>
+                                    <div className="flex gap-3 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
+                                        {AMBIENT_SOUNDSCAPES.map(sc => (
+                                            <button key={sc.id}
+                                                onClick={() => isOnline ? openYouTube(sc.query, sc.title) : undefined}
+                                                disabled={!isOnline}
+                                                className="shrink-0 rounded-[18px] overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg active:scale-[0.98] disabled:opacity-30"
+                                                style={{ width: 130, border: '1px solid rgba(255,255,255,0.06)' }}>
+                                                <div style={{
+                                                    height: 100,
+                                                    backgroundImage: `url(${sc.image})`,
+                                                    backgroundSize: 'cover',
+                                                    backgroundPosition: 'center',
+                                                    backgroundColor: '#0d0618',
+                                                }} />
+                                                <div className="p-2.5" style={{ background: 'rgba(0,0,0,0.3)' }}>
+                                                    <span className="text-[11px] font-medium text-altar-text block">{sc.title}</span>
+                                                    <span className="text-[9px] text-altar-muted/50">∞ Loop</span>
+                                                </div>
                                             </button>
                                         ))}
                                     </div>
                                 </div>
 
-                                {/* Search bar */}
+                                {/* ── Guided Meditations ── */}
+                                <div>
+                                    <p className="text-[9px] text-altar-muted font-display tracking-[3px] uppercase mb-3">Guided Meditations</p>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {[
+                                            { id: 'morning', emoji: '🌅', title: 'Morning Intention', duration: '10 min', desc: 'Set your frequency for the day', query: 'guided morning intention setting meditation 10 minutes', color: '#f59e0b' },
+                                            { id: 'manifest', emoji: '✨', title: 'Manifestation', duration: '15 min', desc: 'Visualize & embody your desires', query: 'guided manifestation meditation visualization law of attraction 15 minutes', color: '#8b5cf6' },
+                                            { id: 'sleep', emoji: '🌙', title: 'Deep Sleep', duration: '30 min', desc: 'Drift into restorative rest', query: 'guided sleep meditation deep relaxation 30 minutes', color: '#6366f1' },
+                                            { id: 'anxiety', emoji: '🍃', title: 'Calm Anxiety', duration: '10 min', desc: 'Ground your nervous system', query: 'guided meditation for anxiety relief calming 10 minutes', color: '#22c55e' },
+                                            { id: 'selflove', emoji: '💗', title: 'Self-Love', duration: '12 min', desc: 'Reconnect with your worth', query: 'guided self love meditation inner healing 12 minutes', color: '#ec4899' },
+                                            { id: 'chakra', emoji: '🔮', title: 'Chakra Balance', duration: '20 min', desc: 'Align all seven energy centers', query: 'guided chakra balancing meditation all 7 chakras 20 minutes', color: '#a855f7' },
+                                            { id: 'abundance', emoji: '💰', title: 'Abundance Flow', duration: '15 min', desc: 'Open to receiving & prosperity', query: 'guided abundance meditation prosperity receiving 15 minutes', color: '#d4af37' },
+                                            { id: 'forgiveness', emoji: '🕊️', title: 'Letting Go', duration: '12 min', desc: 'Release resentment & heal', query: 'guided forgiveness meditation letting go release 12 minutes', color: '#06b6d4' },
+                                        ].map(med => (
+                                            <button key={med.id}
+                                                onClick={() => isOnline ? openYouTube(med.query, med.title) : undefined}
+                                                disabled={!isOnline}
+                                                className="flex flex-col items-start gap-1.5 p-4 rounded-2xl text-left transition-all hover:-translate-y-1 hover:shadow-lg active:scale-[0.98] disabled:opacity-30"
+                                                style={{
+                                                    background: `linear-gradient(160deg, ${med.color}12, rgba(13,6,24,0.95))`,
+                                                    border: `1px solid ${med.color}25`,
+                                                }}>
+                                                <div className="flex items-center justify-between w-full">
+                                                    <span style={{ fontSize: 24 }}>{med.emoji}</span>
+                                                    <span className="text-[8px] px-2 py-0.5 rounded-full" style={{
+                                                        background: `${med.color}15`,
+                                                        color: med.color,
+                                                        border: `1px solid ${med.color}30`,
+                                                    }}>{med.duration}</span>
+                                                </div>
+                                                <span className="font-display text-[12px] font-semibold" style={{ color: med.color }}>{med.title}</span>
+                                                <span className="text-[9px] text-altar-muted/50 leading-snug">{med.desc}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* ── BREATHWORK TRIGGER ── */}
+                                <button
+                                    onClick={() => {
+                                        setBreathPhaseIdx(0);
+                                        setBreathSecs(breathPattern.phases[0].seconds);
+                                        setBreathRound(1);
+                                        setBreathActive(false);
+                                        setShowBreathwork(true);
+                                    }}
+                                    className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all hover:scale-[1.01] active:scale-[0.99]"
+                                    style={{
+                                        background: 'linear-gradient(160deg, rgba(6,182,212,0.08), rgba(13,6,24,0.95))',
+                                        border: '1px solid rgba(6,182,212,0.15)',
+                                    }}>
+                                    <span style={{ fontSize: 28 }}>🫁</span>
+                                    <div className="flex-1 text-left">
+                                        <p className="font-display text-[13px]" style={{ color: '#67e8f9' }}>Breathwork Timer</p>
+                                        <p className="text-[10px] text-altar-muted/50">Box · 4-7-8 · Wim Hof</p>
+                                    </div>
+                                    <span className="text-[10px] px-3 py-1 rounded-xl font-display" style={{ background: 'rgba(6,182,212,0.12)', color: '#67e8f9', border: '1px solid rgba(6,182,212,0.2)' }}>Open</span>
+                                </button>
+
+                                {/* Category chips — Browse by Intention */}
+                                <div>
+                                    <p className="text-[9px] text-altar-muted font-display tracking-[3px] uppercase mb-3">Browse by Intention</p>
+                                    <div className="flex gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
+                                        {SOUND_CATEGORIES.map(cat => {
+                                            const isSelected = selectedChip === cat.id;
+                                            return (
+                                                <button key={cat.id}
+                                                    onClick={() => {
+                                                        setSelectedChip(cat.id);
+                                                        if (cat.id === 'arcana') { setShowArcanaSheet(true); return; }
+                                                        if (cat.query) openYouTube(cat.query, cat.label);
+                                                    }}
+                                                    className="shrink-0 px-3.5 py-2 rounded-2xl text-[11px] font-display tracking-wide transition-all hover:scale-105 active:scale-95"
+                                                    style={{
+                                                        background: isSelected
+                                                            ? 'linear-gradient(135deg, rgba(197,147,65,0.25), rgba(197,147,65,0.12))'
+                                                            : cat.id === 'arcana' ? 'linear-gradient(135deg, rgba(212,175,55,0.12) 0%, rgba(99,102,241,0.08) 100%)' : 'rgba(255,255,255,0.05)',
+                                                        border: isSelected
+                                                            ? '1px solid rgba(212,175,55,0.45)'
+                                                            : cat.id === 'arcana' ? '1px solid rgba(212,175,55,0.3)' : '1px solid rgba(255,255,255,0.09)',
+                                                        color: isSelected
+                                                            ? '#F9E491'
+                                                            : cat.id === 'arcana' ? '#d4af37' : 'rgba(255,255,255,0.7)',
+                                                        boxShadow: isSelected ? '0 0 18px rgba(197,147,65,0.12)' : 'none',
+                                                        textShadow: isSelected ? '0 0 8px rgba(212,175,55,0.08)' : 'none',
+                                                        opacity: !isOnline && cat.id !== 'arcana' ? 0.4 : 1,
+                                                    }}>
+                                                    {cat.label}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                {/* ── SOLFEGGIO FREQUENCIES (with soft gate — 2 free, then premium) ── */}
+                                <div>
+                                    <div className="flex justify-between items-center mb-3">
+                                        <p className="text-[9px] text-altar-muted font-display tracking-[3px] uppercase">Solfeggio Frequencies</p>
+                                        <span className="text-[9px] text-altar-muted/40 tracking-wider">{subscription === 'premium' ? 'Sacred Tones ✦' : `${Math.max(0, 2 - solfeggioPlays)} free left`}</span>
+                                    </div>
+                                    <div className="relative">
+                                        <div className="flex gap-3 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
+                                            {SOLFEGGIO_FREQUENCIES.map((freq, idx) => {
+                                                const isLocked = subscription !== 'premium' && solfeggioPlays >= 2 && idx >= 2;
+                                                return (
+                                                    <button key={freq.hz}
+                                                        onClick={() => {
+                                                            if (isLocked) { onShowPremium(); return; }
+                                                            if (!isOnline) return;
+                                                            const newPlays = solfeggioPlays + 1;
+                                                            setSolfeggioPlays(newPlays);
+                                                            safeStorage.setItem('arcana_solfeggio_plays', String(newPlays));
+                                                            openYouTube(freq.query, `${freq.hz}Hz ${freq.name}`);
+                                                        }}
+                                                        disabled={!isOnline && !isLocked}
+                                                        className="shrink-0 rounded-[18px] overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg active:scale-[0.98] disabled:opacity-30"
+                                                        style={{ width: 120, border: `1px solid ${freq.color}22`, opacity: isLocked ? 0.5 : 1 }}>
+                                                        <div style={{
+                                                            height: 80, display: 'flex', flexDirection: 'column',
+                                                            alignItems: 'center', justifyContent: 'center',
+                                                            background: `linear-gradient(160deg, ${freq.color}18, rgba(13,6,24,0.95))`,
+                                                        }}>
+                                                            {isLocked ? (
+                                                                <span style={{ fontSize: 24 }}>🔒</span>
+                                                            ) : (
+                                                                <>
+                                                                    <span style={{ fontSize: 22, fontFamily: "'Cinzel', serif", fontWeight: 700, color: freq.color }}>
+                                                                        {freq.hz}
+                                                                    </span>
+                                                                    <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.3)', letterSpacing: 1 }}>Hz</span>
+                                                                </>
+                                                            )}
+                                                        </div>
+                                                        <div className="p-2.5" style={{ background: 'rgba(0,0,0,0.4)' }}>
+                                                            <span className="text-[11px] font-medium text-altar-text block" style={{ color: isLocked ? 'rgba(255,255,255,0.4)' : freq.color }}>{freq.name}</span>
+                                                            <span className="text-[8px] text-altar-muted/50 block mt-0.5">{isLocked ? '👑 Premium' : freq.desc}</span>
+                                                        </div>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Search bar — frosted glass */}
                                 <form onSubmit={e => { e.preventDefault(); if (soundSearch.trim() && isOnline) openYouTube(soundSearch.trim(), `"${soundSearch.trim()}"`); }}>
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-2 rounded-2xl p-1" style={{
+                                        background: 'rgba(255,255,255,0.03)',
+                                        backdropFilter: 'blur(12px)',
+                                        WebkitBackdropFilter: 'blur(12px)',
+                                    }}>
                                         <input
                                             value={soundSearch}
                                             onChange={e => setSoundSearch(e.target.value)}
-                                            placeholder="Search meditations, frequencies..."
+                                            placeholder="Find frequencies, meditations, artists..."
                                             disabled={!isOnline}
-                                            className="flex-1 rounded-2xl px-4 py-2.5 text-xs text-altar-text bg-white/5 border border-white/10 focus:outline-none focus:border-altar-gold/30 placeholder-altar-muted/40"
+                                            className="flex-1 rounded-xl px-4 py-2.5 text-xs text-altar-text bg-transparent border-none focus:outline-none placeholder-altar-muted/40"
                                         />
                                         <button type="submit" disabled={!soundSearch.trim() || !isOnline}
-                                            className="px-4 py-2.5 rounded-2xl text-xs font-display transition-all disabled:opacity-30"
-                                            style={{ background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.25)', color: '#d4af37' }}>
-                                            Go
+                                            className="px-4 py-2 rounded-xl text-xs font-display transition-all disabled:opacity-30"
+                                            style={{ background: 'rgba(212,175,55,0.15)', color: '#d4af37' }}>
+                                            🔍
                                         </button>
                                     </div>
                                 </form>
+
 
                                 {/* Favorites */}
                                 {soundFavorites.length > 0 && (
@@ -621,23 +806,46 @@ export function SchoolTab({ onClose, onTabChange, subscription, onShowPremium }:
                                     </div>
                                 )}
 
-                                {/* Recently Played */}
+                                {/* Recently Played — upgraded with share + star animation */}
                                 {soundHistory.length > 0 && (
                                     <div>
-                                        <p className="text-[9px] text-altar-muted font-display tracking-[3px] uppercase mb-3">🕐 Recently Played</p>
+                                        <p className="text-[9px] text-altar-muted font-display tracking-[3px] uppercase mb-3">Recently Played</p>
                                         <div className="space-y-2">
                                             {soundHistory.map((item, i) => (
                                                 <div key={i} onClick={() => playItem(item)}
-                                                    className="w-full flex items-center justify-between px-4 py-3 rounded-2xl text-left cursor-pointer transition-all hover:scale-[1.01] active:scale-[0.99]"
+                                                    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left cursor-pointer transition-all hover:scale-[1.01] active:scale-[0.99]"
                                                     style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                                                    <span className="text-xs text-altar-text/80 font-display truncate max-w-[200px]">{item.label}</span>
-                                                    <div className="flex items-center gap-2 shrink-0">
-                                                        <span className="text-[9px] text-altar-muted/50">
+                                                    {/* Thumbnail */}
+                                                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0"
+                                                        style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(13,6,24,0.8))', border: '1px solid rgba(99,102,241,0.15)' }}>
+                                                        🎵
+                                                    </div>
+                                                    {/* Info */}
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-xs text-altar-text/80 font-display truncate">{item.label}</p>
+                                                        <p className="text-[9px] text-altar-muted/50 mt-0.5">
                                                             {item.timestamp ? new Date(item.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''}
-                                                        </span>
-                                                        <button onClick={e => { e.stopPropagation(); toggleFave(item); }}
-                                                            className="text-[14px] transition-colors"
-                                                            style={{ color: soundFavorites.some(f => f.query === item.query) ? '#d4af37' : 'rgba(255,255,255,0.2)' }}>
+                                                        </p>
+                                                    </div>
+                                                    {/* Actions */}
+                                                    <div className="flex items-center gap-1.5 shrink-0">
+                                                        <button onClick={e => { e.stopPropagation(); navigator.share?.({ title: item.label, text: `Listen to ${item.label} on Arcana Whisper` }).catch(() => {}); }}
+                                                            className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] text-altar-muted/40 transition-all hover:text-altar-gold/60 hover:bg-white/5">
+                                                            ↗
+                                                        </button>
+                                                        <button onClick={e => {
+                                                                e.stopPropagation();
+                                                                const btn = e.currentTarget;
+                                                                btn.style.transform = 'scale(1.3)';
+                                                                setTimeout(() => { btn.style.transform = 'scale(1)'; }, 300);
+                                                                toggleFave(item);
+                                                            }}
+                                                            className="text-[15px] transition-all"
+                                                            style={{
+                                                                color: soundFavorites.some(f => f.query === item.query) ? '#d4af37' : 'rgba(255,255,255,0.15)',
+                                                                textShadow: soundFavorites.some(f => f.query === item.query) ? '0 0 8px rgba(212,175,55,0.3)' : 'none',
+                                                                transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                                                            }}>
                                                             ★
                                                         </button>
                                                     </div>
@@ -771,6 +979,178 @@ export function SchoolTab({ onClose, onTabChange, subscription, onShowPremium }:
                             <button onClick={cancelTimer} className="text-[10px] text-altar-muted/50">cancel</button>
                         </div>
                     )}
+                </div>
+            )}
+
+            {/* ── GUIDED BREATH CODEX OVERLAY ── */}
+            {showBreathwork && (
+                <div className="fixed inset-0 z-[70] flex flex-col" style={{ background: 'linear-gradient(180deg, #0a0515, #0d0618)' }}>
+                    {/* Header */}
+                    <div className="flex items-center justify-between px-5 py-4 shrink-0">
+                        <button onClick={() => { setShowBreathwork(false); setBreathActive(false); setBreathShowInfo(true); setBreathLearnMode(true); if (breathRef.current) clearInterval(breathRef.current); }}
+                            className="text-white/50 text-sm font-display">Close</button>
+                        <p className="font-display text-sm tracking-[3px] uppercase" style={{ color: breathPattern.color }}>{breathPattern.name}</p>
+                        <span className="text-[10px] text-altar-muted">
+                            {breathActive ? `Round ${breathRound}/${breathPattern.rounds}` : breathPattern.difficulty}
+                        </span>
+                    </div>
+
+                    {/* Pattern selector */}
+                    <div className="flex gap-2 px-5 pb-3 shrink-0 justify-center">
+                        {BREATHWORK_PATTERNS.map(p => (
+                            <button key={p.id}
+                                onClick={() => {
+                                    setBreathPattern(p);
+                                    setBreathPhaseIdx(0);
+                                    setBreathSecs(p.phases[0].seconds);
+                                    setBreathRound(1);
+                                    setBreathActive(false);
+                                    setBreathShowInfo(true);
+                                    setBreathLearnMode(true);
+                                }}
+                                className="px-3 py-1.5 rounded-xl text-[11px] font-display transition-all"
+                                style={{
+                                    background: breathPattern.id === p.id ? `${p.color}25` : 'rgba(255,255,255,0.04)',
+                                    border: breathPattern.id === p.id ? `1px solid ${p.color}50` : '1px solid rgba(255,255,255,0.06)',
+                                    color: breathPattern.id === p.id ? p.color : 'rgba(255,255,255,0.4)',
+                                }}>
+                                {p.name}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* ── PRE-SESSION CODEX CARD ── */}
+                    {breathShowInfo && !breathActive && (
+                        <div className="px-5 pb-4 shrink-0 animate-fade-up" style={{ opacity: 0 }}>
+                            <div className="rounded-2xl p-4" style={{
+                                background: `linear-gradient(160deg, ${breathPattern.color}08, rgba(13,6,24,0.95))`,
+                                border: `1px solid ${breathPattern.color}20`,
+                            }}>
+                                {/* Origin story */}
+                                <p className="text-[9px] font-display tracking-[2px] uppercase mb-2" style={{ color: `${breathPattern.color}80` }}>Origin</p>
+                                <p className="text-[12px] text-altar-text/80 leading-relaxed mb-3">{breathPattern.origin}</p>
+
+                                {/* Science */}
+                                <p className="text-[9px] font-display tracking-[2px] uppercase mb-2" style={{ color: `${breathPattern.color}80` }}>The Science</p>
+                                <p className="text-[11px] text-altar-muted/60 leading-relaxed mb-3">{breathPattern.science}</p>
+
+                                {/* Lineage */}
+                                <p className="text-[10px] text-altar-muted/40 italic">{breathPattern.lineage}</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ── VISUAL BREATH MAP ── */}
+                    <div className="px-5 pb-3 shrink-0">
+                        <div className="flex gap-1 items-end">
+                            {breathPattern.phases.map((phase, i) => {
+                                const totalSecs = breathPattern.phases.reduce((s, p) => s + p.seconds, 0);
+                                const widthPct = (phase.seconds / totalSecs) * 100;
+                                const isActive = breathActive && breathPhaseIdx === i;
+                                const isPast = breathActive && breathPhaseIdx > i;
+                                return (
+                                    <div key={i} style={{ width: `${widthPct}%`, transition: 'all 0.3s ease' }}>
+                                        <div style={{
+                                            height: phase.label.includes('Inhale') ? 28 : phase.label.includes('Exhale') ? 20 : 14,
+                                            borderRadius: 4,
+                                            background: isActive ? `${breathPattern.color}50` : isPast ? `${breathPattern.color}25` : 'rgba(255,255,255,0.06)',
+                                            border: isActive ? `1px solid ${breathPattern.color}80` : '1px solid transparent',
+                                            transition: 'all 0.3s ease',
+                                            boxShadow: isActive ? `0 0 12px ${breathPattern.color}30` : 'none',
+                                        }} />
+                                        <p className="text-[7px] text-center mt-1 font-display tracking-wider" style={{
+                                            color: isActive ? breathPattern.color : 'rgba(255,255,255,0.25)',
+                                        }}>{phase.label.replace('Power ', '').replace('Quick ', '')}</p>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* ── BREATHING CIRCLE ── */}
+                    <div className="flex-1 flex flex-col items-center justify-center">
+                        <div style={{
+                            width: 200, height: 200, borderRadius: '50%',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            flexDirection: 'column',
+                            background: `radial-gradient(circle, ${breathPattern.color}15, transparent 70%)`,
+                            border: `2px solid ${breathPattern.color}40`,
+                            boxShadow: `0 0 60px ${breathPattern.color}15, inset 0 0 40px ${breathPattern.color}08`,
+                            transition: 'transform 1s ease-in-out, box-shadow 1s ease-in-out',
+                            transform: breathActive && breathPattern.phases[breathPhaseIdx]?.label.includes('Inhale')
+                                ? 'scale(1.3)' : breathActive && breathPattern.phases[breathPhaseIdx]?.label.includes('Exhale')
+                                ? 'scale(0.8)' : 'scale(1)',
+                        }}>
+                            <span className="font-display text-4xl" style={{ color: breathPattern.color }}>
+                                {breathSecs}
+                            </span>
+                            <span className="font-display text-sm tracking-[3px] uppercase mt-2" style={{ color: `${breathPattern.color}99` }}>
+                                {breathPattern.phases[breathPhaseIdx]?.label || 'Ready'}
+                            </span>
+                        </div>
+
+                        {/* ── COACHING TEXT (changes per phase) ── */}
+                        <p className="text-[11px] text-altar-muted/50 mt-5 px-10 text-center italic leading-relaxed" style={{ minHeight: 32, transition: 'opacity 0.5s ease' }}>
+                            {breathActive
+                                ? (breathPattern.phases[breathPhaseIdx] as any)?.coach || breathPattern.desc
+                                : breathPattern.desc
+                            }
+                        </p>
+
+                        {/* Learn mode badge */}
+                        {breathActive && breathLearnMode && breathRound === 1 && (
+                            <span className="text-[9px] font-display tracking-[2px] uppercase mt-2 px-3 py-1 rounded-full" style={{
+                                background: `${breathPattern.color}15`, border: `1px solid ${breathPattern.color}30`, color: `${breathPattern.color}90`,
+                            }}>✦ Guided Round — 2× Slower</span>
+                        )}
+
+                        {/* Start / Pause / Info toggle */}
+                        <div className="flex gap-3 mt-6">
+                            {!breathActive && (
+                                <button
+                                    onClick={() => setBreathShowInfo(prev => !prev)}
+                                    className="px-4 py-2.5 rounded-2xl text-xs font-display tracking-wide transition-all hover:scale-105 active:scale-95"
+                                    style={{
+                                        background: 'rgba(255,255,255,0.04)',
+                                        border: '1px solid rgba(255,255,255,0.08)',
+                                        color: 'rgba(255,255,255,0.5)',
+                                    }}>
+                                    {breathShowInfo ? 'Hide Info' : 'Learn More'}
+                                </button>
+                            )}
+                            <button
+                                onClick={() => {
+                                    if (!breathActive) {
+                                        if (breathRound >= breathPattern.rounds && breathPhaseIdx === 0) {
+                                            setBreathRound(1);
+                                            setBreathSecs(breathLearnMode ? breathPattern.phases[0].seconds * 2 : breathPattern.phases[0].seconds);
+                                            setBreathLearnMode(true);
+                                        }
+                                        setBreathShowInfo(false);
+                                        setBreathActive(true);
+                                    } else {
+                                        setBreathActive(false);
+                                    }
+                                }}
+                                className="px-10 py-2.5 rounded-2xl font-display text-sm tracking-[3px] uppercase transition-all hover:scale-105 active:scale-95"
+                                style={{
+                                    background: breathActive ? 'rgba(255,255,255,0.06)' : `${breathPattern.color}20`,
+                                    border: `1px solid ${breathActive ? 'rgba(255,255,255,0.1)' : breathPattern.color + '40'}`,
+                                    color: breathActive ? 'rgba(255,255,255,0.5)' : breathPattern.color,
+                                }}>
+                                {breathActive ? 'Pause' : breathRound >= breathPattern.rounds ? 'Restart' : 'Begin'}
+                            </button>
+                        </div>
+
+                        {/* Skip learn mode */}
+                        {!breathActive && breathLearnMode && (
+                            <button
+                                onClick={() => setBreathLearnMode(false)}
+                                className="mt-3 text-[10px] text-altar-muted/30 hover:text-altar-muted/50 transition-colors">
+                                Skip guided round → full speed
+                            </button>
+                        )}
+                    </div>
                 </div>
             )}
         </>
