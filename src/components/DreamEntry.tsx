@@ -217,12 +217,13 @@ export function DreamEntryView({ onClose, onSaved }: DreamEntryProps) {
                 <button
                     onClick={handleSave}
                     disabled={!text.trim() || isSaving}
-                    className="w-full py-4 rounded-2xl font-display tracking-[2px] text-sm transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed"
+                    className={`w-full py-4 rounded-2xl font-display tracking-[2px] text-sm transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed ${text.trim() ? 'gold-shimmer' : ''}`}
                     style={text.trim() ? {
-                        background: 'linear-gradient(135deg, rgba(109,40,217,0.8), rgba(139,92,246,0.6))',
-                        border: '1px solid rgba(139,92,246,0.5)',
-                        color: '#e9d5ff',
-                        boxShadow: '0 0 30px rgba(139,92,246,0.2)',
+                        background: 'linear-gradient(180deg, #F9E491, #D4A94E 30%, #C59341 60%, #A67B2E)',
+                        border: '2px solid rgba(212,175,55,0.6)',
+                        color: '#1a0f2e',
+                        fontWeight: 800,
+                        boxShadow: '0 2px 0 #8a6b25, 0 4px 12px rgba(0,0,0,0.5), 0 0 40px rgba(212,175,55,0.08), inset 0 1px 0 rgba(255,255,255,0.35)',
                     } : {
                         background: 'linear-gradient(145deg, rgba(255,255,255,0.04) 0%, rgba(0,0,0,0.1) 100%)',
                     boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.45), inset 0 -1px 2px rgba(255,255,255,0.05)',

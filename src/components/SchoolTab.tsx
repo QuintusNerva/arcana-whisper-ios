@@ -12,6 +12,7 @@ import { BottomNav } from './BottomNav';
 import { PageHeader } from './PageHeader';
 import { safeStorage } from '../services/storage.service';
 import { TeachingsSection } from './TeachingsSection';
+import { MASTERS } from '../services/teachings.service';
 
 // ── TEACHINGS DATA — moved to teachings.service.ts ──
 
@@ -49,18 +50,6 @@ function saveAngelLog(log: AngelSighting[]) {
 }
 
 // ── SOUND LIBRARY DATA ─────────────────────────────────────────────────────
-
-const SOUND_CATEGORIES = [
-    { id: 'sleep', label: '🌙 Sleep', query: 'sleep manifestation meditation deep calm' },
-    { id: 'focus', label: '🧠 Focus', query: 'focus flow binaural beats study' },
-    { id: 'healing', label: '✨ Healing', query: '528hz healing solfeggio transformation' },
-    { id: 'release', label: '🌿 Release', query: 'limiting belief release subliminal affirmations' },
-    { id: 'teachings', label: '📖 Teachings', query: 'neville goddard manifestation law assumption lectures' },
-    { id: 'ritual', label: '🔮 Ritual', query: 'manifestation ritual moon ceremony guided meditation' },
-    { id: '528hz', label: '528Hz', query: '528hz solfeggio miracle tone frequency' },
-    { id: 'binaural', label: 'Binaural', query: 'binaural beats theta alpha deep meditation' },
-    { id: 'arcana', label: '🌙 Arcana ✦', query: null },
-];
 
 function getMoonPhaseKey(): string {
     const synodic = 29.53058868;
@@ -228,12 +217,12 @@ export function SchoolTab({ onClose, onTabChange, subscription, onShowPremium }:
     const [timerExpired, setTimerExpired] = React.useState(false);
     const [isOnline, setIsOnline] = React.useState(navigator.onLine);
     const [nightMode, setNightMode] = React.useState(false);
-    const [soundSearch, setSoundSearch] = React.useState('');
-    const [selectedChip, setSelectedChip] = React.useState<string>('arcana');
+
     // In-app video player state
     const [videoModal, setVideoModal] = React.useState<{ videoId: string; title: string } | null>(null);
     const [searchModal, setSearchModal] = React.useState<{ results: YTItem[]; title: string } | null>(null);
     const [isSearching, setIsSearching] = React.useState(false);
+    const [selectedMaster, setSelectedMaster] = React.useState<string | null>(null);
 
     // ── Sound Rx state ──
     const [selectedMood, setSelectedMood] = React.useState<string | null>(null);
@@ -263,43 +252,83 @@ export function SchoolTab({ onClose, onTabChange, subscription, onShowPremium }:
     }, []);
 
     // ── Breathwork timer logic (learn mode = 2x slower on round 1) ──
+    // Use refs to track current values atomically — avoids nested setState race conditions
+    const breathPhaseIdxRef = React.useRef(breathPhaseIdx);
+    const breathSecsRef = React.useRef(breathSecs);
+    const breathRoundRef = React.useRef(breathRound);
+    const breathLearnModeRef = React.useRef(breathLearnMode);
+
+    React.useEffect(() => { breathPhaseIdxRef.current = breathPhaseIdx; }, [breathPhaseIdx]);
+    React.useEffect(() => { breathSecsRef.current = breathSecs; }, [breathSecs]);
+    React.useEffect(() => { breathRoundRef.current = breathRound; }, [breathRound]);
+    React.useEffect(() => { breathLearnModeRef.current = breathLearnMode; }, [breathLearnMode]);
+
     React.useEffect(() => {
         if (!breathActive) {
             if (breathRef.current) clearInterval(breathRef.current);
             return;
         }
-        const speed = (breathLearnMode && breathRound === 1) ? 2000 : 1000;
-        breathRef.current = setInterval(() => {
-            setBreathSecs(prev => {
-                if (prev <= 1) {
-                    // Advance to next phase
-                    setBreathPhaseIdx(pi => {
-                        const nextPi = pi + 1;
-                        if (nextPi >= breathPattern.phases.length) {
-                            // Next round
-                            setBreathRound(r => {
-                                if (r >= breathPattern.rounds) {
-                                    // All rounds done
-                                    setBreathActive(false);
-                                    return r;
-                                }
-                                // After round 1, turn off learn mode
-                                if (r === 1 && breathLearnMode) setBreathLearnMode(false);
-                                return r + 1;
-                            });
-                            setBreathSecs(breathPattern.phases[0].seconds);
-                            return 0;
-                        }
-                        setBreathSecs(breathPattern.phases[nextPi].seconds);
-                        return nextPi;
-                    });
-                    return 0;
+        const getSpeed = () => (breathLearnModeRef.current && breathRoundRef.current === 1) ? 2000 : 1000;
+
+        const tick = () => {
+            const currentSecs = breathSecsRef.current;
+            const currentPhaseIdx = breathPhaseIdxRef.current;
+            const currentRound = breathRoundRef.current;
+
+            if (currentSecs > 1) {
+                // Normal countdown — just decrement
+                const next = currentSecs - 1;
+                breathSecsRef.current = next;
+                setBreathSecs(next);
+            } else {
+                // Phase complete — advance to next phase
+                const nextPhaseIdx = currentPhaseIdx + 1;
+
+                if (nextPhaseIdx >= breathPattern.phases.length) {
+                    // All phases in this round complete — advance round
+                    if (currentRound >= breathPattern.rounds) {
+                        // All rounds done
+                        setBreathActive(false);
+                        if (breathRef.current) clearInterval(breathRef.current);
+                        return;
+                    }
+                    // Next round — reset to phase 0
+                    const nextRound = currentRound + 1;
+                    const nextSecs = breathPattern.phases[0].seconds;
+                    if (currentRound === 1 && breathLearnModeRef.current) {
+                        breathLearnModeRef.current = false;
+                        setBreathLearnMode(false);
+                    }
+                    breathRoundRef.current = nextRound;
+                    breathPhaseIdxRef.current = 0;
+                    breathSecsRef.current = nextSecs;
+                    setBreathRound(nextRound);
+                    setBreathPhaseIdx(0);
+                    setBreathSecs(nextSecs);
+                } else {
+                    // Move to next phase in same round
+                    const nextSecs = breathPattern.phases[nextPhaseIdx].seconds;
+                    breathPhaseIdxRef.current = nextPhaseIdx;
+                    breathSecsRef.current = nextSecs;
+                    setBreathPhaseIdx(nextPhaseIdx);
+                    setBreathSecs(nextSecs);
                 }
-                return prev - 1;
-            });
-        }, speed);
-        return () => { if (breathRef.current) clearInterval(breathRef.current); };
-    }, [breathActive, breathPattern, breathLearnMode, breathRound]);
+            }
+        };
+
+        // Use dynamic speed via setTimeout chain instead of fixed setInterval
+        // This allows speed to change between round 1 (learn mode) and later rounds
+        let timeoutId: ReturnType<typeof setTimeout>;
+        const schedule = () => {
+            timeoutId = setTimeout(() => {
+                tick();
+                schedule();
+            }, getSpeed());
+        };
+        schedule();
+
+        return () => { clearTimeout(timeoutId); if (breathRef.current) clearInterval(breathRef.current); };
+    }, [breathActive, breathPattern]);
 
 
     const openYouTube = async (query: string, label: string) => {
@@ -485,8 +514,23 @@ export function SchoolTab({ onClose, onTabChange, subscription, onShowPremium }:
                                                 onClick={() => isOnline ? openYouTube(cosmicRec.query, cosmicRec.title) : undefined}
                                                 disabled={!isOnline}
                                                 className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-display tracking-wide transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-30"
-                                                style={{ background: 'linear-gradient(135deg, rgba(212,175,55,0.2) 0%, rgba(212,175,55,0.08) 100%)', border: '1px solid rgba(212,175,55,0.3)', color: '#d4af37' }}>
-                                                ▶ Play Now
+                                                style={{
+                                                    background: 'linear-gradient(180deg, #F9E491, #D4A94E 40%, #C59341)',
+                                                    border: '1.5px solid rgba(249,228,145,0.6)',
+                                                    boxShadow: '0 2px 0 #8a6b25, 0 4px 14px rgba(0,0,0,0.45), 0 0 20px rgba(212,175,55,0.25), inset 0 1px 0 rgba(255,255,255,0.3)',
+                                                    color: '#1a0f2e',
+                                                    position: 'relative',
+                                                    overflow: 'hidden',
+                                                }}>
+                                                {/* Shimmer sweep */}
+                                                <div style={{
+                                                    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                                                    width: '200%',
+                                                    background: 'linear-gradient(90deg, transparent 30%, rgba(255,255,255,0.22) 50%, transparent 70%)',
+                                                    animation: 'shimmer-sweep 3.5s ease-in-out infinite',
+                                                    pointerEvents: 'none',
+                                                }} />
+                                                <span style={{ position: 'relative', zIndex: 1 }}>▶ Play Now</span>
                                             </button>
                                             <button
                                                 onClick={() => setShowTimerPicker(prev => !prev)}
@@ -681,40 +725,7 @@ export function SchoolTab({ onClose, onTabChange, subscription, onShowPremium }:
                                     <span className="text-[10px] px-3 py-1 rounded-xl font-display" style={{ background: 'rgba(6,182,212,0.12)', color: '#67e8f9', border: '1px solid rgba(6,182,212,0.2)' }}>Open</span>
                                 </button>
 
-                                {/* Category chips — Browse by Intention */}
-                                <div>
-                                    <p className="text-[9px] text-altar-muted font-display tracking-[3px] uppercase mb-3">Browse by Intention</p>
-                                    <div className="flex gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
-                                        {SOUND_CATEGORIES.map(cat => {
-                                            const isSelected = selectedChip === cat.id;
-                                            return (
-                                                <button key={cat.id}
-                                                    onClick={() => {
-                                                        setSelectedChip(cat.id);
-                                                        if (cat.id === 'arcana') { setShowArcanaSheet(true); return; }
-                                                        if (cat.query) openYouTube(cat.query, cat.label);
-                                                    }}
-                                                    className="shrink-0 px-3.5 py-2 rounded-2xl text-[11px] font-display tracking-wide transition-all hover:scale-105 active:scale-95"
-                                                    style={{
-                                                        background: isSelected
-                                                            ? 'linear-gradient(135deg, rgba(197,147,65,0.25), rgba(197,147,65,0.12))'
-                                                            : cat.id === 'arcana' ? 'linear-gradient(135deg, rgba(212,175,55,0.12) 0%, rgba(99,102,241,0.08) 100%)' : 'rgba(255,255,255,0.05)',
-                                                        border: isSelected
-                                                            ? '1px solid rgba(212,175,55,0.45)'
-                                                            : cat.id === 'arcana' ? '1px solid rgba(212,175,55,0.3)' : '1px solid rgba(255,255,255,0.09)',
-                                                        color: isSelected
-                                                            ? '#F9E491'
-                                                            : cat.id === 'arcana' ? '#d4af37' : 'rgba(255,255,255,0.7)',
-                                                        boxShadow: isSelected ? '0 0 18px rgba(197,147,65,0.12)' : 'none',
-                                                        textShadow: isSelected ? '0 0 8px rgba(212,175,55,0.08)' : 'none',
-                                                        opacity: !isOnline && cat.id !== 'arcana' ? 0.4 : 1,
-                                                    }}>
-                                                    {cat.label}
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
+
 
                                 {/* ── SOLFEGGIO FREQUENCIES (with soft gate — 2 free, then premium) ── */}
                                 <div>
@@ -766,27 +777,6 @@ export function SchoolTab({ onClose, onTabChange, subscription, onShowPremium }:
                                     </div>
                                 </div>
 
-                                {/* Search bar — frosted glass */}
-                                <form onSubmit={e => { e.preventDefault(); if (soundSearch.trim() && isOnline) openYouTube(soundSearch.trim(), `"${soundSearch.trim()}"`); }}>
-                                    <div className="flex gap-2 rounded-2xl p-1" style={{
-                                        background: 'rgba(255,255,255,0.03)',
-                                        backdropFilter: 'blur(12px)',
-                                        WebkitBackdropFilter: 'blur(12px)',
-                                    }}>
-                                        <input
-                                            value={soundSearch}
-                                            onChange={e => setSoundSearch(e.target.value)}
-                                            placeholder="Find frequencies, meditations, artists..."
-                                            disabled={!isOnline}
-                                            className="flex-1 rounded-xl px-4 py-2.5 text-xs text-altar-text bg-transparent border-none focus:outline-none placeholder-altar-muted/40"
-                                        />
-                                        <button type="submit" disabled={!soundSearch.trim() || !isOnline}
-                                            className="px-4 py-2 rounded-xl text-xs font-display transition-all disabled:opacity-30"
-                                            style={{ background: 'rgba(212,175,55,0.15)', color: '#d4af37' }}>
-                                            🔍
-                                        </button>
-                                    </div>
-                                </form>
 
 
                                 {/* Favorites */}
@@ -806,54 +796,149 @@ export function SchoolTab({ onClose, onTabChange, subscription, onShowPremium }:
                                     </div>
                                 )}
 
-                                {/* Recently Played — upgraded with share + star animation */}
-                                {soundHistory.length > 0 && (
-                                    <div>
-                                        <p className="text-[9px] text-altar-muted font-display tracking-[3px] uppercase mb-3">Recently Played</p>
-                                        <div className="space-y-2">
-                                            {soundHistory.map((item, i) => (
-                                                <div key={i} onClick={() => playItem(item)}
-                                                    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left cursor-pointer transition-all hover:scale-[1.01] active:scale-[0.99]"
-                                                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                                                    {/* Thumbnail */}
-                                                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0"
-                                                        style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(13,6,24,0.8))', border: '1px solid rgba(99,102,241,0.15)' }}>
-                                                        🎵
-                                                    </div>
-                                                    {/* Info */}
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="text-xs text-altar-text/80 font-display truncate">{item.label}</p>
-                                                        <p className="text-[9px] text-altar-muted/50 mt-0.5">
-                                                            {item.timestamp ? new Date(item.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''}
-                                                        </p>
-                                                    </div>
-                                                    {/* Actions */}
-                                                    <div className="flex items-center gap-1.5 shrink-0">
-                                                        <button onClick={e => { e.stopPropagation(); navigator.share?.({ title: item.label, text: `Listen to ${item.label} on Arcana Whisper` }).catch(() => {}); }}
-                                                            className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] text-altar-muted/40 transition-all hover:text-altar-gold/60 hover:bg-white/5">
-                                                            ↗
-                                                        </button>
-                                                        <button onClick={e => {
-                                                                e.stopPropagation();
-                                                                const btn = e.currentTarget;
-                                                                btn.style.transform = 'scale(1.3)';
-                                                                setTimeout(() => { btn.style.transform = 'scale(1)'; }, 300);
-                                                                toggleFave(item);
-                                                            }}
-                                                            className="text-[15px] transition-all"
-                                                            style={{
-                                                                color: soundFavorites.some(f => f.query === item.query) ? '#d4af37' : 'rgba(255,255,255,0.15)',
-                                                                textShadow: soundFavorites.some(f => f.query === item.query) ? '0 0 8px rgba(212,175,55,0.3)' : 'none',
-                                                                transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                                {/* ── THE MASTERS ── */}
+                                <div>
+                                    <p className="text-[9px] text-altar-muted font-display tracking-[3px] uppercase mb-3">✦ The Masters</p>
+
+                                    {/* Teacher cards — horizontal scroll */}
+                                    <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 12, scrollbarWidth: 'none' as const }}>
+                                        {MASTERS.map(master => {
+                                            const isActive = selectedMaster === master.id;
+                                            return (
+                                                <button
+                                                    key={master.id}
+                                                    onClick={() => setSelectedMaster(isActive ? null : master.id)}
+                                                    style={{
+                                                        flex: '0 0 auto',
+                                                        width: 200,
+                                                        padding: '16px 14px',
+                                                        borderRadius: 18,
+                                                        background: isActive
+                                                            ? `linear-gradient(135deg, ${master.color}18, ${master.color}08)`
+                                                            : 'rgba(255,255,255,0.03)',
+                                                        border: isActive
+                                                            ? `1px solid ${master.color}50`
+                                                            : '1px solid rgba(255,255,255,0.06)',
+                                                        textAlign: 'left' as const,
+                                                        transition: 'all 0.3s ease',
+                                                        cursor: 'pointer',
+                                                        boxShadow: isActive ? `0 0 24px ${master.color}15` : 'none',
+                                                    }}
+                                                >
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                                                        <span style={{ fontSize: 28 }}>{master.emoji}</span>
+                                                        <div>
+                                                            <p style={{
+                                                                fontSize: 13, fontWeight: 700, color: isActive ? master.color : 'rgba(255,255,255,0.85)',
+                                                                fontFamily: "'Cinzel', serif", margin: 0,
                                                             }}>
-                                                            ★
-                                                        </button>
+                                                                {master.name}
+                                                            </p>
+                                                            <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', margin: 0 }}>
+                                                                {master.era}
+                                                            </p>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            ))}
-                                        </div>
+                                                    <p style={{
+                                                        fontSize: 10, color: isActive ? `${master.color}cc` : 'rgba(255,255,255,0.35)',
+                                                        fontStyle: 'italic', margin: '0 0 6px 0', lineHeight: 1.4,
+                                                    }}>
+                                                        {master.philosophy}
+                                                    </p>
+                                                    <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)', margin: 0, lineHeight: 1.4 }}>
+                                                        {master.lectures.length} curated lectures
+                                                    </p>
+                                                </button>
+                                            );
+                                        })}
                                     </div>
-                                )}
+
+                                    {/* Expanded lecture list for selected master */}
+                                    {selectedMaster && (() => {
+                                        const master = MASTERS.find(m => m.id === selectedMaster);
+                                        if (!master) return null;
+                                        const themes = Array.from(new Set(master.lectures.map(l => l.theme)));
+                                        return (
+                                            <div style={{
+                                                marginTop: 4,
+                                                padding: '16px 14px',
+                                                borderRadius: 18,
+                                                background: 'rgba(255,255,255,0.02)',
+                                                border: `1px solid ${master.color}20`,
+                                            }}>
+                                                <p style={{
+                                                    fontSize: 11, color: 'rgba(255,255,255,0.45)',
+                                                    lineHeight: 1.6, margin: '0 0 16px 0',
+                                                }}>
+                                                    {master.bio}
+                                                </p>
+                                                {themes.map(theme => (
+                                                    <div key={theme} style={{ marginBottom: 14 }}>
+                                                        <p style={{
+                                                            fontSize: 9, color: `${master.color}80`,
+                                                            fontFamily: "'Cinzel', serif",
+                                                            letterSpacing: 2, textTransform: 'uppercase',
+                                                            marginBottom: 8,
+                                                        }}>
+                                                            {theme}
+                                                        </p>
+                                                        {master.lectures.filter(l => l.theme === theme).map(lecture => (
+                                                            <button
+                                                                key={lecture.id}
+                                                                onClick={() => setVideoModal({ videoId: lecture.videoId, title: `${master.name}: ${lecture.title}` })}
+                                                                style={{
+                                                                    display: 'flex', alignItems: 'center', gap: 10,
+                                                                    width: '100%', padding: '10px 12px',
+                                                                    borderRadius: 14,
+                                                                    background: 'rgba(255,255,255,0.02)',
+                                                                    border: '1px solid rgba(255,255,255,0.05)',
+                                                                    marginBottom: 6,
+                                                                    cursor: 'pointer',
+                                                                    textAlign: 'left' as const,
+                                                                    transition: 'all 0.2s ease',
+                                                                }}
+                                                                onMouseEnter={e => {
+                                                                    (e.currentTarget as HTMLElement).style.background = `${master.color}10`;
+                                                                    (e.currentTarget as HTMLElement).style.borderColor = `${master.color}30`;
+                                                                }}
+                                                                onMouseLeave={e => {
+                                                                    (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.02)';
+                                                                    (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.05)';
+                                                                }}
+                                                            >
+                                                                <span style={{
+                                                                    width: 36, height: 36, borderRadius: '50%',
+                                                                    background: `linear-gradient(145deg, ${master.color}45, ${master.color}20)`,
+                                                                    border: `1.5px solid ${master.color}60`,
+                                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                    fontSize: 13, flexShrink: 0,
+                                                                    color: '#fff',
+                                                                    boxShadow: `0 2px 0 ${master.color}30, 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.2), inset 0 -1px 2px ${master.color}15`,
+                                                                }}>
+                                                                    ▶
+                                                                </span>
+                                                                <div style={{ flex: 1, minWidth: 0 }}>
+                                                                    <p style={{
+                                                                        fontSize: 12, color: 'rgba(255,255,255,0.8)',
+                                                                        margin: 0, fontWeight: 600,
+                                                                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                                                                    }}>
+                                                                        {lecture.title}
+                                                                    </p>
+                                                                    <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', margin: '2px 0 0 0' }}>
+                                                                        {lecture.duration}
+                                                                        {lecture.relatedLessonId && ' · 🔗 Study Guide'}
+                                                                    </p>
+                                                                </div>
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        );
+                                    })()}
+                                </div>
+
 
                                 <div className="h-6" />
                             </div>

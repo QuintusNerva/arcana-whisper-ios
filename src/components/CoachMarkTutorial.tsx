@@ -341,6 +341,7 @@ export function CoachMarkTutorial({ onComplete }: { onComplete: () => void }) {
                             </button>
                         )}
                         <button
+                            className="gold-shimmer"
                             onClick={handleNext}
                             style={{
                                 background: 'linear-gradient(180deg, #F9E491, #D4A94E 30%, #C59341 60%, #A67B2E)',

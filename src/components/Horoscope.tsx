@@ -3,11 +3,12 @@ import React from 'react';
 import { BottomNav } from './BottomNav';
 import {
     getBirthData, getSunSign, getDailyHoroscope, getCompatibility, ZODIAC_SIGNS,
-    getNatalTriad,
+    getNatalTriad, getLifePathNumber, getCurrentPersonalYear,
 } from '../services/astrology.service';
 import { AIService } from '../services/ai.service';
 import { AIResponseRenderer } from './AIResponseRenderer';
 import { PageHeader } from './PageHeader';
+import { getActiveManifestations } from '../services/manifestation.service';
 
 interface HoroscopeProps {
     onClose: () => void;
@@ -91,6 +92,20 @@ Expand on that theme with practical guidance, emotional insight, and a sense of 
 
                 if (triad) {
                     userPrompt += `\n\nThis person's natal chart: Sun in ${triad.sun.name}, Moon in ${triad.moon.name}, Rising in ${triad.rising.name}. Subtly personalize the reading to this configuration without mentioning you're doing so.`;
+
+                    // Add numerology context
+                    if (birthData?.birthday) {
+                        const lp = getLifePathNumber(birthData.birthday);
+                        const py = getCurrentPersonalYear(birthData.birthday);
+                        userPrompt += `\nThey are on Life Path ${lp} in Personal Year ${py}. Weave this numerological timing into the day's energy — how their current cycle amplifies or softens today's theme.`;
+                    }
+                }
+
+                // Add active manifestation context
+                const manifests = getActiveManifestations();
+                if (manifests.length > 0) {
+                    const intentions = manifests.slice(0, 2).map(m => m.declaration).join('; ');
+                    userPrompt += `\nThey are actively manifesting: ${intentions}. If today's energy genuinely supports or challenges this intention, mention it briefly.`;
                 }
 
                 const result = await ai.chat(sysPrompt, userPrompt);

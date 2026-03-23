@@ -665,7 +665,7 @@ function App() {
                         <div className="sticky top-0 z-10 bg-altar-deep/95 backdrop-blur-sm px-5 pt-safe pt-4 pb-3 flex items-center gap-3 border-b border-white/5 max-w-[500px] mx-auto w-full">
                             <button
                                 onClick={() => { setShowAngelNumbers(false); setCurrentTab('home'); }}
-                                className="text-altar-muted/70 text-sm font-display hover:text-altar-muted transition-colors"
+                                className="text-altar-muted text-sm font-display hover:text-altar-text transition-colors"
                             >
                                 ← Witness
                             </button>
@@ -675,9 +675,9 @@ function App() {
                         <div className="max-w-[500px] mx-auto">
                             {/* Condensed poetic intro */}
                             <div className="mx-5 mt-6 mb-2 text-center">
-                                <p className="text-[11px] text-altar-text/70 leading-relaxed" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 300 }}>
+                                <p className="text-[11px] text-altar-text/90 leading-relaxed" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 300 }}>
                                     Repeating numbers aren't random — they're messages.<br />
-                                    <span className="text-altar-gold/80">Tap one to decode yours.</span>
+                                    <span className="text-altar-gold">Tap one to decode yours.</span>
                                 </p>
                             </div>
                             <AngelNumbersSection />

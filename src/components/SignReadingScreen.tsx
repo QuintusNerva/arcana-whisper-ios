@@ -1,4 +1,5 @@
 import React from 'react';
+import { safeStorage } from '../services/storage.service';
 import { BottomNav } from './BottomNav';
 import { AIResponseRenderer } from './AIResponseRenderer';
 import {
@@ -15,10 +16,10 @@ interface SignReadingScreenProps {
 const MEANING_CACHE_KEY = 'arcana_sign_reading_cache';
 
 function getCache(): Record<string, any> {
-    try { return JSON.parse(localStorage.getItem(MEANING_CACHE_KEY) || '{}'); } catch { return {}; }
+    try { return JSON.parse(safeStorage.getItem(MEANING_CACHE_KEY) || '{}'); } catch { return {}; }
 }
 function setCache(c: Record<string, any>) {
-    localStorage.setItem(MEANING_CACHE_KEY, JSON.stringify(c));
+    safeStorage.setItem(MEANING_CACHE_KEY, JSON.stringify(c));
 }
 
 export function SignReadingScreen({ focus, onClose, onTabChange }: SignReadingScreenProps) {

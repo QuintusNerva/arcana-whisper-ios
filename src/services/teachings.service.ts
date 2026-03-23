@@ -704,3 +704,75 @@ export function personalizeText(text: string, ctx: UserContext): string {
 
     return result;
 }
+
+// ── Masters Library ───────────────────────────────────────────────────────────
+// Real-world spiritual teachers with curated YouTube lectures.
+// Phase 1: Public-domain teachers only. Expand later.
+
+export interface MasterLecture {
+    id: string;
+    title: string;
+    videoId: string;           // YouTube video ID
+    duration: string;          // e.g. "45 min"
+    theme: string;             // Grouping within the master's content
+    relatedLessonId?: string;  // Cross-link to an AI Teaching lesson
+}
+
+export interface Master {
+    id: string;
+    name: string;
+    emoji: string;
+    era: string;               // e.g. "1905–1972"
+    philosophy: string;        // One-line tagline
+    bio: string;               // 2-sentence bio
+    color: string;             // Accent colour
+    lectures: MasterLecture[];
+}
+
+export const MASTERS: Master[] = [
+    {
+        id: 'neville-goddard',
+        name: 'Neville Goddard',
+        emoji: '🔮',
+        era: '1905 – 1972',
+        philosophy: '"Imagination is the only reality."',
+        bio: 'Barbadian-born mystic who taught that consciousness creates reality. His work on the Law of Assumption influenced an entire generation of manifestation teachers.',
+        color: '#d4af37',
+        lectures: [
+            // ── Core Teachings (Neville Goddard Official channel) ──
+            { id: 'ng-1', title: 'Feeling Is The Secret', videoId: 'FdISgW7loPg', duration: '15 min', theme: 'Core Teachings' },
+            { id: 'ng-2', title: 'The Law and The Promise', videoId: 'KFLPjnIHKlY', duration: '18 min', theme: 'Core Teachings' },
+            { id: 'ng-3', title: 'Imagination Creates Reality', videoId: 'Fny-BVLKY8c', duration: '20 min', theme: 'Core Teachings' },
+            // ── Techniques ──
+            { id: 'ng-4', title: 'State Akin to Sleep (SATS)', videoId: '4QdVITzlYvw', duration: '21 min', theme: 'Techniques', relatedLessonId: 'emotional-alchemy' },
+            { id: 'ng-5', title: 'The Pruning Shears of Revision', videoId: 'M6EXXXGSUiE', duration: '14 min', theme: 'Techniques' },
+            { id: 'ng-6', title: 'Living in the End', videoId: 'b7lWi3ZQYOU', duration: '17 min', theme: 'Techniques' },
+            // ── Advanced ──
+            { id: 'ng-7', title: 'You Are Living In A Play Created By God', videoId: 'B1lCDVIlzyE', duration: '19 min', theme: 'Advanced' },
+            { id: 'ng-8', title: 'The Power of Awareness', videoId: 'dQic_eWlSno', duration: '16 min', theme: 'Advanced' },
+            { id: 'ng-9', title: 'Your Wish Is Your Command', videoId: 'liYH4_08XkM', duration: '15 min', theme: 'Advanced' },
+        ],
+    },
+    {
+        id: 'florence-scovel-shinn',
+        name: 'Florence Scovel Shinn',
+        emoji: '✦',
+        era: '1871 – 1940',
+        philosophy: '"The game of life is a game of boomerangs."',
+        bio: 'American artist and metaphysical teacher whose books on affirmation and spoken word became cornerstones of New Thought. Her gentle, practical approach to manifestation remains timeless.',
+        color: '#c084fc',
+        lectures: [
+            // ── Core Teachings ──
+            { id: 'fss-1', title: 'The Game of Life and How to Play It', videoId: 'wJa5Ch0O4BI', duration: '1 hr 43 min', theme: 'Core Teachings' },
+            { id: 'fss-2', title: 'Your Word Is Your Wand', videoId: 'uTBZeWPIOn8', duration: '1 hr 15 min', theme: 'Core Teachings' },
+            { id: 'fss-3', title: 'The Secret Door to Success', videoId: '9RDCu2ZX9LA', duration: '1 hr 50 min', theme: 'Core Teachings' },
+            // ── Affirmations & Practice ──
+            { id: 'fss-4', title: 'The Power of the Spoken Word', videoId: 'HZqJX4KWSqc', duration: '1 hr 5 min', theme: 'Affirmations & Practice' },
+            { id: 'fss-5', title: 'Affirmations Collection', videoId: 'UJpgf1l4qfU', duration: '6 hrs', theme: 'Affirmations & Practice' },
+        ],
+    },
+];
+
+export function getMasterById(id: string): Master | undefined {
+    return MASTERS.find(m => m.id === id);
+}

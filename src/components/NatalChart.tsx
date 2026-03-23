@@ -202,14 +202,14 @@ export function NatalChart({ onClose, onTabChange, subscription, onShowPremium, 
                             <p className="text-sm mb-4" style={{ color: 'var(--color-altar-muted)', fontFamily: 'var(--font-body)', fontWeight: 300 }}>Set your birth data to reveal your natal chart</p>
                             <button
                                 onClick={() => onTabChange('profile')}
-                                className="w-full sm:w-auto px-6 py-3 rounded-2xl text-sm font-display transition-all active:scale-[0.97]"
+                                className="w-full sm:w-auto px-6 py-3 rounded-2xl text-sm font-display transition-all active:scale-[0.97] gold-shimmer"
                                 style={{
-                                    background: 'linear-gradient(135deg, #D4A94E 0%, #F9E491 50%, #C59341 100%)',
-                                    color: '#1a0e2e',
+                                    background: 'linear-gradient(180deg, #F9E491, #D4A94E 30%, #C59341 60%, #A67B2E)',
+                                    color: '#1a0f2e',
                                     fontWeight: 800,
                                     letterSpacing: '2px',
-                                    border: '1px solid var(--color-gold-300)',
-                                    boxShadow: '0 4px 14px rgba(212,169,78,0.3), inset 0 1px 0 rgba(255,255,255,0.25)',
+                                    border: '2px solid rgba(212,175,55,0.6)',
+                                    boxShadow: '0 2px 0 #8a6b25, 0 4px 12px rgba(0,0,0,0.5), 0 0 40px rgba(212,175,55,0.08), inset 0 1px 0 rgba(255,255,255,0.35)',
                                 }}
                             >
                                 SET UP IN PROFILE →
@@ -404,13 +404,13 @@ export function NatalChart({ onClose, onTabChange, subscription, onShowPremium, 
                                                     setChartSummaryLoading(false);
                                                 }
                                             }}
-                                            className="w-full py-3.5 rounded-xl flex items-center justify-center gap-2 font-display text-sm tracking-[2px] transition-all active:scale-[0.97]"
+                                            className="w-full py-3.5 rounded-xl flex items-center justify-center gap-2 font-display text-sm tracking-[2px] transition-all active:scale-[0.97] gold-shimmer"
                                             style={{
-                                                background: 'linear-gradient(135deg, #D4A94E 0%, #F9E491 50%, #C59341 100%)',
-                                                color: '#1a0e2e',
+                                                background: 'linear-gradient(180deg, #F9E491, #D4A94E 30%, #C59341 60%, #A67B2E)',
+                                                color: '#1a0f2e',
                                                 fontWeight: 800,
-                                                border: '1px solid var(--color-gold-300)',
-                                                boxShadow: '0 4px 14px rgba(212,169,78,0.3), inset 0 1px 0 rgba(255,255,255,0.25)',
+                                                border: '2px solid rgba(212,175,55,0.6)',
+                                                boxShadow: '0 2px 0 #8a6b25, 0 4px 12px rgba(0,0,0,0.5), 0 0 40px rgba(212,175,55,0.08), inset 0 1px 0 rgba(255,255,255,0.35)',
                                             }}
                                         >
                                             <span>✨</span> REVEAL CHART READING

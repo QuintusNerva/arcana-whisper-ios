@@ -2,11 +2,13 @@ import React from 'react';
 import { BottomNav } from './BottomNav';
 import {
     getBirthData, getLifePathNumber, getLifePathMeaning, getPersonalYearNumber,
-    getCurrentPersonalYear, getNatalTriad,
+    getCurrentPersonalYear, getNatalTriad, getDestinyName, saveDestinyName,
+    PYTH_MAP, reducePyth,
 } from '../services/astrology.service';
 import { AIService, dailyCache } from '../services/ai.service';
 import { AIResponseRenderer } from './AIResponseRenderer';
 import { PageHeader } from './PageHeader';
+import { getActiveManifestations } from '../services/manifestation.service';
 
 interface NumerologyProps {
     onClose: () => void;
@@ -14,6 +16,22 @@ interface NumerologyProps {
     subscription: string;
     onShowPremium: () => void;
 }
+
+// ── Destiny Number meanings (hoisted outside component for perf) ──
+const DESTINY_MEANINGS: Record<number, { title: string; meaning: string }> = {
+    1: { title: 'The Initiator', meaning: 'You express your purpose through leadership, independence, and bold originality. You are here to start things others are afraid to begin.' },
+    2: { title: 'The Diplomat', meaning: 'You express your purpose through partnership, mediation, and emotional sensitivity. Your gift is bringing balance to every room you enter.' },
+    3: { title: 'The Communicator', meaning: 'You express your purpose through creativity, self-expression, and joy. Words, art, and performance are your natural currencies.' },
+    4: { title: 'The Builder', meaning: 'You express your purpose through structure, discipline, and steady construction. You turn vision into reality — brick by brick.' },
+    5: { title: 'The Freedom Seeker', meaning: 'You express your purpose through adventure, adaptability, and embracing change. You show others what it looks like to live fully alive.' },
+    6: { title: 'The Nurturer', meaning: 'You express your purpose through service, healing, and unconditional love. You create safe spaces where others can transform.' },
+    7: { title: 'The Truth Seeker', meaning: 'You express your purpose through wisdom, introspection, and spiritual insight. You see what others miss and speak the deep truth.' },
+    8: { title: 'The Powerhouse', meaning: 'You express your purpose through mastery, abundance, and wielding influence responsibly. You are here to build something that lasts.' },
+    9: { title: 'The Humanitarian', meaning: 'You express your purpose through compassion, global awareness, and selfless service. You close chapters so new ones can open for many.' },
+    11: { title: 'The Intuitive Visionary', meaning: 'Master Destiny: You express your purpose through heightened intuition, spiritual inspiration, and illuminating what others cannot see.' },
+    22: { title: 'The Master Builder', meaning: 'Master Destiny: You express your purpose by turning visionary ideas into massive real-world impact. You build at a scale others dream about.' },
+    33: { title: 'The Master Teacher', meaning: 'Master Destiny: You express your purpose through unconditional love, healing, and uplifting humanity. You teach by embodying the lesson.' },
+};
 
 export function Numerology({ onClose, onTabChange, subscription, onShowPremium }: NumerologyProps) {
     const birthData = getBirthData();
@@ -45,7 +63,7 @@ export function Numerology({ onClose, onTabChange, subscription, onShowPremium }
     const [showYearModal, setShowYearModal] = React.useState(false);
     const [aiYear, setAiYear] = React.useState<string | null>(null);
     const [aiYearLoading, setAiYearLoading] = React.useState(false);
-    const [destinyName, setDestinyName] = React.useState('');
+    const [destinyName, setDestinyName] = React.useState(getDestinyName() || '');
     const [showDestinyModal, setShowDestinyModal] = React.useState(false);
     const [aiDestiny, setAiDestiny] = React.useState<{ overview: string; expressionStyle: string; shadowSide: string; advice: string } | null>(null);
     const [aiDestinyLoading, setAiDestinyLoading] = React.useState(false);
@@ -55,42 +73,12 @@ export function Numerology({ onClose, onTabChange, subscription, onShowPremium }
         setAiDestiny(null);
     }, [destinyName]);
 
-    // Pythagorean letter-to-number mapping
-    const PYTH_MAP: Record<string, number> = {
-        A: 1, J: 1, S: 1,
-        B: 2, K: 2, T: 2,
-        C: 3, L: 3, U: 3,
-        D: 4, M: 4, V: 4,
-        E: 5, N: 5, W: 5,
-        F: 6, O: 6, X: 6,
-        G: 7, P: 7, Y: 7,
-        H: 8, Q: 8, Z: 8,
-        I: 9, R: 9,
-    };
-
-    const DESTINY_MEANINGS: Record<number, { title: string; meaning: string }> = {
-        1: { title: 'The Initiator', meaning: 'You express your purpose through leadership, independence, and bold originality. You are here to start things others are afraid to begin.' },
-        2: { title: 'The Diplomat', meaning: 'You express your purpose through partnership, mediation, and emotional sensitivity. Your gift is bringing balance to every room you enter.' },
-        3: { title: 'The Communicator', meaning: 'You express your purpose through creativity, self-expression, and joy. Words, art, and performance are your natural currencies.' },
-        4: { title: 'The Builder', meaning: 'You express your purpose through structure, discipline, and steady construction. You turn vision into reality — brick by brick.' },
-        5: { title: 'The Freedom Seeker', meaning: 'You express your purpose through adventure, adaptability, and embracing change. You show others what it looks like to live fully alive.' },
-        6: { title: 'The Nurturer', meaning: 'You express your purpose through service, healing, and unconditional love. You create safe spaces where others can transform.' },
-        7: { title: 'The Truth Seeker', meaning: 'You express your purpose through wisdom, introspection, and spiritual insight. You see what others miss and speak the deep truth.' },
-        8: { title: 'The Powerhouse', meaning: 'You express your purpose through mastery, abundance, and wielding influence responsibly. You are here to build something that lasts.' },
-        9: { title: 'The Humanitarian', meaning: 'You express your purpose through compassion, global awareness, and selfless service. You close chapters so new ones can open for many.' },
-        11: { title: 'The Intuitive Visionary', meaning: 'Master Destiny: You express your purpose through heightened intuition, spiritual inspiration, and illuminating what others cannot see.' },
-        22: { title: 'The Master Builder', meaning: 'Master Destiny: You express your purpose by turning visionary ideas into massive real-world impact. You build at a scale others dream about.' },
-        33: { title: 'The Master Teacher', meaning: 'Master Destiny: You express your purpose through unconditional love, healing, and uplifting humanity. You teach by embodying the lesson.' },
-    };
-
-    const reduceToSingle = (num: number): number => {
-        if (num === 11 || num === 22 || num === 33) return num;
-        while (num > 9) {
-            num = String(num).split('').reduce((a, d) => a + parseInt(d), 0);
-            if (num === 11 || num === 22 || num === 33) return num;
-        }
-        return num;
-    };
+    // Auto-save destiny name when it changes (debounced)
+    React.useEffect(() => {
+        if (!destinyName.trim()) return;
+        const timer = setTimeout(() => saveDestinyName(destinyName.trim()), 500);
+        return () => clearTimeout(timer);
+    }, [destinyName]);
 
     const destinyResult = React.useMemo(() => {
         const cleaned = destinyName.trim();
@@ -101,12 +89,12 @@ export function Numerology({ onClose, onTabChange, subscription, onShowPremium }
         const nameBreakdowns = names.map(name => {
             const letters = name.toUpperCase().split('').filter(c => PYTH_MAP[c]).map(c => ({ letter: c, value: PYTH_MAP[c] }));
             const sum = letters.reduce((a, l) => a + l.value, 0);
-            const reduced = reduceToSingle(sum);
+            const reduced = reducePyth(sum);
             return { name, letters, sum, reduced };
         });
 
         const total = nameBreakdowns.reduce((a, n) => a + n.reduced, 0);
-        const finalNumber = reduceToSingle(total);
+        const finalNumber = reducePyth(total);
         const info = DESTINY_MEANINGS[finalNumber] || DESTINY_MEANINGS[finalNumber > 9 ? (finalNumber % 9 || 9) : finalNumber];
 
         return {
@@ -239,8 +227,16 @@ This person's natal chart for deeper personalization:
 Sun: ${triad.sun.name} (${triad.sun.element})
 Moon: ${triad.moon.name} (${triad.moon.element})
 Rising: ${triad.rising.name} (${triad.rising.element})
+${personalYear ? `Personal Year: ${personalYear} (current cycle)` : ''}
 
-Weave their astrology into the numerology reading — how does their Life Path ${lifePathNum} interact with their ${triad.sun.name} Sun? What unique strengths and challenges emerge from this specific combination?`;
+Weave their astrology into the numerology reading — how does their Life Path ${lifePathNum} interact with their ${triad.sun.name} Sun? What unique strengths and challenges emerge from this specific combination?${personalYear ? ` Also note how their Personal Year ${personalYear} cycle colors their Life Path journey right now.` : ''}`;
+            }
+
+            // Add active manifestation context
+            const manifests = getActiveManifestations();
+            if (manifests.length > 0) {
+                const primary = manifests[0];
+                userPrompt += `\nThey are actively manifesting: "${primary.declaration}". If their Life Path energy genuinely supports this intention, weave that connection in.`;
             }
 
             const raw = await ai.chatPremium(systemPrompt, userPrompt);

@@ -196,12 +196,13 @@ export function DreamJournal({ onClose, onTabChange, subscription, onShowPremium
                             </p>
                             <button
                                 onClick={() => setShowNewEntry(true)}
-                                className="px-6 py-4 rounded-2xl font-display text-sm tracking-[2px] transition-all active:scale-[0.98]"
+                                className="px-6 py-4 rounded-2xl font-display text-sm tracking-[2px] transition-all active:scale-[0.98] gold-shimmer"
                                 style={{
-                                    background: 'linear-gradient(145deg, #3b1f8a 0%, #2d1b6e 55%, #1a1042 100%)',
-                                    boxShadow: '0 6px 18px rgba(109,40,217,0.45), 0 2px 4px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15), inset 0 -2px 5px rgba(0,0,0,0.4)',
-                                    border: '1px solid rgba(167,139,250,0.3)',
-                                    color: '#c4b5fd',
+                                    background: 'linear-gradient(180deg, #F9E491, #D4A94E 30%, #C59341 60%, #A67B2E)',
+                                    boxShadow: '0 2px 0 #8a6b25, 0 4px 12px rgba(0,0,0,0.5), 0 0 40px rgba(212,175,55,0.08), inset 0 1px 0 rgba(255,255,255,0.35)',
+                                    border: '2px solid rgba(212,175,55,0.6)',
+                                    color: '#1a0f2e',
+                                    fontWeight: 800,
                                 }}
                             >
                                 ✦ Record Your First Dream
@@ -240,17 +241,19 @@ export function DreamJournal({ onClose, onTabChange, subscription, onShowPremium
                     {/* New dream CTA if has entries */}
                     {entries.length > 0 && (
                         <button
-                            onClick={() => setShowNewEntry(true)}
-                            className="w-full mt-5 py-4 rounded-2xl flex items-center justify-center gap-2 transition-all"
-                            style={{
-                                background: 'rgba(109,40,217,0.1)',
-                                border: '1px dashed rgba(139,92,246,0.25)',
-                                color: 'rgba(167,139,250,0.6)',
-                            }}
-                        >
-                            <span className="text-sm">🌙</span>
-                            <span className="text-sm font-display tracking-wide">Record a New Dream</span>
-                        </button>
+                        onClick={() => setShowNewEntry(true)}
+                        className="w-full mt-5 py-4 rounded-2xl flex items-center justify-center gap-2 transition-all active:scale-[0.98] gold-shimmer"
+                        style={{
+                            background: 'linear-gradient(180deg, #F9E491, #D4A94E 30%, #C59341 60%, #A67B2E)',
+                            border: '2px solid rgba(212,175,55,0.6)',
+                            color: '#1a0f2e',
+                            fontWeight: 800,
+                            boxShadow: '0 2px 0 #8a6b25, 0 4px 12px rgba(0,0,0,0.5), 0 0 40px rgba(212,175,55,0.08), inset 0 1px 0 rgba(255,255,255,0.35)',
+                        }}
+                    >
+                        <span className="text-sm">🌙</span>
+                        <span className="text-sm font-display tracking-[2px] uppercase">Record a New Dream</span>
+                    </button>
                     )}
                 </div>
             </div>

@@ -325,7 +325,7 @@ export function Compatibility({ onClose, onTabChange, subscription, onShowPremiu
                             )}
 
                             {/* Partner input */}
-                            <div className="clay-card rounded-3xl p-5 mb-4 animate-fade-up" style={{ animationDelay: '0.2s', opacity: 0 }}>
+                            <div className="clay-card rounded-3xl p-5 mb-4 animate-fade-up" style={{ animationDelay: '0.2s', opacity: 0, position: 'relative' as const, zIndex: 10 }}>
                                 <label className="block font-display text-xs text-altar-muted tracking-[2px] uppercase mb-3">
                                     Partner's Name
                                 </label>
@@ -360,7 +360,7 @@ export function Compatibility({ onClose, onTabChange, subscription, onShowPremiu
                                 <label className="block font-display text-xs text-altar-muted tracking-[2px] uppercase mb-3">
                                     Place of Birth <span className="text-altar-muted/40">(optional — improves accuracy)</span>
                                 </label>
-                                <div className="relative" ref={cityDropdownRef}>
+                                <div className="relative z-20" ref={cityDropdownRef}>
                                     <input
                                         type="text"
                                         value={cityQuery || partnerBirthLocation}
@@ -419,7 +419,7 @@ export function Compatibility({ onClose, onTabChange, subscription, onShowPremiu
 
                             {/* Partner sign preview */}
                             {partnerSign && partnerBirthday && (
-                                <div className="clay-card rounded-3xl p-4 mb-5 flex items-center gap-3 animate-fade-up">
+                                <div className="clay-card rounded-3xl p-4 mb-5 flex items-center gap-3 animate-fade-up" style={{ position: 'relative' as const, zIndex: 1 }}>
                                     <span className="text-3xl">{partnerSign.glyph}</span>
                                     <div>
                                         <p className="text-xs text-altar-muted font-display tracking-[2px] uppercase">{partnerName || 'Partner'}</p>
@@ -433,10 +433,15 @@ export function Compatibility({ onClose, onTabChange, subscription, onShowPremiu
                                 onClick={handleReveal}
                                 disabled={!partnerBirthday || !birthData}
                                 className={`w-full py-4 rounded-2xl font-display font-semibold text-base tracking-wide transition-all duration-300 animate-fade-up ${partnerBirthday && birthData
-                                    ? 'bg-gradient-to-r from-pink-500/80 via-rose-500/80 to-pink-500/80 text-white hover:shadow-[0_0_30px_rgba(236,72,153,0.3)] hover:scale-[1.01] active:scale-[0.99]'
+                                    ? 'text-altar-deep hover:scale-[1.01] active:scale-[0.99] gold-shimmer'
                                     : 'bg-white/5 text-white/30 cursor-not-allowed'
                                     }`}
-                                style={{ animationDelay: '0.35s', opacity: 0 }}
+                                style={partnerBirthday && birthData ? {
+                                    background: 'linear-gradient(180deg, #F9E491, #D4A94E 30%, #C59341 60%, #A67B2E)',
+                                    border: '2px solid rgba(212,175,55,0.6)',
+                                    boxShadow: '0 2px 0 #8a6b25, 0 4px 12px rgba(0,0,0,0.5), 0 0 40px rgba(212,175,55,0.08), inset 0 1px 0 rgba(255,255,255,0.35)',
+                                    animationDelay: '0.35s', opacity: 0,
+                                } : { animationDelay: '0.35s', opacity: 0 }}
                             >
                                 ✦ Reveal Our Connection ✦
                             </button>
@@ -710,7 +715,14 @@ export function Compatibility({ onClose, onTabChange, subscription, onShowPremiu
                                     setActiveTab('overview');
                                     safeStorage.removeItem('arcana_partner');
                                 }}
-                                className="w-full py-3 rounded-2xl clay-btn text-center text-sm font-display text-altar-muted tracking-wide mb-5"
+                                className="w-full py-3.5 rounded-2xl text-center text-sm font-display tracking-[2px] uppercase mb-5 transition-all active:scale-[0.98] gold-shimmer"
+                                style={{
+                                    background: 'linear-gradient(180deg, #F9E491, #D4A94E 30%, #C59341 60%, #A67B2E)',
+                                    border: '2px solid rgba(212,175,55,0.6)',
+                                    color: '#1a0f2e',
+                                    fontWeight: 800,
+                                    boxShadow: '0 2px 0 #8a6b25, 0 4px 12px rgba(0,0,0,0.5), 0 0 40px rgba(212,175,55,0.08), inset 0 1px 0 rgba(255,255,255,0.35)',
+                                }}
                             >
                                 Try Another Match →
                             </button>

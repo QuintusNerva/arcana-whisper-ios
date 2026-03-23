@@ -376,6 +376,25 @@ button:hover .portal-icon-gold svg {
   50% { transform: translateX(100%); }
 }
 
+/* Reusable gold shimmer sweep for CTA buttons.
+   Usage: add class "gold-shimmer" + ensure button has position:relative; overflow:hidden; */
+.gold-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.gold-shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 200%;
+  background: linear-gradient(90deg, transparent 30%, rgba(255,255,255,0.22) 50%, transparent 70%);
+  animation: shimmer-sweep 3.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
 /* ── Breathe (cinematic glow pulse) ── */
 @keyframes breathe {
   0%, 100% { opacity: 0.8; text-shadow: 0 0 30px rgba(212,175,55,0.25), 0 0 60px rgba(212,175,55,0.1); }

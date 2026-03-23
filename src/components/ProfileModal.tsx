@@ -9,6 +9,7 @@ import {
 import { getMemoryStats, clearMemory } from '../services/memory.service';
 import {
     getBirthData, saveBirthData, getNatalTriad, getSunSign, ZODIAC_SIGNS, BirthData,
+    getDestinyName, saveDestinyName,
 } from '../services/astrology.service';
 import { searchPlaces, resolvePlace, PlaceSuggestion } from '../services/geocoding.service';
 import { PageHeader } from './PageHeader';
@@ -45,6 +46,9 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
     const [birthSaved, setBirthSaved] = React.useState(false);
     const cityDropdownRef = React.useRef<HTMLDivElement>(null);
     const searchTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Birth name for Destiny Number
+    const [birthName, setBirthName] = React.useState(getDestinyName() || '');
 
     // Close city dropdown on outside click
     React.useEffect(() => {
@@ -157,6 +161,10 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
         setEditingBirth(false);
         setBirthSaved(true);
         setTimeout(() => setBirthSaved(false), 2000);
+        // Save birth name if provided
+        if (birthName.trim()) {
+            saveDestinyName(birthName.trim());
+        }
         // Also update zodiac in profile
         const sunSign = getSunSign(birthday);
         if (sunSign) {
@@ -176,6 +184,8 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
         safeStorage.removeItem('arcana_subscription_status');
         safeStorage.removeItem('ai_consent');
         clearMemory();
+        safeStorage.removeItem('arcana_destiny_name');
+        safeStorage.removeItem('arcana_sign_reading_cache');
         // Clear ALL localStorage as a safety net
         try { localStorage.clear(); } catch { /* ignore */ }
         window.location.reload();
@@ -340,6 +350,19 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
                                     <p className="text-[10px] text-altar-muted/60 mt-1 italic">Needed for accurate Moon & Rising signs</p>
                                 </div>
 
+                                {/* Birth Name (optional) */}
+                                <div>
+                                    <label className="block text-[10px] text-altar-muted font-display tracking-[2px] uppercase mb-1">Birth Name (optional)</label>
+                                    <input
+                                        type="text"
+                                        value={birthName}
+                                        onChange={e => setBirthName(e.target.value)}
+                                        placeholder="Full name as given at birth"
+                                        className="w-full bg-altar-deep/50 text-sm text-altar-text placeholder-altar-muted/50 rounded-lg px-3 py-2.5 border border-white/10 focus:border-altar-gold/30 focus:outline-none transition-colors"
+                                    />
+                                    <p className="text-[10px] text-altar-muted/60 mt-1 italic">Used for your Destiny Number calculation</p>
+                                </div>
+
                                 <div className="flex gap-2 pt-2">
                                     {birthData && (
                                         <button onClick={() => setEditingBirth(false)} className="flex-1 py-2.5 rounded-lg glass text-xs text-altar-muted font-display border border-white/5 hover:border-white/15 transition-colors">Cancel</button>
@@ -371,6 +394,15 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
                                     <span className="text-xs text-altar-muted">Birth City</span>
                                     <span className="text-xs text-altar-text truncate max-w-[180px]">{birthData.location || 'Not set'}</span>
                                 </div>
+                                {birthName && (
+                                    <>
+                                        <div className="h-[1px] bg-white/5" />
+                                        <div className="flex justify-between py-1.5">
+                                            <span className="text-xs text-altar-muted">Birth Name</span>
+                                            <span className="text-xs text-altar-text truncate max-w-[180px]">{birthName}</span>
+                                        </div>
+                                    </>
+                                )}
 
                                 {/* Triad summary */}
                                 {triad && (

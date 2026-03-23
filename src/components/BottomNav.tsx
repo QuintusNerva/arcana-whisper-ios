@@ -107,7 +107,7 @@ function TarotIcon({ className }: { className?: string }) {
 const TABS = [
     { id: 'home', label: 'Witness', icon: HomeIcon },
     { id: 'create', label: 'Manifest', icon: SparkleIcon },
-    { id: 'school', label: 'School', icon: BookIcon },
+    { id: 'school', label: 'Learn', icon: BookIcon },
 ];
 
 export function BottomNav({ currentTab, onTabChange }: BottomNavProps) {

@@ -34,7 +34,11 @@ import {
     createSacredScript,
     getActiveScript,
     getCompletedScripts,
+    getPausedScripts,
+    getScriptByManifestationId,
     abandonScript,
+    pauseScript,
+    resumeScript,
     saveRitualEntry,
     getTodayRitual,
     getScriptProgress,
@@ -231,7 +235,7 @@ function ManifestCard({ entry, onRefresh }: {
                             "{entry.declaration}"
                         </p>
                     </div>
-                    {expanded && <span style={{ color: 'rgba(148,163,184,0.4)', fontSize: '14px', flexShrink: 0, marginTop: '4px' }}>▾</span>}
+                    {expanded && <span style={{ color: 'rgba(178,190,205,0.75)', fontSize: '14px', flexShrink: 0, marginTop: '4px' }}>▾</span>}
                 </div>
 
                 {/* Progress bar row — exact prototype values */}
@@ -315,7 +319,7 @@ function ManifestCard({ entry, onRefresh }: {
                                     >
                                         {action.completedDate && <span className="flex items-center justify-center text-[8px] text-emerald-400">✓</span>}
                                     </button>
-                                    <p className={`text-xs leading-snug ${action.completedDate ? 'text-altar-muted line-through opacity-60' : 'text-altar-text/80'}`}>
+                                    <p className={`text-xs leading-snug ${action.completedDate ? 'text-altar-muted line-through opacity-60' : 'text-altar-text/90'}`}>
                                         {action.description}
                                     </p>
                                 </div>
@@ -356,7 +360,7 @@ function ManifestCard({ entry, onRefresh }: {
                                 </div>
                             ) : (
                                 <button onClick={() => setShowActionInput(true)}
-                                    className="text-[10px] text-altar-muted/70 italic hover:text-altar-gold/70 transition-colors">
+                                    className="text-[10px] text-altar-muted italic hover:text-altar-gold/70 transition-colors">
                                     + Add a committed action
                                 </button>
                             )}
@@ -565,7 +569,7 @@ function ManifestJournalPage({
                         {catMeta.emoji} {catMeta.label}
                     </span>
                     <p style={{
-                        fontSize: '10px', color: 'rgba(196,196,220,0.5)',
+                        fontSize: '10px', color: 'rgba(210,210,230,0.8)',
                         fontStyle: 'italic', marginTop: '6px',
                     }}>{moonPhaseName} energy guides today's reflection</p>
                 </div>
@@ -628,7 +632,7 @@ function ManifestJournalPage({
                         paddingTop: '12px',
                     }}>
                         <span style={{
-                            fontSize: '11px', color: 'rgba(148,163,184,0.4)',
+                            fontSize: '11px', color: 'rgba(178,190,205,0.75)',
                             fontWeight: 300,
                         }}>{body.length} characters</span>
                     </div>
@@ -646,7 +650,7 @@ function ManifestJournalPage({
                         fontFamily: 'var(--font-display)',
                         fontSize: '10px', fontWeight: 600,
                         letterSpacing: '2px', textTransform: 'uppercase' as const,
-                        color: 'rgba(226,232,240,0.6)', marginBottom: '12px',
+                        color: 'rgba(226,232,240,0.85)', marginBottom: '12px',
                     }}>How do you feel?</p>
                     <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' as const }}>
                         {JOURNAL_MOODS.map(m => (
@@ -672,7 +676,7 @@ function ManifestJournalPage({
                                 <span style={{
                                     fontSize: '8px', fontWeight: 500,
                                     letterSpacing: '0.5px',
-                                    color: selectedMood === m.emoji ? '#D4A94E' : 'rgba(148,163,184,0.5)',
+                                    color: selectedMood === m.emoji ? '#D4A94E' : 'rgba(178,190,205,0.7)',
                                     textTransform: 'uppercase' as const,
                                     fontFamily: 'var(--font-display)',
                                 }}>{m.label}</span>
@@ -692,7 +696,7 @@ function ManifestJournalPage({
                         fontFamily: 'var(--font-display)',
                         fontSize: '12px', fontWeight: 700,
                         letterSpacing: '3px', textTransform: 'uppercase' as const,
-                        color: saved ? '#1a1625' : body.trim() ? '#1a1625' : 'rgba(148,163,184,0.4)',
+                        color: saved ? '#1a1625' : body.trim() ? '#1a1625' : 'rgba(178,190,205,0.6)',
                         background: saved
                             ? 'linear-gradient(135deg, #8BD5CA, #6EE7B7)'
                             : body.trim()
@@ -745,11 +749,11 @@ function JournalHistoryView({ onClose }: { onClose: () => void }) {
                         <p style={{
                             fontFamily: 'var(--font-display)',
                             fontSize: '12px', letterSpacing: '2px',
-                            color: 'rgba(196,196,220,0.5)',
+                            color: 'rgba(210,210,230,0.8)',
                             textTransform: 'uppercase' as const,
                         }}>No entries yet</p>
                         <p style={{
-                            fontSize: '13px', color: 'rgba(148,163,184,0.4)',
+                            fontSize: '13px', color: 'rgba(178,190,205,0.75)',
                             fontStyle: 'italic', marginTop: '6px',
                         }}>Your reflections will appear here</p>
                     </div>
@@ -792,12 +796,12 @@ function JournalHistoryView({ onClose }: { onClose: () => void }) {
                                     <p style={{
                                         fontFamily: "'Playfair Display', serif",
                                         fontSize: '12px', fontStyle: 'italic',
-                                        color: 'rgba(212,175,55,0.6)',
+                                        color: 'rgba(212,175,55,0.8)',
                                         marginBottom: '8px', lineHeight: 1.5,
                                     }}>"{entry.prompt.length > 80 ? entry.prompt.slice(0, 80) + '…' : entry.prompt}"</p>
                                     {/* Body preview */}
                                     <p style={{
-                                        fontSize: '13px', color: 'rgba(226,232,240,0.75)',
+                                        fontSize: '13px', color: 'rgba(226,232,240,0.9)',
                                         lineHeight: 1.7, fontWeight: 300,
                                         display: '-webkit-box',
                                         WebkitLineClamp: 4,
@@ -840,7 +844,7 @@ function SacredScriptOnboarding({ onDismiss }: { onDismiss: () => void }) {
                 onClick={onDismiss}
                 style={{
                     position: 'absolute', top: '12px', right: '14px',
-                    fontSize: '14px', color: 'rgba(148,163,184,0.4)',
+                    fontSize: '14px', color: 'rgba(178,190,205,0.75)',
                     background: 'none', border: 'none', cursor: 'pointer',
                     padding: '4px', lineHeight: 1,
                 }}
@@ -854,7 +858,7 @@ function SacredScriptOnboarding({ onDismiss }: { onDismiss: () => void }) {
             }}>✦ The Sacred Script</p>
 
             <p style={{
-                fontSize: '12px', lineHeight: 1.65, color: 'rgba(226,232,240,0.75)',
+                fontSize: '12px', lineHeight: 1.65, color: 'rgba(226,232,240,0.9)',
                 fontWeight: 300, marginBottom: '12px',
             }}>
                 A 21-day manifestation practice rooted in Tesla's 3-6-9 numerology. Each day,
@@ -951,7 +955,7 @@ function ProgressRing({ progress, size = 72 }: { progress: ScriptProgress; size?
                 }}>{progress.dayNumber}</span>
                 <span style={{
                     fontSize: '7px', letterSpacing: '1px',
-                    color: 'rgba(148,163,184,0.5)',
+                    color: 'rgba(178,190,205,0.8)',
                     fontFamily: 'var(--font-display)',
                     textTransform: 'uppercase' as const,
                 }}>of {progress.totalDays}</span>
@@ -1085,7 +1089,7 @@ function TodayRitualCard({
                     color: '#F9E491',
                 }}>✦ How the 369 method works</span>
                 <span style={{
-                    fontSize: '10px', color: 'rgba(148,163,184,0.5)',
+                    fontSize: '10px', color: 'rgba(178,190,205,0.8)',
                     transform: showInstructions ? 'rotate(180deg)' : 'rotate(0deg)',
                     transition: 'transform 0.2s ease',
                 }}>▼</span>
@@ -1210,21 +1214,36 @@ function TodayRitualCard({
                                     <button
                                         onClick={() => onOpenRitual(tod)}
                                         style={{
-                                            padding: '7px 16px',
-                                            borderRadius: '20px',
-                                            fontSize: '10px', fontWeight: 600,
+                                            padding: '9px 20px',
+                                            borderRadius: '22px',
+                                            fontSize: '11px', fontWeight: 700,
                                             fontFamily: 'var(--font-display)',
-                                            letterSpacing: '1.5px',
+                                            letterSpacing: '2px',
                                             textTransform: 'uppercase' as const,
-                                            background: isCurrent ? 'rgba(197,147,65,0.12)' : 'rgba(255,255,255,0.05)',
-                                            color: isCurrent ? '#D4A94E' : 'rgba(196,196,220,0.6)',
-                                            border: isCurrent ? '1px solid rgba(197,147,65,0.25)' : '1px solid rgba(255,255,255,0.1)',
+                                            background: 'linear-gradient(180deg, #F9E491, #D4A94E 40%, #C59341)',
+                                            color: '#1a0f2e',
+                                            border: '1.5px solid rgba(249,228,145,0.6)',
                                             cursor: 'pointer',
                                             transition: 'all 0.2s ease',
                                             whiteSpace: 'nowrap' as const,
+                                            boxShadow: '0 2px 0 #8a6b25, 0 4px 14px rgba(0,0,0,0.45), 0 0 20px rgba(212,175,55,0.25), inset 0 1px 0 rgba(255,255,255,0.3)',
+                                            position: 'relative' as const,
+                                            overflow: 'hidden' as const,
+                                            minWidth: '80px',
+                                            textAlign: 'center' as const,
                                         }}
                                     >
-                                        {isCurrent ? 'Write' : `Step ${idx + 1}`}
+                                        {/* Shimmer sweep */}
+                                        <div style={{
+                                            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                                            width: '200%',
+                                            background: 'linear-gradient(90deg, transparent 30%, rgba(255,255,255,0.22) 50%, transparent 70%)',
+                                            animation: 'shimmer-sweep 3.5s ease-in-out infinite',
+                                            pointerEvents: 'none',
+                                        }} />
+                                        <span style={{ position: 'relative', zIndex: 1 }}>
+                                            {isCurrent ? 'Write' : `Step ${idx + 1}`}
+                                        </span>
                                     </button>
                                 )}
                             </div>
@@ -1246,13 +1265,13 @@ function TodayRitualCard({
                                             fontStyle: 'italic',
                                             padding: '2px 0',
                                         }}>
-                                            <span style={{ color: 'rgba(212,175,55,0.6)', fontSize: '9px', marginRight: '6px' }}>{i + 1}</span>
+                                            <span style={{ color: 'rgba(212,175,55,0.8)', fontSize: '9px', marginRight: '6px' }}>{i + 1}</span>
                                             {line}
                                         </p>
                                     ))}
                                     {completedEntry.lines.length > 2 && (
                                         <p style={{
-                                            fontSize: '9px', color: 'rgba(196,196,220,0.5)',
+                                            fontSize: '9px', color: 'rgba(210,210,230,0.8)',
                                             fontStyle: 'italic', marginTop: '2px',
                                         }}>+{completedEntry.lines.length - 2} more</p>
                                     )}
@@ -1308,7 +1327,7 @@ function TodayRitualCard({
                         }}>DAY {progress.dayNumber} COMPLETE</p>
 
                         <p style={{
-                            fontSize: '11px', color: 'rgba(226,232,240,0.75)',
+                            fontSize: '11px', color: 'rgba(226,232,240,0.9)',
                             fontWeight: 300, fontStyle: 'italic',
                             lineHeight: 1.5,
                             position: 'relative',
@@ -1341,6 +1360,29 @@ function TodayRitualCard({
                         }}>
                             {progress.totalRitualsCompleted} of {progress.totalRitualsPossible} rituals completed
                         </p>
+
+                        {/* Button to save & start a new intention */}
+                        <button
+                            onClick={onAbandon}
+                            style={{
+                                marginTop: '18px',
+                                padding: '10px 24px',
+                                borderRadius: '20px',
+                                background: 'linear-gradient(135deg, rgba(212,175,55,0.12) 0%, rgba(212,175,55,0.04) 100%)',
+                                border: '1px solid rgba(212,175,55,0.25)',
+                                color: '#F9E491',
+                                fontFamily: 'var(--font-display)',
+                                fontSize: '10px',
+                                fontWeight: 600,
+                                letterSpacing: '2px',
+                                textTransform: 'uppercase' as const,
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                                position: 'relative' as const,
+                            }}
+                        >
+                            ✦ Start new intention
+                        </button>
                     </div>
                 </>
             )}
@@ -1510,7 +1552,7 @@ function RitualWritingSurface({
 
                 {/* Progress indicator */}
                 <p style={{
-                    fontSize: '10px', color: 'rgba(148,163,184,0.4)',
+                    fontSize: '10px', color: 'rgba(178,190,205,0.75)',
                     textAlign: 'center' as const, marginBottom: '16px',
                 }}>
                     {filledCount} of {cfg.lineCount} lines filled
@@ -1595,7 +1637,15 @@ function StartSacredScript({
 
     const handleSave = () => {
         if (!canSave) return;
-        const script = createSacredScript(affirmation.trim(), moonPhaseName, manifestations[0]?.id);
+        // Auto-create a manifestation if one doesn't already exist for this affirmation
+        let linkedManifestId = manifestations.find(
+            m => m.declaration.toLowerCase() === affirmation.trim().toLowerCase()
+        )?.id;
+        if (!linkedManifestId) {
+            const newManifest = createManifestation(affirmation.trim(), 'intention');
+            linkedManifestId = newManifest.id;
+        }
+        const script = createSacredScript(affirmation.trim(), moonPhaseName, linkedManifestId);
         // Save whichever rituals have content
         for (const tod of ['morning', 'afternoon', 'evening'] as TimeOfDay[]) {
             const { lines } = linesMap[tod];
@@ -1603,6 +1653,10 @@ function StartSacredScript({
                 saveRitualEntry(script.id, tod, lines);
             }
         }
+        // Today's rituals are already filled from the creation form,
+        // so pause this script (day is done) — the form resets for a new intention.
+        // The completed script lives in ✦ Your Intentions and auto-resumes tomorrow.
+        pauseScript(script.id);
         onStart();
     };
 
@@ -1658,7 +1712,7 @@ function StartSacredScript({
                     color: '#F9E491',
                 }}>✦ How the 369 method works</span>
                 <span style={{
-                    fontSize: '10px', color: 'rgba(148,163,184,0.5)',
+                    fontSize: '10px', color: 'rgba(178,190,205,0.8)',
                     transform: show369 ? 'rotate(180deg)' : 'rotate(0deg)',
                     transition: 'transform 0.2s ease',
                 }}>▼</span>
@@ -1673,7 +1727,7 @@ function StartSacredScript({
                     marginBottom: '16px',
                 }}>
                     <p style={{
-                        fontSize: '11px', lineHeight: 1.65, color: 'rgba(226,232,240,0.75)',
+                        fontSize: '11px', lineHeight: 1.65, color: 'rgba(226,232,240,0.9)',
                         fontWeight: 300, marginBottom: '10px',
                     }}>
                         Each day for 21 days, complete three writing rituals:
@@ -1759,7 +1813,7 @@ function StartSacredScript({
                                         color: isOpen ? '#F9E491' : 'rgba(226,232,240,0.75)',
                                     }}>{cfg.title.toUpperCase()}</p>
                                     <p style={{
-                                        fontSize: '9px', color: 'rgba(148,163,184,0.5)',
+                                        fontSize: '9px', color: 'rgba(178,190,205,0.8)',
                                         fontWeight: 300, marginTop: '2px',
                                     }}>{cfg.lineCount} lines · {cfg.description.split('.')[0]}</p>
                                 </div>
@@ -1771,7 +1825,7 @@ function StartSacredScript({
                                     }}>{filled}/{cfg.lineCount}</span>
                                 )}
                                 <span style={{
-                                    fontSize: '10px', color: 'rgba(148,163,184,0.4)',
+                                    fontSize: '10px', color: 'rgba(178,190,205,0.75)',
                                     transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
                                     transition: 'transform 0.2s ease',
                                     flexShrink: 0,
@@ -1898,7 +1952,7 @@ function PastSacredTexts({ scripts }: { scripts: SacredScript[] }) {
                                     overflow: 'hidden', textOverflow: 'ellipsis',
                                 }}>"{s.affirmation}"</p>
                                 <p style={{
-                                    fontSize: '10px', color: 'rgba(148,163,184,0.4)',
+                                    fontSize: '10px', color: 'rgba(178,190,205,0.75)',
                                     marginTop: '2px',
                                 }}>
                                     {s.entries.length} days · {s.status === 'completed' ? '✨ Completed' : 'Ended early'}
@@ -1934,7 +1988,7 @@ function PastSacredTexts({ scripts }: { scripts: SacredScript[] }) {
                                             letterSpacing: '1px', marginBottom: '4px',
                                         }}>DAY {entry.dayNumber}</p>
                                         {entry.morning && (
-                                            <p style={{ fontSize: '10px', color: 'rgba(226,232,240,0.5)', fontWeight: 300 }}>
+                                            <p style={{ fontSize: '10px', color: 'rgba(226,232,240,0.8)', fontWeight: 300 }}>
                                                 ☀️ {entry.morning.lines[0]?.slice(0, 50)}{(entry.morning.lines[0]?.length ?? 0) > 50 ? '…' : ''}
                                             </p>
                                         )}
@@ -1967,10 +2021,12 @@ export function CreateTab({ onClose, onTabChange, subscription, onShowPremium }:
     const [activeScript, setActiveScript] = React.useState<SacredScript | null>(null);
     const [scriptProgress, setScriptProgress] = React.useState<ScriptProgress | null>(null);
     const [completedScripts, setCompletedScripts] = React.useState<SacredScript[]>([]);
+    const [pausedScriptsList, setPausedScriptsList] = React.useState<SacredScript[]>([]);
     const [showOnboarding, setShowOnboarding] = React.useState(false);
     const [ritualModal, setRitualModal] = React.useState<{ open: boolean; timeOfDay: TimeOfDay }>({ open: false, timeOfDay: 'morning' });
     const [stackExpanded, setStackExpanded] = React.useState(false);
     const [showVisionBoard, setShowVisionBoard] = React.useState(false);
+    const [showIntentions, setShowIntentions] = React.useState(false);
     const [visionItems, setVisionItems] = React.useState<VisionBoardItem[]>(() => getVisionBoardItems());
 
     const lunarData = React.useMemo(() => getLunarData(), []);
@@ -1993,6 +2049,7 @@ export function CreateTab({ onClose, onTabChange, subscription, onShowPremium }:
             setScriptProgress(null);
         }
         setCompletedScripts(getCompletedScripts());
+        setPausedScriptsList(getPausedScripts());
         setShowOnboarding(!hasSeenOnboarding());
         setTick(t => t + 1);
     };
@@ -2121,7 +2178,7 @@ export function CreateTab({ onClose, onTabChange, subscription, onShowPremium }:
                                         moonPhaseName={lunarData.currentPhase.name}
                                         onOpenRitual={(tod) => setRitualModal({ open: true, timeOfDay: tod })}
                                         onAbandon={() => {
-                                            abandonScript(activeScript.id);
+                                            pauseScript(activeScript.id);
                                             refresh();
                                         }}
                                     />
@@ -2137,7 +2194,59 @@ export function CreateTab({ onClose, onTabChange, subscription, onShowPremium }:
                                 <PastSacredTexts scripts={completedScripts} />
                             </div>
 
-                            {/* ─── Vision Board Preview Card ─── */}
+                            {/* ─── Intentions Preview Card (Vision Board pattern) ─── */}
+                            {(active.length > 0 || pausedScriptsList.length > 0) && (
+                                <div
+                                    onClick={() => setShowIntentions(true)}
+                                    style={{
+                                        marginTop: '24px',
+                                        padding: '18px',
+                                        borderRadius: '18px',
+                                        background: 'linear-gradient(145deg, rgba(28,21,56,0.9) 0%, rgba(13,11,34,0.95) 100%)',
+                                        border: '1px solid rgba(212,175,55,0.15)',
+                                        backdropFilter: 'blur(12px)',
+                                        boxShadow: '0 4px 16px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.04)',
+                                        cursor: 'pointer',
+                                        transition: 'border-color 0.2s',
+                                    }}
+                                >
+                                    <p style={{
+                                        fontFamily: 'var(--font-display)',
+                                        fontSize: '10px',
+                                        letterSpacing: '5px',
+                                        textTransform: 'uppercase' as const,
+                                        color: '#D4A94E',
+                                        opacity: 0.7,
+                                        textShadow: '0 0 10px rgba(212,175,55,0.12)',
+                                        marginBottom: '14px',
+                                    }}>✦ Your Intentions</p>
+
+                                    <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '6px', marginBottom: '12px' }}>
+                                        {active.slice(0, 3).map(m => (
+                                            <p key={m.id} style={{
+                                                fontSize: '12px', color: 'rgba(226,232,240,0.65)',
+                                                fontStyle: 'italic', fontWeight: 300,
+                                                whiteSpace: 'nowrap' as const,
+                                                overflow: 'hidden', textOverflow: 'ellipsis',
+                                                paddingLeft: '8px',
+                                                borderLeft: '2px solid rgba(212,175,55,0.25)',
+                                            }}>"{m.declaration}"</p>
+                                        ))}
+                                        {active.length > 3 && (
+                                            <p style={{ fontSize: '10px', color: 'rgba(196,196,220,0.35)', paddingLeft: '8px' }}>
+                                                +{active.length - 3} more
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <p style={{
+                                        fontSize: '10px', color: 'rgba(196,196,220,0.45)',
+                                        fontStyle: 'italic', textAlign: 'center' as const,
+                                    }}>
+                                        {active.length} active{pausedScriptsList.length > 0 ? ` · ${pausedScriptsList.length} paused` : ''} · Tap to explore →
+                                    </p>
+                                </div>
+                            )}
                             <div
                                 onClick={() => setShowVisionBoard(true)}
                                 style={{
@@ -2180,7 +2289,7 @@ export function CreateTab({ onClose, onTabChange, subscription, onShowPremium }:
                                             marginBottom: '4px',
                                         }}>Start visualizing your future</p>
                                         <p style={{
-                                            fontSize: '10px', color: 'rgba(196,196,220,0.4)',
+                                            fontSize: '10px', color: 'rgba(210,210,230,0.75)',
                                             fontStyle: 'italic',
                                         }}>Tap to create your vision board →</p>
                                     </div>
@@ -2285,7 +2394,7 @@ export function CreateTab({ onClose, onTabChange, subscription, onShowPremium }:
                                             onClick={() => setShowJournalHistory(true)}
                                             style={{
                                                 background: 'none', border: 'none', cursor: 'pointer',
-                                                fontSize: '10px', color: 'rgba(148,163,184,0.5)',
+                                                fontSize: '10px', color: 'rgba(178,190,205,0.8)',
                                                 padding: '2px 6px',
                                                 fontFamily: 'var(--font-display)',
                                                 letterSpacing: '1px',
@@ -2325,23 +2434,25 @@ export function CreateTab({ onClose, onTabChange, subscription, onShowPremium }:
 
                                 {/* Moon phase note */}
                                 <p style={{
-                                    fontSize: '10px', color: 'rgba(196,196,220,0.5)',
+                                    fontSize: '10px', color: 'rgba(210,210,230,0.8)',
                                     fontStyle: 'italic', fontWeight: 300, marginBottom: '16px',
                                 }}>{lunarData.currentPhase.emoji} {lunarData.currentPhase.name} energy guides today's reflection</p>
 
                                 {/* Write CTA */}
                                 <button
+                                    className="gold-shimmer"
                                     onClick={() => setShowJournalPage(true)}
                                     style={{
                                         width: '100%', padding: '14px',
                                         borderRadius: '14px',
-                                        border: 'none', cursor: 'pointer',
+                                        border: '2px solid rgba(212,175,55,0.6)',
+                                        cursor: 'pointer',
                                         fontFamily: 'var(--font-display)',
-                                        fontSize: '11px', fontWeight: 700,
+                                        fontSize: '11px', fontWeight: 800,
                                         letterSpacing: '3px', textTransform: 'uppercase' as const,
-                                        color: '#1a1625',
-                                        background: 'linear-gradient(135deg, #F9E491, #D4A94E, #A67B2E)',
-                                        boxShadow: '0 4px 20px rgba(212,175,55,0.25)',
+                                        color: '#1a0f2e',
+                                        background: 'linear-gradient(180deg, #F9E491, #D4A94E 30%, #C59341 60%, #A67B2E)',
+                                        boxShadow: '0 2px 0 #8a6b25, 0 4px 12px rgba(0,0,0,0.5), 0 0 40px rgba(212,175,55,0.08), inset 0 1px 0 rgba(255,255,255,0.35)',
                                         transition: 'all 0.2s ease',
                                     }}
                                 >✦ Write Today's Entry</button>
@@ -2417,7 +2528,7 @@ export function CreateTab({ onClose, onTabChange, subscription, onShowPremium }:
                                                             </p>
                                                             <p style={{
                                                                 fontSize: '11px',
-                                                                color: 'rgba(226,232,240,0.75)',
+                                                                color: 'rgba(226,232,240,0.9)',
                                                                 fontWeight: 300, lineHeight: 1.5,
                                                             }}>{wInfo.msg}</p>
                                                         </div>
@@ -2547,7 +2658,7 @@ export function CreateTab({ onClose, onTabChange, subscription, onShowPremium }:
                                             if (!wInfo) return null;
                                             return (
                                                 <p style={{
-                                                    fontSize: '10px', color: 'rgba(196,196,220,0.5)',
+                                                    fontSize: '10px', color: 'rgba(210,210,230,0.8)',
                                                     fontStyle: 'italic', textAlign: 'center' as const,
                                                     marginTop: '6px',
                                                 }}>No active windows — {comingWindows.length} approaching</p>
@@ -2603,6 +2714,216 @@ export function CreateTab({ onClose, onTabChange, subscription, onShowPremium }:
                         setVisionItems(getVisionBoardItems()); // refresh preview
                     }}
                 />
+            )}
+
+            {/* Intentions full-page overlay */}
+            {showIntentions && (
+                <div style={{
+                    position: 'fixed', inset: 0, zIndex: 9999,
+                    background: 'linear-gradient(180deg, #0e0a1f 0%, #120224 50%, #0e0a1f 100%)',
+                    overflow: 'auto',
+                    paddingBottom: '100px',
+                }}>
+                    {/* Header */}
+                    <div style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '16px 20px', paddingTop: 'max(16px, env(safe-area-inset-top))',
+                    }}>
+                        <button onClick={() => { setShowIntentions(false); refresh(); }} style={{
+                            background: 'none', border: 'none', color: 'rgba(196,196,220,0.6)',
+                            fontSize: '14px', cursor: 'pointer', padding: '4px',
+                        }}>← Back</button>
+                        <p style={{
+                            fontFamily: 'var(--font-display)',
+                            fontSize: '11px', fontWeight: 700,
+                            letterSpacing: '5px', textTransform: 'uppercase' as const,
+                            color: '#F9E491',
+                            textShadow: '0 0 20px rgba(212,175,55,0.2)',
+                        }}>Your Intentions</p>
+                        <div style={{ width: '48px' }} />
+                    </div>
+
+                    <div style={{ maxWidth: '500px', margin: '0 auto', padding: '0 20px' }}>
+
+                        {/* Active Manifestations */}
+                        {active.length > 0 && (
+                            <div style={{ marginBottom: '24px' }}>
+                                <p style={{
+                                    fontFamily: 'var(--font-display)',
+                                    fontSize: '9px', letterSpacing: '5px',
+                                    textTransform: 'uppercase' as const,
+                                    color: '#D4A94E', opacity: 0.5,
+                                    marginBottom: '12px',
+                                }}>✦ Active — tap to practice</p>
+                                <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '10px' }}>
+                                    {active.map(m => {
+                                        const linkedScript = getScriptByManifestationId(m.id);
+                                        const isCurrentlyActive = linkedScript?.status === 'active';
+                                        const progress = linkedScript ? getScriptProgress(linkedScript.id) : null;
+                                        const doneToday = progress?.todayComplete ?? false;
+                                        return (
+                                            <button
+                                                key={m.id}
+                                                onClick={() => {
+                                                    if (linkedScript) {
+                                                        if (linkedScript.status === 'paused') {
+                                                            resumeScript(linkedScript.id);
+                                                        }
+                                                    } else {
+                                                        // No Sacred Script yet — create one for this intention
+                                                        createSacredScript(m.declaration, lunarData.currentPhase.name, m.id);
+                                                    }
+                                                    setShowIntentions(false);
+                                                    refresh();
+                                                }}
+                                                style={{
+                                                    width: '100%', textAlign: 'left' as const,
+                                                    padding: '16px 18px',
+                                                    borderRadius: '16px',
+                                                    background: isCurrentlyActive
+                                                        ? 'linear-gradient(145deg, rgba(212,175,55,0.08) 0%, rgba(28,21,56,0.95) 100%)'
+                                                        : 'rgba(255,255,255,0.02)',
+                                                    border: isCurrentlyActive
+                                                        ? '1px solid rgba(212,175,55,0.25)'
+                                                        : '1px solid rgba(255,255,255,0.06)',
+                                                    cursor: linkedScript ? 'pointer' : 'default',
+                                                    transition: 'all 0.2s',
+                                                }}
+                                            >
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                        <span style={{ fontSize: '14px' }}>{doneToday ? '✓' : '○'}</span>
+                                                        <p style={{
+                                                            fontFamily: 'var(--font-display)',
+                                                            fontSize: '13px',
+                                                            color: doneToday ? '#34d399' : isCurrentlyActive ? '#F9E491' : 'rgba(226,232,240,0.7)',
+                                                            fontWeight: isCurrentlyActive || doneToday ? 600 : 400,
+                                                            fontStyle: 'italic',
+                                                        }}>"{m.declaration}"</p>
+                                                    </div>
+                                                    {doneToday && (
+                                                        <span style={{
+                                                            fontSize: '8px', letterSpacing: '2px',
+                                                            textTransform: 'uppercase' as const,
+                                                            color: '#34d399', opacity: 0.7,
+                                                            fontFamily: 'var(--font-display)',
+                                                        }}>Done today</span>
+                                                    )}
+                                                </div>
+                                                {linkedScript && (
+                                                    <p style={{
+                                                        fontSize: '10px',
+                                                        color: isCurrentlyActive ? 'rgba(212,175,55,0.5)' : 'rgba(148,163,184,0.4)',
+                                                        paddingLeft: '24px', marginTop: '4px',
+                                                    }}>
+                                                        Day {progress ? progress.dayNumber : linkedScript.entries.length + 1} of {CYCLE_DAYS}
+                                                        {!doneToday && (isCurrentlyActive ? ' · Currently scripting' : ' · Tap to practice')}
+                                                    </p>
+                                                )}
+                                                {!linkedScript && (
+                                                    <p style={{ fontSize: '10px', color: 'rgba(212,175,55,0.4)', paddingLeft: '24px', marginTop: '4px' }}>
+                                                        Tap to begin your 369 practice
+                                                    </p>
+                                                )}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Paused Sacred Scripts */}
+                        {pausedScriptsList.length > 0 && (
+                            <div style={{ marginBottom: '24px' }}>
+                                <p style={{
+                                    fontFamily: 'var(--font-display)',
+                                    fontSize: '9px', letterSpacing: '5px',
+                                    textTransform: 'uppercase' as const,
+                                    color: '#94a3b8', opacity: 0.5,
+                                    marginBottom: '12px',
+                                }}>⏸ Paused Journeys</p>
+                                <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '8px' }}>
+                                    {pausedScriptsList.map(s => (
+                                        <div key={s.id} style={{
+                                            padding: '14px 16px',
+                                            borderRadius: '16px',
+                                            background: 'rgba(99,102,241,0.06)',
+                                            border: '1px solid rgba(99,102,241,0.12)',
+                                            backdropFilter: 'blur(12px)',
+                                            display: 'flex', alignItems: 'center', gap: '12px',
+                                        }}>
+                                            <span style={{ fontSize: '20px', flexShrink: 0, opacity: 0.5 }}>⏸</span>
+                                            <div style={{ flex: 1, minWidth: 0 }}>
+                                                <p style={{
+                                                    fontSize: '12px', color: 'rgba(226,232,240,0.6)',
+                                                    fontStyle: 'italic', fontWeight: 300,
+                                                    whiteSpace: 'nowrap' as const,
+                                                    overflow: 'hidden', textOverflow: 'ellipsis',
+                                                }}>"{s.affirmation}"</p>
+                                                <p style={{
+                                                    fontSize: '10px', color: 'rgba(148,163,184,0.5)',
+                                                    marginTop: '2px',
+                                                }}>
+                                                    Day {s.entries.length} of {CYCLE_DAYS} · Paused
+                                                </p>
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+                                                <button
+                                                    onClick={() => { resumeScript(s.id); refresh(); }}
+                                                    style={{
+                                                        padding: '6px 12px',
+                                                        borderRadius: '10px',
+                                                        fontFamily: 'var(--font-display)',
+                                                        fontSize: '9px', fontWeight: 600,
+                                                        letterSpacing: '1px',
+                                                        textTransform: 'uppercase' as const,
+                                                        background: 'rgba(99,102,241,0.15)',
+                                                        color: '#a5b4fc',
+                                                        border: '1px solid rgba(99,102,241,0.25)',
+                                                        cursor: 'pointer',
+                                                    }}
+                                                >▶ Resume</button>
+                                                <button
+                                                    onClick={() => { abandonScript(s.id); refresh(); }}
+                                                    style={{
+                                                        padding: '6px 10px',
+                                                        borderRadius: '10px',
+                                                        fontFamily: 'var(--font-display)',
+                                                        fontSize: '9px',
+                                                        letterSpacing: '1px',
+                                                        textTransform: 'uppercase' as const,
+                                                        background: 'rgba(239,68,68,0.06)',
+                                                        color: 'rgba(239,68,68,0.5)',
+                                                        border: '1px solid rgba(239,68,68,0.12)',
+                                                        cursor: 'pointer',
+                                                    }}
+                                                >✕</button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Completed / Released */}
+                        {manifestations.filter(m => m.status !== 'active').length > 0 && (
+                            <div style={{ marginBottom: '24px' }}>
+                                <p style={{
+                                    fontFamily: 'var(--font-display)',
+                                    fontSize: '9px', letterSpacing: '5px',
+                                    textTransform: 'uppercase' as const,
+                                    color: '#94a3b8', opacity: 0.35,
+                                    marginBottom: '12px',
+                                }}>✧ History</p>
+                                <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '10px' }}>
+                                    {manifestations.filter(m => m.status !== 'active').map(m => (
+                                        <ManifestCard key={m.id} entry={m} onRefresh={refresh} />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
             )}
 
             {/* Manifest Journal full-page overlay */}

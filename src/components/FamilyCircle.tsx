@@ -399,7 +399,7 @@ export function FamilyCircle({ onClose, onTabChange, subscription, onShowPremium
                                 <p className="text-3xl mb-2">⚠️</p>
                                 <p className="text-sm text-altar-text/70 mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>Set your birth data first to see family dynamics.</p>
                                 <button onClick={() => onTabChange('profile')}
-                                    className="rounded-2xl px-6 py-2.5 font-display text-[11px] tracking-[2px] uppercase transition-all active:scale-[0.98]"
+                                    className="rounded-2xl px-6 py-2.5 font-display text-[11px] tracking-[2px] uppercase transition-all active:scale-[0.98] gold-shimmer"
                                     style={{
                                         background: 'linear-gradient(180deg, #F9E491, #D4A94E 30%, #C59341 60%, #A67B2E)',
                                         border: '2px solid rgba(212,175,55,0.6)',
@@ -463,7 +463,7 @@ export function FamilyCircle({ onClose, onTabChange, subscription, onShowPremium
                             <div className="mx-5 mt-6 animate-fade-up" style={{ animationDelay: `${Math.min(family.length, 5) * 0.1 + 0.2}s`, opacity: 0 }}>
                                 <button
                                     onClick={() => { resetForm(); setViewState('add'); }}
-                                    className="w-full rounded-2xl px-5 py-4 font-display text-[12px] tracking-[3px] uppercase transition-all active:scale-[0.98]"
+                                    className="w-full rounded-2xl px-5 py-4 font-display text-[12px] tracking-[3px] uppercase transition-all active:scale-[0.98] gold-shimmer"
                                     style={{
                                         background: 'linear-gradient(180deg, #F9E491, #D4A94E 30%, #C59341 60%, #A67B2E)',
                                         border: '2px solid rgba(212,175,55,0.6)',
@@ -670,7 +670,7 @@ export function FamilyCircle({ onClose, onTabChange, subscription, onShowPremium
                         <button
                             onClick={handleSaveMember}
                             disabled={!formName || !formBirthday}
-                            className="w-full rounded-2xl py-4 font-display text-[12px] tracking-[3px] uppercase transition-all active:scale-[0.98] disabled:opacity-30"
+                            className="w-full rounded-2xl py-4 font-display text-[12px] tracking-[3px] uppercase transition-all active:scale-[0.98] disabled:opacity-30 gold-shimmer"
                             style={{
                                 background: formName && formBirthday
                                     ? 'linear-gradient(180deg, #F9E491, #D4A94E 30%, #C59341 60%, #A67B2E)'

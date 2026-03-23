@@ -190,9 +190,8 @@ export function AngelNumbersSection() {
                 }}
             >
                 <p className="font-display text-[9px] tracking-[5px] uppercase text-center mb-3" style={{
-                    color: '#D4A94E',
-                    opacity: 0.7,
-                    textShadow: '0 0 10px rgba(212,175,55,0.08)',
+                    color: '#F9E491',
+                    textShadow: '0 0 12px rgba(212,175,55,0.15)',
                 }}>
                     ✦ What number is finding you? ✦
                 </p>
@@ -214,7 +213,7 @@ export function AngelNumbersSection() {
                 <button
                     onClick={handleCustomSubmit}
                     disabled={!customInput.trim()}
-                    className="w-full mt-3 rounded-2xl px-5 py-3.5 text-[11px] font-display tracking-[3px] uppercase disabled:opacity-30 transition-all active:scale-[0.98]"
+                    className="w-full mt-3 rounded-2xl px-5 py-3.5 text-[11px] font-display tracking-[3px] uppercase disabled:opacity-30 transition-all active:scale-[0.98] gold-shimmer"
                     style={{
                         background: 'linear-gradient(180deg, #F9E491, #D4A94E 30%, #C59341 60%, #A67B2E)',
                         border: '2px solid rgba(212,175,55,0.6)',
@@ -230,7 +229,7 @@ export function AngelNumbersSection() {
             {/* ── Separator ── */}
             <div className="flex items-center gap-3 mb-3">
                 <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
-                <p className="text-[8px] font-display tracking-[2px] uppercase text-altar-muted/40">or explore common numbers</p>
+                <p className="text-[8px] font-display tracking-[2px] uppercase text-altar-muted/70">or explore common numbers</p>
                 <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
             </div>
 
@@ -272,16 +271,16 @@ export function AngelNumbersSection() {
                             )}
                             {/* Number */}
                             <p className="font-display text-base" style={{
-                                color: isActive ? '#F9E491' : '#e2e8f0',
-                                fontWeight: 400,
-                                textShadow: isActive ? '0 0 10px rgba(212,175,55,0.3)' : 'none',
+                                color: isActive ? '#F9E491' : '#f1f5f9',
+                                fontWeight: 500,
+                                textShadow: isActive ? '0 0 10px rgba(212,175,55,0.3)' : '0 0 4px rgba(255,255,255,0.1)',
                             }}>
                                 {item.num}
                             </p>
                             {/* Meaning preview */}
                             <p className="font-display text-[8px] tracking-[1.5px] uppercase mt-0.5" style={{
-                                color: '#D4A94E',
-                                opacity: isActive ? 0.9 : 0.5,
+                                color: isActive ? '#F9E491' : '#D4A94E',
+                                opacity: isActive ? 1 : 0.85,
                             }}>
                                 {item.meaning}
                             </p>
@@ -314,8 +313,8 @@ export function AngelNumbersSection() {
                         </p>
                         {meaning && (
                             <p className="font-display text-[9px] tracking-[3px] uppercase mt-2" style={{
-                                color: '#D4A94E',
-                                opacity: 0.7,
+                                color: '#F9E491',
+                                opacity: 0.9,
                                 textShadow: '0 0 10px rgba(212,175,55,0.08)',
                             }}>
                                 {meaning.title}
@@ -337,8 +336,8 @@ export function AngelNumbersSection() {
                                 >
                                     <p className="font-display text-xs" style={{ color: '#D4A94E' }}>{d.digit}</p>
                                     <p className="text-[7px] uppercase tracking-[1px]" style={{
-                                        color: '#D4A94E',
-                                        opacity: 0.5,
+                                        color: '#F9E491',
+                                        opacity: 0.8,
                                         fontFamily: "'Cinzel', serif",
                                     }}>
                                         {d.meaning}
@@ -393,13 +392,13 @@ export function AngelNumbersSection() {
                             {/* Gold divider */}
                             <div style={{ margin: '0 20px 16px', height: 1, background: 'linear-gradient(to right, transparent, rgba(212,175,55,0.2), transparent)' }} />
 
-                            <div className="text-xs text-altar-text/85 leading-relaxed space-y-2" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 300 }}>
+                            <div className="text-xs text-altar-text leading-relaxed space-y-2" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 300 }}>
                                 {meaning.body.split('\n').filter(l => l.trim()).map((line, i) => {
                                     const clean = line.replace(/\*\*/g, '').replace(/^#+\s*/, '').trim();
                                     const isItalic = clean.startsWith('*') && clean.endsWith('*');
                                     const text = isItalic ? clean.slice(1, -1) : clean;
                                     return isItalic
-                                        ? <p key={i} className="italic mt-2" style={{ color: '#D4A94E', opacity: 0.7 }}>{text}</p>
+                                        ? <p key={i} className="italic mt-2" style={{ color: '#F9E491', opacity: 0.9 }}>{text}</p>
                                         : <p key={i}>{text}</p>;
                                 })}
                             </div>
@@ -436,9 +435,9 @@ export function AngelNumbersSection() {
             {log.length > 0 && (
                 <div>
                     <p className="font-display text-[9px] tracking-[5px] uppercase mb-2 text-center" style={{
-                        color: '#D4A94E',
-                        opacity: 0.5,
-                        textShadow: '0 0 10px rgba(212,175,55,0.08)',
+                        color: '#F9E491',
+                        opacity: 0.85,
+                        textShadow: '0 0 12px rgba(212,175,55,0.15)',
                     }}>
                         ✦ Your Sightings ✦
                     </p>
@@ -463,15 +462,15 @@ export function AngelNumbersSection() {
                                     {s.number}
                                 </span>
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-[10px] text-altar-muted" style={{ fontFamily: "'Inter', sans-serif" }}>
+                                    <p className="text-[10px] text-altar-text/80" style={{ fontFamily: "'Inter', sans-serif" }}>
                                         Angel Number {s.number}
                                         {sightingCounts[s.number] && sightingCounts[s.number] > 1 && (
                                             <span className="text-altar-gold/60 ml-1">×{sightingCounts[s.number]} this week</span>
                                         )}
                                     </p>
-                                    {s.note && <p className="text-[9px] text-altar-text/40 italic truncate">"{s.note}"</p>}
+                                    {s.note && <p className="text-[9px] text-altar-text/65 italic truncate">"{s.note}"</p>}
                                 </div>
-                                <p className="text-[9px] text-altar-muted/40 shrink-0">
+                                <p className="text-[9px] text-altar-muted/70 shrink-0">
                                     {new Date(s.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                                 </p>
                             </div>
@@ -481,7 +480,7 @@ export function AngelNumbersSection() {
                         <button
                             onClick={() => setShowAll(!showAll)}
                             className="w-full mt-2 text-[10px] font-display text-center transition-colors"
-                            style={{ color: '#D4A94E', opacity: 0.5 }}
+                            style={{ color: '#F9E491', opacity: 0.8 }}
                         >
                             {showAll ? '▴ Show less' : `▾ View all ${log.length} sightings`}
                         </button>

@@ -6,6 +6,10 @@ import {
     type EmpowermentContext,
 } from './empowerment.service';
 import { getActiveManifestations } from './manifestation.service';
+import {
+    getBirthData, getNatalTriad, getLifePathNumber, getCurrentPersonalYear,
+    getDestinyName, getDestinyNumber,
+} from './astrology.service';
 /**
  * AI Interpretation Service — OpenRouter Integration
  * Uses Gemini 2.0 Flash via OpenRouter for tarot card interpretations.
@@ -53,6 +57,33 @@ One thoughtful, non-prescriptive question for the seeker to sit with — turning
 
 ## 🚀 Your Next Step
 One specific, actionable micro-step they can take TODAY or THIS WEEK — directly justified by what the cards or chart revealed. Format: "Because [specific insight] → [specific action]." Never generic.`;
+
+/**
+ * Auto-pull chart + numerology context from stored birth data.
+ * Returns a prompt-injectable string, or null if no birth data.
+ */
+function buildChartNumerologyContext(): string | null {
+    try {
+        const birthData = getBirthData();
+        if (!birthData?.birthday) return null;
+        const triad = getNatalTriad(birthData);
+        const lifePath = getLifePathNumber(birthData.birthday);
+        const personalYear = getCurrentPersonalYear(birthData.birthday);
+        const destinyName = getDestinyName();
+        const destinyNum = destinyName ? getDestinyNumber(destinyName) : null;
+
+        const numerology = destinyNum
+            ? `Life Path: ${lifePath} · Personal Year: ${personalYear} · Destiny Number: ${destinyNum}`
+            : `Life Path: ${lifePath} · Personal Year: ${personalYear}`;
+
+        return `\n\nSEEKER'S COSMIC PROFILE (weave naturally — do NOT list mechanically):
+☀️ Sun: ${triad.sun.name} (${triad.sun.element}) · 🌙 Moon: ${triad.moon.name} (${triad.moon.element}) · ⬆️ Rising: ${triad.rising.name} (${triad.rising.element})
+${numerology}
+Use this to personalize how the insight lands — which parts of the reading resonate with their chart energy, and how their current numerological cycle colors the timing.`;
+    } catch {
+        return null;
+    }
+}
 
 /**
  * Build a manifestation-aware system prompt prefix.
@@ -111,7 +142,8 @@ export class AIService {
         const systemPrompt = `${compassionPrefix}You are an expert mystical tarot reader with deep knowledge of the Rider-Waite-Smith deck.
 You give insightful, poetic yet practical readings.
 Use a warm, wise tone — like a compassionate oracle.
-Always explain what the card means first — its symbolism, archetype, and traditional meaning — before offering personal insight.${manifestationGuidance}${TEACHING_FORMAT}`;
+Always explain what the card means first — its symbolism, archetype, and traditional meaning — before offering personal insight.
+If the seeker's cosmic profile is provided, subtly weave relevant astrological and numerological resonance into the card interpretation — how this card speaks to their specific chart configuration and current life cycle. Do NOT list their placements mechanically; integrate the insight naturally.${manifestationGuidance}${TEACHING_FORMAT}`;
 
         let userPrompt = `Give a personalized insight for "${cardName}".
 Upright meaning: ${cardMeaning}
@@ -133,6 +165,12 @@ Reversed meaning: ${cardReversed}`;
         const memoryCtx = getMemoryContextForAI();
         if (memoryCtx) {
             userPrompt += `\n\n${memoryCtx}`;
+        }
+
+        // Inject chart + numerology context
+        const chartCtx = buildChartNumerologyContext();
+        if (chartCtx) {
+            userPrompt += chartCtx;
         }
 
         return this.chat(systemPrompt, userPrompt);
@@ -160,7 +198,8 @@ Reversed meaning: ${cardReversed}`;
 You synthesize multi-card spreads into cohesive, insightful narratives.
 Be specific to the cards drawn and their positions.
 Use a warm, wise tone — like a compassionate oracle.
-Always explain what each card means (its core symbolism and teaching) before weaving it into the spread narrative.${manifestationGuidance}${TEACHING_FORMAT}`;
+Always explain what each card means (its core symbolism and teaching) before weaving it into the spread narrative.
+If the seeker's cosmic profile is provided, weave relevant chart and numerological resonance into the spread narrative — how the cards interact with their natal energies and current life cycle. Integrate naturally, never list mechanically.${manifestationGuidance}${TEACHING_FORMAT}`;
 
         const cardLines = cards.map((c, i) =>
             `Position ${i + 1} (${c.position}): ${c.name} — ${c.meaning}`
@@ -181,6 +220,12 @@ Always explain what each card means (its core symbolism and teaching) before wea
         const memoryCtx = getMemoryContextForAI();
         if (memoryCtx) {
             userPrompt += `\n\n${memoryCtx}`;
+        }
+
+        // Inject chart + numerology context
+        const chartCtx = buildChartNumerologyContext();
+        if (chartCtx) {
+            userPrompt += chartCtx;
         }
 
         userPrompt += `\n\nProvide a cohesive reading that weaves all cards together. Explain each card's meaning and the story they tell collectively. Focus on insight and the second side of the coin — what is being called in or released.`;
@@ -229,7 +274,6 @@ Ruling planet: ${sign.ruling}`;
 Use this context to make the reading more personalized — how does this placement interact with the rest of their chart?`;
             }
         }
-
         const raw = await this.chat(systemPrompt, userPrompt);
 
         try {
@@ -263,13 +307,19 @@ Focus on what makes THIS specific combination of signs rare and special — what
 Make them feel truly seen. Be specific about how these signs interact in ways that no other combination would.
 Use a warm, mystical, empowering tone.${TEACHING_FORMAT}`;
 
-        const userPrompt = `Tell this person what makes them cosmically unique based on their natal chart:
+        let userPrompt = `Tell this person what makes them cosmically unique based on their natal chart:
 
 Sun: ${triad.sun.name} (${triad.sun.element}, ruled by ${triad.sun.ruling})
 Moon: ${triad.moon.name} (${triad.moon.element}, ruled by ${triad.moon.ruling})
 Rising: ${triad.rising.name} (${triad.rising.element}, ruled by ${triad.rising.ruling})
 
 What is rare or special about this exact combination? What can they do that almost nobody else can? What hidden tension or superpower lives in the interplay between these three signs? Make them feel like the universe designed them for something specific.`;
+
+        // Inject numerology context if available
+        const numCtx = buildChartNumerologyContext();
+        if (numCtx) {
+            userPrompt += numCtx;
+        }
 
         return this.chat(systemPrompt, userPrompt);
     }
@@ -296,7 +346,7 @@ Use a warm, insightful, mystical tone.${TEACHING_FORMAT}`;
             `${a.planet1Name} ${a.type} ${a.planet2Name} (orb: ${a.orb}°)`
         ).join('\n');
 
-        const userPrompt = `Provide a comprehensive natal chart reading:
+        let userPrompt = `Provide a comprehensive natal chart reading:
 
 BIG THREE: Sun in ${triad.sun}, Moon in ${triad.moon}, Rising in ${triad.rising}
 
@@ -307,6 +357,12 @@ KEY ASPECTS:
 ${aspectLines}
 
 What are the dominant themes? What makes this chart unique? What should this person know about their cosmic blueprint?`;
+
+        // Inject numerology context if available
+        const numCtx = buildChartNumerologyContext();
+        if (numCtx) {
+            userPrompt += numCtx;
+        }
 
         return this.chat(systemPrompt, userPrompt);
     }
@@ -415,12 +471,21 @@ AFTER the main reading, add one final section:
 ## 🌱 What You're Building Together
 2-3 sentences about what this couple naturally ATTRACTS as a unit based on their combined elements, and close with: "What is the shared intention you're both ready to declare?"${TEACHING_FORMAT}`;
 
-        const userPrompt = `Write a couple compatibility reading for these two charts:
+        let userPrompt = `Write a couple compatibility reading for these two charts:
 
 Person A: Sun in ${userTriad.sun.name} (${userTriad.sun.element}), Moon in ${userTriad.moon.name} (${userTriad.moon.element}), Rising in ${userTriad.rising.name} (${userTriad.rising.element})
 Person B: Sun in ${partnerTriad.sun.name} (${partnerTriad.sun.element}), Moon in ${partnerTriad.moon.name} (${partnerTriad.moon.element}), Rising in ${partnerTriad.rising.name} (${partnerTriad.rising.element})
 
 Their compatibility score is ${score}/100 — "${tier}". Weave this naturally into the reading without stating the number.`;
+
+        // Inject numerology context for both people
+        try {
+            const birthData = getBirthData();
+            if (birthData?.birthday) {
+                const lp = getLifePathNumber(birthData.birthday);
+                userPrompt += `\nPerson A's Life Path: ${lp}.`;
+            }
+        } catch { /* skip */ }
 
         return this.chat(systemPrompt, userPrompt);
     }
@@ -514,7 +579,7 @@ FORMATTING:
             `${cat.toUpperCase()}:\n${items.join('\n')}`
         ).join('\n\n');
 
-        const userPrompt = `Read this couple's synastry chart:
+        let userPrompt = `Read this couple's synastry chart:
 
 PERSON A: Sun ${userTriad.sun}, Moon ${userTriad.moon}, Rising ${userTriad.rising}
 ${partnerName.toUpperCase()}: Sun ${partnerTriad.sun}, Moon ${partnerTriad.moon}, Rising ${partnerTriad.rising}
@@ -523,6 +588,12 @@ SYNASTRY ASPECTS:
 ${aspectBlock}
 
 Write a flowing, personal deep dive. For every insight: describe what it FEELS like, ground it in a scenario, then give one growth tip.`;
+
+        // Inject user's numerology context if available
+        const numCtx = buildChartNumerologyContext();
+        if (numCtx) {
+            userPrompt += numCtx;
+        }
 
         return this.chatPremium(systemPrompt, userPrompt, 1500);
     }
@@ -566,6 +637,16 @@ NATURE: ${aspect.nature}`;
         }
 
         userPrompt += `\n\nWrite a personalized 2-3 sentence interpretation. Be specific about what they might FEEL or EXPERIENCE today because of this transit. End with one actionable suggestion.`;
+
+        // Inject numerology context for timing resonance
+        try {
+            const birthData = getBirthData();
+            if (birthData?.birthday) {
+                const lp = getLifePathNumber(birthData.birthday);
+                const py = getCurrentPersonalYear(birthData.birthday);
+                userPrompt += `\nNumerology context: Life Path ${lp}, Personal Year ${py}.`;
+            }
+        } catch { /* skip */ }
 
         return this.chat(systemPrompt, userPrompt, 200);
     }
@@ -612,6 +693,16 @@ FORMAT:
                 userPrompt += `\n\nTheir natal chart: ${parts.join(', ')}.`;
             }
         }
+
+        // Inject numerology context for pattern depth
+        try {
+            const birthData = getBirthData();
+            if (birthData?.birthday) {
+                const lp = getLifePathNumber(birthData.birthday);
+                const py = getCurrentPersonalYear(birthData.birthday);
+                userPrompt += `\nNumerology: Life Path ${lp}, Personal Year ${py}.`;
+            }
+        } catch { /* skip */ }
 
         return this.chat(systemPrompt, userPrompt, 300);
     }

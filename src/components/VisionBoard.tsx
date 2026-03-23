@@ -377,12 +377,14 @@ export function VisionBoard({ onClose }: VisionBoardProps) {
                         position: 'relative' as const,
                         boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
                         cursor: 'pointer',
+                        maxHeight: '400px',
                     }}>
                         <img
                             src={item.content}
                             alt="Vision"
                             style={{
                                 width: '100%',
+                                maxHeight: '400px',
                                 display: 'block',
                                 objectFit: 'cover' as const,
                             }}
@@ -424,6 +426,8 @@ export function VisionBoard({ onClose }: VisionBoardProps) {
                         background: 'conic-gradient(from 225deg at 100% 0%, rgba(212,175,55,0.50) 0deg, rgba(212,175,55,0.25) 45deg, rgba(255,255,255,0.06) 120deg, rgba(255,255,255,0.03) 200deg, rgba(255,255,255,0.06) 300deg, rgba(212,175,55,0.35) 360deg)',
                         padding: '1px',
                         boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+                        overflow: 'hidden',
+                        maxHeight: '280px',
                     }}>
                     <div style={{
                         borderRadius: '21px',
@@ -436,6 +440,7 @@ export function VisionBoard({ onClose }: VisionBoardProps) {
                         `,
                         cursor: 'pointer',
                         aspectRatio: aspect,
+                        maxHeight: '280px',
                         display: 'flex',
                         flexDirection: 'column' as const,
                         justifyContent: 'flex-end' as const,

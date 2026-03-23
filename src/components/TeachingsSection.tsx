@@ -21,6 +21,7 @@ export function TeachingsSection() {
     const [selectedGuide, setSelectedGuide] = React.useState<string | null>(null);
     const [activeLesson, setActiveLesson] = React.useState<Lesson | null>(null);
     const [userContext, setUserContext] = React.useState<UserContext>({});
+    const [selectedMaster, setSelectedMaster] = React.useState<string | null>(null);
 
     React.useEffect(() => {
         setUserContext(getUserContext());
@@ -293,19 +294,32 @@ export function TeachingsSection() {
                                             </span>
                                         ))}
                                     </div>
-                                    {/* CTA button — matches prototype gold gradient */}
+                                    {/* CTA button — matches gold gradient style */}
                                     <button style={{
                                         width: '100%', padding: '14px 32px',
-                                        borderRadius: 16, border: 'none', cursor: 'pointer',
-                                        background: 'linear-gradient(135deg, rgba(197,147,65,0.25), rgba(197,147,65,0.08))',
-                                        boxShadow: '0 4px 16px rgba(197,147,65,0.15)',
-                                        color: '#d4af37', fontFamily: "'Cinzel', serif",
+                                        borderRadius: 22, cursor: 'pointer',
+                                        background: 'linear-gradient(180deg, #F9E491, #D4A94E 40%, #C59341)',
+                                        border: '1.5px solid rgba(249,228,145,0.6)',
+                                        boxShadow: '0 2px 0 #8a6b25, 0 4px 14px rgba(0,0,0,0.45), 0 0 20px rgba(212,175,55,0.25), inset 0 1px 0 rgba(255,255,255,0.3)',
+                                        color: '#1a0f2e', fontFamily: "'Cinzel', serif",
                                         fontSize: 13, fontWeight: 700, letterSpacing: 3,
                                         textTransform: 'uppercase',
                                         transition: 'all 0.3s',
+                                        position: 'relative',
+                                        overflow: 'hidden',
                                     }}>
-                                        <span style={{ marginRight: 8 }}>▶</span>
-                                        {isCompleted ? 'Review Teaching' : 'Begin Teaching'}
+                                        {/* Shimmer sweep */}
+                                        <div style={{
+                                            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                                            width: '200%',
+                                            background: 'linear-gradient(90deg, transparent 30%, rgba(255,255,255,0.22) 50%, transparent 70%)',
+                                            animation: 'shimmer-sweep 3.5s ease-in-out infinite',
+                                            pointerEvents: 'none',
+                                        }} />
+                                        <span style={{ position: 'relative', zIndex: 1 }}>
+                                            <span style={{ marginRight: 8 }}>▶</span>
+                                            {isCompleted ? 'Review Teaching' : 'Begin Teaching'}
+                                        </span>
                                     </button>
                                     {/* Progress dots — from prototype */}
                                     <div style={{
@@ -508,6 +522,7 @@ export function TeachingsSection() {
                         })}
                     </div>
                 </div>
+
 
                 {/* Context-aware note */}
                 {userContext.activeIntention && (

@@ -41,7 +41,7 @@ export interface SacredScript {
     manifestationId?: string;   // Links to active manifestation
     startDate: string;          // ISO date
     entries: DayEntry[];        // One per day (up to 21)
-    status: 'active' | 'completed' | 'abandoned';
+    status: 'active' | 'completed' | 'abandoned' | 'paused';
     lunarPhaseAtStart: string;  // Moon phase when started
     completedDate?: string;     // ISO date when completed
 }
@@ -147,10 +147,10 @@ export function createSacredScript(
 ): SacredScript {
     const all = getScripts();
 
-    // Abandon any currently active script
+    // Pause any currently active script (preserve progress)
     for (const s of all) {
         if (s.status === 'active') {
-            s.status = 'abandoned';
+            s.status = 'paused';
         }
     }
 
@@ -193,6 +193,67 @@ export function abandonScript(id: string): void {
         script.status = 'abandoned';
         saveScripts(all);
     }
+}
+
+/**
+ * Pause a script (freeze day counter, preserve progress).
+ */
+export function pauseScript(id: string): void {
+    const all = getScripts();
+    const script = all.find(s => s.id === id);
+    if (script && script.status === 'active') {
+        script.status = 'paused';
+        saveScripts(all);
+    }
+}
+
+/**
+ * Resume a paused script. Pauses any currently active script first.
+ * Adjusts the startDate so the day counter continues from where it left off.
+ */
+export function resumeScript(id: string): void {
+    const all = getScripts();
+    const script = all.find(s => s.id === id);
+    if (!script || script.status !== 'paused') return;
+
+    // Pause any currently active script
+    for (const s of all) {
+        if (s.status === 'active') {
+            s.status = 'paused';
+        }
+    }
+
+    // Calculate how many PAST days were completed (exclude today's entry)
+    // so getScriptProgress returns the correct dayNumber
+    const today = getToday();
+    const completedDays = script.entries.filter(e => e.date < today).length;
+    const newStart = new Date(today + 'T00:00:00');
+    newStart.setDate(newStart.getDate() - completedDays);
+    script.startDate = newStart.toISOString().slice(0, 10);
+
+    script.status = 'active';
+    saveScripts(all);
+}
+
+/**
+ * Get all paused scripts.
+ */
+export function getPausedScripts(): SacredScript[] {
+    return getScripts().filter(s => s.status === 'paused');
+}
+
+/**
+ * Find the Sacred Script linked to a specific manifestation ID.
+ * Returns the active or paused script (prefers active).
+ */
+export function getScriptByManifestationId(manifestationId: string): SacredScript | null {
+    const scripts = getScripts().filter(s =>
+        s.manifestationId === manifestationId && (s.status === 'active' || s.status === 'paused')
+    );
+    // Prefer active, then paused
+    return scripts.find(s => s.status === 'active')
+        ?? scripts.find(s => s.status === 'paused')
+        ?? null;
 }
 
 /**

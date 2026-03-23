@@ -1,5 +1,5 @@
 import React from 'react';
-import { saveBirthData, getSunSign } from '../services/astrology.service';
+import { saveBirthData, getSunSign, saveDestinyName } from '../services/astrology.service';
 import { searchPlaces, resolvePlace, PlaceSuggestion } from '../services/geocoding.service';
 import { safeStorage } from '../services/storage.service';
 
@@ -110,6 +110,12 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             latitude: selectedCity?.lat,
             longitude: selectedCity?.lng,
         });
+
+        // Smart detection: if name has 2+ words, silently save as destiny name
+        const trimmed = name.trim();
+        if (trimmed.split(/\s+/).length >= 2) {
+            saveDestinyName(trimmed);
+        }
 
         // Build profile
         const profile: any = {

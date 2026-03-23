@@ -771,3 +771,66 @@ export function getSynastryChart(
         communication: aspects.filter(a => a.category === 'communication'),
     };
 }
+
+// ── Destiny Name Persistence ──
+
+const DESTINY_NAME_KEY = 'arcana_destiny_name';
+
+/**
+ * Retrieve the stored birth name used for Destiny Number calculation.
+ */
+export function getDestinyName(): string | null {
+    try {
+        const val = safeStorage.getItem(DESTINY_NAME_KEY);
+        return val && val.trim() ? val.trim() : null;
+    } catch { return null; }
+}
+
+/**
+ * Save the user's birth name for Destiny Number calculation.
+ */
+export function saveDestinyName(name: string): void {
+    try { safeStorage.setItem(DESTINY_NAME_KEY, name.trim()); } catch { /* */ }
+}
+
+/**
+ * Pythagorean letter-to-number mapping for Destiny Number calculation.
+ */
+export const PYTH_MAP: Record<string, number> = {
+    A: 1, J: 1, S: 1,
+    B: 2, K: 2, T: 2,
+    C: 3, L: 3, U: 3,
+    D: 4, M: 4, V: 4,
+    E: 5, N: 5, W: 5,
+    F: 6, O: 6, X: 6,
+    G: 7, P: 7, Y: 7,
+    H: 8, Q: 8, Z: 8,
+    I: 9, R: 9,
+};
+
+export function reducePyth(num: number): number {
+    if (num === 11 || num === 22 || num === 33) return num;
+    while (num > 9) {
+        num = String(num).split('').reduce((a, d) => a + parseInt(d), 0);
+        if (num === 11 || num === 22 || num === 33) return num;
+    }
+    return num;
+}
+
+/**
+ * Compute the Destiny Number from a full name string.
+ * Returns the reduced single digit (or master number 11/22/33).
+ */
+export function getDestinyNumber(fullName: string): number | null {
+    const cleaned = fullName.trim();
+    if (!cleaned) return null;
+    const names = cleaned.split(/\s+/).filter(Boolean);
+    if (names.length === 0) return null;
+    const total = names.reduce((sum, name) => {
+        const nameSum = name.toUpperCase().split('')
+            .filter(c => PYTH_MAP[c])
+            .reduce((a, c) => a + PYTH_MAP[c], 0);
+        return sum + reducePyth(nameSum);
+    }, 0);
+    return reducePyth(total);
+}

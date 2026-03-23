@@ -388,11 +388,13 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
                                         ) : (
                                             <button
                                                 onClick={async () => {
+                                                    const capturedIdx = selectedCardIdx;
+                                                    if (capturedIdx === null) return;
                                                     setCardInsightLoading(true);
                                                     setAiError(null);
                                                     try {
                                                         const ai = new AIService();
-                                                        const card = reading.cards[selectedCardIdx!];
+                                                        const card = reading.cards[capturedIdx];
                                                         const insight = await ai.getCardInsight(
                                                             card.name, card.meaning, card.reversed,
                                                             { theme: reading.theme, question: reading.question }

@@ -555,14 +555,15 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange, 
                         {/* Begin Ritual button */}
                         <button
                             onClick={() => startDrawRitual()}
-                            className="w-full mt-6 py-4 font-semibold text-base tracking-wide transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]"
+                            className="w-full mt-6 py-4 font-semibold text-base tracking-[3px] uppercase transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] gold-shimmer"
                             style={{
-                                background: 'linear-gradient(135deg, var(--color-gold-100), var(--color-gold-200))',
+                                background: 'linear-gradient(180deg, #F9E491, #D4A94E 30%, #C59341 60%, #A67B2E)',
                                 borderRadius: '16px',
-                                border: '1px solid var(--color-gold-glow-med)',
-                                color: '#0d0b22',
+                                border: '2px solid rgba(212,175,55,0.6)',
+                                color: '#1a0f2e',
                                 fontFamily: 'var(--font-display)',
-                                boxShadow: '0 4px 20px rgba(212,175,55,0.3)',
+                                fontWeight: 800,
+                                boxShadow: '0 2px 0 #8a6b25, 0 4px 12px rgba(0,0,0,0.5), 0 0 40px rgba(212,175,55,0.08), inset 0 1px 0 rgba(255,255,255,0.35)',
                             }}
                         >
                             ✦ Begin the Ritual ✦
