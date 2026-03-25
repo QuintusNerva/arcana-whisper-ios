@@ -1,5 +1,5 @@
 import React from 'react';
-import { PRODUCTS, purchaseProduct, restorePurchases, type ProductId } from '../services/storekit.service';
+import { PRODUCTS, purchaseProduct, restorePurchases, getOfferings, type ProductId } from '../services/storekit.service';
 
 interface PremiumOverlayProps {
     onClose: () => void;
@@ -15,14 +15,32 @@ const FEATURES = [
 
 export function PremiumOverlay({ onClose, onSubscribe }: PremiumOverlayProps) {
     const [isVisible, setIsVisible] = React.useState(false);
-    const [selectedPlan, setSelectedPlan] = React.useState<'MONTHLY' | 'YEARLY'>('YEARLY');
+    const [selectedPlan, setSelectedPlan] = React.useState<'WEEKLY' | 'MONTHLY' | 'YEARLY'>('YEARLY');
     const [isProcessing, setIsProcessing] = React.useState(false);
     const [isComplete, setIsComplete] = React.useState(false);
     const [isRestoring, setIsRestoring] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
+    const [livePrices, setLivePrices] = React.useState<Record<string, { price: string; period: string }> | null>(null);
 
     React.useEffect(() => {
         requestAnimationFrame(() => setIsVisible(true));
+        // Fetch live prices from RevenueCat
+        getOfferings().then((offering: any) => {
+            if (!offering?.availablePackages) return;
+            const prices: Record<string, { price: string; period: string }> = {};
+            for (const pkg of offering.availablePackages) {
+                const id = pkg.product?.identifier;
+                const priceStr = pkg.product?.priceString;
+                if (id === PRODUCTS.WEEKLY.id && priceStr) {
+                    prices.WEEKLY = { price: priceStr, period: '/wk' };
+                } else if (id === PRODUCTS.MONTHLY.id && priceStr) {
+                    prices.MONTHLY = { price: priceStr, period: '/mo' };
+                } else if (id === PRODUCTS.YEARLY.id && priceStr) {
+                    prices.YEARLY = { price: priceStr, period: '/yr' };
+                }
+            }
+            if (Object.keys(prices).length > 0) setLivePrices(prices);
+        }).catch(() => { /* use hardcoded fallback */ });
     }, []);
 
     const handleClose = () => {
@@ -140,15 +158,12 @@ export function PremiumOverlay({ onClose, onSubscribe }: PremiumOverlayProps) {
                         ))}
                     </div>
 
-                    {/* Social Proof */}
+                    {/* Benefits highlight */}
                     <div className="text-center mb-3 animate-fade-up" style={{ animationDelay: '0.5s', opacity: 0 }}>
-                        <div className="flex justify-center gap-0.5 mb-1">
-                            {[1,2,3,4,5].map(i => <span key={i} className="text-xs" style={{ color: '#d4af37' }}>★</span>)}
-                        </div>
-                        <p className="text-[11px] text-altar-muted italic">"This app changed my entire morning ritual" · <span className="not-italic text-altar-muted/50">Join thousands of seekers</span></p>
+                        <p className="text-[11px] text-altar-muted">✦ Personalized to your natal chart ✦</p>
                     </div>
 
-                    {/* Free Trial Badge */}
+                    {/* Cancel anytime note */}
                     <div className="flex justify-center mb-3">
                         <div className="px-3.5 py-1 rounded-full text-[10px] font-display tracking-wider"
                             style={{
@@ -156,32 +171,32 @@ export function PremiumOverlay({ onClose, onSubscribe }: PremiumOverlayProps) {
                                 border: '1px solid rgba(212,175,55,0.3)',
                                 color: '#d4af37',
                             }}>
-                            ✦ 7-Day Free Trial — Cancel Anytime
+                            ✦ Cancel Anytime
                         </div>
                     </div>
 
                     {/* Plan Selector */}
-                    <div className="grid grid-cols-2 gap-2.5 mb-4">
-                        {(['MONTHLY', 'YEARLY'] as const).map((key) => {
+                    <div className="grid grid-cols-3 gap-2 mb-4">
+                        {(['WEEKLY', 'MONTHLY', 'YEARLY'] as const).map((key) => {
                             const plan = PRODUCTS[key];
                             return (
                                 <button
                                     key={key}
                                     onClick={() => setSelectedPlan(key)}
-                                    className={`relative rounded-2xl p-3 text-center transition-all border-2 ${selectedPlan === key
+                                    className={`relative rounded-2xl p-2.5 text-center transition-all border-2 ${selectedPlan === key
                                         ? 'border-altar-gold bg-altar-gold/10 shadow-[0_0_20px_rgba(255,215,0,0.15)]'
                                         : 'border-white/10 glass hover:border-white/20'
                                         }`}
                                 >
                                     {plan.savings && (
-                                        <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-green-500 text-[9px] text-white font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
+                                        <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-green-500 text-[8px] text-white font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap">
                                             {plan.savings}
                                         </span>
                                     )}
-                                    <div className="text-[11px] text-altar-muted mb-0.5 font-medium">{plan.label}</div>
-                                    <div className="font-display text-base text-white font-semibold">
-                                        {plan.price}
-                                        <span className="text-[11px] text-altar-muted font-sans">{plan.period}</span>
+                                    <div className="text-[10px] text-altar-muted mb-0.5 font-medium">{plan.label}</div>
+                                    <div className="font-display text-sm text-white font-semibold">
+                                        {livePrices?.[key]?.price || plan.price}
+                                        <span className="text-[10px] text-altar-muted font-sans">{livePrices?.[key]?.period || plan.period}</span>
                                     </div>
                                 </button>
                             );
@@ -210,7 +225,8 @@ export function PremiumOverlay({ onClose, onSubscribe }: PremiumOverlayProps) {
                                 Processing…
                             </span>
                         ) : (
-                            `Start Free Trial — then ${PRODUCTS[selectedPlan].price}${PRODUCTS[selectedPlan].period}`
+                            `Subscribe — ${livePrices?.[selectedPlan]?.price || PRODUCTS[selectedPlan].price}${livePrices?.[selectedPlan]?.period || PRODUCTS[selectedPlan].period}`
+
                         )}
                     </button>
 

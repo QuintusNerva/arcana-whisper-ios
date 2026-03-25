@@ -12,14 +12,14 @@ import {
 } from './astrology.service';
 /**
  * AI Interpretation Service — OpenRouter Integration
- * Uses Gemini 2.0 Flash via OpenRouter for tarot card interpretations.
+ * Uses Claude Haiku 4.5 via OpenRouter for all AI interpretations.
  */
 
 import { getMemoryContextForAI } from './memory.service';
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const MODEL = 'google/gemini-2.0-flash-001';
-const PREMIUM_MODEL = 'anthropic/claude-sonnet-4.6';
+const MODEL = 'anthropic/claude-haiku-4.5';
+const PREMIUM_MODEL = 'anthropic/claude-haiku-4.5';
 const STORAGE_KEY = 'openrouter_api_key';
 
 /**
@@ -39,6 +39,23 @@ export const dailyCache = {
     set(key: string, value: string): void {
         const today = new Date().toISOString().slice(0, 10);
         safeStorage.setItem(`daily_${key}`, JSON.stringify({ date: today, value }));
+    },
+};
+
+/**
+ * Permanent cache — for readings that only need to generate once
+ * (natal chart, career alignment, numerology, family).
+ * Keyed to birth data so it auto-invalidates if user changes their info.
+ */
+export const permanentCache = {
+    get(key: string): string | null {
+        return safeStorage.getItem(`perm_${key}`) || null;
+    },
+    set(key: string, value: string): void {
+        safeStorage.setItem(`perm_${key}`, value);
+    },
+    clear(key: string): void {
+        safeStorage.removeItem(`perm_${key}`);
     },
 };
 
@@ -392,19 +409,19 @@ EVERY INSIGHT MUST FOLLOW THIS PATTERN:
 3. REFRAME it — turn what might feel like confusion into clarity, or weakness into strength.
 4. GIVE THEM ONE ACTION — end each section with one specific, practical action they can take TODAY or THIS WEEK. The action MUST be directly justified by the chart insight you just explained. Use the pattern: "Because [specific chart placement/aspect] → try [specific action]." Never give generic advice like "practice gratitude" or "set boundaries." The action should be something ONLY someone with THIS chart would benefit from. Make it concrete: a 5-minute exercise, a specific question to ask themselves, a behavior to try once, or a mindset shift to practice.
 
-STRUCTURE — Follow these four sections exactly, using these headers:
+STRUCTURE — Follow these four sections exactly, using ## headers (NOT bold text):
 
-**✦ Who You Are at Your Core** (150-200 words)
-Weave Sun sign + Life Path number together. Show how they reinforce or create interesting tension. Ground with a relatable scenario about how they make decisions or move through the world. End with ONE specific action justified by this Sun + Life Path combination.
+## ✦ Who You Are at Your Core
+(150-200 words) Weave Sun sign + Life Path number together. Show how they reinforce or create interesting tension. Ground with a relatable scenario about how they make decisions or move through the world. End with ONE specific action justified by this Sun + Life Path combination.
 
-**✦ The Energies Shaping You** (150-200 words)
-Moon, Rising, key planets, and the most important aspects. Explain what these energies feel like from the INSIDE. Use specific "you might notice..." examples — like walking into a room and sensing tension, or the push-pull of getting excited then second-guessing yourself. End with ONE specific action justified by their Moon/Rising dynamic.
+## ✦ The Energies Shaping You
+(150-200 words) Moon, Rising, key planets, and the most important aspects. Explain what these energies feel like from the INSIDE. Use specific "you might notice..." examples — like walking into a room and sensing tension, or the push-pull of getting excited then second-guessing yourself. End with ONE specific action justified by their Moon/Rising dynamic.
 
-**✦ Where You Are Right Now** (100-150 words)
-Personal Year number in the context of their chart. Connect it to what they might currently be feeling — restlessness, transition, consolidation, whatever fits. Make them feel seen in their current moment. End with ONE specific action for navigating THIS particular year cycle with their chart.
+## ✦ Where You Are Right Now
+(100-150 words) Personal Year number in the context of their chart. Connect it to what they might currently be feeling — restlessness, transition, consolidation, whatever fits. Make them feel seen in their current moment. End with ONE specific action for navigating THIS particular year cycle with their chart.
 
-**✦ The Gift You Don't See Yet** (100-150 words)
-Name something in their chart that is likely their greatest strength but that they've probably been told is "too much" or have dismissed about themselves. Prove it with a relatable example, then reframe it powerfully. End with ONE specific way to lean INTO this gift this week — not hold it back.
+## ✦ The Gift You Don't See Yet
+(100-150 words) Name something in their chart that is likely their greatest strength but that they've probably been told is "too much" or have dismissed about themselves. Prove it with a relatable example, then reframe it powerfully. End with ONE specific way to lean INTO this gift this week — not hold it back.
 
 ACTION FORMATTING:
 - Write each action as a bold line starting with **→ Try this:** followed by the specific suggestion.
@@ -412,10 +429,12 @@ ACTION FORMATTING:
 - Actions must reference the specific chart placement that justifies them (e.g., "Because your Mars in Gemini trines your Moon...").
 
 FORMATTING RULES (follow strictly):
-- Put each section header on its OWN line with a blank line BEFORE and AFTER it.
+- ALWAYS use ## for section headers. NEVER use ** bold markers ** for section titles.
+- Put each ## header on its OWN line with a blank line BEFORE and AFTER it.
 - Break your writing into short paragraphs of 2-3 sentences MAX. Put a blank line between every paragraph.
 - NEVER write more than 3 sentences in a row without a paragraph break.
-- The reading should breathe — white space is part of the experience.`;
+- The reading should breathe — white space is part of the experience.
+- Bold key astrology and numerology terms using **double asterisks** (e.g., **Sagittarius Sun**, **Life Path 11**).`;
 
         const planetLines = planets.slice(0, 10).map(p =>
             `${p.name}: ${p.degreeInSign.toFixed(1)}° ${p.signId.charAt(0).toUpperCase() + p.signId.slice(1)}`
@@ -441,8 +460,8 @@ Personal Year: ${personalYear.number} (current cycle, year ${new Date().getFullY
 
 Follow the four-section structure. For every insight: name the energy, ground it in a relatable life scenario, then reframe it. Make them feel like you truly see them.
 
-AFTER the four main sections, add one final section:
-**✦ How You Manifest**
+AFTER the four main sections, add one final section using a ## header:
+## ✦ How You Manifest
 Based on their dominant element (derived from their chart), describe their unique manifestation style in 80-100 words:
 - Fire (Aries/Leo/Sag): manifests through bold action, momentum, and declaring intentions publicly
 - Earth (Taurus/Virgo/Cap): manifests through patient ritual, consistent daily practice, and tangible steps
@@ -1112,14 +1131,19 @@ Give the universal spiritual meaning of ${number}. Break down its digit composit
         if (!navigator.onLine) {
             throw new Error('You appear to be offline. AI insights require an internet connection. Tarot, astrology, and numerology still work offline!');
         }
-        // AI consent check
+        // AI consent check — default to disabled on any error (corrupted data, missing key)
         try {
-            const consent = JSON.parse(safeStorage.getItem('ai_consent') || '{}');
-            if (consent.consented === false) {
-                throw new Error('AI features are disabled. You can enable them in Settings.');
+            const raw = safeStorage.getItem('ai_consent');
+            if (raw) {
+                const consent = JSON.parse(raw);
+                if (consent.consented === false) {
+                    throw new Error('AI features are disabled. You can enable them in Settings.');
+                }
             }
         } catch (e) {
             if (e instanceof Error && e.message.includes('AI features are disabled')) throw e;
+            // Corrupted consent data — block AI calls to be safe
+            throw new Error('AI features are disabled. You can enable them in Settings.');
         }
 
         const response = await fetch(OPENROUTER_URL, {
@@ -1139,6 +1163,7 @@ Give the universal spiritual meaning of ${number}. Break down its digit composit
                 max_tokens: maxTokens,
                 temperature: 0.8,
             }),
+            signal: AbortSignal.timeout(30000),
         });
 
         if (!response.ok) {
@@ -1160,7 +1185,7 @@ Give the universal spiritual meaning of ${number}. Break down its digit composit
         return content.trim();
     }
 
-    /** Premium model chat — uses Gemini 2.5 Pro for deep, once-a-day readings */
+    /** Premium model chat — uses Claude for deep, once-a-day readings */
     async chatPremium(systemPrompt: string, userPrompt: string, maxTokens = 3000): Promise<string> {
         if (!this.apiKey) {
             throw new Error('No API key configured. Add your OpenRouter key in Settings.');
@@ -1187,13 +1212,14 @@ Give the universal spiritual meaning of ${number}. Break down its digit composit
                 max_tokens: maxTokens,
                 temperature: 0.8,
             }),
+            signal: AbortSignal.timeout(45000),
         });
 
         if (!response.ok) {
             const error = await response.text();
-            // Fallback to Flash model if premium fails
-            console.warn('Premium model failed, falling back to Flash:', error);
-            return this.chat(systemPrompt, userPrompt, maxTokens);
+            // Fallback to Flash model if premium fails — cap tokens to prevent cost blowup
+            if (import.meta.env.DEV) console.warn('[AI] Premium model failed, falling back to Flash:', error);
+            return this.chat(systemPrompt, userPrompt, Math.min(maxTokens, 1200));
         }
 
         const data = await response.json();
@@ -1237,8 +1263,8 @@ export function getRemainingReadings(): number {
 }
 
 /** Check if user can perform another reading (free tier) */
-export function canDoReading(subscription: string): boolean {
-    if (subscription === 'premium') return true;
+export function canDoReading(isPremium: boolean): boolean {
+    if (isPremium) return true;
     return getRemainingReadings() > 0;
 }
 

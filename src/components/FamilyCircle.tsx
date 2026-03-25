@@ -721,12 +721,13 @@ export function FamilyCircle({ onClose, onTabChange, subscription, onShowPremium
                         {/* Back button */}
                         <button
                             onClick={() => { setViewState('list'); setReadingContent(null); setSiblingPair(null); }}
-                            className="w-full mt-4 rounded-2xl py-3 font-display text-[11px] tracking-[2px] uppercase transition-all active:scale-[0.98]"
+                            className="w-full mt-4 rounded-2xl py-3 font-display text-[11px] tracking-[2px] uppercase transition-all active:scale-[0.98] gold-shimmer"
                             style={{
-                                background: 'rgba(61,29,90,0.35)',
-                                border: '1px solid rgba(212,175,55,0.15)',
-                                color: '#D4A94E',
-                                backdropFilter: 'blur(12px)',
+                                background: 'linear-gradient(180deg, #F9E491, #D4A94E 30%, #C59341 60%, #A67B2E)',
+                                border: '2px solid rgba(212,175,55,0.6)',
+                                color: '#1a0f2e',
+                                fontWeight: 800,
+                                boxShadow: '0 2px 0 #8a6914, 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.35)',
                             }}
                         >
                             ← Back to Family

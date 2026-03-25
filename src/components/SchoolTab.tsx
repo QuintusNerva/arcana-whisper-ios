@@ -398,11 +398,19 @@ export function SchoolTab({ onClose, onTabChange, subscription, onShowPremium }:
     const SubTab = ({ id, label }: { id: 'teachings' | 'sounds'; label: string }) => (
         <button
             onClick={() => setActiveSubTab(id)}
-            className="flex-1 py-2 rounded-2xl text-[10px] font-display tracking-wider transition-all"
+            className="flex-1 py-2.5 rounded-2xl text-[12px] font-display tracking-wider transition-all"
             style={{
-                background: activeSubTab === id ? 'rgba(212,175,55,0.15)' : 'transparent',
-                color: activeSubTab === id ? '#d4af37' : 'rgba(255,255,255,0.35)',
-                border: activeSubTab === id ? '1px solid rgba(212,175,55,0.25)' : '1px solid transparent',
+                background: activeSubTab === id
+                    ? 'linear-gradient(145deg, rgba(212,175,55,0.20), rgba(212,175,55,0.08))'
+                    : 'rgba(255,255,255,0.03)',
+                color: activeSubTab === id ? '#F9E491' : 'rgba(255,255,255,0.50)',
+                border: activeSubTab === id
+                    ? '1px solid rgba(212,175,55,0.45)'
+                    : '1px solid rgba(255,255,255,0.10)',
+                fontWeight: activeSubTab === id ? 600 : 400,
+                boxShadow: activeSubTab === id
+                    ? '0 0 16px rgba(212,175,55,0.15), inset 0 1px 0 rgba(249,228,145,0.1)'
+                    : 'none',
             }}
         >
             {label}
@@ -433,8 +441,13 @@ export function SchoolTab({ onClose, onTabChange, subscription, onShowPremium }:
                         </div>
 
                         {/* Sub-tab bar */}
-                        <div className="flex gap-1.5 p-1 rounded-2xl mb-5 animate-fade-up"
-                            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', animationDelay: '0.1s', opacity: 0 }}>
+                        <div className="flex gap-1.5 p-1.5 rounded-2xl mb-5 animate-fade-up"
+                            style={{
+                                background: 'rgba(255,255,255,0.05)',
+                                border: '1px solid rgba(255,255,255,0.10)',
+                                boxShadow: '0 2px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)',
+                                animationDelay: '0.1s', opacity: 0,
+                            }}>
                             <SubTab id="teachings" label="📖 Teachings" />
                             <SubTab id="sounds" label="🔊 Sounds" />
                         </div>
@@ -511,7 +524,32 @@ export function SchoolTab({ onClose, onTabChange, subscription, onShowPremium }:
                                         </div>
                                         <div className="flex gap-2 justify-center flex-wrap">
                                             <button
-                                                onClick={() => isOnline ? openYouTube(cosmicRec.query, cosmicRec.title) : undefined}
+                                                onClick={async () => {
+                                                    if (!isOnline) return;
+                                                    // Save to history
+                                                    const updated = [{ label: cosmicRec.title, query: cosmicRec.query, timestamp: new Date().toISOString() }, ...soundHistory].slice(0, 5);
+                                                    setSoundHistory(updated); saveSoundHist(updated);
+                                                    // Auto-play first result
+                                                    const apiKey = (import.meta as any).env?.VITE_YOUTUBE_API_KEY;
+                                                    if (apiKey) {
+                                                        setIsSearching(true);
+                                                        try {
+                                                            const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(cosmicRec.query)}&type=video&maxResults=1&key=${apiKey}`);
+                                                            const data = await res.json();
+                                                            const items: YTItem[] = (data.items || []).filter((it: any) => it.id?.videoId);
+                                                            if (items.length > 0) {
+                                                                setVideoModal({ videoId: items[0].id.videoId, title: cosmicRec.title });
+                                                                setIsSearching(false);
+                                                                return;
+                                                            }
+                                                        } catch { /* fall through */ }
+                                                        setIsSearching(false);
+                                                    }
+                                                    // Fallback — open in browser
+                                                    const url = `https://m.youtube.com/results?search_query=${encodeURIComponent(cosmicRec.query)}`;
+                                                    try { const m = await (Function('return import("@capacitor/browser")')() as Promise<any>); await m.Browser.open({ url }); }
+                                                    catch { window.open(url, '_blank'); }
+                                                }}
                                                 disabled={!isOnline}
                                                 className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-display tracking-wide transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-30"
                                                 style={{

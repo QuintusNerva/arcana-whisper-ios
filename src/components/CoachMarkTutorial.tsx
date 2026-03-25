@@ -20,10 +20,10 @@ const STEPS: Step[] = [
         position: 'below',
     },
     {
-        target: 'scripting',
-        title: 'Script Your Intentions',
-        message: 'This is your sacred journal. Tap here to script intentions, record dreams, and track your manifestations.',
-        icon: '✍',
+        target: 'dream-journal',
+        title: 'Dream Journal',
+        message: 'Record your dreams, decode hidden symbols, and track recurring themes. Your subconscious speaks loudest at night — capture it here.',
+        icon: '🌙',
         position: 'above',
     },
     {

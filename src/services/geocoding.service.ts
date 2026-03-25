@@ -9,7 +9,6 @@
  *           for Daylight Saving Time. A 1-hour error = 1 zodiac sign error.
  */
 
-const GOOGLE_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
 
 // ── Types ──
 
@@ -49,7 +48,7 @@ export async function searchPlaces(query: string): Promise<PlaceSuggestion[]> {
         if (!res.ok) return [];
         const data = await res.json();
 
-        console.log('[GEO] Nominatim results:', data.length);
+        if (import.meta.env.DEV) console.log('[GEO] Nominatim results:', data.length);
 
         return data.map((item: any) => {
             const parts: string[] = [];
@@ -110,12 +109,12 @@ async function getIANATimezone(lat: number, lng: number): Promise<string> {
         if (res.ok) {
             const data = await res.json();
             if (data.timeZone) {
-                console.log('[GEO] IANA timezone from API:', data.timeZone);
+                if (import.meta.env.DEV) console.log('[GEO] IANA timezone from API:', data.timeZone);
                 return data.timeZone;
             }
         }
     } catch {
-        console.warn('[GEO] timeapi.io failed, using coordinate fallback');
+        if (import.meta.env.DEV) console.warn('[GEO] timeapi.io failed, using coordinate fallback');
     }
 
     // Fallback: estimate IANA timezone from coordinates
@@ -189,7 +188,7 @@ function estimateIANATimezone(lat: number, lng: number): string {
 
     // Absolute fallback: use Etc/GMT zones (no DST, but better than nothing)
     const offset = Math.round(lng / 15);
-    console.warn('[GEO] Using Etc/GMT fallback for coordinates:', lat, lng);
+    if (import.meta.env.DEV) console.warn('[GEO] Using Etc/GMT fallback for coordinates:', lat, lng);
     if (offset === 0) return 'Etc/UTC';
     // Note: Etc/GMT signs are INVERTED (Etc/GMT-5 = UTC+5)
     return `Etc/GMT${offset > 0 ? '-' : '+'}${Math.abs(offset)}`;
@@ -244,7 +243,7 @@ function computeHistoricalUTCOffset(iana: string, dateStr: string, timeStr?: str
         // The offset = local_as_utc - actual_utc (in hours)
         const offsetHours = (localAsUTC - roughUTC.getTime()) / (1000 * 60 * 60);
 
-        console.log('[GEO] Historical UTC offset for', iana, dateStr, timeStr, '→', offsetHours, 'hours');
+        if (import.meta.env.DEV) console.log('[GEO] Historical UTC offset for', iana, dateStr, timeStr, '→', offsetHours, 'hours');
         return offsetHours;
     } catch (err) {
         console.error('[GEO] computeHistoricalUTCOffset error:', err);
@@ -276,7 +275,7 @@ export async function resolvePlace(
     const { lat, lng } = suggestion;
     if (!lat || !lng) return null;
 
-    console.log('[GEO] Resolving:', suggestion.description, lat, lng);
+    if (import.meta.env.DEV) console.log('[GEO] Resolving:', suggestion.description, lat, lng);
 
     const utcOffset = await getTimezoneOffset(lat, lng, birthDate, birthTime);
 

@@ -280,7 +280,7 @@ const REMINDER_MESSAGES = [
 ];
 
 /** Fire a journal reminder notification if conditions are met */
-export function fireJournalReminder(): boolean {
+export async function fireJournalReminder(): Promise<boolean> {
     const settings = getJournalReminderSettings();
     if (!settings.enabled) return false;
 
@@ -302,14 +302,26 @@ export function fireJournalReminder(): boolean {
     const todayEntry = entries.find(e => e.date === today);
     if (todayEntry) return false; // Already journaled, no need to remind
 
-    // Fire notification
-    if ('Notification' in window && Notification.permission === 'granted') {
-        const msg = REMINDER_MESSAGES[Math.floor(Math.random() * REMINDER_MESSAGES.length)];
-        new Notification('Journal', {
-            body: msg,
-            icon: '/icon.png',
-            tag: 'journal-reminder',
-        });
+    // Fire notification via Capacitor Local Notifications (or browser fallback)
+    const msg = REMINDER_MESSAGES[Math.floor(Math.random() * REMINDER_MESSAGES.length)];
+    try {
+        const { Capacitor } = await import('@capacitor/core');
+        if (Capacitor.isNativePlatform()) {
+            const { LocalNotifications } = await import('@capacitor/local-notifications');
+            await LocalNotifications.schedule({
+                notifications: [{
+                    id: 99999,
+                    title: '📓 Journal',
+                    body: msg,
+                    schedule: { at: new Date(Date.now() + 500) },
+                    sound: 'default',
+                }],
+            });
+        } else if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('Journal', { body: msg, tag: 'journal-reminder' });
+        }
+    } catch {
+        // Silent fallback — notification is non-critical
     }
 
     safeStorage.setItem('journal_last_reminder', today);

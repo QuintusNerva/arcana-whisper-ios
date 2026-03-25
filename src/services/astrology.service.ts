@@ -61,7 +61,7 @@ export function getSunSign(dateStr: string): typeof ZODIAC_SIGNS[number] {
     const d = new Date(dateStr + 'T12:00:00');
     const month = d.getMonth() + 1; // 1-12
     const day = d.getDate();
-    console.log('[SUN] getSunSign input:', dateStr, '→ month:', month, 'day:', day);
+    if (import.meta.env.DEV) console.log('[SUN] getSunSign input:', dateStr, '→ month:', month, 'day:', day);
 
     // Explicit date ranges — the only way to be sure
     if ((month === 3 && day >= 21) || (month === 4 && day <= 19)) return ZODIAC_SIGNS[0];  // Aries
@@ -117,9 +117,9 @@ function parseBirthDateTime(dateStr: string, timeStr?: string) {
 export function getMoonSign(dateStr: string, timeStr?: string, utcOffset?: number): typeof ZODIAC_SIGNS[number] {
     const { year, month, day, hour, minute } = parseBirthDateTime(dateStr, timeStr);
     const input = { year, month, day, hour, minute, utcOffset: utcOffset || 0 };
-    console.log('[EPHEMERIS] getMoonSign input:', JSON.stringify(input));
+    if (import.meta.env.DEV) console.log('[EPHEMERIS] getMoonSign input:', JSON.stringify(input));
     const result = calculateEphemeris(input);
-    console.log('[EPHEMERIS] Moon result:', result.moonSignId, result.moonLongitude.toFixed(2) + '°');
+    if (import.meta.env.DEV) console.log('[EPHEMERIS] Moon result:', result.moonSignId, result.moonLongitude.toFixed(2) + '°');
     const sign = ZODIAC_SIGNS.find(z => z.id === result.moonSignId);
     return sign || ZODIAC_SIGNS[0];
 }
@@ -165,7 +165,7 @@ export interface NatalTriad {
 }
 
 export function getNatalTriad(data: BirthData): NatalTriad {
-    console.log('[NATAL] BirthData:', JSON.stringify({
+    if (import.meta.env.DEV) console.log('[NATAL] BirthData:', JSON.stringify({
         birthday: data.birthday, birthTime: data.birthTime,
         location: data.location, utcOffset: data.utcOffset,
         latitude: data.latitude, longitude: data.longitude
@@ -175,7 +175,7 @@ export function getNatalTriad(data: BirthData): NatalTriad {
         moon: getMoonSign(data.birthday, data.birthTime, data.utcOffset),
         rising: getRisingSign(data.birthday, data.birthTime, data.utcOffset, data.latitude, data.longitude),
     };
-    console.log('[NATAL] Triad:', result.sun.name, '/', result.moon.name, '/', result.rising.name);
+    if (import.meta.env.DEV) console.log('[NATAL] Triad:', result.sun.name, '/', result.moon.name, '/', result.rising.name);
     return result;
 }
 

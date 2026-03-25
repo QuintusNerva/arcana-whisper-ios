@@ -1,7 +1,9 @@
 import React from 'react';
-import { saveBirthData, getSunSign, saveDestinyName } from '../services/astrology.service';
+import { saveBirthData, getSunSign, saveDestinyName, getLifePathNumber, getDailyHoroscope } from '../services/astrology.service';
 import { searchPlaces, resolvePlace, PlaceSuggestion } from '../services/geocoding.service';
 import { safeStorage } from '../services/storage.service';
+import { requestNotificationPermission } from '../services/reminder.service';
+import { PRODUCTS, purchaseProduct, restorePurchases, type ProductId } from '../services/storekit.service';
 
 interface OnboardingProps {
     onComplete: (profile: { name: string; birthday: string; zodiac: string; birthTime?: string; birthCity?: string; latitude?: number; longitude?: number; utcOffset?: number }) => void;
@@ -50,7 +52,26 @@ function EyeOfProvidence({ size = 80, className = '' }: { size?: number; classNa
     );
 }
 
-const STEPS = ['welcome', 'name', 'birthday', 'birthdetails', 'consent', 'reveal'] as const;
+/* ── Life Path meanings (short) ── */
+const LIFE_PATH_BRIEF: Record<number, string> = {
+    1: 'The Leader — independent, ambitious, pioneering',
+    2: 'The Diplomat — intuitive, harmonious, cooperative',
+    3: 'The Communicator — creative, expressive, joyful',
+    4: 'The Builder — disciplined, practical, grounded',
+    5: 'The Adventurer — freedom-seeking, versatile, curious',
+    6: 'The Nurturer — caring, responsible, community-minded',
+    7: 'The Seeker — analytical, spiritual, introspective',
+    8: 'The Powerhouse — ambitious, karmic, authority-driven',
+    9: 'The Humanitarian — compassionate, wise, visionary',
+    11: 'The Illuminator — master intuition, spiritual insight',
+    22: 'The Master Builder — visionary architect of reality',
+    33: 'The Master Teacher — pure compassion, healing energy',
+};
+
+const STEPS = ['welcome', 'value1', 'value2', 'value3', 'name', 'birthday', 'birthdetails', 'reveal', 'notifications', 'paywall', 'consent'] as const;
+
+/* ── Tracked steps for progress dots (exclude welcome) ── */
+const PROGRESS_STEPS = STEPS.filter(s => s !== 'welcome');
 
 export function Onboarding({ onComplete }: OnboardingProps) {
     const [step, setStep] = React.useState<typeof STEPS[number]>('welcome');
@@ -65,7 +86,15 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     const [aiConsent, setAiConsent] = React.useState(false);
     const searchTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
+    // Paywall state
+    const [selectedPlan, setSelectedPlan] = React.useState<'MONTHLY' | 'YEARLY'>('YEARLY');
+    const [isPurchasing, setIsPurchasing] = React.useState(false);
+    const [isRestoring, setIsRestoring] = React.useState(false);
+    const [purchaseError, setPurchaseError] = React.useState<string | null>(null);
+
     const sunSign = birthday ? getSunSign(birthday) : null;
+    const lifePathNumber = birthday ? getLifePathNumber(birthday) : null;
+    const horoscope = sunSign ? getDailyHoroscope(sunSign.id) : null;
 
     // City search — debounced async via Nominatim
     const handleCitySearch = (query: string) => {
@@ -133,17 +162,56 @@ export function Onboarding({ onComplete }: OnboardingProps) {
         onComplete(profile);
     };
 
-    const handleDetailsNext = () => {
-        setStep('consent');
+    const handleNotificationRequest = async () => {
+        await requestNotificationPermission();
+        setStep('paywall');
+    };
+
+    const handlePurchase = async () => {
+        setPurchaseError(null);
+        setIsPurchasing(true);
+        const product = PRODUCTS[selectedPlan];
+        const result = await purchaseProduct(product.id as ProductId);
+        setIsPurchasing(false);
+        if (result.success) {
+            setStep('consent');
+        } else if (result.error && !result.error.includes('cancelled') && !result.error.includes('canceled')) {
+            setPurchaseError(result.error || 'Something went wrong.');
+        }
+    };
+
+    const handleRestore = async () => {
+        setPurchaseError(null);
+        setIsRestoring(true);
+        const result = await restorePurchases();
+        setIsRestoring(false);
+        if (result.restored) {
+            setStep('consent');
+        } else {
+            setPurchaseError(result.error || 'No active subscriptions found.');
+        }
     };
 
     const handleConsentNext = () => {
         safeStorage.setItem('ai_consent', JSON.stringify({ consented: aiConsent, timestamp: new Date().toISOString() }));
         setStep('reveal');
-        setTimeout(() => setRevealReady(true), 1200);
+        // If we're coming back to reveal after consent, the reveal is already set up
+        // We use a flag to distinguish first reveal vs final reveal
     };
 
     const stepIndex = STEPS.indexOf(step);
+    const progressIndex = PROGRESS_STEPS.indexOf(step as any);
+
+    /* ── Open legal pages in Capacitor browser or new tab ── */
+    const openLegal = async (page: 'terms' | 'privacy') => {
+        const url = page === 'terms' ? '/terms.html' : '/privacy.html';
+        try {
+            const m = await (Function('return import("@capacitor/browser")')() as Promise<any>);
+            await m.Browser.open({ url });
+        } catch {
+            window.open(url, '_blank');
+        }
+    };
 
     return (
         <div className="fixed inset-0 bg-gradient-to-b from-altar-deep via-altar-dark to-altar-purple text-altar-text flex flex-col items-center justify-center relative overflow-hidden px-6" style={{ height: '100dvh' }}>
@@ -167,12 +235,85 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                         Tarot readings, natal charts, numerology, and daily horoscopes — all personalized to your cosmic blueprint.
                     </p>
                     <button
-                        onClick={() => setStep('name')}
+                        onClick={() => setStep('value1')}
                         className="w-full py-4 rounded-2xl bg-gradient-to-br from-altar-mid to-altar-bright border border-altar-gold/20 text-base font-display font-semibold tracking-wide transition-all hover:translate-y-[-2px] hover:shadow-[0_6px_20px_rgba(255,215,0,0.2)] hover:border-altar-gold/40 active:scale-[0.98]"
                     >
                         ✦ Begin Your Journey ✦
                     </button>
-                    <p className="text-[10px] text-altar-muted/40 mt-4">Anonymous & private · Your data stays on your device</p>
+                    <p className="text-[10px] text-altar-muted/40 mt-4">For entertainment and self-reflection · Your data stays on your device</p>
+                    <div className="flex items-center justify-center gap-2 mt-2">
+                        <button onClick={() => openLegal('privacy')} className="text-[10px] text-altar-gold/40 hover:text-altar-gold transition-colors underline">Privacy Policy</button>
+                        <span className="text-white/10 text-[10px]">·</span>
+                        <button onClick={() => openLegal('terms')} className="text-[10px] text-altar-gold/40 hover:text-altar-gold transition-colors underline">Terms of Service</button>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Value Carousel Screen 1 ── */}
+            {step === 'value1' && (
+                <div className="text-center max-w-[380px] animate-fade-up w-full" style={{ marginTop: '-5vh' }}>
+                    <div className="w-20 h-20 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-altar-mid/60 to-altar-bright/40 flex items-center justify-center shadow-[0_0_40px_rgba(139,95,191,0.3)]">
+                        <span className="text-4xl">🔮</span>
+                    </div>
+                    <h2 className="font-display text-xl text-altar-gold tracking-[3px] mb-3">PERSONALIZED TAROT</h2>
+                    <p className="text-sm text-altar-muted leading-relaxed mb-2">
+                        Daily readings drawn from a full 78-card deck, each interpretation personalized to your cosmic profile.
+                    </p>
+                    <p className="text-xs text-altar-muted/50 mb-8">
+                        Three-card spreads, Celtic Cross, career paths, and more — all aligned to your stars.
+                    </p>
+                    <button
+                        onClick={() => setStep('value2')}
+                        className="w-full py-3.5 rounded-xl font-display tracking-wide transition-all bg-altar-gold/15 text-altar-gold border border-altar-gold/25 hover:border-altar-gold/50"
+                    >
+                        Next →
+                    </button>
+                </div>
+            )}
+
+            {/* ── Value Carousel Screen 2 ── */}
+            {step === 'value2' && (
+                <div className="text-center max-w-[380px] animate-fade-up w-full" style={{ marginTop: '-5vh' }}>
+                    <div className="w-20 h-20 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-indigo-900/60 to-purple-800/40 flex items-center justify-center shadow-[0_0_40px_rgba(99,102,241,0.3)]">
+                        <span className="text-4xl">⭐</span>
+                    </div>
+                    <h2 className="font-display text-xl text-altar-gold tracking-[3px] mb-3">YOUR COSMIC BLUEPRINT</h2>
+                    <p className="text-sm text-altar-muted leading-relaxed mb-2">
+                        A complete natal chart with your Sun, Moon, and Rising signs — revealing who you are, how you feel, and how the world sees you.
+                    </p>
+                    <p className="text-xs text-altar-muted/50 mb-8">
+                        Planetary transits, house placements, and aspect patterns mapped to your exact birth moment.
+                    </p>
+                    <button
+                        onClick={() => setStep('value3')}
+                        className="w-full py-3.5 rounded-xl font-display tracking-wide transition-all bg-altar-gold/15 text-altar-gold border border-altar-gold/25 hover:border-altar-gold/50"
+                    >
+                        Next →
+                    </button>
+                    <button onClick={() => setStep('value1')} className="mt-3 text-xs text-altar-muted/50 hover:text-altar-muted transition-colors">← Back</button>
+                </div>
+            )}
+
+            {/* ── Value Carousel Screen 3 ── */}
+            {step === 'value3' && (
+                <div className="text-center max-w-[380px] animate-fade-up w-full" style={{ marginTop: '-5vh' }}>
+                    <div className="w-20 h-20 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-amber-900/60 to-orange-800/40 flex items-center justify-center shadow-[0_0_40px_rgba(245,158,11,0.3)]">
+                        <span className="text-4xl">📖</span>
+                    </div>
+                    <h2 className="font-display text-xl text-altar-gold tracking-[3px] mb-3">DAILY GUIDANCE</h2>
+                    <p className="text-sm text-altar-muted leading-relaxed mb-2">
+                        Horoscopes, numerology, angel numbers, and cosmic timing — all updated daily to guide your journey.
+                    </p>
+                    <p className="text-xs text-altar-muted/50 mb-8">
+                        Your Life Path Number, transit alerts, and personalized insights — everything in one sacred space.
+                    </p>
+                    <button
+                        onClick={() => setStep('name')}
+                        className="w-full py-3.5 rounded-xl font-display tracking-wide transition-all bg-altar-gold/15 text-altar-gold border border-altar-gold/25 hover:border-altar-gold/50"
+                    >
+                        Let's Get Started →
+                    </button>
+                    <button onClick={() => setStep('value2')} className="mt-3 text-xs text-altar-muted/50 hover:text-altar-muted transition-colors">← Back</button>
                 </div>
             )}
 
@@ -198,11 +339,12 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                         disabled={!name.trim()}
                         className={`w-full mt-5 py-3.5 rounded-xl font-display tracking-wide transition-all ${name.trim()
                             ? 'bg-altar-gold/15 text-altar-gold border border-altar-gold/25 hover:border-altar-gold/50'
-                            : 'bg-white/5 text-white/25 border border-white/5 cursor-not-allowed'
+                            : 'bg-white/5 text-white/40 border border-white/5 cursor-not-allowed'
                             }`}
                     >
                         Continue →
                     </button>
+                    <button onClick={() => setStep('value3')} className="mt-3 text-xs text-altar-muted/50 hover:text-altar-muted transition-colors">← Back</button>
                 </div>
             )}
 
@@ -235,7 +377,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                         disabled={!birthday}
                         className={`w-full mt-5 py-3.5 rounded-xl font-display tracking-wide transition-all ${birthday
                             ? 'bg-altar-gold/15 text-altar-gold border border-altar-gold/25 hover:border-altar-gold/50'
-                            : 'bg-white/5 text-white/25 border border-white/5 cursor-not-allowed'
+                            : 'bg-white/5 text-white/40 border border-white/5 cursor-not-allowed'
                             }`}
                     >
                         Continue →
@@ -309,13 +451,264 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                     </p>
 
                     <button
-                        onClick={handleDetailsNext}
+                        onClick={() => {
+                            setStep('reveal');
+                            setRevealReady(false);
+                            setTimeout(() => setRevealReady(true), 1200);
+                        }}
                         className="w-full py-3.5 rounded-xl font-display tracking-wide transition-all bg-altar-gold/15 text-altar-gold border border-altar-gold/25 hover:border-altar-gold/50"
                     >
                         Reveal My Stars →
                     </button>
 
                     <button onClick={() => setStep('birthday')} className="mt-3 text-xs text-altar-muted/50 hover:text-altar-muted transition-colors">← Back</button>
+                </div>
+            )}
+
+            {/* ── Enriched Reveal ── */}
+            {step === 'reveal' && sunSign && (
+                <div className="text-center max-w-[380px] w-full overflow-y-auto max-h-[85vh] pb-6">
+                    {/* Animated zodiac reveal */}
+                    <div className="animate-card-entrance">
+                        <div className="relative w-24 h-24 mx-auto mb-5">
+                            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-altar-mid to-altar-bright shadow-[0_0_60px_rgba(139,95,191,0.5)] animate-pulse-glow" />
+                            <div className="absolute inset-0 flex items-center justify-center text-5xl">
+                                {sunSign.glyph}
+                            </div>
+                        </div>
+
+                        <h2 className="font-display text-2xl text-altar-gold tracking-[4px] mb-1">
+                            {sunSign.name.toUpperCase()}
+                        </h2>
+                        <p className="text-sm text-altar-muted mb-1">{sunSign.dates}</p>
+                        <p className="text-xs text-altar-muted/60 mb-5">
+                            {sunSign.element} Sign · Ruled by {sunSign.ruling}
+                        </p>
+
+                        <p className="text-sm text-altar-text/80 leading-relaxed mb-5">
+                            Welcome, <span className="text-altar-gold font-display">{name}</span>. The stars have been waiting for you.
+                        </p>
+                    </div>
+
+                    {/* ── Today's Horoscope Preview ── */}
+                    {horoscope && (
+                        <div className="glass-strong rounded-xl p-4 mb-4 text-left animate-fade-up" style={{ animationDelay: '0.4s', opacity: 0 }}>
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className="text-sm">{sunSign.glyph}</span>
+                                <span className="text-[11px] font-display text-altar-gold tracking-[2px] uppercase">{sunSign.name} Today</span>
+                                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-altar-gold/10 text-altar-gold/70 ml-auto">{horoscope.mood}</span>
+                            </div>
+                            <p className="text-xs text-altar-text/70 leading-relaxed italic">
+                                "{horoscope.daily}"
+                            </p>
+                        </div>
+                    )}
+
+                    {/* ── Life Path Number ── */}
+                    {lifePathNumber !== null && (
+                        <div className="glass-strong rounded-xl p-4 mb-4 text-left animate-fade-up" style={{ animationDelay: '0.6s', opacity: 0 }}>
+                            <div className="flex items-center gap-2 mb-2">
+                                <div className="w-8 h-8 rounded-full bg-altar-gold/15 border border-altar-gold/25 flex items-center justify-center">
+                                    <span className="font-display text-altar-gold text-sm font-bold">{lifePathNumber}</span>
+                                </div>
+                                <span className="text-[10px] font-display text-altar-gold tracking-[2px] uppercase">Life Path Number</span>
+                            </div>
+                            <p className="text-xs text-altar-text/70 leading-relaxed">
+                                {LIFE_PATH_BRIEF[lifePathNumber] || `Life Path ${lifePathNumber} — a rare and powerful vibration`}
+                            </p>
+                        </div>
+                    )}
+
+
+
+                    {revealReady && (
+                        <button
+                            onClick={() => setStep('notifications')}
+                            className="w-full py-4 rounded-2xl bg-gradient-to-br from-altar-mid to-altar-bright border border-altar-gold/20 text-base font-display font-semibold tracking-wide animate-fade-up transition-all hover:translate-y-[-2px] hover:shadow-[0_6px_20px_rgba(255,215,0,0.2)] hover:border-altar-gold/40 active:scale-[0.98]"
+                        >
+                            Continue →
+                        </button>
+                    )}
+                </div>
+            )}
+
+            {/* ── Notification Permission ── */}
+            {step === 'notifications' && (
+                <div className="text-center max-w-[380px] animate-fade-up w-full" style={{ marginTop: '-5vh' }}>
+                    <div className="w-20 h-20 mx-auto mb-5 rounded-full bg-gradient-to-br from-altar-mid/40 to-altar-bright/20 flex items-center justify-center shadow-[0_0_40px_rgba(139,95,191,0.2)]">
+                        <span className="text-4xl">🔔</span>
+                    </div>
+                    <h2 className="font-display text-xl text-altar-gold tracking-[3px] mb-2">DAILY COSMIC GUIDANCE</h2>
+                    <p className="text-sm text-altar-muted leading-relaxed mb-6">
+                        Get gentle reminders aligned to your chart:
+                    </p>
+
+                    <div className="space-y-2.5 mb-6">
+                        {[
+                            { icon: '🌅', text: 'Morning horoscope and daily card' },
+                            { icon: '🌑', text: 'New moon and full moon rituals' },
+                            { icon: '🪐', text: 'Transit alerts when planets shift' },
+                            { icon: '📓', text: 'Evening journal reflection nudges' },
+                        ].map((item, i) => (
+                            <div key={i} className="flex items-center gap-3 glass rounded-xl px-4 py-3 animate-fade-up" style={{ animationDelay: `${i * 0.1}s`, opacity: 0 }}>
+                                <span className="text-base">{item.icon}</span>
+                                <span className="text-xs text-altar-text">{item.text}</span>
+                            </div>
+                        ))}
+                    </div>
+
+                    <button
+                        onClick={handleNotificationRequest}
+                        className="w-full py-3.5 rounded-2xl bg-gradient-to-br from-altar-mid to-altar-bright border border-altar-gold/20 font-display font-semibold tracking-wide transition-all hover:translate-y-[-1px] hover:shadow-[0_4px_16px_rgba(255,215,0,0.15)] active:scale-[0.98]"
+                    >
+                        Enable Notifications
+                    </button>
+
+                    <button
+                        onClick={() => setStep('paywall')}
+                        className="mt-3 text-xs text-altar-muted/50 hover:text-altar-muted transition-colors"
+                    >
+                        Not now
+                    </button>
+                </div>
+            )}
+
+            {/* ── Soft Paywall ── */}
+            {step === 'paywall' && (
+                <div className="text-center max-w-[380px] w-full overflow-y-auto max-h-[90vh] pb-4" style={{ marginTop: '-2vh' }}>
+                    <div className="animate-fade-up">
+                        <div className="text-2xl mb-2">👑</div>
+                        <h2 className="font-display text-xl shimmer-text font-semibold tracking-wide mb-1">
+                            Unlock Your Full Journey
+                        </h2>
+                        <p className="text-xs text-altar-muted mb-4">
+                            Elevate your mystical experience
+                        </p>
+                    </div>
+
+                    {/* Features */}
+                    <div className="space-y-2 mb-3">
+                        {[
+                            { icon: '🌙', text: 'Year Ahead Forecast — personalized to your chart' },
+                            { icon: '🔮', text: 'Unlimited Tarot — all spreads, no daily cap' },
+                            { icon: '📊', text: 'Celtic Cross, Career Path & Compatibility' },
+                            { icon: '🎵', text: 'Full Sound Library — Solfeggio & Breathwork Codex' },
+                        ].map((feature, i) => (
+                            <div
+                                key={i}
+                                className="flex items-center gap-2.5 glass rounded-xl px-3 py-2.5 animate-fade-up"
+                                style={{ animationDelay: `${i * 0.1}s`, opacity: 0 }}
+                            >
+                                <span className="text-base">{feature.icon}</span>
+                                <span className="text-[13px] text-altar-text font-medium leading-tight">{feature.text}</span>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Social Proof */}
+
+
+                    {/* Free Trial Badge */}
+                    <div className="flex justify-center mb-3">
+                        <div className="px-3.5 py-1 rounded-full text-[10px] font-display tracking-wider"
+                            style={{
+                                background: 'linear-gradient(135deg, rgba(212,175,55,0.15), rgba(212,175,55,0.05))',
+                                border: '1px solid rgba(212,175,55,0.3)',
+                                color: '#d4af37',
+                            }}>
+                            ✦ 7-Day Free Trial — Cancel Anytime
+                        </div>
+                    </div>
+
+                    {/* Plan Selector */}
+                    <div className="grid grid-cols-2 gap-2.5 mb-4">
+                        {(['MONTHLY', 'YEARLY'] as const).map((key) => {
+                            const plan = PRODUCTS[key];
+                            return (
+                                <button
+                                    key={key}
+                                    onClick={() => setSelectedPlan(key)}
+                                    className={`relative rounded-2xl p-3 text-center transition-all border-2 ${selectedPlan === key
+                                        ? 'border-altar-gold bg-altar-gold/10 shadow-[0_0_20px_rgba(255,215,0,0.15)]'
+                                        : 'border-white/10 glass hover:border-white/20'
+                                        }`}
+                                >
+                                    {plan.savings && (
+                                        <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-green-500 text-[10px] text-white font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
+                                            {plan.savings}
+                                        </span>
+                                    )}
+                                    <div className="text-[11px] text-altar-muted mb-0.5 font-medium">{plan.label}</div>
+                                    <div className="font-display text-base text-white font-semibold">
+                                        {plan.price}
+                                        <span className="text-[11px] text-altar-muted font-sans">{plan.period}</span>
+                                    </div>
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {/* Error */}
+                    {purchaseError && (
+                        <div className="mb-3 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-center">
+                            <p className="text-xs text-red-300">{purchaseError}</p>
+                        </div>
+                    )}
+
+                    {/* Subscribe Button */}
+                    <button
+                        onClick={handlePurchase}
+                        disabled={isPurchasing || isRestoring}
+                        className={`w-full py-3.5 rounded-2xl font-display font-bold text-base tracking-wide transition-all ${!isPurchasing && !isRestoring
+                            ? 'bg-gradient-to-r from-altar-gold via-altar-gold-dim to-altar-gold text-altar-deep hover:shadow-[0_0_30px_rgba(255,215,0,0.4)] hover:scale-[1.02] active:scale-[0.98]'
+                            : 'bg-white/10 text-white/30 cursor-not-allowed'
+                            }`}
+                    >
+                        {isPurchasing ? (
+                            <span className="flex items-center justify-center gap-2">
+                                <span className="w-5 h-5 border-2 border-altar-deep/30 border-t-altar-deep rounded-full animate-spin" />
+                                Processing…
+                            </span>
+                        ) : (
+                            `Start Free Trial — then ${PRODUCTS[selectedPlan].price}${PRODUCTS[selectedPlan].period}`
+                        )}
+                    </button>
+
+                    {/* Restore */}
+                    <button
+                        onClick={handleRestore}
+                        disabled={isPurchasing || isRestoring}
+                        className="w-full mt-2 py-2 rounded-xl text-xs text-altar-muted hover:text-white transition-colors disabled:opacity-50"
+                    >
+                        {isRestoring ? (
+                            <span className="flex items-center justify-center gap-2">
+                                <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                Restoring…
+                            </span>
+                        ) : (
+                            'Restore Purchases'
+                        )}
+                    </button>
+
+                    {/* Skip */}
+                    <button
+                        onClick={() => setStep('consent')}
+                        className="mt-1 text-xs text-altar-muted/50 hover:text-altar-muted transition-colors"
+                    >
+                        Continue Free →
+                    </button>
+
+                    {/* Subscription terms */}
+                    <div className="mt-2">
+                        <p className="text-center text-[10px] text-white/40 leading-snug">
+                            Payment charged to Apple ID at purchase. Auto-renews unless cancelled 24 hrs before period ends. Manage in App Store settings.
+                        </p>
+                        <div className="flex items-center justify-center gap-2 text-[10px] mt-1.5">
+                            <button onClick={() => openLegal('terms')} className="text-altar-gold/40 hover:text-altar-gold transition-colors underline">Terms</button>
+                            <span className="text-white/10">·</span>
+                            <button onClick={() => openLegal('privacy')} className="text-altar-gold/40 hover:text-altar-gold transition-colors underline">Privacy</button>
+                        </div>
+                    </div>
                 </div>
             )}
 
@@ -336,6 +729,9 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                             <li className="flex gap-2"><span className="text-altar-gold">•</span> Data is processed by <span className="text-altar-gold">OpenRouter</span> (third-party AI service)</li>
                             <li className="flex gap-2"><span className="text-altar-gold">•</span> All other data stays on your device</li>
                         </ul>
+                        <button onClick={() => openLegal('privacy')} className="mt-3 text-[10px] text-altar-gold/60 hover:text-altar-gold transition-colors underline">
+                            Read our Privacy Policy →
+                        </button>
                     </div>
 
                     <button
@@ -353,66 +749,32 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                     </button>
 
                     <button
-                        onClick={handleConsentNext}
-                        className="w-full py-3.5 rounded-xl font-display tracking-wide transition-all bg-altar-gold/15 text-altar-gold border border-altar-gold/25 hover:border-altar-gold/50"
+                        onClick={() => {
+                            safeStorage.setItem('ai_consent', JSON.stringify({ consented: aiConsent, timestamp: new Date().toISOString() }));
+                            handleFinish();
+                        }}
+                        className="w-full py-4 rounded-2xl bg-gradient-to-br from-altar-mid to-altar-bright border border-altar-gold/20 text-base font-display font-semibold tracking-wide transition-all hover:translate-y-[-2px] hover:shadow-[0_6px_20px_rgba(255,215,0,0.2)] hover:border-altar-gold/40 active:scale-[0.98]"
                     >
-                        Continue →
+                        ✦ Enter the Altar ✦
                     </button>
 
                     <p className="text-[10px] text-altar-muted/40 mt-3">
                         You can still use tarot, astrology, and numerology without AI. {!aiConsent && 'AI features will be disabled.'}
                     </p>
 
-                    <button onClick={() => setStep('birthdetails')} className="mt-3 text-xs text-altar-muted/50 hover:text-altar-muted transition-colors">← Back</button>
-                </div>
-            )}
-
-            {/* ── Reveal ── */}
-            {step === 'reveal' && sunSign && (
-                <div className="text-center max-w-[380px] w-full">
-                    {/* Animated zodiac reveal */}
-                    <div className="animate-card-entrance">
-                        <div className="relative w-28 h-28 mx-auto mb-6">
-                            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-altar-mid to-altar-bright shadow-[0_0_60px_rgba(139,95,191,0.5)] animate-pulse-glow" />
-                            <div className="absolute inset-0 flex items-center justify-center text-6xl">
-                                {sunSign.glyph}
-                            </div>
-                        </div>
-
-                        <h2 className="font-display text-2xl text-altar-gold tracking-[4px] mb-1">
-                            {sunSign.name.toUpperCase()}
-                        </h2>
-                        <p className="text-sm text-altar-muted mb-1">{sunSign.dates}</p>
-                        <p className="text-xs text-altar-muted/60 mb-6">
-                            {sunSign.element} Sign · Ruled by {sunSign.ruling}
-                        </p>
-
-                        <p className="text-sm text-altar-text/80 leading-relaxed mb-8">
-                            Welcome, <span className="text-altar-gold font-display">{name}</span>. The stars have been waiting for you.
-                            Your {sunSign.name} energy guides your readings from this moment forward.
-                        </p>
-                    </div>
-
-                    {revealReady && (
-                        <button
-                            onClick={handleFinish}
-                            className="w-full py-4 rounded-2xl bg-gradient-to-br from-altar-mid to-altar-bright border border-altar-gold/20 text-base font-display font-semibold tracking-wide animate-fade-up transition-all hover:translate-y-[-2px] hover:shadow-[0_6px_20px_rgba(255,215,0,0.2)] hover:border-altar-gold/40 active:scale-[0.98]"
-                        >
-                            ✦ Enter the Altar ✦
-                        </button>
-                    )}
+                    <button onClick={() => setStep('paywall')} className="mt-3 text-xs text-altar-muted/50 hover:text-altar-muted transition-colors">← Back</button>
                 </div>
             )}
 
             {/* Step indicator */}
             {step !== 'welcome' && (
-                <div className="absolute bottom-8 flex gap-2">
-                    {['name', 'birthday', 'birthdetails', 'consent', 'reveal'].map((s) => (
+                <div className="absolute bottom-8 flex gap-1.5">
+                    {PROGRESS_STEPS.map((s) => (
                         <div
                             key={s}
-                            className={`h-1 rounded-full transition-all duration-500 ${step === s || stepIndex > STEPS.indexOf(s as any)
-                                ? 'w-6 bg-altar-gold/60'
-                                : 'w-2 bg-white/15'
+                            className={`h-1 rounded-full transition-all duration-500 ${step === s || progressIndex > PROGRESS_STEPS.indexOf(s)
+                                ? 'w-4 bg-altar-gold/60'
+                                : 'w-1.5 bg-white/15'
                                 }`}
                         />
                     ))}

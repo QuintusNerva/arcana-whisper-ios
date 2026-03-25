@@ -630,7 +630,7 @@ export function VisionBoard({ onClose }: VisionBoardProps) {
                             Collect images, write affirmations, and set goals.
                             See your future before it arrives.
                         </p>
-                        <button onClick={() => setShowAddModal(true)} style={{
+                        <button onClick={() => setShowAddModal(true)} className="gold-shimmer" style={{
                             padding: '14px 32px', borderRadius: '24px',
                             background: 'linear-gradient(135deg, #f3d077, #8a6e2f)',
                             border: 'none',
@@ -639,6 +639,8 @@ export function VisionBoard({ onClose }: VisionBoardProps) {
                             letterSpacing: '0.15em',
                             textTransform: 'uppercase' as const,
                             boxShadow: '0 4px 20px rgba(212,175,55,0.25)',
+                            position: 'relative' as const,
+                            overflow: 'hidden' as const,
                         }}>+ Add Your First Vision</button>
                     </div>
                 ) : (

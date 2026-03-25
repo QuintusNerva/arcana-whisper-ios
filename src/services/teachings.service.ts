@@ -96,7 +96,7 @@ export const GUIDES: Guide[] = [
     {
         id: 'luna-tides',
         name: 'Luna Tides',
-        domain: 'Moon Rituals',
+        domain: 'Lunar Cycles',
         emoji: '🌊',
         image: '/guide-luna-tides.png',
         color: 'linear-gradient(135deg, #1a2a4a, #2d4a7a)',

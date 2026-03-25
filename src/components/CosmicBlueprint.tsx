@@ -3,7 +3,7 @@ import {
     getBirthData, getNatalTriad, getFullChart, getLifePathNumber, getLifePathMeaning,
     getCurrentPersonalYear, ZODIAC_SIGNS, FullChartData,
 } from '../services/astrology.service';
-import { AIService, dailyCache } from '../services/ai.service';
+import { AIService, permanentCache } from '../services/ai.service';
 import { AIResponseRenderer } from './AIResponseRenderer';
 
 interface CosmicBlueprintProps {
@@ -164,7 +164,7 @@ export function CosmicBlueprint({ onTabChange }: CosmicBlueprintProps) {
     const lunarData = React.useMemo(() => getLunarData(), []);
 
     React.useEffect(() => {
-        const cached = dailyCache.get('blueprint');
+        const cached = permanentCache.get('blueprint');
         if (cached) setReading(cached);
     }, []);
 
@@ -222,7 +222,7 @@ export function CosmicBlueprint({ onTabChange }: CosmicBlueprintProps) {
                 { number: personalYear },
             );
             setReading(result);
-            dailyCache.set('blueprint', result);
+            permanentCache.set('blueprint', result);
         } catch {
             setError('Failed to generate blueprint. Try again.');
         } finally {
@@ -408,7 +408,7 @@ export function CosmicBlueprint({ onTabChange }: CosmicBlueprintProps) {
                                 border: '1px solid rgba(255,255,255,0.06)',
                             }}
                         >
-                            <p className="text-[13px] font-display text-altar-gold tracking-[3px] uppercase mb-3 text-center">✦ Your Cosmic Blueprint ✦</p>
+
                             <div className={collapsed ? 'max-h-[100px] overflow-hidden relative' : ''}>
                                 <AIResponseRenderer text={reading} />
                                 {collapsed && (
@@ -483,24 +483,25 @@ export function CosmicBlueprint({ onTabChange }: CosmicBlueprintProps) {
                 </div>
             </div>
 
-            {/* ── Scripting Shortcut (outside card, tightened gap) ── */}
+            {/* ── Dream Journal Shortcut (outside card, tightened gap) ── */}
             <div style={{ margin: '4px 0 0' }}>
                 <button
-                    data-coach="scripting"
+                    data-coach="dream-journal"
                     onClick={() => onTabChange('journal')}
                     className="w-full flex items-center justify-between px-5 py-3.5 rounded-2xl transition-all hover:bg-white/[0.04] active:scale-[0.98] group"
                     style={{ background: 'rgba(35,20,60,0.5)', border: '1px solid rgba(212,175,55,0.08)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
                 >
-                    <span className="flex items-center gap-2 text-[11px] font-display italic" style={{ color: 'rgba(212,175,55,0.75)' }}>
-                        <span className="inline-flex items-center" style={{ width: 16, height: 16 }}>
+                    <span className="flex items-center gap-2.5 text-[14px] font-display italic" style={{ color: 'rgba(212,175,55,0.75)' }}>
+                        <span className="inline-flex items-center" style={{ width: 18, height: 18 }}>
                             <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" style={{ stroke: 'var(--color-altar-gold)', strokeWidth: 1.3, fill: 'none', filter: 'drop-shadow(0 0 6px rgba(212,175,55,0.5))' }}>
-                                <path d="M3 17 L3 14 L14 3 L17 6 L6 17 Z" strokeLinejoin="round" />
-                                <line x1={12} y1={5} x2={15} y2={8} opacity={0.4} />
+                                <path d="M15 3c-4 1-6.5 4.5-6.5 8.5s2.5 6.5 6.5 7.5c-5 0-9.5-4-9.5-8.5S6.5 2 11.5 1c1 0 2.3.4 3.5 1V3z" strokeLinejoin="round" />
+                                <circle cx="14" cy="6" r="0.8" fill="var(--color-altar-gold)" stroke="none" opacity="0.5" />
+                                <circle cx="16" cy="9" r="0.5" fill="var(--color-altar-gold)" stroke="none" opacity="0.3" />
                             </svg>
                         </span>
-                        What are you scripting today?
+                        Dream Journal
                     </span>
-                    <span className="text-[9px] text-altar-gold/40 group-hover:text-altar-gold/60 transition-colors font-display">Create →</span>
+                    <span className="text-[11px] text-altar-gold/40 group-hover:text-altar-gold/60 transition-colors font-display">Write →</span>
                 </button>
             </div>
         </div>

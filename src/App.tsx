@@ -40,7 +40,7 @@ import { fireTransitNotification, getTransitFeed } from './services/transit.serv
 import { fireJournalReminder, getJournalEntries, getPatternProgress } from './services/journal.service';
 import { getDreamEntries } from './services/dream-journal.service';
 import { getBirthData, getSunSign, getDailyHoroscope, ZODIAC_SIGNS } from './services/astrology.service';
-import { initializePurchases } from './services/storekit.service';
+import { initializePurchases, PRODUCTS } from './services/storekit.service';
 
 /* ── Portal card icons ── */
 import iconTarot from './assets/icons/tarot.png';
@@ -112,7 +112,7 @@ function HoroscopeSnippet({ onTap }: { onTap: () => void }) {
     const horoscope = sign ? getDailyHoroscope(sign.id) : null;
 
     return (
-        <div className="mx-5 my-4 animate-fade-up" style={{ animationDelay: '0.65s', opacity: 0 }}>
+        <div className="mx-5 my-4 animate-fade-up" style={{ animationDelay: '0.35s', opacity: 0 }}>
             <button onClick={onTap} className="w-full text-left group">
                 <div className="relative overflow-hidden rounded-2xl border border-white/8 bg-gradient-to-r from-indigo-900/30 via-purple-900/20 to-indigo-900/30 p-4 transition-all group-hover:border-altar-gold/20">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full blur-3xl" />
@@ -124,13 +124,13 @@ function HoroscopeSnippet({ onTap }: { onTap: () => void }) {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-1">
-                                        <span className="text-[10px] font-display text-altar-gold tracking-[2px] uppercase">{sign.name} Today</span>
-                                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-altar-gold/10 text-altar-gold/70">{horoscope?.mood}</span>
+                                        <span className="text-[11px] font-display text-altar-gold tracking-[2px] uppercase">{sign.name} Today</span>
+                                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-altar-gold/10 text-altar-gold/70">{horoscope?.mood}</span>
                                     </div>
                                     <p className="text-xs text-altar-text/70 leading-relaxed line-clamp-2 italic">
                                         "{horoscope?.daily}"
                                     </p>
-                                    <span className="text-[10px] text-altar-gold/50 mt-1 inline-block group-hover:text-altar-gold/80 transition-colors">
+                                    <span className="text-[11px] text-altar-gold/50 mt-1 inline-block group-hover:text-altar-gold/80 transition-colors">
                                         Read full horoscope →
                                     </span>
                                 </div>
@@ -140,7 +140,7 @@ function HoroscopeSnippet({ onTap }: { onTap: () => void }) {
                                 <span className="text-2xl">✨</span>
                                 <div>
                                     <p className="text-xs font-display text-altar-muted tracking-[2px] uppercase">Daily Horoscope</p>
-                                    <p className="text-[10px] text-altar-muted/60 mt-0.5">Enter your birthday to unlock</p>
+                                    <p className="text-[11px] text-altar-muted/60 mt-0.5">Enter your birthday to unlock</p>
                                 </div>
                                 <span className="text-altar-gold/50 ml-auto">→</span>
                             </div>
@@ -209,11 +209,11 @@ function EnergyInterpretation({ cards }: { cards: Card[] }) {
             {loading ? (
                 <div className="flex items-center justify-center gap-2 py-2">
                     <div className="w-1 h-1 bg-altar-gold/50 rounded-full animate-pulse" />
-                    <span className="text-[10px] text-altar-muted/60 italic">Reading the energy...</span>
+                    <span className="text-[11px] text-altar-muted/60 italic">Reading the energy...</span>
                     <div className="w-1 h-1 bg-altar-gold/50 rounded-full animate-pulse" style={{ animationDelay: '0.3s' }} />
                 </div>
             ) : (
-                <p className="text-[11px] text-altar-text/60 leading-relaxed text-center italic">
+                <p className="text-xs text-altar-text/60 leading-relaxed text-center italic">
                     "{interpretation}"
                 </p>
             )}
@@ -225,7 +225,7 @@ function EnergyInterpretation({ cards }: { cards: Card[] }) {
 /* ── Inline Premium CTA Banner ── */
 function PremiumBanner({ onClick, remaining }: { onClick: () => void; remaining: number }) {
     return (
-        <div className="mx-5 my-4 animate-fade-up" style={{ animationDelay: '0.6s', opacity: 0 }}>
+        <div className="mx-5 my-4 animate-fade-up" style={{ animationDelay: '0.4s', opacity: 0 }}>
             <button
                 onClick={onClick}
                 className="w-full relative overflow-hidden rounded-2xl p-[1px] bg-gradient-to-r from-altar-gold/50 via-altar-bright/30 to-altar-gold/50 group cursor-pointer"
@@ -240,11 +240,11 @@ function PremiumBanner({ onClick, remaining }: { onClick: () => void; remaining:
                         <div className="text-left">
                             <span className="shimmer-text font-display text-sm font-semibold">Unlock Premium</span>
                             <p className="text-xs text-altar-muted mt-0.5">Deep Insights · Unlimited Readings</p>
-                            <p className="text-[10px] text-altar-text/50 mt-1">{remaining} of 3 free readings remaining today</p>
+                            <p className="text-[11px] text-altar-text/50 mt-1">{remaining} of 3 free readings remaining today</p>
                         </div>
                     </div>
                     <div className="px-3 py-1.5 rounded-full bg-altar-gold/10 border border-altar-gold/30 text-xs text-altar-gold font-medium group-hover:border-altar-gold/60 transition-colors">
-                        $4.99/mo
+                        {PRODUCTS.MONTHLY.price}{PRODUCTS.MONTHLY.period}
                     </div>
                 </div>
             </button>
@@ -404,7 +404,7 @@ function App() {
 
         setCurrentTab(tab);
         if (tab === 'new' || tab.startsWith('new:')) {
-            if (!canDoReading(sub)) {
+            if (!canDoReading(sub === 'premium')) {
                 setShowPremiumOverlay(true);
                 return;
             }
@@ -794,13 +794,13 @@ function App() {
                     {/* Profile gear icon — inside header, above gradient overlay */}
                     <button
                         onClick={() => setShowProfileModal(true)}
-                        className="absolute right-4 top-5 z-20 transition-opacity hover:opacity-70 active:scale-90"
-                        style={{ opacity: 0.4, lineHeight: 1 }}
+                        className="absolute right-4 top-5 z-20 transition-all hover:opacity-80 active:scale-90"
+                        style={{ opacity: 0.75, lineHeight: 1, padding: '6px', borderRadius: '50%', background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.15)' }}
                         aria-label="Profile settings"
                     >
-                        <svg width={17} height={17} viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" style={{ fill: 'var(--color-altar-gold)', filter: 'drop-shadow(0 0 3px rgba(212,175,55,0.3))' }}>
+                        <svg width={22} height={22} viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" style={{ fill: 'var(--color-altar-gold)', filter: 'drop-shadow(0 0 4px rgba(212,175,55,0.5))' }}>
                             <path d="M10 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" />
-                            <path fillRule="evenodd" d="M8.5 1.5a1.5 1.5 0 00-1.415 1.002L6.72 3.598A7.536 7.536 0 005.18 4.5l-1.132-.441a1.5 1.5 0 00-1.792.68l-1.5 2.598a1.5 1.5 0 00.377 1.883l.834.606c-.057.437-.086.885-.086 1.338 0 .453.029.9.086 1.338l-.834.605a1.5 1.5 0 00-.377 1.883l1.5 2.598a1.5 1.5 0 001.792.68l1.133-.441c.48.38.998.71 1.54.994l.366 1.095A1.5 1.5 0 0010.12 20h3l.001-.002a1.5 1.5 0 001.414-1.002l.365-1.095a7.523 7.523 0 001.541-.994l1.133.441a1.5 1.5 0 001.792-.68l1.5-2.598a1.5 1.5 0 00-.377-1.883l-.834-.605c.057-.437.086-.885.086-1.338 0-.453-.029-.9-.086-1.338l.834-.606a1.5 1.5 0 00.377-1.883l-1.5-2.598a1.5 1.5 0 00-1.792-.68l-1.133.441a7.524 7.524 0 00-1.54-.994L11.5 2.502A1.5 1.5 0 0010 1.5H8.5zM10 14a4 4 0 100-8 4 4 0 000 8z" clipRule="evenodd" opacity={0.3} />
+                            <path fillRule="evenodd" d="M8.5 1.5a1.5 1.5 0 00-1.415 1.002L6.72 3.598A7.536 7.536 0 005.18 4.5l-1.132-.441a1.5 1.5 0 00-1.792.68l-1.5 2.598a1.5 1.5 0 00.377 1.883l.834.606c-.057.437-.086.885-.086 1.338 0 .453.029.9.086 1.338l-.834.605a1.5 1.5 0 00-.377 1.883l1.5 2.598a1.5 1.5 0 001.792.68l1.133-.441c.48.38.998.71 1.54.994l.366 1.095A1.5 1.5 0 0010.12 20h3l.001-.002a1.5 1.5 0 001.414-1.002l.365-1.095a7.523 7.523 0 001.541-.994l1.133.441a1.5 1.5 0 001.792-.68l1.5-2.598a1.5 1.5 0 00-.377-1.883l-.834-.605c.057-.437.086-.885.086-1.338 0-.453-.029-.9-.086-1.338l.834-.606a1.5 1.5 0 00.377-1.883l-1.5-2.598a1.5 1.5 0 00-1.792-.68l-1.133.441a7.524 7.524 0 00-1.54-.994L11.5 2.502A1.5 1.5 0 0010 1.5H8.5zM10 14a4 4 0 100-8 4 4 0 000 8z" clipRule="evenodd" opacity={0.4} />
                         </svg>
                     </button>
 
@@ -831,23 +831,23 @@ function App() {
 
 
                     {/* ── Portal Cards ── */}
-                    <div className="mx-3 mb-4 animate-fade-up" style={{ animationDelay: '0.5s', opacity: 0 }}>
+                    <div className="mx-3 mb-4 animate-fade-up" style={{ animationDelay: '0.3s', opacity: 0 }}>
                         <h3 className="font-display text-center text-sm tracking-[5px] text-altar-gold uppercase mb-4">
                             <span className="text-altar-gold">✦</span> Your Portal <span className="text-altar-gold">✦</span>
                         </h3>
                         <div className="grid grid-cols-3 gap-2.5">
                             {[
-                                { label: 'Tarot', tagline: "Today's energy + spreads", tab: 'tarot', icon: iconTarot },
-                                { label: 'Relationships', tagline: 'Cosmic bonds', tab: 'compatibility', icon: iconRelationships },
-                                { label: 'Angel Numbers', tagline: 'Signs & synchronicities', tab: 'angelnumbers', icon: iconAngelNumbers },
-                                { label: 'Natal', tagline: 'Your birth blueprint', tab: 'natal', icon: iconNatal },
-                                { label: 'Family', tagline: 'Circle of souls', tab: 'family', icon: iconFamily },
-                                { label: 'Career', tagline: 'Your true calling', tab: 'career', icon: iconCareer },
+                                { label: 'Tarot', tagline: "Today's energy + spreads", tab: 'tarot', icon: iconTarot, goldTint: true, iconSize: 200 },
+                                { label: 'Relationships', tagline: 'Cosmic bonds', tab: 'compatibility', icon: iconRelationships, goldTint: true, iconSize: 66 },
+                                { label: 'Angel Numbers', tagline: 'Signs & synchronicities', tab: 'angelnumbers', icon: iconAngelNumbers, goldTint: true, iconSize: 80 },
+                                { label: 'Natal', tagline: 'Your birth blueprint', tab: 'natal', icon: iconNatal, goldTint: true, iconSize: 80 },
+                                { label: 'Family', tagline: 'Circle of souls', tab: 'family', icon: iconFamily, goldTint: true, iconSize: 80 },
+                                { label: 'Career', tagline: 'Your true calling', tab: 'career', icon: iconCareer, goldTint: true, iconSize: 80 },
                             ].map(item => (
                                 <button
                                     key={item.tab}
                                     onClick={() => handleTabChange(item.tab)}
-                                    className="relative flex flex-col items-center justify-center gap-2.5 rounded-[20px] px-2.5 pt-5 pb-4 transition-all duration-250 overflow-hidden active:scale-[0.96]"
+                                    className="relative flex flex-col items-center justify-center gap-2.5 rounded-[20px] px-2.5 pt-5 pb-4 transition-all duration-250 overflow-hidden active:scale-[0.96] active:opacity-80"
                                     style={{
                                         background: 'linear-gradient(165deg, rgba(35,20,60,0.85) 0%, rgba(18,10,40,0.95) 100%)',
                                         border: '1px solid rgba(212,175,55,0.12)',
@@ -864,14 +864,14 @@ function App() {
 
                                     {/* Portal card icon — true alpha transparency */}
                                     <div className="relative z-10 flex items-center justify-center flex-shrink-0" style={{ width: 84, height: 84 }}>
-                                        <img src={item.icon} alt={item.label} style={{ width: 80, height: 80, objectFit: 'contain', filter: 'drop-shadow(0 0 8px rgba(212,175,55,0.35))' }} />
+                                        <img src={item.icon} alt={item.label} style={{ width: item.iconSize, height: item.iconSize, objectFit: 'contain', filter: 'sepia(1) saturate(1.5) hue-rotate(5deg) brightness(0.85) drop-shadow(0 0 8px rgba(212,175,55,0.35))' }} />
                                     </div>
 
                                     <div className="relative z-10 flex flex-col items-center gap-1">
                                         <span className="font-display text-[11px] font-semibold text-altar-gold leading-tight text-center tracking-[2px] uppercase">
                                             {item.label}
                                         </span>
-                                        <span className="text-[10px] text-altar-text/65 leading-snug text-center px-0.5" style={{ fontWeight: 300 }}>
+                                        <span className="text-[11px] text-altar-text/65 leading-snug text-center px-0.5" style={{ fontWeight: 300 }}>
                                             {item.tagline}
                                         </span>
                                     </div>

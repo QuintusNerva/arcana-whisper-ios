@@ -466,7 +466,7 @@ export function TeachingsSection() {
                             // Path names matching prototype
                             const pathNames: Record<string, string> = {
                                 'mystic-ra': 'Astrology 101',
-                                'luna-tides': 'Moon Rituals',
+                                'luna-tides': 'Lunar Cycles',
                                 'earth-song': 'Manifestation',
                                 'sol-wisdom': 'Numerology',
                                 'veda-light': 'Tarot Foundations',

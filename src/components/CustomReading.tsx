@@ -298,7 +298,7 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange, 
                         <div className="text-center mt-6 mb-6">
                             <span className="text-3xl mb-2 block">🃏</span>
                             <h2 style={{ ...headerStyle, fontSize: '20px' }}>CHOOSE YOUR SPREAD</h2>
-                            <p style={{ ...mutedTextStyle, fontSize: '14px', marginTop: '8px' }}>Select the ritual that calls to you</p>
+                            <p style={{ ...mutedTextStyle, fontSize: '14px', marginTop: '8px' }}>Select the spread that calls to you</p>
                         </div>
 
                         {/* 2×2 spread grid */}
@@ -566,7 +566,7 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange, 
                                 boxShadow: '0 2px 0 #8a6b25, 0 4px 12px rgba(0,0,0,0.5), 0 0 40px rgba(212,175,55,0.08), inset 0 1px 0 rgba(255,255,255,0.35)',
                             }}
                         >
-                            ✦ Begin the Ritual ✦
+                            ✦ Begin Your Reading ✦
                         </button>
                     </div>
                 )}

@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { AIService, dailyCache } from '../services/ai.service';
+import { AIService, permanentCache } from '../services/ai.service';
 import { AIResponseRenderer } from './AIResponseRenderer';
 import {
     getBirthData,
@@ -81,7 +81,7 @@ export function CareerAlignment({ onClose, onTabChange, subscription, onShowPrem
     const CACHE_KEY = `career_alignment_${sunId}_${lifePath}`;
 
     React.useEffect(() => {
-        const cached = dailyCache.get(CACHE_KEY);
+        const cached = permanentCache.get(CACHE_KEY);
         if (cached) {
             try {
                 setReading(JSON.parse(cached));
@@ -118,7 +118,7 @@ export function CareerAlignment({ onClose, onTabChange, subscription, onShowPrem
             if (!jsonMatch) throw new Error('Invalid AI response format');
 
             const parsed: CareerReading = JSON.parse(jsonMatch[0]);
-            dailyCache.set(CACHE_KEY, JSON.stringify(parsed));
+            permanentCache.set(CACHE_KEY, JSON.stringify(parsed));
             setReading(parsed);
             setUnlocked(true);
         } catch (e: any) {
@@ -254,12 +254,13 @@ export function CareerAlignment({ onClose, onTabChange, subscription, onShowPrem
                                     )}
                                     <button
                                         onClick={handleGetReading}
-                                        className="w-full py-4 rounded-xl font-display tracking-[2px] text-sm transition-all active:scale-[0.97]"
+                                        className="w-full relative overflow-hidden py-4 rounded-xl font-display tracking-[2px] text-sm transition-all active:scale-[0.97] gold-shimmer"
                                         style={{
-                                            background: 'linear-gradient(135deg, rgba(212,175,55,0.25), rgba(180,140,20,0.15))',
-                                            border: '1px solid var(--color-gold-glow-med)',
-                                            color: 'var(--color-gold-100)',
-                                            boxShadow: '0 0 20px rgba(212,175,55,0.1)',
+                                            background: 'linear-gradient(180deg, #F9E491, #D4A94E 30%, #C59341 60%, #A67B2E)',
+                                            border: '2px solid rgba(212,175,55,0.6)',
+                                            color: '#1a0f2e',
+                                            fontWeight: 800,
+                                            boxShadow: '0 2px 0 #8a6914, 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.35)',
                                         }}
                                     >
                                         ✦ Reveal Full Reading

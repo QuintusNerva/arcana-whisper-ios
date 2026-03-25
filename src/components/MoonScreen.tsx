@@ -301,7 +301,7 @@ export function MoonScreen({ onClose, onTabChange }: MoonScreenProps) {
                                     boxShadow: '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.05)',
                                 }}
                             >
-                                <p className="text-[9px] text-violet-400/60 font-display tracking-[3px] uppercase mb-2">Today's Ritual</p>
+                                <p className="text-[9px] text-violet-400/60 font-display tracking-[3px] uppercase mb-2">Today's Practice</p>
                                 <p className="text-sm text-altar-text/80 leading-relaxed">
                                     {lunarData.currentPhase.ritual}
                                 </p>

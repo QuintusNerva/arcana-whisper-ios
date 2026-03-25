@@ -26,25 +26,32 @@ async function loadRevenueCat() {
         Purchases = mod.Purchases;
         PURCHASES_PACKAGE_TYPE = mod.PACKAGE_TYPE;
     } catch (e) {
-        console.warn('[StoreKit] RevenueCat not available (web mode):', e);
+        if (import.meta.env.DEV) console.warn('[StoreKit] RevenueCat not available (web mode):', e);
     }
 }
 
 // ── Product Configuration ──
 export const PRODUCTS = {
+    WEEKLY: {
+        id: 'com.arcanawhisper.premium.weekly',
+        label: 'Weekly',
+        price: '$4.99',
+        period: '/wk',
+        savings: '',
+    },
     MONTHLY: {
         id: 'com.arcanawhisper.premium.monthly',
         label: 'Monthly',
-        price: '$9.99',
+        price: '$14.99',
         period: '/mo',
-        savings: '',
+        savings: 'Save 31%',
     },
     YEARLY: {
         id: 'com.arcanawhisper.premium.yearly',
         label: 'Yearly',
-        price: '$49.99',
+        price: '$99.99',
         period: '/yr',
-        savings: 'Save 58%',
+        savings: 'Save 61%',
         popular: true,
     },
 } as const;
@@ -72,7 +79,7 @@ let rcInitialized = false;
 export async function initializePurchases(): Promise<void> {
     if (rcInitialized) return;
     if (!Capacitor.isNativePlatform()) {
-        console.log('[StoreKit] Web platform — using local storage fallback');
+        if (import.meta.env.DEV) console.log('[StoreKit] Web platform — using local storage fallback');
         rcInitialized = true;
         return;
     }
@@ -81,14 +88,14 @@ export async function initializePurchases(): Promise<void> {
     if (!Purchases) return;
 
     if (!RC_API_KEY) {
-        console.warn('[StoreKit] No VITE_REVENUECAT_API_KEY set — purchases disabled');
+        if (import.meta.env.DEV) console.warn('[StoreKit] No VITE_REVENUECAT_API_KEY set — purchases disabled');
         return;
     }
 
     try {
         await Purchases.configure({ apiKey: RC_API_KEY });
         rcInitialized = true;
-        console.log('[StoreKit] RevenueCat initialized');
+        if (import.meta.env.DEV) console.log('[StoreKit] RevenueCat initialized');
     } catch (err) {
         console.error('[StoreKit] RevenueCat init failed:', err);
     }
@@ -194,13 +201,17 @@ export async function purchaseProduct(productId: ProductId): Promise<{ success: 
     }
 
     // ── Web fallback: simulate for development ──
-    console.warn('[StoreKit] Web mode — simulating purchase');
+    if (import.meta.env.DEV) console.warn('[StoreKit] Web mode — simulating purchase');
     try {
         await new Promise(resolve => setTimeout(resolve, 1500));
-        const isMonthly = productId === PRODUCTS.MONTHLY.id;
         const expiresAt = new Date();
-        if (isMonthly) expiresAt.setMonth(expiresAt.getMonth() + 1);
-        else expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+        if (productId === PRODUCTS.WEEKLY.id) {
+            expiresAt.setDate(expiresAt.getDate() + 7);
+        } else if (productId === PRODUCTS.MONTHLY.id) {
+            expiresAt.setMonth(expiresAt.getMonth() + 1);
+        } else {
+            expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+        }
 
         const status: SubscriptionStatus = {
             isActive: true,
@@ -245,7 +256,7 @@ export async function restorePurchases(): Promise<{ restored: boolean; error?: s
     }
 
     // ── Web fallback ──
-    console.warn('[StoreKit] Web mode — simulating restore');
+    if (import.meta.env.DEV) console.warn('[StoreKit] Web mode — simulating restore');
     await new Promise(resolve => setTimeout(resolve, 1000));
     const status = getSubscriptionStatus();
     if (status.isActive) {

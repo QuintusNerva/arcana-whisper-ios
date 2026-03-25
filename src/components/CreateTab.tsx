@@ -301,7 +301,7 @@ function ManifestCard({ entry, onRefresh }: {
                     {/* Actions list */}
                     {entry.actions.length > 0 && (
                         <div className="mt-3 space-y-2">
-                            <p className="text-[9px] text-altar-muted font-display tracking-[2px] uppercase">Committed Actions</p>
+                            <p className="text-[10px] text-altar-muted font-display tracking-[2px] uppercase">Committed Actions</p>
                             {entry.actions.map(action => (
                                 <div key={action.id} className="flex items-start gap-2">
                                     <button
@@ -317,7 +317,7 @@ function ManifestCard({ entry, onRefresh }: {
                                             background: action.completedDate ? 'rgba(52,211,153,0.2)' : 'transparent',
                                         }}
                                     >
-                                        {action.completedDate && <span className="flex items-center justify-center text-[8px] text-emerald-400">✓</span>}
+                                        {action.completedDate && <span className="flex items-center justify-center text-[10px] text-emerald-400">✓</span>}
                                     </button>
                                     <p className={`text-xs leading-snug ${action.completedDate ? 'text-altar-muted line-through opacity-60' : 'text-altar-text/90'}`}>
                                         {action.description}
@@ -341,7 +341,7 @@ function ManifestCard({ entry, onRefresh }: {
                                     />
                                     <div className="flex gap-2">
                                         <button onClick={() => { setShowActionInput(false); setNewAction(''); }}
-                                            className="flex-1 py-2 rounded-xl text-[10px] text-altar-muted border border-white/10">
+                                            className="flex-1 py-2 rounded-xl text-[11px] text-altar-muted border border-white/10">
                                             Cancel
                                         </button>
                                         <button
@@ -353,14 +353,14 @@ function ManifestCard({ entry, onRefresh }: {
                                                     onRefresh();
                                                 }
                                             }}
-                                            className="flex-1 py-2 rounded-xl text-[10px] text-altar-gold border border-altar-gold/30">
+                                            className="flex-1 py-2 rounded-xl text-[11px] text-altar-gold border border-altar-gold/30">
                                             Commit ✓
                                         </button>
                                     </div>
                                 </div>
                             ) : (
                                 <button onClick={() => setShowActionInput(true)}
-                                    className="text-[10px] text-altar-muted italic hover:text-altar-gold/70 transition-colors">
+                                    className="text-[11px] text-altar-muted italic hover:text-altar-gold/70 transition-colors">
                                     + Add a committed action
                                 </button>
                             )}
@@ -372,13 +372,13 @@ function ManifestCard({ entry, onRefresh }: {
                         <div className="flex gap-2 mt-4">
                             <button
                                 onClick={() => { updateManifestationStatus(entry.id, 'manifested'); onRefresh(); }}
-                                className="flex-1 py-2.5 rounded-2xl text-[10px] font-display tracking-wide"
+                                className="flex-1 py-2.5 rounded-2xl text-[11px] font-display tracking-wide"
                                 style={{ background: 'rgba(197,147,65,0.10)', color: '#D4A94E', border: '1px solid rgba(197,147,65,0.2)' }}>
                                 ✨ It manifested!
                             </button>
                             <button
                                 onClick={() => { updateManifestationStatus(entry.id, 'released'); onRefresh(); }}
-                                className="flex-1 py-2.5 rounded-2xl text-[10px] font-display tracking-wide"
+                                className="flex-1 py-2.5 rounded-2xl text-[11px] font-display tracking-wide"
                                 style={{ background: 'rgba(255,255,255,0.03)', color: '#9ca3af', border: '1px solid rgba(255,255,255,0.08)' }}>
                                 🌿 Release
                             </button>
@@ -389,7 +389,7 @@ function ManifestCard({ entry, onRefresh }: {
                     {!isActive && (
                         <button
                             onClick={() => { deleteManifestation(entry.id); onRefresh(); }}
-                            className="mt-3 text-[9px] text-red-400/50 hover:text-red-400/80 transition-colors">
+                            className="mt-3 text-[10px] text-red-400/50 hover:text-red-400/80 transition-colors">
                             Remove from history
                         </button>
                     )}
@@ -592,7 +592,7 @@ function ManifestJournalPage({
                         background: 'linear-gradient(90deg, transparent, rgba(212,175,55,0.4), transparent)',
                     }} />
                     <p style={{
-                        fontFamily: "'Playfair Display', serif",
+                        fontFamily: "var(--font-display)",
                         fontSize: '16px', fontWeight: 500,
                         fontStyle: 'italic',
                         color: '#d4af37',
@@ -674,7 +674,7 @@ function ManifestJournalPage({
                             >
                                 <span style={{ fontSize: '20px' }}>{m.emoji}</span>
                                 <span style={{
-                                    fontSize: '8px', fontWeight: 500,
+                                    fontSize: '10px', fontWeight: 500,
                                     letterSpacing: '0.5px',
                                     color: selectedMood === m.emoji ? '#D4A94E' : 'rgba(178,190,205,0.7)',
                                     textTransform: 'uppercase' as const,
@@ -780,7 +780,7 @@ function JournalHistoryView({ onClose }: { onClose: () => void }) {
                                             <span style={{ fontSize: '16px' }}>{entry.mood}</span>
                                             <span style={{
                                                 fontFamily: 'var(--font-display)',
-                                                fontSize: '9px', fontWeight: 600,
+                                                fontSize: '10px', fontWeight: 600,
                                                 letterSpacing: '1.5px', textTransform: 'uppercase' as const,
                                                 padding: '3px 8px', borderRadius: '12px',
                                                 color: catMeta.color,
@@ -794,7 +794,7 @@ function JournalHistoryView({ onClose }: { onClose: () => void }) {
                                     </div>
                                     {/* Prompt */}
                                     <p style={{
-                                        fontFamily: "'Playfair Display', serif",
+                                        fontFamily: "var(--font-display)",
                                         fontSize: '12px', fontStyle: 'italic',
                                         color: 'rgba(212,175,55,0.8)',
                                         marginBottom: '8px', lineHeight: 1.5,
@@ -810,7 +810,7 @@ function JournalHistoryView({ onClose }: { onClose: () => void }) {
                                     }}>{entry.body}</p>
                                     {/* Moon phase */}
                                     <p style={{
-                                        fontSize: '9px', color: 'rgba(148,163,184,0.35)',
+                                        fontSize: '10px', color: 'rgba(148,163,184,0.35)',
                                         marginTop: '8px', fontStyle: 'italic',
                                     }}>{entry.moonPhase}</p>
                                 </div>
@@ -862,7 +862,7 @@ function SacredScriptOnboarding({ onDismiss }: { onDismiss: () => void }) {
                 fontWeight: 300, marginBottom: '12px',
             }}>
                 A 21-day manifestation practice rooted in Tesla's 3-6-9 numerology. Each day,
-                you complete three rituals:
+                you complete three practices:
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '6px', marginBottom: '12px' }}>
@@ -1084,7 +1084,7 @@ function TodayRitualCard({
             >
                 <span style={{
                     fontFamily: 'var(--font-display)',
-                    fontSize: '9px', fontWeight: 600,
+                    fontSize: '10px', fontWeight: 600,
                     letterSpacing: '1.5px', textTransform: 'uppercase' as const,
                     color: '#F9E491',
                 }}>✦ How the 369 method works</span>
@@ -1108,7 +1108,7 @@ function TodayRitualCard({
                         fontSize: '13px', lineHeight: 1.7, color: 'rgba(226,232,240,0.85)',
                         fontWeight: 400, marginBottom: '14px',
                     }}>
-                        A 21-day practice rooted in Tesla's 3-6-9 numerology. Each day, complete three rituals:
+                        A 21-day practice rooted in Tesla's 3-6-9 numerology. Each day, complete three practices:
                     </p>
                     <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '8px', marginBottom: '12px' }}>
                         {(['morning', 'afternoon', 'evening'] as TimeOfDay[]).map(tod => {
@@ -1153,7 +1153,7 @@ function TodayRitualCard({
                 background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)',
             }} />
 
-            {/* ─── 3 Ritual Sections (internal rows) ─── */}
+            {/* ─── 3 Practice Sections (internal rows) ─── */}
             {RITUAL_ORDER.map((tod, idx) => {
                 const cfg = RITUAL_CONFIGS[tod];
                 const isDone = progress.ritualsToday[tod];
@@ -1163,7 +1163,7 @@ function TodayRitualCard({
 
                 return (
                     <div key={tod}>
-                        {/* Ritual row */}
+                        {/* Practice row */}
                         <div style={{ marginBottom: isDone && completedEntry ? '8px' : '0' }}>
                             {/* Header row */}
                             <div style={{
@@ -1265,13 +1265,13 @@ function TodayRitualCard({
                                             fontStyle: 'italic',
                                             padding: '2px 0',
                                         }}>
-                                            <span style={{ color: 'rgba(212,175,55,0.8)', fontSize: '9px', marginRight: '6px' }}>{i + 1}</span>
+                                            <span style={{ color: 'rgba(212,175,55,0.8)', fontSize: '10px', marginRight: '6px' }}>{i + 1}</span>
                                             {line}
                                         </p>
                                     ))}
                                     {completedEntry.lines.length > 2 && (
                                         <p style={{
-                                            fontSize: '9px', color: 'rgba(210,210,230,0.8)',
+                                            fontSize: '10px', color: 'rgba(210,210,230,0.8)',
                                             fontStyle: 'italic', marginTop: '2px',
                                         }}>+{completedEntry.lines.length - 2} more</p>
                                     )}
@@ -1355,10 +1355,10 @@ function TodayRitualCard({
                             }} />
                         </div>
                         <p style={{
-                            fontSize: '9px', color: 'rgba(196,196,220,0.55)',
+                            fontSize: '10px', color: 'rgba(196,196,220,0.55)',
                             marginTop: '5px', position: 'relative',
                         }}>
-                            {progress.totalRitualsCompleted} of {progress.totalRitualsPossible} rituals completed
+                            {progress.totalRitualsCompleted} of {progress.totalRitualsPossible} practices completed
                         </p>
 
                         {/* Button to save & start a new intention */}
@@ -1476,7 +1476,7 @@ function RitualWritingSurface({
                 }}>
                     <p style={{
                         fontFamily: 'var(--font-display)',
-                        fontSize: '8px', letterSpacing: '2px',
+                        fontSize: '10px', letterSpacing: '2px',
                         textTransform: 'uppercase' as const,
                         color: 'rgba(197,147,65,0.5)',
                         marginBottom: '4px',
@@ -1707,7 +1707,7 @@ function StartSacredScript({
             >
                 <span style={{
                     fontFamily: 'var(--font-display)',
-                    fontSize: '9px', fontWeight: 600,
+                    fontSize: '10px', fontWeight: 600,
                     letterSpacing: '1.5px', textTransform: 'uppercase' as const,
                     color: '#F9E491',
                 }}>✦ How the 369 method works</span>
@@ -1755,7 +1755,7 @@ function StartSacredScript({
             <div style={{ marginBottom: '16px' }}>
                 <p style={{
                     fontFamily: 'var(--font-display)',
-                    fontSize: '8px', fontWeight: 600,
+                    fontSize: '10px', fontWeight: 600,
                     letterSpacing: '2px', textTransform: 'uppercase' as const,
                     color: 'rgba(197,147,65,0.6)', marginBottom: '6px',
                 }}>Your affirmation</p>
@@ -1813,13 +1813,13 @@ function StartSacredScript({
                                         color: isOpen ? '#F9E491' : 'rgba(226,232,240,0.75)',
                                     }}>{cfg.title.toUpperCase()}</p>
                                     <p style={{
-                                        fontSize: '9px', color: 'rgba(178,190,205,0.8)',
+                                        fontSize: '10px', color: 'rgba(178,190,205,0.8)',
                                         fontWeight: 300, marginTop: '2px',
                                     }}>{cfg.lineCount} lines · {cfg.description.split('.')[0]}</p>
                                 </div>
                                 {filled > 0 && (
                                     <span style={{
-                                        fontSize: '9px', fontFamily: 'var(--font-display)',
+                                        fontSize: '10px', fontFamily: 'var(--font-display)',
                                         color: filled === cfg.lineCount ? '#22c55e' : 'rgba(212,175,55,0.6)',
                                         fontWeight: 600, flexShrink: 0,
                                     }}>{filled}/{cfg.lineCount}</span>
@@ -1919,7 +1919,7 @@ function PastSacredTexts({ scripts }: { scripts: SacredScript[] }) {
         <div style={{ marginTop: '20px' }}>
             <p style={{
                 fontFamily: 'var(--font-display)',
-                fontSize: '9px', letterSpacing: '5px',
+                fontSize: '10px', letterSpacing: '5px',
                 textTransform: 'uppercase' as const,
                 color: '#D4A94E', opacity: 0.5,
                 textShadow: '0 0 10px rgba(212,175,55,0.08)',
@@ -1984,7 +1984,7 @@ function PastSacredTexts({ scripts }: { scripts: SacredScript[] }) {
                                     }}>
                                         <p style={{
                                             fontFamily: 'var(--font-display)',
-                                            fontSize: '9px', color: 'rgba(197,147,65,0.5)',
+                                            fontSize: '10px', color: 'rgba(197,147,65,0.5)',
                                             letterSpacing: '1px', marginBottom: '4px',
                                         }}>DAY {entry.dayNumber}</p>
                                         {entry.morning && (
@@ -1996,7 +1996,7 @@ function PastSacredTexts({ scripts }: { scripts: SacredScript[] }) {
                                 ))}
                                 {s.entries.length > 5 && (
                                     <p style={{
-                                        fontSize: '9px', color: 'rgba(148,163,184,0.35)',
+                                        fontSize: '10px', color: 'rgba(148,163,184,0.35)',
                                         fontStyle: 'italic', textAlign: 'center' as const,
                                         padding: '6px 0',
                                     }}>+{s.entries.length - 5} more days</p>
@@ -2332,8 +2332,8 @@ export function CreateTab({ onClose, onTabChange, subscription, onShowPremium }:
                                                             padding: '6px',
                                                         }}>
                                                             <p style={{
-                                                                fontFamily: "'Playfair Display', serif",
-                                                                fontSize: '9px', color: '#d4af37',
+                                                                fontFamily: "var(--font-display)",
+                                                                fontSize: '10px', color: '#d4af37',
                                                                 fontStyle: 'italic', fontWeight: 500,
                                                                 textAlign: 'center' as const,
                                                                 overflow: 'hidden',
@@ -2408,7 +2408,7 @@ export function CreateTab({ onClose, onTabChange, subscription, onShowPremium }:
                                     <span style={{
                                         display: 'inline-block',
                                         padding: '4px 10px', borderRadius: '16px',
-                                        fontSize: '9px', fontWeight: 600,
+                                        fontSize: '10px', fontWeight: 600,
                                         fontFamily: 'var(--font-display)',
                                         letterSpacing: '1.5px', textTransform: 'uppercase' as const,
                                         background: `${CATEGORY_META[todayJournal.category].color}18`,
@@ -2420,7 +2420,7 @@ export function CreateTab({ onClose, onTabChange, subscription, onShowPremium }:
 
                                 {/* Today's prompt */}
                                 <p style={{
-                                    fontFamily: "'Playfair Display', serif",
+                                    fontFamily: "var(--font-display)",
                                     fontSize: '14px', fontWeight: 500,
                                     fontStyle: 'italic',
                                     color: '#d4af37',
@@ -2537,7 +2537,7 @@ export function CreateTab({ onClose, onTabChange, subscription, onShowPremium }:
                                                             <span style={{
                                                                 display: 'flex', alignItems: 'center', gap: '5px',
                                                                 fontFamily: 'var(--font-display)',
-                                                                fontSize: '9px', letterSpacing: '1.5px',
+                                                                fontSize: '10px', letterSpacing: '1.5px',
                                                                 textTransform: 'uppercase' as const,
                                                                 padding: '5px 12px', borderRadius: '20px',
                                                                 background: 'rgba(197,147,65,0.15)',
@@ -2629,7 +2629,7 @@ export function CreateTab({ onClose, onTabChange, subscription, onShowPremium }:
                                                                 <div style={{ flexShrink: 0 }}>
                                                                     <span style={{
                                                                         fontFamily: 'var(--font-display)',
-                                                                        fontSize: '9px', letterSpacing: '1px',
+                                                                        fontSize: '10px', letterSpacing: '1px',
                                                                         textTransform: 'uppercase' as const,
                                                                         padding: '4px 10px', borderRadius: '20px',
                                                                         background: 'rgba(148,163,184,0.06)',
@@ -2750,7 +2750,7 @@ export function CreateTab({ onClose, onTabChange, subscription, onShowPremium }:
                             <div style={{ marginBottom: '24px' }}>
                                 <p style={{
                                     fontFamily: 'var(--font-display)',
-                                    fontSize: '9px', letterSpacing: '5px',
+                                    fontSize: '10px', letterSpacing: '5px',
                                     textTransform: 'uppercase' as const,
                                     color: '#D4A94E', opacity: 0.5,
                                     marginBottom: '12px',
@@ -2803,7 +2803,7 @@ export function CreateTab({ onClose, onTabChange, subscription, onShowPremium }:
                                                     </div>
                                                     {doneToday && (
                                                         <span style={{
-                                                            fontSize: '8px', letterSpacing: '2px',
+                                                            fontSize: '10px', letterSpacing: '2px',
                                                             textTransform: 'uppercase' as const,
                                                             color: '#34d399', opacity: 0.7,
                                                             fontFamily: 'var(--font-display)',
@@ -2837,7 +2837,7 @@ export function CreateTab({ onClose, onTabChange, subscription, onShowPremium }:
                             <div style={{ marginBottom: '24px' }}>
                                 <p style={{
                                     fontFamily: 'var(--font-display)',
-                                    fontSize: '9px', letterSpacing: '5px',
+                                    fontSize: '10px', letterSpacing: '5px',
                                     textTransform: 'uppercase' as const,
                                     color: '#94a3b8', opacity: 0.5,
                                     marginBottom: '12px',
@@ -2874,7 +2874,7 @@ export function CreateTab({ onClose, onTabChange, subscription, onShowPremium }:
                                                         padding: '6px 12px',
                                                         borderRadius: '10px',
                                                         fontFamily: 'var(--font-display)',
-                                                        fontSize: '9px', fontWeight: 600,
+                                                        fontSize: '10px', fontWeight: 600,
                                                         letterSpacing: '1px',
                                                         textTransform: 'uppercase' as const,
                                                         background: 'rgba(99,102,241,0.15)',
@@ -2889,7 +2889,7 @@ export function CreateTab({ onClose, onTabChange, subscription, onShowPremium }:
                                                         padding: '6px 10px',
                                                         borderRadius: '10px',
                                                         fontFamily: 'var(--font-display)',
-                                                        fontSize: '9px',
+                                                        fontSize: '10px',
                                                         letterSpacing: '1px',
                                                         textTransform: 'uppercase' as const,
                                                         background: 'rgba(239,68,68,0.06)',
@@ -2910,7 +2910,7 @@ export function CreateTab({ onClose, onTabChange, subscription, onShowPremium }:
                             <div style={{ marginBottom: '24px' }}>
                                 <p style={{
                                     fontFamily: 'var(--font-display)',
-                                    fontSize: '9px', letterSpacing: '5px',
+                                    fontSize: '10px', letterSpacing: '5px',
                                     textTransform: 'uppercase' as const,
                                     color: '#94a3b8', opacity: 0.35,
                                     marginBottom: '12px',

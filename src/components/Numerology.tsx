@@ -5,7 +5,7 @@ import {
     getCurrentPersonalYear, getNatalTriad, getDestinyName, saveDestinyName,
     PYTH_MAP, reducePyth,
 } from '../services/astrology.service';
-import { AIService, dailyCache } from '../services/ai.service';
+import { AIService, permanentCache } from '../services/ai.service';
 import { AIResponseRenderer } from './AIResponseRenderer';
 import { PageHeader } from './PageHeader';
 import { getActiveManifestations } from '../services/manifestation.service';
@@ -115,7 +115,7 @@ export function Numerology({ onClose, onTabChange, subscription, onShowPremium }
         if (aiDestiny || aiDestinyLoading) return;
 
         const cacheKey = `destiny_${destinyResult.number}_${destinyName.trim().toLowerCase()}`;
-        const cached = dailyCache.get(cacheKey);
+        const cached = permanentCache.get(cacheKey);
         if (cached) {
             try { setAiDestiny(JSON.parse(cached)); return; } catch { }
         }
@@ -178,7 +178,7 @@ This should read as ONE unified cosmic profile, not "here's your number" + "here
                 if (jsonMatch) {
                     const parsed = JSON.parse(jsonMatch[0]);
                     setAiDestiny(parsed);
-                    dailyCache.set(cacheKey, JSON.stringify(parsed));
+                    permanentCache.set(cacheKey, JSON.stringify(parsed));
                 }
             } catch { }
         } catch { }
@@ -196,7 +196,7 @@ This should read as ONE unified cosmic profile, not "here's your number" + "here
         if (aiPath || aiPathLoading) return;
 
         // Check daily cache first
-        const cached = dailyCache.get(`lifepath_${lifePathNum}`);
+        const cached = permanentCache.get(`lifepath_${lifePathNum}`);
         if (cached) {
             try { setAiPath(JSON.parse(cached)); return; } catch { }
         }
@@ -245,7 +245,7 @@ Weave their astrology into the numerology reading — how does their Life Path $
                 if (jsonMatch) {
                     const parsed = JSON.parse(jsonMatch[0]);
                     setAiPath(parsed);
-                    dailyCache.set(`lifepath_${lifePathNum}`, JSON.stringify(parsed));
+                    permanentCache.set(`lifepath_${lifePathNum}`, JSON.stringify(parsed));
                 }
             } catch { /* use static fallback */ }
         } catch { /* use static fallback */ }

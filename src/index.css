@@ -161,6 +161,11 @@ body {
   --color-gold-glow-strong: rgba(212,175,55, 0.35);
   --color-gold-glow-neon: rgba(249,228,145, 0.4);
 
+  /* Standard Radius Scale */
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+
   --font-display: "Cinzel", serif;
   --font-body: "Inter", sans-serif;
 

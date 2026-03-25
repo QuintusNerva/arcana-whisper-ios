@@ -42,10 +42,6 @@ export function ShareCardButton({ card }: ShareCardButtonProps) {
             setStatus('done');
             setTimeout(() => setStatus('idle'), 2000);
         } catch {
-            // TODO: Ayrshare API integration
-            // POST to https://app.ayrshare.com/api/post
-            // with { post: shareText, platforms: ["twitter", "instagram"] }
-            // Headers: { Authorization: `Bearer ${AYRSHARE_API_KEY}` }
             setStatus('error');
             setTimeout(() => setStatus('idle'), 3000);
         }

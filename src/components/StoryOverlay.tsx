@@ -277,13 +277,15 @@ export function StoryOverlay({ lesson, userContext, onComplete, onClose }: Story
                             </div>
                         )}
                         {quizAnswered && (
-                            <button onClick={goNext} style={{
+                            <button onClick={goNext} className="gold-shimmer" style={{
                                 width: '100%', marginTop: 20, padding: '14px',
-                                borderRadius: 16,
-                                background: 'linear-gradient(135deg, rgba(212,175,55,0.2), rgba(212,175,55,0.08))',
-                                border: '1px solid rgba(212,175,55,0.3)',
-                                color: '#d4af37', fontSize: 13, fontFamily: "'Cinzel', serif",
+                                borderRadius: 16, position: 'relative', overflow: 'hidden',
+                                background: 'linear-gradient(180deg, #F9E491, #D4A94E 30%, #C59341 60%, #A67B2E)',
+                                border: '2px solid rgba(212,175,55,0.6)',
+                                color: '#1a0f2e', fontSize: 13, fontFamily: "'Cinzel', serif",
+                                fontWeight: 800,
                                 letterSpacing: 2, cursor: 'pointer',
+                                boxShadow: '0 2px 0 #8a6914, 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.35)',
                             }}>
                                 Continue →
                             </button>
@@ -330,14 +332,15 @@ export function StoryOverlay({ lesson, userContext, onComplete, onClose }: Story
                         </div>
 
                         {/* Complete button */}
-                        <button onClick={handleComplete} style={{
+                        <button onClick={handleComplete} className="gold-shimmer" style={{
                             width: '100%', padding: '16px',
-                            borderRadius: 20,
-                            background: 'linear-gradient(135deg, rgba(212,175,55,0.25), rgba(212,175,55,0.1))',
-                            border: '1px solid rgba(212,175,55,0.35)',
-                            color: '#d4af37', fontSize: 14, fontFamily: "'Cinzel', serif",
+                            borderRadius: 20, position: 'relative', overflow: 'hidden',
+                            background: 'linear-gradient(180deg, #F9E491, #D4A94E 30%, #C59341 60%, #A67B2E)',
+                            border: '2px solid rgba(212,175,55,0.6)',
+                            color: '#1a0f2e', fontSize: 14, fontFamily: "'Cinzel', serif",
+                            fontWeight: 800,
                             letterSpacing: 3, cursor: 'pointer',
-                            boxShadow: '0 0 30px rgba(212,175,55,0.08)',
+                            boxShadow: '0 2px 0 #8a6914, 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.35)',
                         }}>
                             ✦ Complete Teaching
                         </button>

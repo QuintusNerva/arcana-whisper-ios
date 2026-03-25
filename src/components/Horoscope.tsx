@@ -264,9 +264,16 @@ Expand on that theme with practical guidance, emotional insight, and a sense of 
                                         {horoscope.extended}
                                     </p>
                                     <button
-                                        className="mt-3 w-full py-2.5 rounded-xl text-xs font-display tracking-wide transition-all clay-btn-gold"
+                                        className="mt-3 w-full py-2.5 rounded-xl text-xs font-display tracking-wide transition-all active:scale-[0.97] gold-shimmer"
+                                        style={{
+                                            background: 'linear-gradient(180deg, #F9E491, #D4A94E 30%, #C59341 60%, #A67B2E)',
+                                            border: '2px solid rgba(212,175,55,0.6)',
+                                            color: '#1a0f2e',
+                                            fontWeight: 800,
+                                            boxShadow: '0 2px 0 #8a6914, 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.35)',
+                                        }}
                                     >
-                                        Unlock Premium — $4.99/mo
+                                        ✦ Unlock Premium
                                     </button>
                                 </div>
                             )}

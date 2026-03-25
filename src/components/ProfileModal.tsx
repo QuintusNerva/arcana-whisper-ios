@@ -483,7 +483,7 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
                                     }}
                                     className="w-full py-3 rounded-xl bg-gradient-to-r from-altar-gold via-altar-gold-dim to-altar-gold text-altar-deep font-display font-bold text-sm tracking-wide hover:shadow-[0_0_20px_rgba(255,215,0,0.3)] transition-all hover:scale-[1.01] active:scale-[0.99]"
                                 >
-                                    Unlock Premium — $4.99/mo
+                                    Unlock Premium — $9.99/mo
                                 </button>
                             )}
                         </div>
@@ -495,6 +495,9 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
 
                         {/* Daily Reminders */}
                         <ReminderSettingsRow />
+
+                        {/* AI Features */}
+                        <AiToggleRow />
 
                         {/* Theme */}
                         <div className="flex items-center gap-3 px-4 py-3 border-b border-white/5">
@@ -595,7 +598,7 @@ export function ProfileModal({ onClose, userProfile, onTabChange }: ProfileModal
                             <div className="h-[1px] bg-white/5" />
                             <div className="flex justify-between">
                                 <span className="text-xs text-altar-muted">Price</span>
-                                <span className="text-xs text-altar-text">$4.99/mo</span>
+                                <span className="text-xs text-altar-text">$9.99/mo</span>
                             </div>
                             <div className="h-[1px] bg-white/5" />
                             <div className="flex justify-between">
@@ -818,6 +821,49 @@ function ReminderSettingsRow() {
                     </div>
                 </div>
             )}
+        </div>
+    );
+}
+
+// ── AI Features Toggle Row ──
+function AiToggleRow() {
+    const [enabled, setEnabled] = React.useState(() => {
+        try {
+            const consent = JSON.parse(safeStorage.getItem('ai_consent') || '{}');
+            return consent.consented !== false; // default to true if not set
+        } catch { return true; }
+    });
+
+    const handleToggle = () => {
+        const newValue = !enabled;
+        safeStorage.setItem('ai_consent', JSON.stringify({
+            consented: newValue,
+            timestamp: new Date().toISOString(),
+        }));
+        setEnabled(newValue);
+    };
+
+    return (
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-white/5">
+            <span className="text-lg">✨</span>
+            <div className="flex-1">
+                <p className="text-sm text-altar-text">AI Insights</p>
+                <p className="text-[10px] text-altar-muted/60 mt-0.5">
+                    {enabled ? 'Personalized readings & dream interpretation' : 'AI features are off'}
+                </p>
+            </div>
+            <button
+                onClick={handleToggle}
+                className={`relative w-10 h-5 rounded-full transition-colors duration-300 ${enabled
+                    ? 'bg-purple-500 shadow-[0_0_10px_rgba(147,51,234,0.4)]'
+                    : 'bg-white/10'
+                    }`}
+            >
+                <div
+                    className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-md transition-transform duration-300 ${enabled ? 'translate-x-5' : 'translate-x-0.5'
+                        }`}
+                />
+            </button>
         </div>
     );
 }

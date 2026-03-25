@@ -14,8 +14,6 @@
 
 import React from 'react';
 import { generateShareURL } from './CosmicInvite';
-import { PDFDownloadLink } from '@react-pdf/renderer';
-import { generateYearAheadPDF } from './YearAheadPDF';
 import { PageHeader } from './PageHeader';
 import { generateYearAheadReport, YearAheadReport, isBirthdayToday } from '../services/year-ahead.service';
 import { getBirthData, getNatalTriad } from '../services/astrology.service';
@@ -267,7 +265,14 @@ export function YearAhead({ onClose, onTabChange, subscription, onShowPremium }:
                         <p className="text-sm text-altar-text/70 mb-4">{error}</p>
                         <button
                             onClick={() => onTabChange('profile')}
-                            className="px-6 py-2.5 bg-altar-gold/20 text-altar-gold text-sm font-display tracking-[2px] rounded-xl border border-altar-gold/30 hover:bg-altar-gold/30 transition-all"
+                            className="px-6 py-2.5 text-sm font-display tracking-[2px] rounded-xl transition-all active:scale-[0.97] gold-shimmer"
+                            style={{
+                                background: 'linear-gradient(180deg, #F9E491, #D4A94E 30%, #C59341 60%, #A67B2E)',
+                                border: '2px solid rgba(212,175,55,0.6)',
+                                color: '#1a0f2e',
+                                fontWeight: 800,
+                                boxShadow: '0 2px 0 #8a6914, 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.35)',
+                            }}
                         >
                             SET UP PROFILE
                         </button>
@@ -391,11 +396,13 @@ export function YearAhead({ onClose, onTabChange, subscription, onShowPremium }:
                             ) : (
                                 <button
                                     onClick={handleGenerate}
-                                    className="w-full py-4 rounded-2xl font-display text-sm tracking-[3px] uppercase transition-all active:scale-[0.98] border"
+                                    className="w-full py-4 rounded-2xl font-display text-sm tracking-[3px] uppercase transition-all active:scale-[0.98] gold-shimmer"
                                     style={{
-                                        background: 'linear-gradient(135deg, rgba(218,165,32,0.2), rgba(138,43,226,0.15))',
-                                        borderColor: 'rgba(218,165,32,0.3)',
-                                        color: 'var(--color-altar-gold)',
+                                        background: 'linear-gradient(180deg, #F9E491, #D4A94E 30%, #C59341 60%, #A67B2E)',
+                                        border: '2px solid rgba(212,175,55,0.6)',
+                                        color: '#1a0f2e',
+                                        fontWeight: 800,
+                                        boxShadow: '0 2px 0 #8a6914, 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.35)',
                                     }}
                                 >
                                     ✦ GENERATE YOUR YEAR AHEAD
