@@ -77,38 +77,25 @@ export function Horoscope({ onClose, onTabChange, subscription }: HoroscopeProps
         (async () => {
             try {
                 const sign = ZODIAC_SIGNS.find(z => z.id === selectedSign) || ZODIAC_SIGNS[0];
-                const sysPrompt = `You are a warm, mystical astrologer writing today's horoscope. Write in second person ("you"). Be specific, poetic, and empowering.
 
-You MUST format your response using these rules:
-1. Structure into 2-3 sections using ## headers (e.g. ## The Theme, ## The Lesson, ## Your Action Steps).
-2. Bold all key terminology using **double asterisks** (e.g. **Sagittarius**, **Mercury retrograde**).
-3. End with a section called "## Your Action Steps" containing 2-3 bullet points starting with "- ".
-4. Keep paragraphs short (2-3 sentences max).
-5. Do NOT use any other markdown like code blocks, links, or images.`;
-
-                let userPrompt = `Write today's horoscope for ${sign.name} (${sign.element} sign, ruled by ${sign.ruling}) for ${dateLabel}.
-Mood seed: "${horoscope.mood}". Theme seed: "${horoscope.daily}".
-Expand on that theme with practical guidance, emotional insight, and a sense of what the day holds.`;
-
-                if (triad) {
-                    userPrompt += `\n\nThis person's natal chart: Sun in ${triad.sun.name}, Moon in ${triad.moon.name}, Rising in ${triad.rising.name}. Subtly personalize the reading to this configuration without mentioning you're doing so.`;
-
-                    // Add numerology context
-                    if (birthData?.birthday) {
-                        const lp = getLifePathNumber(birthData.birthday);
-                        const py = getCurrentPersonalYear(birthData.birthday);
-                        userPrompt += `\nThey are on Life Path ${lp} in Personal Year ${py}. Weave this numerological timing into the day's energy — how their current cycle amplifies or softens today's theme.`;
-                    }
+                // Build params for modular prompt
+                let lifePath: number | undefined;
+                let personalYear: number | undefined;
+                if (triad && birthData?.birthday) {
+                    lifePath = getLifePathNumber(birthData.birthday);
+                    personalYear = getCurrentPersonalYear(birthData.birthday);
                 }
 
-                // Add active manifestation context
                 const manifests = getActiveManifestations();
-                if (manifests.length > 0) {
-                    const intentions = manifests.slice(0, 2).map(m => m.declaration).join('; ');
-                    userPrompt += `\nThey are actively manifesting: ${intentions}. If today's energy genuinely supports or challenges this intention, mention it briefly.`;
-                }
+                const activeManifestations = manifests.length > 0
+                    ? manifests.slice(0, 2).map(m => m.declaration)
+                    : undefined;
 
-                const result = await ai.chat(sysPrompt, userPrompt);
+                const result = await ai.getHoroscope({
+                    sign: { name: sign.name, element: sign.element, ruling: sign.ruling },
+                    dateLabel, mood: horoscope.mood, daily: horoscope.daily,
+                    triad: triad || undefined, lifePath, personalYear, activeManifestations,
+                });
                 if (!cancelled) {
                     const cleaned = result.replace(/^["']|["']$/g, '').trim();
                     setAiDaily(cleaned);
