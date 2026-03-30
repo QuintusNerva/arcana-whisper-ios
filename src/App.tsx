@@ -7,6 +7,7 @@ import { MindBodySpiritFloat } from './components/MindBodySpiritFloat';
 import { PremiumOverlay } from './components/PremiumOverlay';
 import { ShareCardButton } from './components/ShareCardButton';
 import { CustomReading } from './components/CustomReading';
+import { ReadingRitual, type RitualData } from './components/ReadingRitual';
 import { ReadingResult } from './components/ReadingResult';
 import { ProfileModal } from './components/ProfileModal';
 import { ReadingHistory } from './components/ReadingHistory';
@@ -172,31 +173,23 @@ function EnergyInterpretation({ cards }: { cards: Card[] }) {
         if (!ai.hasApiKey()) return;
 
         setLoading(true);
-        const cardData = cards.map((c, i) => ({
-            name: c.name,
-            meaning: c.meaning || c.description,
-            position: ['Mind', 'Body', 'Spirit'][i],
-        }));
 
-        ai.getSpreadInsight(cardData, 'three-card', 'daily energy', 'What energy does today hold?')
+        // Use the new short-format energy reading prompt (Wise Mirror)
+        ai.getEnergyReading(cards)
             .then((result: string) => {
-                // Extract just the first 2-3 sentences for a brief summary
-                const brief = result
-                    .replace(/##.*?\n/g, '') // strip headers
-                    .replace(/- .*/g, '')    // strip bullets
-                    .replace(/\*\*/g, '')    // strip bold markers
-                    .trim()
-                    .split(/[.!?]\s+/)
-                    .filter((s: string) => s.trim().length > 10)
-                    .slice(0, 3)
-                    .join('. ') + '.';
+                // Light cleanup — strip any accidental markdown
+                const clean = result
+                    .replace(/##.*?\n/g, '')
+                    .replace(/\*\*/g, '')
+                    .trim();
 
-                dailyCache.set(CACHE_KEY, brief);
-                setInterpretation(brief);
+                dailyCache.set(CACHE_KEY, clean);
+                setInterpretation(clean);
             })
             .catch(() => {
                 // Fallback — generate a simple non-AI interpretation
-                const fallback = `${cards[0].name} guides your thoughts, ${cards[1].name} moves your body, and ${cards[2].name} lifts your spirit. Let today's energy flow through you.`;
+                const r = (c: Card) => c.isReversed ? ` (reversed)` : '';
+                const fallback = `${cards[0].name}${r(cards[0])} guides your thoughts, ${cards[1].name}${r(cards[1])} moves your body, and ${cards[2].name}${r(cards[2])} lifts your spirit. Let today's energy flow through you.`;
                 setInterpretation(fallback);
             })
             .finally(() => setLoading(false));
@@ -258,6 +251,8 @@ function App() {
     const [energyCards, setEnergyCards] = React.useState<Card[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [showCustomReading, setShowCustomReading] = React.useState(false);
+    const [showRitual, setShowRitual] = React.useState(false);
+    const [ritualData, setRitualData] = React.useState<RitualData | null>(null);
     const [preselectedSpread, setPreselectedSpread] = React.useState<string | null>(null);
     const [customReadingResult, setCustomReadingResult] = React.useState<Reading | null>(null);
     const [isShuffling, setIsShuffling] = React.useState(false);
@@ -355,15 +350,31 @@ function App() {
 
     const handleCustomReadingComplete = (readingData: any) => {
         const tarotService = new TarotService();
+        // Merge ritual context + in-flow context into question for AI consumption
+        const contextParts: string[] = [];
+        if (readingData.question) contextParts.push(readingData.question);
+        // Ritual data (from the pre-reading ritual screens)
+        if (ritualData?.intention) contextParts.push(`[Intention: ${ritualData.intention}]`);
+        const ritualContext = [
+            ...(ritualData?.contextTags || []),
+            ...(ritualData?.followUpAnswers || []).map((a: string) => `Deepening: ${a}`),
+            ritualData?.extraContext || null,
+            readingData.context || null,
+        ].filter(Boolean);
+        if (ritualContext.length > 0) contextParts.push(`[Context: ${ritualContext.join('; ')}]`);
+        const enrichedQuestion = contextParts.join(' ') || undefined;
+
         const reading = tarotService.getCustomReading(
             readingData.spread,
             readingData.theme,
-            readingData.question
+            enrichedQuestion
         );
         incrementReadingCount();
         recordReading(readingData.theme, readingData.question, reading.cards);
         setCustomReadingResult(reading);
         setShowCustomReading(false);
+        setShowRitual(false);
+        setRitualData(null);
     };
 
     const handleOnboardingComplete = (profile: { name: string; birthday: string; zodiac: string; birthTime?: string; birthCity?: string; latitude?: number; longitude?: number; utcOffset?: number }) => {
@@ -410,6 +421,20 @@ function App() {
             }
             const spreadId = tab.includes(':') ? tab.split(':')[1] : null;
             setPreselectedSpread(spreadId);
+            if (spreadId) {
+                // Direct spread shortcuts (Career, Relationship from TarotTab) skip ritual
+                setShowCustomReading(true);
+            } else {
+                // Generic "Custom Reading" → immersive ritual first
+                setShowRitual(true);
+            }
+        }
+        else if (tab === 'draw-your-own') {
+            if (!canDoReading(sub === 'premium')) {
+                setShowPremiumOverlay(true);
+                return;
+            }
+            setPreselectedSpread(null);
             setShowCustomReading(true);
         }
         else if (tab === 'meanings') setShowCardLibrary(true);
@@ -755,13 +780,38 @@ function App() {
                 <AltarParticles />
 
                 {/* Overlays */}
+                {/* Pre-Reading Ritual (separate immersive screens) */}
+                {showRitual && (
+                    <ReadingRitual
+                        onComplete={(data) => {
+                            setRitualData(data);
+                            // If oracle suggested a spread, preselect it to skip the grid
+                            if (data.recommendedSpread) {
+                                setPreselectedSpread(data.recommendedSpread);
+                            }
+                            setShowRitual(false);
+                            setShowCustomReading(true);
+                        }}
+                        onSkip={() => {
+                            setRitualData(null);
+                            setShowRitual(false);
+                            setShowCustomReading(true);
+                        }}
+                        onClose={() => {
+                            setShowRitual(false);
+                            setCurrentTab('home');
+                        }}
+                    />
+                )}
+
                 {showCustomReading && (
                     <CustomReading
-                        onClose={() => { setShowCustomReading(false); setPreselectedSpread(null); setCurrentTab('home'); }}
+                        onClose={() => { setShowCustomReading(false); setPreselectedSpread(null); setRitualData(null); setCurrentTab('home'); }}
                         onComplete={handleCustomReadingComplete}
                         subscription={userProfile?.subscription || 'free'}
                         onTabChange={handleTabChange}
                         initialSpread={preselectedSpread}
+                        initialTheme={ritualData?.recommendedTheme || null}
                     />
                 )}
                 {customReadingResult && (

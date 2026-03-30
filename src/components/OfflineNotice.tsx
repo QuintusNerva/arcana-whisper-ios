@@ -42,7 +42,7 @@ export function OfflineNotice() {
             aria-live="polite"
         >
             {isOffline ? (
-                <span>📡 No connection — AI insights unavailable</span>
+                <span>📡 No connection — oracle insights unavailable</span>
             ) : (
                 <span>✓ Back online</span>
             )}

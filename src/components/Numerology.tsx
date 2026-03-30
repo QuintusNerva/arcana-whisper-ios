@@ -409,7 +409,7 @@ Weave their astrology into the numerology reading — how does their Life Path $
                                                 border: '1px solid rgba(212,175,55,0.2)',
                                             }}
                                         >
-                                            <span className="text-[11px] font-display text-altar-gold/70 tracking-wide">✦ Tap for AI Deep Reading ✦</span>
+                                            <span className="text-[11px] font-display text-altar-gold/70 tracking-wide">✦ Tap for Deep Reading ✦</span>
                                         </button>
                                     </div>
                                 )}

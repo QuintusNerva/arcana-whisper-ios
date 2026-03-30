@@ -9,6 +9,7 @@ import { HorseshoeLayout } from './HorseshoeLayout';
 import { RelationshipLayout } from './RelationshipLayout';
 import { CareerLayout } from './CareerLayout';
 import CourageCard from './CourageCard';
+import { DeclarationCard } from './DeclarationCard';
 import { detectCrisisCards } from '../services/empowerment.service';
 
 interface ReadingResultProps {
@@ -139,6 +140,34 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
         return () => timers.forEach(clearTimeout);
     }, [reading.cards]);
 
+    // Auto-trigger spread reading for premium users when all cards revealed
+    React.useEffect(() => {
+        if (!allRevealed || !isPremium || spreadInsight || spreadInsightLoading) return;
+        const ai = new AIService();
+        if (!ai.hasApiKey()) return;
+        setSpreadInsightLoading(true);
+        setAiError(null);
+        (async () => {
+            try {
+                const cardsContext = reading.cards.map((c, i) => ({
+                    name: c.name,
+                    meaning: c.meaning,
+                    reversed: c.reversed,
+                    position: positions[i] || `Card ${i + 1}`,
+                    isReversed: c.isReversed ?? false,
+                }));
+                const insight = await ai.getSpreadInsight(
+                    cardsContext, reading.spread, reading.theme, reading.question
+                );
+                setSpreadInsight(insight);
+            } catch (e: any) {
+                setAiError(e.message);
+            } finally {
+                setSpreadInsightLoading(false);
+            }
+        })();
+    }, [allRevealed]);
+
     const handleSave = () => {
         const tarotService = new TarotService();
         tarotService.saveReading(reading);
@@ -198,12 +227,22 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
                 )}
 
                 {/* Reading info */}
-                {reading.question && (
-                    <div className="mt-4 mb-2 p-4" style={goldCardStyle}>
-                        <p style={{ ...headerStyle, fontSize: '10px', marginBottom: '4px' }}>Your Question</p>
-                        <p style={{ ...mutedTextStyle, fontSize: '14px', fontStyle: 'italic', color: 'rgba(226,232,240,0.9)' }}>"{reading.question}"</p>
-                    </div>
-                )}
+                {reading.question && (() => {
+                    // Clean raw ritual tags for display — show just the user's original question
+                    const cleanQuestion = reading.question
+                        .replace(/\[Intention:\s*/gi, '')
+                        .replace(/\]\s*\[Context:[^\]]*\]/gi, '')
+                        .replace(/\[Context:[^\]]*\]/gi, '')
+                        .replace(/\]$/g, '')
+                        .trim();
+                    if (!cleanQuestion) return null;
+                    return (
+                        <div className="mt-4 mb-2 p-4" style={goldCardStyle}>
+                            <p style={{ ...headerStyle, fontSize: '10px', marginBottom: '4px' }}>Your Question</p>
+                            <p style={{ ...mutedTextStyle, fontSize: '14px', fontStyle: 'italic', color: 'rgba(226,232,240,0.9)' }}>"{cleanQuestion}"</p>
+                        </div>
+                    );
+                })()}
 
                 {/* Cards layout */}
                 {reading.spread === 'celtic-cross' ? (
@@ -314,6 +353,7 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
                                                     src={card.image}
                                                     alt={card.name}
                                                     className="w-full h-full object-cover"
+                                                    style={card.isReversed ? { transform: 'rotate(180deg)' } : undefined}
                                                     onError={(e) => {
                                                         e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDEyMCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iMTgwIiByeD0iMTIiIGZpbGw9IiM0YTJjNmQiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmaWxsPSIjZmZkNzAwIiBmb250LWZhbWlseT0ic2VyaWYiIGZvbnQtc2l6ZT0iMjgiIHRleHQtYW5jaG9yPSJtaWRkbGUiPuKcqDwvdGV4dD4KPC9zdmc+Cg==';
                                                     }}
@@ -321,6 +361,19 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
                                                 <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-black/70 to-transparent" />
                                                 <div className="absolute bottom-2 left-2 right-2">
                                                     <p style={{ ...headerStyle, fontSize: '10px', color: 'white' }} className="truncate">{card.name}</p>
+                                                    {card.isReversed && (
+                                                        <span style={{
+                                                            fontSize: '8px',
+                                                            padding: '1px 6px',
+                                                            borderRadius: '4px',
+                                                            background: 'rgba(168,85,247,0.35)',
+                                                            border: '1px solid rgba(168,85,247,0.5)',
+                                                            color: '#c4b5fd',
+                                                            fontFamily: 'var(--font-display)',
+                                                            letterSpacing: '1px',
+                                                            textTransform: 'uppercase' as const,
+                                                        }}>Reversed</span>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -367,18 +420,35 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
                                 <p style={{ ...headerStyle, fontSize: '10px', marginBottom: '4px' }}>
                                     {positions[selectedCardIdx]}
                                 </p>
-                                <h3 style={{ fontFamily: 'var(--font-display)', color: 'var(--color-gold-100)', fontSize: '18px', marginBottom: '8px' }}>
+                                <h3 style={{ fontFamily: 'var(--font-display)', color: 'var(--color-gold-100)', fontSize: '18px', marginBottom: '4px' }}>
                                     {reading.cards[selectedCardIdx].name}
+                                    {reading.cards[selectedCardIdx].isReversed && (
+                                        <span style={{
+                                            fontSize: '11px',
+                                            marginLeft: '8px',
+                                            padding: '2px 8px',
+                                            borderRadius: '6px',
+                                            background: 'rgba(168,85,247,0.2)',
+                                            border: '1px solid rgba(168,85,247,0.4)',
+                                            color: '#c4b5fd',
+                                            fontFamily: 'var(--font-display)',
+                                            letterSpacing: '1px',
+                                            verticalAlign: 'middle',
+                                        }}>REVERSED</span>
+                                    )}
                                 </h3>
                                 <p style={{ ...mutedTextStyle, fontSize: '14px', lineHeight: '1.6', marginBottom: '12px', color: 'rgba(226,232,240,0.8)' }}>
-                                    {reading.cards[selectedCardIdx].meaning}
+                                    {reading.cards[selectedCardIdx].isReversed
+                                        ? reading.cards[selectedCardIdx].reversed
+                                        : reading.cards[selectedCardIdx].meaning
+                                    }
                                 </p>
 
                                 {/* AI Insight / Free tease */}
                                 {isPremium ? (
                                     <div className="mt-3">
                                         <p style={{ ...mutedTextStyle, fontSize: '12px', marginBottom: '4px' }}>
-                                            <span style={{ color: 'var(--color-gold-100)' }}>✦</span> Reversed: <span style={{ fontStyle: 'italic', color: 'rgba(255,255,255,0.6)' }}>{reading.cards[selectedCardIdx].reversed}</span>
+                                            <span style={{ color: 'var(--color-gold-100)' }}>✦</span> {reading.cards[selectedCardIdx].isReversed ? 'Upright' : 'Reversed'}: <span style={{ fontStyle: 'italic', color: 'rgba(255,255,255,0.6)' }}>{reading.cards[selectedCardIdx].isReversed ? reading.cards[selectedCardIdx].meaning : reading.cards[selectedCardIdx].reversed}</span>
                                         </p>
                                         {cardInsight ? (
                                             <div className="mt-2 p-3" style={insetStyle}>
@@ -397,7 +467,9 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
                                                         const card = reading.cards[capturedIdx];
                                                         const insight = await ai.getCardInsight(
                                                             card.name, card.meaning, card.reversed,
-                                                            { theme: reading.theme, question: reading.question }
+                                                            { theme: reading.theme, question: reading.question },
+                                                            undefined,
+                                                            card.isReversed ?? false,
                                                         );
                                                         setCardInsight(insight);
                                                     } catch (e: any) {
@@ -437,46 +509,6 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
                     </div>
                 )}
 
-                {/* Personalized memory banner */}
-                {allRevealed && isPersonalized() && (() => {
-                    const prefix = getPersonalizedPrefix();
-                    const profile = getMemoryProfile();
-                    if (!prefix) return null;
-                    return (
-                        <div className="mt-6 animate-fade-up">
-                            <div className="relative overflow-hidden p-5" style={goldCardStyle}>
-                                {/* Subtle glow */}
-                                <div className="absolute top-0 right-0 w-24 h-24 rounded-full blur-3xl" style={{ background: 'rgba(212,175,55,0.05)' }} />
-                                <div className="relative">
-                                    <p className="flex items-center gap-1.5 mb-2" style={{ ...headerStyle, fontSize: '10px', opacity: 0.7 }}>
-                                        <span className="animate-pulse">✦</span> The Cards Remember
-                                    </p>
-                                    <p style={{ ...mutedTextStyle, fontSize: '14px', lineHeight: '1.6', fontStyle: 'italic', color: 'rgba(226,232,240,0.85)' }}>
-                                        {prefix}
-                                    </p>
-                                    {profile.topKeywords.length > 0 && (
-                                        <div className="flex flex-wrap gap-1.5 mt-3">
-                                            {profile.topKeywords.slice(0, 3).map(kw => (
-                                                <span key={kw} style={{
-                                                    fontSize: '9px',
-                                                    padding: '2px 8px',
-                                                    borderRadius: '9999px',
-                                                    background: 'rgba(212,175,55,0.08)',
-                                                    border: '1px solid rgba(212,175,55,0.1)',
-                                                    color: 'rgba(212,175,55,0.6)',
-                                                    fontFamily: 'var(--font-display)',
-                                                    letterSpacing: '1px',
-                                                }}>
-                                                    {kw}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    );
-                })()}
 
                 {/* Post-draw actions — show after all revealed */}
                 {allRevealed && (
@@ -517,7 +549,7 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
                             </button>
                         </div>
 
-                        {/* Spread Reading — manual trigger */}
+                        {/* Spread Reading — auto-triggered for premium, upsell for free */}
                         {spreadInsightLoading ? (
                             <div className="p-5" style={goldCardStyle}>
                                 <h4 className="flex items-center gap-2 mb-3" style={{ ...headerStyle, fontSize: '14px' }}>
@@ -538,36 +570,9 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
                                 </h4>
                                 <AIResponseRenderer text={spreadInsight} />
                             </div>
-                        ) : (
+                        ) : !isPremium ? (
                             <button
-                                onClick={async () => {
-                                    if (!isPremium) {
-                                        onShowPremium();
-                                        return;
-                                    }
-                                    const ai = new AIService();
-                                    if (!ai.hasApiKey()) {
-                                        setAiError('Please enter your OpenAI API key in the settings to generate AI readings.');
-                                        return;
-                                    }
-                                    setSpreadInsightLoading(true);
-                                    setAiError(null);
-                                    try {
-                                        const cardsContext = reading.cards.map((c, i) => ({
-                                            name: c.name,
-                                            meaning: c.meaning,
-                                            position: positions[i] || `Card ${i + 1}`,
-                                        }));
-                                        const insight = await ai.getSpreadInsight(
-                                            cardsContext, reading.spread, reading.theme, reading.question
-                                        );
-                                        setSpreadInsight(insight);
-                                    } catch (e: any) {
-                                        setAiError(e.message);
-                                    } finally {
-                                        setSpreadInsightLoading(false);
-                                    }
-                                }}
+                                onClick={() => onShowPremium()}
                                 className="w-full py-4 text-center transition-all hover:scale-[1.01] active:scale-[0.99]"
                                 style={{
                                     background: 'linear-gradient(135deg, var(--color-gold-100), var(--color-gold-200))',
@@ -579,14 +584,64 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
                                 }}
                             >
                                 <span className="font-display text-sm font-semibold tracking-wide flex items-center justify-center gap-2" style={{ color: '#0d0b22' }}>
-                                    {isPremium ? '✨' : '👑'} {isPremium ? 'Get Deep Dive Reading' : 'Unlock Deep Dive Reading'}
+                                    👑 Unlock Deep Dive Reading
                                 </span>
                                 <p style={{ fontSize: '10px', marginTop: '2px', color: 'rgba(13,11,34,0.6)' }}>
-                                    {isPremium ? 'Unlock the mystic synthesis of your spread' : 'Premium mystic synthesis of your spread'}
+                                    Premium mystic synthesis of your spread
                                 </p>
                             </button>
-                        )}
+                        ) : null}
                         {aiError && <p className="text-xs text-center mt-2" style={{ color: '#f87171' }}>{aiError}</p>}
+
+                        {/* Declaration of Ambition — auto-generates after spread reading */}
+                        <DeclarationCard
+                            reading={reading}
+                            spreadInsight={spreadInsight}
+                            positions={positions}
+                            isPremium={isPremium}
+                        />
+
+                        {/* Personalized memory banner — soft footer */}
+                        {isPersonalized() && (() => {
+                            const prefix = getPersonalizedPrefix();
+                            const profile = getMemoryProfile();
+                            if (!prefix) return null;
+                            return (
+                                <div className="animate-fade-up" style={{ opacity: 0.8 }}>
+                                    <div className="relative overflow-hidden p-4" style={{
+                                        ...primaryCardStyle,
+                                        border: '1px solid rgba(255,255,255,0.04)',
+                                    }}>
+                                        <div className="relative">
+                                            <p className="flex items-center gap-1.5 mb-2" style={{ ...headerStyle, fontSize: '9px', opacity: 0.5 }}>
+                                                <span>✦</span> The Cards Remember
+                                            </p>
+                                            <p style={{ ...mutedTextStyle, fontSize: '12px', lineHeight: '1.5', fontStyle: 'italic', color: 'rgba(226,232,240,0.55)' }}>
+                                                {prefix}
+                                            </p>
+                                            {profile.topKeywords.length > 0 && (
+                                                <div className="flex flex-wrap gap-1.5 mt-2">
+                                                    {profile.topKeywords.slice(0, 3).map(kw => (
+                                                        <span key={kw} style={{
+                                                            fontSize: '8px',
+                                                            padding: '1px 6px',
+                                                            borderRadius: '9999px',
+                                                            background: 'rgba(212,175,55,0.05)',
+                                                            border: '1px solid rgba(212,175,55,0.06)',
+                                                            color: 'rgba(212,175,55,0.4)',
+                                                            fontFamily: 'var(--font-display)',
+                                                            letterSpacing: '1px',
+                                                        }}>
+                                                            {kw}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })()}
 
                         {/* Draw again */}
                         <button

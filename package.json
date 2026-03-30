@@ -20,9 +20,12 @@
     "@capacitor/cli": "^7.2.0",
     "@capacitor/core": "^7.2.0",
     "@capacitor/ios": "^7.2.0",
+    "@tailwindcss/postcss": "^4.2.2",
     "@tailwindcss/vite": "^4.1.18",
     "@types/react": "~19.1.0",
     "@vitejs/plugin-react": "^5.1.4",
+    "autoprefixer": "^10.4.27",
+    "postcss": "^8.5.8",
     "tailwindcss": "^4.1.18",
     "typescript": "~5.9.2",
     "vite": "^7.3.1"

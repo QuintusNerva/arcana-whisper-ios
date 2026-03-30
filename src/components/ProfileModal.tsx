@@ -847,9 +847,9 @@ function AiToggleRow() {
         <div className="flex items-center gap-3 px-4 py-3 border-b border-white/5">
             <span className="text-lg">✨</span>
             <div className="flex-1">
-                <p className="text-sm text-altar-text">AI Insights</p>
+                <p className="text-sm text-altar-text">Mystic Insights</p>
                 <p className="text-[10px] text-altar-muted/60 mt-0.5">
-                    {enabled ? 'Personalized readings & dream interpretation' : 'AI features are off'}
+                    {enabled ? 'Personalized readings & dream interpretation' : 'Mystic insights are paused'}
                 </p>
             </div>
             <button

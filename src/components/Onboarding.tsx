@@ -715,18 +715,18 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             {/* ── AI Consent ── */}
             {step === 'consent' && (
                 <div className="text-center max-w-[380px] animate-fade-up w-full">
-                    <div className="text-4xl mb-4">🤖</div>
-                    <h2 className="font-display text-xl text-altar-gold tracking-[3px] mb-2">AI-POWERED INSIGHTS</h2>
+                    <div className="text-4xl mb-4">🔮</div>
+                    <h2 className="font-display text-xl text-altar-gold tracking-[3px] mb-2">MYSTIC INSIGHTS</h2>
                     <p className="text-sm text-altar-muted mb-5">
-                        Arcana Whisper uses AI to create personalized reading interpretations.
+                        Arcana Whisper channels deep, personalized reading interpretations for you.
                     </p>
 
                     <div className="glass-strong rounded-xl p-4 text-left mb-5">
-                        <p className="text-xs text-altar-text font-medium mb-3">When you request an AI interpretation:</p>
+                        <p className="text-xs text-altar-text font-medium mb-3">When you request a personalized interpretation:</p>
                         <ul className="space-y-2 text-[11px] text-altar-muted">
-                            <li className="flex gap-2"><span className="text-altar-gold">•</span> Your card selections and reading theme are sent to our AI provider</li>
+                            <li className="flex gap-2"><span className="text-altar-gold">•</span> Your card selections and reading theme are sent to generate your reading</li>
                             <li className="flex gap-2"><span className="text-altar-gold">•</span> Your zodiac sign and birth data may be included for personalization</li>
-                            <li className="flex gap-2"><span className="text-altar-gold">•</span> Data is processed by <span className="text-altar-gold">OpenRouter</span> (third-party AI service)</li>
+                            <li className="flex gap-2"><span className="text-altar-gold">•</span> Readings are channeled through <span className="text-altar-gold">a secure third-party service</span></li>
                             <li className="flex gap-2"><span className="text-altar-gold">•</span> All other data stays on your device</li>
                         </ul>
                         <button onClick={() => openLegal('privacy')} className="mt-3 text-[10px] text-altar-gold/60 hover:text-altar-gold transition-colors underline">
@@ -745,7 +745,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                             }`}>
                             {aiConsent && <span className="text-xs font-bold">✓</span>}
                         </div>
-                        <span className="text-xs text-altar-text text-left">I consent to my reading data being processed by a third-party AI service</span>
+                        <span className="text-xs text-altar-text text-left">I consent to my reading data being processed by a third-party service for personalized interpretations</span>
                     </button>
 
                     <button
@@ -759,7 +759,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                     </button>
 
                     <p className="text-[10px] text-altar-muted/40 mt-3">
-                        You can still use tarot, astrology, and numerology without AI. {!aiConsent && 'AI features will be disabled.'}
+                        You can still use tarot, astrology, and numerology without personalized insights. {!aiConsent && 'Personalized readings will be disabled.'}
                     </p>
 
                     <button onClick={() => setStep('paywall')} className="mt-3 text-xs text-altar-muted/50 hover:text-altar-muted transition-colors">← Back</button>

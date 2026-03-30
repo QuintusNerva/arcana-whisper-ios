@@ -10,12 +10,23 @@ import {
     getBirthData, getNatalTriad, getLifePathNumber, getCurrentPersonalYear,
     getDestinyName, getDestinyNumber,
 } from './astrology.service';
+
 /**
  * AI Interpretation Service — OpenRouter Integration
  * Uses Claude Haiku 4.5 via OpenRouter for all AI interpretations.
+ * Tarot prompts powered by the Wise Mirror framework (src/prompts/).
  */
 
 import { getMemoryContextForAI } from './memory.service';
+
+// Wise Mirror prompt builders
+import { TEACHING_FORMAT } from '../prompts/shared/wise-mirror';
+import { scoreSpreadEnergy, type DrawnCard } from '../prompts/shared/energy-scorer';
+import { buildCardInsightPrompt } from '../prompts/tarot/card-insight';
+import { buildSpreadInsightPrompt } from '../prompts/tarot/spread-insight';
+import { buildEnergyReadingPrompt } from '../prompts/tarot/energy-reading';
+import { buildDeclarationPrompt, type DeclarationParams } from '../prompts/tarot/declaration';
+import type { Card } from '../models/card.model';
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const MODEL = 'anthropic/claude-haiku-4.5';
@@ -59,21 +70,8 @@ export const permanentCache = {
     },
 };
 
-/** Shared formatting instruction appended to all AI system prompts */
-const TEACHING_FORMAT = `
+/** Shared formatting instruction — re-exported from Wise Mirror shared module */
 
-You MUST format your response using these rules:
-1. Structure into 2-3 sections using ## headers (e.g. ## The Theme, ## The Lesson, ## The Energy).
-2. Bold all key terminology using **double asterisks** (e.g. **Personal Year 9**, **Virgo Moon**, **The Tower**).
-3. Keep paragraphs short (2-3 sentences max).
-4. Do NOT use any other markdown like code blocks, links, or images.
-5. End with these TWO sections (always, in this order):
-
-## 🪞 The Mirror
-One thoughtful, non-prescriptive question for the seeker to sit with — turning the reading inward. Italicize the question. (Example: *What would it feel like to trust that this is already on its way to you?*)
-
-## 🚀 Your Next Step
-One specific, actionable micro-step they can take TODAY or THIS WEEK — directly justified by what the cards or chart revealed. Format: "Because [specific insight] → [specific action]." Never generic.`;
 
 /**
  * Auto-pull chart + numerology context from stored birth data.
@@ -105,6 +103,10 @@ Use this to personalize how the insight lands — which parts of the reading res
 /**
  * Build a manifestation-aware system prompt prefix.
  * Returns empty string when context doesn't warrant it.
+ */
+/**
+ * Build manifestation system guidance.
+ * Re-exported from Wise Mirror shared module for non-tarot methods.
  */
 function buildManifestationSystemGuidance(ctx: EmpowermentContext): string {
     if (ctx.compassionMode) return '';
@@ -140,7 +142,7 @@ export class AIService {
 
     /**
      * Get a personalized AI insight for a single card.
-     * Returns the text content or throws on error.
+     * Now powered by Wise Mirror dynamic tone engine.
      */
     async getCardInsight(
         cardName: string,
@@ -148,56 +150,44 @@ export class AIService {
         cardReversed: string,
         context?: { theme?: string; question?: string },
         empowermentCtx?: EmpowermentContext,
+        isReversed: boolean = false,
     ): Promise<string> {
         // Build empowerment context if not provided
         const ctx = empowermentCtx ?? buildEmpowermentContext(context?.question, [cardName]);
         const activeManifestations = getActiveManifestations();
         const manifestationCtx = buildManifestationContextString(ctx, activeManifestations);
         const compassionPrefix = ctx.compassionMode ? buildCompassionSystemPrefix() : '';
-        const manifestationGuidance = buildManifestationSystemGuidance(ctx);
 
-        const systemPrompt = `${compassionPrefix}You are an expert mystical tarot reader with deep knowledge of the Rider-Waite-Smith deck.
-You give insightful, poetic yet practical readings.
-Use a warm, wise tone — like a compassionate oracle.
-Always explain what the card means first — its symbolism, archetype, and traditional meaning — before offering personal insight.
-If the seeker's cosmic profile is provided, subtly weave relevant astrological and numerological resonance into the card interpretation — how this card speaks to their specific chart configuration and current life cycle. Do NOT list their placements mechanically; integrate the insight naturally.${manifestationGuidance}${TEACHING_FORMAT}`;
+        // Score energy for tone selection (single card)
+        const cardForScoring: Card = { id: '', name: cardName, description: '', image: '', meaning: cardMeaning, reversed: cardReversed, suit: '' };
+        const drawnCards: DrawnCard[] = [{ card: cardForScoring, position: 'Present', isReversed }];
+        const tone = scoreSpreadEnergy(drawnCards);
 
-        let userPrompt = `Give a personalized insight for "${cardName}".
-Upright meaning: ${cardMeaning}
-Reversed meaning: ${cardReversed}`;
+        // Build prompts via Wise Mirror
+        const { system, user } = buildCardInsightPrompt({
+            cardName,
+            cardMeaning,
+            cardReversed,
+            isReversed,
+            tone,
+            theme: context?.theme,
+            question: context?.question,
+            empowermentCtx: ctx,
+            manifestationCtx,
+            compassionPrefix,
+            memoryCtx: getMemoryContextForAI(),
+            chartCtx: buildChartNumerologyContext(),
+        });
 
-        if (context?.theme) {
-            userPrompt += `\nThe seeker's focus area is: ${context.theme}`;
-        }
-        if (context?.question) {
-            userPrompt += `\nTheir question: "${context.question}"`;
-        }
-
-        // Inject manifestation/empowerment context
-        if (manifestationCtx) {
-            userPrompt += manifestationCtx;
-        }
-
-        // Inject memory context for personalization
-        const memoryCtx = getMemoryContextForAI();
-        if (memoryCtx) {
-            userPrompt += `\n\n${memoryCtx}`;
-        }
-
-        // Inject chart + numerology context
-        const chartCtx = buildChartNumerologyContext();
-        if (chartCtx) {
-            userPrompt += chartCtx;
-        }
-
-        return this.chat(systemPrompt, userPrompt);
+        return this.chat(system, user);
     }
 
     /**
      * Get a deep AI interpretation for a full spread reading.
+     * Now powered by Wise Mirror dynamic tone engine.
      */
     async getSpreadInsight(
-        cards: Array<{ name: string; meaning: string; position: string }>,
+        cards: Array<{ name: string; meaning: string; reversed?: string; position: string; isReversed?: boolean }>,
         spread: string,
         theme: string,
         question?: string,
@@ -209,45 +199,245 @@ Reversed meaning: ${cardReversed}`;
         const activeManifestations = getActiveManifestations();
         const manifestationCtx = buildManifestationContextString(ctx, activeManifestations);
         const compassionPrefix = ctx.compassionMode ? buildCompassionSystemPrefix() : '';
-        const manifestationGuidance = buildManifestationSystemGuidance(ctx);
 
-        const systemPrompt = `${compassionPrefix}You are an expert mystical tarot reader with deep knowledge of the Rider-Waite-Smith deck.
-You synthesize multi-card spreads into cohesive, insightful narratives.
-Be specific to the cards drawn and their positions.
-Use a warm, wise tone — like a compassionate oracle.
-Always explain what each card means (its core symbolism and teaching) before weaving it into the spread narrative.
-If the seeker's cosmic profile is provided, weave relevant chart and numerological resonance into the spread narrative — how the cards interact with their natal energies and current life cycle. Integrate naturally, never list mechanically.${manifestationGuidance}${TEACHING_FORMAT}`;
+        // Score spread energy for tone selection
+        const drawnCards: DrawnCard[] = cards.map(c => ({
+            card: { id: '', name: c.name, description: '', image: '', meaning: c.meaning, reversed: c.reversed || '', suit: '' } as Card,
+            position: c.position,
+            isReversed: c.isReversed ?? false,
+        }));
+        const tone = scoreSpreadEnergy(drawnCards);
 
-        const cardLines = cards.map((c, i) =>
-            `Position ${i + 1} (${c.position}): ${c.name} — ${c.meaning}`
-        ).join('\n');
+        // Build prompts via Wise Mirror
+        const { system, user } = buildSpreadInsightPrompt({
+            cards: cards.map(c => ({
+                name: c.name,
+                meaning: c.meaning,
+                reversed: c.reversed,
+                position: c.position,
+                isReversed: c.isReversed ?? false,
+            })),
+            spread,
+            theme,
+            tone,
+            question,
+            empowermentCtx: ctx,
+            manifestationCtx,
+            compassionPrefix,
+            memoryCtx: getMemoryContextForAI(),
+            chartCtx: buildChartNumerologyContext(),
+        });
 
-        let userPrompt = `Interpret this ${spread} tarot spread:\n${cardLines}`;
-        userPrompt += `\nTheme: ${theme}`;
-        if (question) {
-            userPrompt += `\nThe seeker asks: "${question}"`;
+        // Scale token budget based on spread depth
+        // Needs headroom for: card interpretations + manifestation dimension + natal chart + numerology
+        const cardCount = cards.length;
+        const tokenBudget = cardCount >= 10 ? 3000
+            : cardCount >= 7 ? 2500
+            : cardCount >= 4 ? 2000
+            : cardCount >= 3 ? 1200
+            : 600;
+
+        return this.chat(system, user, tokenBudget);
+    }
+
+    /**
+     * Get a brief daily energy interpretation for the Today's Energy cards.
+     * Uses the short Wise Mirror format (3-4 sentences max).
+     */
+    async getEnergyReading(
+        cards: Card[],
+        positions: string[] = ['Mind', 'Body', 'Spirit'],
+    ): Promise<string> {
+        const cardData = cards.map((card, i) => ({
+            card,
+            position: positions[i] || `Position ${i + 1}`,
+            isReversed: card.isReversed ?? false,
+        }));
+
+        const { system, user } = buildEnergyReadingPrompt({
+            cards: cardData,
+            chartCtx: buildChartNumerologyContext(),
+        });
+
+        return this.chat(system, user);
+    }
+
+    /**
+     * Generate a Declaration of Ambition from a completed reading.
+     * Returns a 1-2 sentence first-person declaration.
+     */
+    async getDeclaration(
+        params: {
+            cards: Array<{ name: string; position: string; isReversed?: boolean; meaning?: string; reversed?: string }>;
+            spread: string;
+            theme: string;
+            question?: string;
+            readingText: string;
+        },
+    ): Promise<string> {
+        // Score energy for tone
+        const drawnCards: DrawnCard[] = params.cards.map(c => ({
+            card: { id: '', name: c.name, description: '', image: '', meaning: c.meaning || '', reversed: c.reversed || '', suit: '' } as Card,
+            position: c.position,
+            isReversed: c.isReversed ?? false,
+        }));
+        const tone = scoreSpreadEnergy(drawnCards);
+
+        const { system, user } = buildDeclarationPrompt({
+            ...params,
+            tone,
+        });
+
+        return this.chat(system, user);
+    }
+
+    /**
+     * Generate a contextual follow-up question for the pre-reading ritual.
+     * The AI asks ONE short, probing question based on the user's initial question.
+     * Returns just the question text — no preamble, no explanation.
+     */
+    async getRitualFollowUp(userQuestion: string): Promise<string> {
+        const systemPrompt = `You are an oracle preparing to give a tarot reading. The seeker has shared their question. Your role is to ask ONE short, deeply perceptive follow-up question that will help the reading be more accurate.
+
+Rules:
+- Ask exactly ONE question, nothing else
+- Keep it under 30 words
+- Be specific to what they shared — do NOT ask generic questions
+- Sound mystical but clear — like a wise counselor, not a therapist
+- Do NOT start with "I" or refer to yourself
+- Do NOT add any preamble like "That's a great question" or "I sense..."
+- Just the question itself, as if it appeared written by an invisible hand
+- If their question is about a relationship, ask about the nature of the dynamic
+- If their question is about career or work specifically, ask about what's driving the change
+- If their question is about a purchase, investment, or material goal, ask about the timeline or what obstacles they foresee
+- If their question is about change, ask whether this is something chosen or something arriving uninvited
+
+Examples of good follow-ups:
+- "Is this about something that has already happened, or something you're afraid might?"
+- "When you imagine the answer you're hoping for — what does it look like?"
+- "Are you seeking permission to act, or clarity about which direction to move?"`;
+
+        const userPrompt = `The seeker's question: "${userQuestion}"
+
+Generate one follow-up question.`;
+
+        return this.chat(systemPrompt, userPrompt, 80);
+    }
+
+    /**
+     * Recommend a spread + theme based on ritual conversation.
+     * Returns structured JSON with spreadId, theme, and explanation.
+     * 
+     * The Oracle always recommends deep readings — never single/yes-no.
+     * Default: Celtic Cross for maximum depth.
+     */
+    async getRitualSpreadRecommendation(
+        question: string,
+        followUpAnswer?: string,
+    ): Promise<{ spreadId: string; theme: string; explanation: string }> {
+        const systemPrompt = `You are an oracle selecting the perfect tarot spread for a seeker. This is a DEEP reading — the Oracle never recommends shallow spreads. Choose the spread that will give the most meaningful insight.
+
+Available spreads (ordered by depth):
+
+1. "celtic-cross" (10 cards) — THE DEFAULT. The most iconic and comprehensive spread in tarot. A "360-degree" view of a situation.
+   Two parts: The Cross (cards 1-6) focuses on the heart of the matter. The Staff (cards 7-10) explores external influences and potential paths.
+   Positions: 1=Present/heart of matter → 2=The Challenge/what crosses you → 3=Conscious goals/aspirations → 4=Unconscious/hidden roots/foundation → 5=Past/recent events → 6=Near Future/immediate developments → 7=Self/personal perspective → 8=External Influences/other people → 9=Hopes and Fears/secret desires or anxieties → 10=Final Outcome/long-term result.
+   Best for: General life reviews, in-depth problem solving, big decisions, identifying blocks, complex situations with multiple forces at play, spiritual growth, career crossroads with many variables.
+   Use when: The question has depth and the seeker needs to understand all dimensions. This is your go-to unless another spread is a clearly better fit. Avoid for simple yes/no — use open-ended questions.
+
+2. "horseshoe" (7 cards) — The decision-maker's spread. The middle ground between depth and focus.
+   Positions: Past → Present → Hidden Influences → The Querent → Influence of Others → Action/Advice → Final Outcome
+   Best for: Decision-making, resolving specific complex problems, troubled relationships that need mending, "what should I do?" questions, understanding hidden influences, when you need actionable advice not just description.
+   Use when: The question is about a SPECIFIC situation that needs a clear course of action. More focused than Celtic Cross but still deeply revealing.
+
+3. "relationship" (5 cards) — The Relationship Cross. A cross-shaped layout showing how two energies intersect.
+   Positions: 1=You (your current state, feelings, what you contribute) → 2=Them (their state, feelings, how they show up) → 3=Foundation (past influences, the root that brought you together) → 4=Present (the heart of the matter, actual health and vibe right now) → 5=Future (likely outcome if current energies continue).
+   Layout: Card 4 (Present) at center, Card 1 (You) left, Card 2 (Them) right, Card 3 (Foundation) below, Card 5 (Future) above. The cross shape visualizes how two people meet at the center.
+   Best for: Understanding the energy between two people, love check-ins, commitment questions, strengthening bonds, new relationship potential, general romantic guidance.
+   Use when: The question is about a relationship but NOT about leaving or staying. For relationship crisis/decisions, use "stay-or-go" instead.
+
+3b. "stay-or-go" (6 cards) — ORACLE EXCLUSIVE. For relationships in crisis.
+   Positions: 1=Current Reality (stripped of nostalgia) → 2=Case for Staying (strengths, growth potential remaining) → 3=Case for Leaving (what is truly missing, deal-breakers, toxic patterns) → 4=Path of Staying (likely emotional landscape if committed) → 5=Path of Leaving (likely landscape if walking away) → 6=Core Advice (fundamental truth to embrace).
+   Best for: Relationships facing serious trouble, "should I leave?" questions, infidelity aftermath, toxic dynamics, when someone needs to make a hard decision about their relationship.
+   Use when: The seeker's language reveals CRISIS energy — words like leave, stay, go, end, divorce, cheating, forgive, can't take it, breaking point. This is NOT for general relationship questions — only when someone is genuinely weighing whether to stay or go.
+   Reading tip: Compare cards 4 and 5 — the contrast between the two paths often provides the breakthrough. Card 6 is the North Star. The AI interprets differently for long marriages vs. new relationships based on ritual context.
+
+4. "career" (4 cards) — Focused professional clarity. Concise but actionable.
+   Positions: 1=Current Energy (atmosphere of your work situation, how you feel right now) → 2=Potential Growth (hidden opportunities or advancement you might not be seeing) → 3=The Obstacle (specific challenges, fears, or upcoming hurdles to plan for) → 4=Actionable Advice (best way to leverage your skills, the next practical step).
+   Best for: Professional growth, navigating job transitions, skill assessment, identifying career gaps, deciding whether to stay or pivot, money/abundance questions.
+   Use when: The question is specifically about work, career, or professional life.
+   Reading tip: Look for connections between cards — if the Obstacle is self-limitation and Advice is expansion, the message is that mindset is the only blocker.
+
+5. "three-card" (3 cards) — The "Swiss Army Knife" of tarot. Versatile positions adapt to the question.
+   Variations (AI picks the best frame based on context):
+   - Timeline: Past (roots) → Present (current energy) → Future (likely path)
+   - Decision: Option A → Option B → Information needed to decide
+   - Problem Solving: The Problem → The Cause → The Solution
+   - Self-Check: Mind → Body → Spirit
+   - Relationships: You → The Other Person → The Connection
+   Best for: Simple direct questions, daily check-ins, clarification, when a focused snapshot is enough.
+   Use when: ONLY if the question is genuinely simple and doesn't warrant more cards. The Oracle should rarely recommend this — most seekers who consult the Oracle want depth.
+   Reading tip: Look for a storyline — do cards get more positive left to right (progress)? All same suit (focused domain)? Blockage in the middle card (something stopping progress)?
+
+IMPORTANT RULES:
+- BIAS TOWARD DEPTH: The Oracle exists for DEEP readings. Celtic Cross should be your recommendation approximately 40-50% of the time.
+- Default to "celtic-cross" for: general life questions, spiritual questions, complex multi-layered situations, timing questions ("when will..."), questions about the future, any question that has emotional weight and no clearly better-fit spread.
+- NEVER recommend "single" or "yes-no" — those are for the "Draw Your Own" section, not the Oracle.
+- "career" is ONLY for questions explicitly about a JOB, PROFESSION, or WORK — NOT for financial purchases, property, investments, or money in general. If someone asks about buying a house, land, or making a purchase, use "celtic-cross" or "horseshoe" depending on complexity.
+- If the question is about a relationship IN CRISIS (leaving, staying, cheating, breaking up), use "stay-or-go".
+- If the question is about a relationship generally (love, connection, future together), use "relationship".
+- If the question requires a specific decision with clear options (non-relationship), use "horseshoe".
+- For spiritual, timing, complex, multi-dimensional, or life-path questions — use "celtic-cross".
+
+Available themes:
+- "general" — Universal guidance (use this for property, purchases, timing, life situations)
+- "love" — Relationships, heart matters
+- "career" — Work, job, profession ONLY (not finances in general)
+- "growth" — Spiritual, personal development
+- "family" — Home, roots, family dynamics
+- "health" — Wellness, healing
+- "decision" — Crossroads, choices
+
+Respond ONLY in this exact JSON format, nothing else:
+{"spreadId":"...","theme":"...","explanation":"..."}
+
+The explanation should be ONE sentence (max 25 words), mystical but clear, explaining what the cards will reveal. Do NOT mention the spread name.
+
+Examples:
+- "When will I buy the land I want?" → {"spreadId":"celtic-cross","theme":"general","explanation":"Ten cards will reveal every force — timing, obstacles, hidden allies, and the momentum carrying you toward what is yours."}
+- "Am I ready for this career change?" → {"spreadId":"career","theme":"career","explanation":"Four cards will map the forces pulling you forward and what stands between you and the leap."}
+- "How can I strengthen my relationship?" → {"spreadId":"relationship","theme":"love","explanation":"Five cards will illuminate the energy between you — what remains unspoken, what is shifting, and what awaits."}
+- "I don't know if I should leave my partner" → {"spreadId":"stay-or-go","theme":"love","explanation":"Six cards will mirror both paths — what stays if you hold on, what opens if you let go, and what your deepest truth already knows."}
+- "I don't know what to do about my living situation" → {"spreadId":"horseshoe","theme":"decision","explanation":"Seven cards will reveal the hidden forces at play and illuminate the wisest path forward."}
+- "What does the universe want me to know right now?" → {"spreadId":"celtic-cross","theme":"growth","explanation":"Ten cards will lay bare every dimension of your journey — past wounds, present power, and destined direction."}
+- "Will I be financially stable this year?" → {"spreadId":"celtic-cross","theme":"general","explanation":"Ten cards will reveal the full landscape of your material journey — what is building, what is shifting, and where abundance waits."}`;
+
+        const userPrompt = `Seeker's question: "${question}"${followUpAnswer ? `\nTheir deepening: "${followUpAnswer}"` : ''}
+
+Select the best spread and theme for this Oracle reading.`;
+
+        const raw = await this.chat(systemPrompt, userPrompt, 120);
+        try {
+            const jsonMatch = raw.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                const parsed = JSON.parse(jsonMatch[0]);
+                // Only allow Oracle-appropriate spreads
+                const validSpreads = ['three-card', 'career', 'relationship', 'stay-or-go', 'celtic-cross', 'horseshoe'];
+                const validThemes = ['general', 'love', 'career', 'growth', 'family', 'health', 'decision'];
+                return {
+                    spreadId: validSpreads.includes(parsed.spreadId) ? parsed.spreadId : 'celtic-cross',
+                    theme: validThemes.includes(parsed.theme) ? parsed.theme : 'general',
+                    explanation: parsed.explanation || 'Ten cards will reveal every dimension of your question.',
+                };
+            }
+        } catch {
+            // fallback
         }
-
-        // Inject manifestation/empowerment context
-        if (manifestationCtx) {
-            userPrompt += manifestationCtx;
-        }
-
-        // Inject memory context for personalization
-        const memoryCtx = getMemoryContextForAI();
-        if (memoryCtx) {
-            userPrompt += `\n\n${memoryCtx}`;
-        }
-
-        // Inject chart + numerology context
-        const chartCtx = buildChartNumerologyContext();
-        if (chartCtx) {
-            userPrompt += chartCtx;
-        }
-
-        userPrompt += `\n\nProvide a cohesive reading that weaves all cards together. Explain each card's meaning and the story they tell collectively. Focus on insight and the second side of the coin — what is being called in or released.`;
-
-        return this.chat(systemPrompt, userPrompt);
+        return {
+            spreadId: 'celtic-cross',
+            theme: 'general',
+            explanation: 'Ten cards will lay bare the full landscape of your question — every force, every possibility.',
+        };
     }
 
     /**
@@ -1085,28 +1275,39 @@ ${keyDatesSummary || 'No exact transit hits detected.'}`;
             rising?: string;
             lifePath?: number;
             personalYear?: number;
-        }
+        },
+        whereSpotted?: string,
     ): Promise<string> {
         const systemPrompt = `You are a warm, wise numerology guide with deep knowledge of angel numbers, sacred geometry, repeating number sequences, and spiritual symbolism across traditions (Pythagorean, Kabbalistic, Doreen Virtue system, and ancient numerology). 
 
 YOUR VOICE:
 - Speak directly to the person ("you"). Warm, oracle-like, grounded.
 - Explain the UNIVERSAL meaning of the number first — its digit composition, what single or master numbers it reduces to, and what that frequency carries spiritually.
+- Then touch on the TIMING dimension — why might this number be appearing NOW? What season of life, transition, or inner shift does this energy typically arrive during? Make them feel like seeing this number was not random.
 - Use poetic but practical language. Not vague. Not generic.
+- Use words like alignment, momentum, and intuition rather than just magic and miracles.
+- Use "You may be feeling..." or "This is an invitation to..." rather than "You must do X."
 - If chart context is provided: ONLY mention their chart if there is a specific, genuine, interesting resonance between the number's meaning and their placement. If the connection feels forced or is not compelling, DO NOT mention the chart at all.
-- End with ONE italicized reflection question (use *asterisks*).
+- If location context is provided ("where they saw it"): weave this in naturally to make the reading feel personal and specific. A number on a clock carries different weight than one on a receipt or license plate.
+
+DIGIT REPETITION NUANCE:
+- Triple digits (111, 222) = the energy is ARRIVING — a nudge, a tap on the shoulder.
+- Quadruple digits (1111, 2222) = the energy has OPENED A PORTAL — the universe isn't whispering, it's speaking clearly.
+- More repetition = qualitatively different, NOT just "the same but louder."
+- Ensure distinct readings for 111 vs 1111, 22 vs 222 vs 2222, etc.
 
 FORMAT:
 - First line: a short evocative title for this number (2-5 words, NO hashtags or asterisks, just plain text)
 - Then a blank line
-- Then 3-4 short paragraphs (2-3 sentences each) — the reading
-- End with the italicized reflection question
-- Total: 150-200 words. Tight and powerful. No fluff.
+- Then 3-4 short paragraphs (2-3 sentences each) — the reading (weave the timing/why-now dimension naturally into the body)
+- Then an italicized reflection question (use *asterisks*)
+- Then a blank line, then on its own line: "✦ [a manifestation seed — one specific, embodied action that channels this number's energy into the user's life, under 15 words. Frame as an intention they can carry forward. E.g. for 444: 'Place both feet on the ground and declare what you are building.' For 555: 'Name one thing you are ready to release — say it out loud, then let it go.' For 888: 'Write down the abundance you are calling in — be specific and bold.']"
+- Total: 180-250 words. Tight and powerful. No fluff.
 - No markdown headers (##), no bullet points, no bold markers.`;
 
-        let userPrompt = `Angel number seen: ${number}
+        let userPrompt = `Angel number seen: ${number}${whereSpotted ? `\nSpotted: ${whereSpotted}` : ''}
 
-Give the universal spiritual meaning of ${number}. Break down its digit composition and what frequency it carries. Then deliver a warm, personal oracle message.`;
+Give the universal spiritual meaning of ${number}. Break down its digit composition and what frequency it carries. Touch on why this number might be appearing now — what transition or season does it typically herald? Deliver a warm, personal oracle message, then a reflection question, then a manifestation seed — one embodied action that channels the number's energy into their life.`;
 
         if (chartContext) {
             const parts: string[] = [];
@@ -1120,7 +1321,7 @@ Give the universal spiritual meaning of ${number}. Break down its digit composit
             }
         }
 
-        return this.chat(systemPrompt, userPrompt, 350);
+        return this.chat(systemPrompt, userPrompt, 400);
     }
 
     async chat(systemPrompt: string, userPrompt: string, maxTokens = 600): Promise<string> {

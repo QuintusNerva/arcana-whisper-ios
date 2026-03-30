@@ -1,3 +1,5 @@
+import type { SpreadEnergy } from '../prompts/shared/wise-mirror';
+
 export interface Card {
   id: string;
   name: string;
@@ -10,6 +12,7 @@ export interface Card {
   element?: string;
   planet?: string;
   zodiac?: string;
+  isReversed?: boolean;    // Set when card is drawn for a reading (undefined in library)
 }
 
 export interface Reading {
@@ -22,6 +25,8 @@ export interface Reading {
   type: 'daily' | 'custom';
   spread: string;
   theme: string;
+  energyScore?: SpreadEnergy;     // Wise Mirror energy classification
+  aiInterpretation?: string;      // Stored AI reading text (for Reading Memory Layer)
 }
 
 export interface SpreadType {

@@ -2,6 +2,7 @@ import React from 'react';
 import { safeStorage } from '../services/storage.service';
 import { AIService } from '../services/ai.service';
 import { getBirthData, getNatalTriad, getLifePathNumber, getCurrentPersonalYear } from '../services/astrology.service';
+import { createManifestation } from '../services/manifestation.service';
 
 const ANGEL_LOG_KEY = 'arcana_angel_log';
 const ANGEL_MEANING_CACHE_KEY = 'arcana_angel_meanings';
@@ -31,19 +32,32 @@ interface AngelSighting { id: string; number: string; timestamp: string; note?: 
 function getLog(): AngelSighting[] { try { return JSON.parse(safeStorage.getItem(ANGEL_LOG_KEY) || '[]'); } catch { return []; } }
 function saveLog(l: AngelSighting[]) { safeStorage.setItem(ANGEL_LOG_KEY, JSON.stringify(l)); }
 
-interface MeaningResult { title: string; body: string; }
+interface MeaningResult { title: string; body: string; ritual?: string; }
 
 function parseMeaning(raw: string): MeaningResult {
-    const lines = raw.trim().split('\n').filter(l => l.trim());
+    const allLines = raw.trim().split('\n').filter(l => l.trim());
     let title = 'Angel Number';
-    let body = raw.trim();
+    let ritual: string | undefined;
+    let startIdx = 0;
 
-    const firstLine = lines[0]?.replace(/^#+\s*/, '').replace(/\*\*/g, '').trim();
+    // Extract title (first short non-sentence line)
+    const firstLine = allLines[0]?.replace(/^#+\s*/, '').replace(/\*\*/g, '').trim();
     if (firstLine && firstLine.length < 60 && !firstLine.endsWith('.')) {
         title = firstLine;
-        body = lines.slice(1).join('\n').trim();
+        startIdx = 1;
     }
-    return { title, body };
+
+    // Separate body from micro-ritual (line starting with ✦)
+    const bodyLines: string[] = [];
+    for (let i = startIdx; i < allLines.length; i++) {
+        if (allLines[i].trim().startsWith('✦')) {
+            ritual = allLines[i].trim().replace(/^✦\s*/, '');
+        } else {
+            bodyLines.push(allLines[i]);
+        }
+    }
+
+    return { title, body: bodyLines.join('\n').trim(), ritual };
 }
 
 // ── Digit meaning breakdown ──
@@ -70,6 +84,8 @@ export function AngelNumbersSection() {
     const [note, setNote] = React.useState('');
     const [collapsed, setCollapsed] = React.useState(true);
     const [showAll, setShowAll] = React.useState(false);
+    const [whereSpotted, setWhereSpotted] = React.useState('');
+    const [ritualSaved, setRitualSaved] = React.useState(false);
 
     const fetchMeaning = async (num: string) => {
         const cache = getMeaningCache();
@@ -82,7 +98,7 @@ export function AngelNumbersSection() {
         if (!ai.hasApiKey()) {
             setMeaning({
                 title: `Angel Number ${num}`,
-                body: `You noticed ${num}. In angel number traditions, each digit carries vibration — ${num.split('').join(' + ')} together form a message from the universe. Add your API key in Settings for a personalized AI reading.`,
+                body: `You noticed ${num}. In angel number traditions, each digit carries vibration — ${num.split('').join(' + ')} together form a message from the universe. Add your API key in Settings for a personalized reading.`,
             });
             return;
         }
@@ -107,7 +123,7 @@ export function AngelNumbersSection() {
                 };
             }
 
-            const raw = await ai.getAngelNumberMeaning(num, chartContext);
+            const raw = await ai.getAngelNumberMeaning(num, chartContext, whereSpotted || undefined);
             const updated = { ...getMeaningCache(), [num]: raw };
             saveMeaningCache(updated);
             setMeaning(parseMeaning(raw));
@@ -127,6 +143,7 @@ export function AngelNumbersSection() {
         }
         setSelected(num);
         setCollapsed(true);
+        setRitualSaved(false);
         fetchMeaning(num);
     };
 
@@ -210,6 +227,19 @@ export function AngelNumbersSection() {
                         }}
                     />
                 </div>
+                <input
+                    value={whereSpotted}
+                    onChange={e => setWhereSpotted(e.target.value)}
+                    placeholder="Where did you spot it? (clock, receipt, dream...)"
+                    className="w-full mt-2 rounded-xl px-4 py-2.5 text-[11px] text-altar-text/80 focus:outline-none transition-all"
+                    style={{
+                        background: 'rgba(61,29,90,0.25)',
+                        border: '1px solid rgba(212,175,55,0.10)',
+                        fontFamily: "'Inter', sans-serif",
+                        fontWeight: 300,
+                        letterSpacing: '0.5px',
+                    }}
+                />
                 <button
                     onClick={handleCustomSubmit}
                     disabled={!customInput.trim()}
@@ -403,7 +433,51 @@ export function AngelNumbersSection() {
                                 })}
                             </div>
 
-
+                            {/* ── Manifestation Seed: the Create pillar ── */}
+                            {meaning.ritual && (
+                                <div
+                                    className="mt-4 rounded-2xl px-4 py-3.5 text-center animate-fade-up"
+                                    style={{
+                                        background: 'rgba(197,147,65,0.06)',
+                                        border: '1px solid rgba(212,175,55,0.25)',
+                                        boxShadow: '0 0 24px rgba(212,175,55,0.06)',
+                                    }}
+                                >
+                                    <p className="font-display text-[8px] tracking-[4px] uppercase mb-2" style={{
+                                        color: '#F9E491',
+                                        opacity: 0.7,
+                                        textShadow: '0 0 10px rgba(212,175,55,0.1)',
+                                    }}>
+                                        ✦ Manifest ✦
+                                    </p>
+                                    <p className="text-xs text-altar-text leading-relaxed mb-3" style={{
+                                        fontFamily: "'Inter', sans-serif",
+                                        fontWeight: 300,
+                                    }}>
+                                        {meaning.ritual}
+                                    </p>
+                                    <button
+                                        onClick={() => {
+                                            if (!meaning.ritual || ritualSaved) return;
+                                            createManifestation(meaning.ritual, 'intention', `Angel Number ${selected}`);
+                                            setRitualSaved(true);
+                                        }}
+                                        disabled={ritualSaved}
+                                        className="w-full py-2.5 rounded-xl text-[11px] font-display tracking-[2px] transition-all active:scale-[0.97]"
+                                        style={{
+                                            background: ritualSaved
+                                                ? 'rgba(74,222,128,0.1)'
+                                                : 'linear-gradient(135deg, rgba(212,175,55,0.15), rgba(184,134,11,0.08))',
+                                            border: ritualSaved
+                                                ? '1px solid rgba(74,222,128,0.3)'
+                                                : '1px solid rgba(212,175,55,0.25)',
+                                            color: ritualSaved ? '#4ade80' : '#D4A94E',
+                                        }}
+                                    >
+                                        {ritualSaved ? '✓ Saved to Manifestations' : '✨ Save to Manifestations'}
+                                    </button>
+                                </div>
+                            )}
 
                             {/* Log row */}
                             <div className="flex gap-2 mt-4">

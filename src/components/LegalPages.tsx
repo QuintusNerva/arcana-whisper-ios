@@ -57,14 +57,14 @@ function PrivacyContent() {
                 <ul className="list-disc list-inside space-y-1 ml-2">
                     <li>Natal chart calculations (Sun, Moon, Rising signs)</li>
                     <li>Numerology life path and expression numbers</li>
-                    <li>AI-generated interpretations of your readings</li>
+                    <li>Personalized interpretations of your readings</li>
                 </ul>
             </Section>
 
             <Section title="3. How We Use Your Data">
                 <ul className="list-disc list-inside space-y-1 ml-2">
                     <li>To generate personalized tarot readings and astrological charts</li>
-                    <li>To provide AI-powered interpretations via a third-party AI service (see Section 5)</li>
+                    <li>To provide personalized interpretations via a third-party service (see Section 5)</li>
                     <li>To maintain your reading history and preferences</li>
                     <li>To calculate your natal chart, numerology profile, and horoscope</li>
                 </ul>
@@ -74,16 +74,16 @@ function PrivacyContent() {
                 <p>
                     All personal data is stored <strong>locally on your device</strong> using the device's
                     built-in storage. We do not maintain servers that store your personal information.
-                    Your data never leaves your device except when sent to the AI service for generating
+                    Your data never leaves your device except when sent to a third-party service for generating
                     interpretations (see Section 5).
                 </p>
             </Section>
 
-            <Section title="5. Third-Party AI Service">
+            <Section title="5. Third-Party Interpretation Service">
                 <p>
-                    Arcana Whisper uses <strong>OpenRouter</strong>, a third-party AI service, to generate
+                    Arcana Whisper uses <strong>OpenRouter</strong>, a third-party service, to generate
                     personalized interpretations of your tarot readings and natal chart insights. When you
-                    request an AI interpretation, the following data may be sent to OpenRouter:
+                    request an interpretation, the following data may be sent to OpenRouter:
                 </p>
                 <ul className="list-disc list-inside space-y-1 ml-2 mt-2">
                     <li>Your tarot card selections and spread layout</li>
@@ -92,7 +92,7 @@ function PrivacyContent() {
                     <li>Your birth data (date, time, location) for natal chart interpretations</li>
                 </ul>
                 <p className="mt-2">
-                    OpenRouter processes this data solely to generate your AI-powered reading.
+                    OpenRouter processes this data solely to generate your personalized reading.
                     Please review{' '}
                     <a
                         href="https://openrouter.ai/privacy"
@@ -110,7 +110,7 @@ function PrivacyContent() {
                 <p>
                     We do not sell, trade, or share your personal data with third parties for marketing
                     purposes. Data is only shared with OpenRouter as described in Section 5, and only
-                    when you actively request an AI interpretation.
+                    when you actively request a personalized interpretation.
                 </p>
             </Section>
 
@@ -119,7 +119,7 @@ function PrivacyContent() {
                 <ul className="list-disc list-inside space-y-1 ml-2 mt-1">
                     <li><strong>View your data</strong> — All your data is visible within the app</li>
                     <li><strong>Delete your data</strong> — Use the "Delete My Account & Data" option in Profile → Settings</li>
-                    <li><strong>Opt out of AI features</strong> — You can use the app's tarot, astrology, and numerology features without requesting AI interpretations</li>
+                    <li><strong>Opt out of personalized features</strong> — You can use the app's tarot, astrology, and numerology features without requesting personalized interpretations</li>
                 </ul>
             </Section>
 
@@ -171,7 +171,7 @@ function TermsContent() {
             <Section title="2. Description of Service">
                 <p>
                     Arcana Whisper is an entertainment and self-reflection app that provides tarot card
-                    readings, astrological charts, numerology calculations, horoscopes, and AI-powered
+                    readings, astrological charts, numerology calculations, horoscopes, and personalized
                     interpretations. The App is intended for <strong>entertainment and personal insight
                         purposes only</strong>.
                 </p>

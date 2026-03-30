@@ -784,19 +784,26 @@ export class TarotService {
             name: 'Career Path',
             description: 'Four cards illuminating your professional journey',
             cardCount: 4,
-            positions: ['Current Role', 'Challenge', 'Action', 'Outcome']
+            positions: ['Current Energy', 'Potential Growth', 'The Obstacle', 'Actionable Advice']
         },
         {
             id: 'relationship',
             name: 'Relationship',
             description: 'Five cards exploring the heart connection',
             cardCount: 5,
-            positions: ['You', 'Partner', 'Connection', 'Challenge', 'Potential']
+            positions: ['You', 'Them', 'The Foundation', 'The Present', 'The Future']
+        },
+        {
+            id: 'stay-or-go',
+            name: 'Stay or Go',
+            description: 'Six cards mirroring both paths for clarity',
+            cardCount: 6,
+            positions: ['Current Reality', 'Case for Staying', 'Case for Leaving', 'Path of Staying', 'Path of Leaving', 'Core Advice']
         }
     ];
 
     getDailyReading(): Reading {
-        const shuffledCards = this.shuffleCards();
+        const shuffledCards = this.shuffleAndOrient();
         const card = shuffledCards[0];
 
         return {
@@ -815,7 +822,7 @@ export class TarotService {
             throw new Error('Invalid spread type');
         }
 
-        const shuffledCards = this.shuffleCards();
+        const shuffledCards = this.shuffleAndOrient();
         const selectedCards = shuffledCards.slice(0, spread.cardCount);
 
         return {
@@ -861,12 +868,25 @@ export class TarotService {
         }
     }
 
-    private shuffleCards(): Card[] {
+    /**
+     * Shuffle the deck AND assign reversed orientation.
+     * ~35% chance of reversal per card, matching traditional tarot practice.
+     */
+    private shuffleAndOrient(): Card[] {
         const shuffled = [...this.cards];
         for (let i = shuffled.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
         }
-        return shuffled;
+        // Assign reversed orientation
+        return shuffled.map(card => ({
+            ...card,
+            isReversed: Math.random() < 0.35,
+        }));
+    }
+
+    /** @deprecated Use shuffleAndOrient() instead */
+    private shuffleCards(): Card[] {
+        return this.shuffleAndOrient();
     }
 }

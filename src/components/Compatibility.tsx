@@ -660,7 +660,7 @@ export function Compatibility({ onClose, onTabChange, subscription, onShowPremiu
                                                 <p className="text-xs text-altar-muted/60 italic">
                                                     {new AIService().hasApiKey()
                                                         ? 'Preparing your deep dive reading…'
-                                                        : 'Add your API key in Settings to unlock AI readings.'}
+                                                        : 'Add your API key in Settings to unlock personalized readings.'}
                                                 </p>
                                             </div>
                                         )}

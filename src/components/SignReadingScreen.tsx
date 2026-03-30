@@ -65,7 +65,7 @@ export function SignReadingScreen({ focus, onClose, onTabChange }: SignReadingSc
                 setCache(updated);
                 setAiMeaning(result);
             })
-            .catch(() => setAiError('Could not load AI reading — showing static interpretation.'))
+            .catch(() => setAiError('Could not channel your reading — showing static interpretation.'))
             .finally(() => setAiLoading(false));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [focus]);

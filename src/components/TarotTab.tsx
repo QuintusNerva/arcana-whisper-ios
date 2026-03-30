@@ -190,35 +190,68 @@ export function TarotTab({ onClose, onTabChange, energyCards, onViewCard }: Taro
                         )}
                     </section>
 
-                    {/* ── Divider ── */}
-                    <div className="flex items-center gap-3 mx-5 mb-5 animate-fade-up" style={{ animationDelay: '0.22s', opacity: 0 }}>
-                        <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(212,175,55,0.2), transparent)' }} />
-                        <span className="font-display text-[9px] tracking-[3px] uppercase" style={{ color: 'var(--color-altar-muted)' }}>Begin a Reading</span>
-                        <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(212,175,55,0.2), transparent)' }} />
-                    </div>
+                    {/* ── Consult the Oracle — Hero Card ── */}
+                    <section className="mx-4 mb-4 animate-fade-up" style={{ animationDelay: '0.22s', opacity: 0 }}>
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(212,175,55,0.2), transparent)' }} />
+                            <span className="font-display text-[9px] tracking-[3px] uppercase" style={{ color: 'var(--color-altar-muted)' }}>Begin a Reading</span>
+                            <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(212,175,55,0.2), transparent)' }} />
+                        </div>
 
-                    {/* ── Spread Options ── */}
-                    <section className="mx-4 grid grid-cols-2 gap-3 animate-fade-up" style={{ animationDelay: '0.3s', opacity: 0 }}>
-                        {SPREADS.map((spread) => (
-                            <button
-                                key={spread.id}
-                                onClick={() => onTabChange(`new:${spread.readingId}`)}
-                                className="relative flex flex-col items-start gap-1 rounded-2xl p-4 text-left transition-all hover:scale-[1.03] active:scale-[0.97]"
-                                style={{
-                                    ...primaryCardStyle,
-                                    border: '1px solid var(--color-gold-glow-med)',
-                                    boxShadow: '0 4px 16px rgba(0,0,0,0.4), 0 0 12px rgba(212,175,55,0.06)',
-                                }}
-                            >
-                                <span className="text-xl mb-1" style={{ filter: 'drop-shadow(0 0 8px rgba(212,175,55,0.3))' }}>{spread.icon}</span>
-                                <span className="font-display text-[11px] font-semibold tracking-wide leading-tight" style={{ color: 'var(--color-gold-100)' }}>
-                                    {spread.name}
-                                </span>
-                                <span className="text-[9px] font-display" style={{ color: 'var(--color-altar-muted)' }}>
-                                    {spread.tagline}
-                                </span>
-                            </button>
-                        ))}
+                        <button
+                            onClick={() => onTabChange('new')}
+                            className="w-full relative overflow-hidden rounded-2xl p-5 text-left transition-all hover:scale-[1.02] active:scale-[0.97]"
+                            style={{
+                                background: 'linear-gradient(135deg, #1c1538 0%, #130f2e 40%, #1a0d35 100%)',
+                                border: '1px solid rgba(212,175,55,0.25)',
+                                boxShadow: '0 8px 32px rgba(0,0,0,0.5), 0 0 30px rgba(212,175,55,0.06)',
+                            }}
+                        >
+                            {/* Ambient glow */}
+                            <div style={{
+                                position: 'absolute', top: '-20px', right: '-20px',
+                                width: '120px', height: '120px', borderRadius: '50%',
+                                background: 'radial-gradient(circle, rgba(212,175,55,0.08) 0%, transparent 70%)',
+                                pointerEvents: 'none',
+                            }} />
+                            <div className="flex items-center gap-4 relative z-10">
+                                <span className="text-3xl" style={{ filter: 'drop-shadow(0 0 12px rgba(212,175,55,0.4))' }}>🔮</span>
+                                <div className="flex-1">
+                                    <span className="font-display text-[13px] tracking-wider block" style={{ color: 'var(--color-gold-100)' }}>
+                                        Consult the Oracle
+                                    </span>
+                                    <span className="text-[10px] font-body block mt-1" style={{ color: 'var(--color-altar-muted)', fontWeight: 300 }}>
+                                        A personalized deep reading · The oracle asks, listens, then draws
+                                    </span>
+                                </div>
+                                <span className="font-display text-[10px]" style={{ color: 'var(--color-gold-300)', opacity: 0.5 }}>✦</span>
+                            </div>
+                        </button>
+                    </section>
+
+                    {/* ── Draw Your Own — Single Button ── */}
+                    <section className="mx-4 mb-2 animate-fade-up" style={{ animationDelay: '0.3s', opacity: 0 }}>
+                        <button
+                            onClick={() => onTabChange('draw-your-own')}
+                            className="w-full relative overflow-hidden rounded-2xl p-5 text-left transition-all hover:scale-[1.02] active:scale-[0.97]"
+                            style={{
+                                ...primaryCardStyle,
+                                border: '1px solid rgba(255,255,255,0.08)',
+                            }}
+                        >
+                            <div className="flex items-center gap-4">
+                                <span className="text-3xl" style={{ filter: 'drop-shadow(0 0 8px rgba(148,163,184,0.2))' }}>🃏</span>
+                                <div className="flex-1">
+                                    <span className="font-display text-[13px] tracking-wider block" style={{ color: 'var(--color-gold-200)' }}>
+                                        Draw Your Own
+                                    </span>
+                                    <span className="text-[10px] font-body block mt-1" style={{ color: 'var(--color-altar-muted)', fontWeight: 300 }}>
+                                        Choose your spread · 3-card to Celtic Cross
+                                    </span>
+                                </div>
+                                <span style={{ color: 'var(--color-altar-muted)', fontSize: '12px' }}>→</span>
+                            </div>
+                        </button>
                     </section>
 
                     {/* ── Card Codex ── */}

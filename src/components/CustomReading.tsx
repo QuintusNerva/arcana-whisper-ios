@@ -10,6 +10,7 @@ interface CustomReadingProps {
     subscription: string;
     onTabChange: (tab: string) => void;
     initialSpread?: string | null;
+    initialTheme?: string | null;
 }
 
 const SPREADS = [
@@ -18,6 +19,7 @@ const SPREADS = [
     { id: 'yes-no', name: 'Yes / No', icon: '⚡', cards: 1, desc: 'Clear answer to your query', tier: 'free' },
     { id: 'career', name: 'Career Path', icon: '💼', cards: 4, desc: 'Your professional journey', tier: 'premium' },
     { id: 'relationship', name: 'Relationship', icon: '💕', cards: 5, desc: 'Heart connection reading', tier: 'premium' },
+    { id: 'stay-or-go', name: 'Stay or Go', icon: '🔥', cards: 6, desc: 'Two paths, one truth', tier: 'premium' },
     { id: 'celtic-cross', name: 'Celtic Cross', icon: '⚜️', cards: 10, desc: 'Deep 10-card revelation', tier: 'premium' },
     { id: 'horseshoe', name: 'Horseshoe', icon: '🌙', cards: 7, desc: 'The path ahead unfolds', tier: 'premium' },
 ];
@@ -27,6 +29,9 @@ const THEMES = [
     { id: 'love', name: 'Love', icon: '💕', desc: 'Matters of the heart & relationships' },
     { id: 'career', name: 'Career', icon: '💼', desc: 'Work, prosperity & purpose' },
     { id: 'growth', name: 'Spirit', icon: '🕊️', desc: 'Spiritual awakening & inner truth' },
+    { id: 'family', name: 'Family', icon: '🏠', desc: 'Home, roots & ancestral bonds' },
+    { id: 'health', name: 'Health', icon: '🌿', desc: 'Wellness, healing & body wisdom' },
+    { id: 'decision', name: 'A Decision', icon: '⚔️', desc: 'A crossroads that demands clarity' },
 ];
 
 /* ── Sacred Fintech Design System Styles ── */
@@ -64,7 +69,7 @@ const mutedTextStyle: React.CSSProperties = {
     fontWeight: 300,
 };
 
-export function CustomReading({ onClose, onComplete, subscription, onTabChange, initialSpread }: CustomReadingProps) {
+export function CustomReading({ onClose, onComplete, subscription, onTabChange, initialSpread, initialTheme }: CustomReadingProps) {
     const [step, setStep] = React.useState(1);
     const [selectedSpread, setSelectedSpread] = React.useState<string | null>(null);
     const [selectedTheme, setSelectedTheme] = React.useState<string | null>(null);
@@ -77,24 +82,42 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange, 
     const activeManifestations = React.useMemo(() => getActiveManifestations(), []);
     const primaryManifestation = activeManifestations[0] ?? null;
 
-    // Auto-select spread if coming from TarotTab with a preselected spread
+    // Ref to call startDrawRitual from useEffect before it's defined
+    const startDrawRitualRef = React.useRef<(skip?: boolean) => void>(() => {});
+    // Flag: should we auto-start the draw ritual once state has settled?
+    const [autoStart, setAutoStart] = React.useState(false);
+
+    // Auto-select spread if coming from TarotTab or oracle recommendation
     React.useEffect(() => {
         if (initialSpread) {
             const spread = SPREADS.find(s => s.id === initialSpread);
             if (spread) {
                 setSelectedSpread(initialSpread);
-                if (initialSpread === 'career') {
+                // If oracle provided a theme, use it and flag for auto-start
+                if (initialTheme) {
+                    setSelectedTheme(initialTheme);
+                    setAutoStart(true);
+                } else if (initialSpread === 'career') {
                     setSelectedTheme('career');
-                    setStep(3);
+                    setAutoStart(true);
                 } else if (initialSpread === 'relationship') {
                     setSelectedTheme('love');
-                    setStep(3);
+                    setAutoStart(true);
                 } else {
                     setStep(2);
                 }
             }
         }
-    }, [initialSpread]);
+    }, [initialSpread, initialTheme]);
+
+    // Once state has settled AND autoStart is flagged, fire the draw ritual
+    React.useEffect(() => {
+        if (autoStart && selectedSpread && selectedTheme) {
+            setAutoStart(false);
+            // Skip mindful check — Oracle already validated the question
+            setTimeout(() => startDrawRitualRef.current(true), 50);
+        }
+    }, [autoStart, selectedSpread, selectedTheme]);
 
     const selectSpread = (id: string) => {
         const spread = SPREADS.find(s => s.id === id);
@@ -107,10 +130,10 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange, 
 
         if (id === 'career') {
             setSelectedTheme('career');
-            setTimeout(() => setStep(3), 350);
+            setTimeout(() => startDrawRitualRef.current(), 350);
         } else if (id === 'relationship') {
             setSelectedTheme('love');
-            setTimeout(() => setStep(3), 350);
+            setTimeout(() => startDrawRitualRef.current(), 350);
         } else {
             setTimeout(() => setStep(2), 350);
         }
@@ -118,33 +141,26 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange, 
 
     const selectTheme = (id: string) => {
         setSelectedTheme(id);
-        setTimeout(() => setStep(3), 350);
+        setTimeout(() => startDrawRitualRef.current(), 350);
     };
     const [isShuffling, setIsShuffling] = React.useState(false);
     const [shuffleProgress, setShuffleProgress] = React.useState(0);
 
     const canProceed = () => {
         if (step === 1) return !!selectedSpread;
-        if (step === 2) return !!selectedTheme;
-        return true; // step 3 question is optional
+        return !!selectedTheme;
     };
 
     const handleNext = () => {
-        if (step < 3) {
-            setStep(step + 1);
+        if (step === 1) {
+            setStep(2);
         } else {
             startDrawRitual();
         }
     };
 
     const handleBack = () => {
-        if (step === 3 && (selectedSpread === 'career' || selectedSpread === 'relationship')) {
-            if (initialSpread) {
-                onClose();
-            } else {
-                setStep(1);
-            }
-        } else if (step === 2 && initialSpread) {
+        if (step === 2 && (selectedSpread === 'career' || selectedSpread === 'relationship' || initialSpread)) {
             onClose();
         } else if (step > 1) {
             setStep(step - 1);
@@ -183,6 +199,9 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange, 
             manifestationId,
         });
     };
+
+    // Keep ref in sync so useEffect can call the latest startDrawRitual
+    startDrawRitualRef.current = (skip) => startDrawRitual(skip);
 
     const spread = SPREADS.find(s => s.id === selectedSpread);
 
@@ -262,7 +281,7 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange, 
                 centerContent={
                     /* Step indicators */
                     <div className="flex items-center justify-center gap-2 w-full">
-                        {[1, 2, 3].map(s => (
+                        {[1, 2].map(s => (
                             <div key={s} className="flex items-center gap-2">
                                 <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs transition-all duration-500"
                                     style={{
@@ -284,7 +303,7 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange, 
                                     }}>
                                     {s < step ? '✓' : s}
                                 </div>
-                                {s < 3 && <div className="w-6 h-[1px]" style={{ background: s < step ? 'rgba(212,175,55,0.5)' : 'rgba(255,255,255,0.1)' }} />}
+                                {s < 2 && <div className="w-6 h-[1px]" style={{ background: s < step ? 'rgba(212,175,55,0.5)' : 'rgba(255,255,255,0.1)' }} />}
                             </div>
                         ))}
                     </div>
@@ -428,148 +447,6 @@ export function CustomReading({ onClose, onComplete, subscription, onTabChange, 
                     </div>
                 )}
 
-                {/* ── STEP 3: Ask Question ── */}
-                {step === 3 && (
-                    <div className="animate-fade-up">
-                        <div className="text-center mt-6 mb-6">
-                            <span className="text-3xl mb-2 block">🌙</span>
-                            <h2 style={{ ...headerStyle, fontSize: '20px' }}>ASK THE CARDS</h2>
-                            <p style={{ ...mutedTextStyle, fontSize: '14px', marginTop: '8px' }}>Focus your energy (optional)</p>
-                        </div>
-
-                        {/* Summary of selections */}
-                        <div className="flex items-center gap-3 p-4 mb-5" style={goldCardStyle}>
-                            <span className="text-2xl">{spread?.icon}</span>
-                            <div>
-                                <p style={{ fontFamily: 'var(--font-display)', color: 'var(--color-gold-100)', fontSize: '14px' }}>{spread?.name}</p>
-                                <p style={{ ...mutedTextStyle, fontSize: '12px' }}>
-                                    {THEMES.find(t => t.id === selectedTheme)?.name} · {spread?.cards} card{(spread?.cards || 0) > 1 ? 's' : ''}
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* Active manifestation badge */}
-                        {primaryManifestation && (
-                            <div className="p-4 mb-4" style={{
-                                ...goldCardStyle,
-                                background: 'linear-gradient(135deg, rgba(212,175,55,0.05) 0%, #130f2e 50%, rgba(184,134,11,0.03) 100%)',
-                            }}>
-                                <p style={{ ...headerStyle, fontSize: '10px', marginBottom: '4px' }}>✨ Active Manifestation</p>
-                                <p style={{ ...mutedTextStyle, fontSize: '14px', fontStyle: 'italic', color: 'rgba(226,232,240,0.9)' }}>"{primaryManifestation.declaration}"</p>
-                                <p style={{ ...mutedTextStyle, fontSize: '10px', marginTop: '4px' }}>This reading will be woven through your active intention</p>
-                            </div>
-                        )}
-
-                        {/* Question input */}
-                        <div className="p-5" style={goldCardStyle}>
-                            <label style={{ ...headerStyle, fontSize: '12px', display: 'block', marginBottom: '12px' }}>
-                                YOUR QUESTION
-                            </label>
-                            <textarea
-                                value={question}
-                                onChange={(e) => setQuestion(e.target.value)}
-                                placeholder="What guidance do you seek…"
-                                rows={3}
-                                className="w-full bg-transparent resize-none focus:outline-none pb-3"
-                                style={{
-                                    ...mutedTextStyle,
-                                    fontSize: '14px',
-                                    lineHeight: '1.6',
-                                    color: 'rgba(226,232,240,0.9)',
-                                    borderBottom: '1px solid rgba(212,175,55,0.2)',
-                                }}
-                            />
-                            <p style={{ ...mutedTextStyle, fontSize: '12px', fontStyle: 'italic', marginTop: '8px', opacity: 0.6 }}>
-                                Leave empty for an open reading
-                            </p>
-                        </div>
-
-                        {/* Intention / Manifestation — only show if no active manifestation */}
-                        {!primaryManifestation && (
-                            <div className="p-5 mt-3" style={goldCardStyle}>
-                                <label style={{ ...headerStyle, fontSize: '12px', display: 'block', marginBottom: '4px' }}>
-                                    🌙 Set an Intention <span style={{ ...mutedTextStyle, fontSize: '11px', fontWeight: 400, textTransform: 'none' as const, letterSpacing: 'normal' }}>(optional)</span>
-                                </label>
-                                <p style={{ ...mutedTextStyle, fontSize: '11px', marginBottom: '12px', opacity: 0.6 }}>What are you calling in? The cards will speak to your intention.</p>
-                                <input
-                                    type="text"
-                                    value={intention}
-                                    onChange={(e) => setIntention(e.target.value)}
-                                    placeholder="I am calling in…"
-                                    className="w-full bg-transparent focus:outline-none pb-2"
-                                    style={{
-                                        ...mutedTextStyle,
-                                        fontSize: '14px',
-                                        color: 'rgba(226,232,240,0.9)',
-                                        borderBottom: '1px solid rgba(212,175,55,0.2)',
-                                    }}
-                                />
-                            </div>
-                        )}
-                        {/* Mindful anti-bias nudge */}
-                        {mindfulWarning && (
-                            <div className="mt-4 overflow-hidden animate-fade-up" style={{
-                                ...primaryCardStyle,
-                                border: '1px solid #f59e0b',
-                                boxShadow: '0 8px 40px rgba(251,191,36,0.15), 0 0 30px rgba(251,191,36,0.08), 0 0 0 1px rgba(251,191,36,0.1)',
-                            }}>
-                                <div className="p-4">
-                                    <p style={{ color: 'rgba(252,211,77,0.9)', fontSize: '10px', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase' as const, marginBottom: '8px', fontFamily: 'var(--font-display)' }}>🌑 A gentle reflection</p>
-                                    <p style={{ ...mutedTextStyle, fontSize: '12px', lineHeight: '1.6', color: 'rgba(255,255,255,0.7)' }}>
-                                        {mindfulWarning.message}
-                                    </p>
-                                    <div className="flex gap-2 mt-3">
-                                        <button
-                                            onClick={() => startDrawRitual(true)}
-                                            className="flex-1 py-2.5 transition-all active:scale-[0.97]"
-                                            style={{
-                                                background: 'linear-gradient(135deg, var(--color-gold-100), var(--color-gold-200))',
-                                                borderRadius: '12px',
-                                                fontSize: '12px',
-                                                fontWeight: 600,
-                                                color: '#0d0b22',
-                                                fontFamily: 'var(--font-display)',
-                                                border: '1px solid var(--color-gold-glow-med)',
-                                                boxShadow: '0 2px 12px rgba(212,175,55,0.25)',
-                                            }}
-                                        >
-                                            Continue anyway
-                                        </button>
-                                        <button
-                                            onClick={() => setMindfulWarning(null)}
-                                            className="flex-1 py-2.5 transition-colors"
-                                            style={{
-                                                borderRadius: '12px',
-                                                fontSize: '12px',
-                                                color: 'rgba(255,255,255,0.4)',
-                                                border: '1px solid rgba(255,255,255,0.08)',
-                                                fontFamily: 'var(--font-display)',
-                                            }}
-                                        >
-                                            I'll sit with this
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                        {/* Begin Ritual button */}
-                        <button
-                            onClick={() => startDrawRitual()}
-                            className="w-full mt-6 py-4 font-semibold text-base tracking-[3px] uppercase transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] gold-shimmer"
-                            style={{
-                                background: 'linear-gradient(180deg, #F9E491, #D4A94E 30%, #C59341 60%, #A67B2E)',
-                                borderRadius: '16px',
-                                border: '2px solid rgba(212,175,55,0.6)',
-                                color: '#1a0f2e',
-                                fontFamily: 'var(--font-display)',
-                                fontWeight: 800,
-                                boxShadow: '0 2px 0 #8a6b25, 0 4px 12px rgba(0,0,0,0.5), 0 0 40px rgba(212,175,55,0.08), inset 0 1px 0 rgba(255,255,255,0.35)',
-                            }}
-                        >
-                            ✦ Begin Your Reading ✦
-                        </button>
-                    </div>
-                )}
             </div>
         </div>
     );
