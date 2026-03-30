@@ -20,6 +20,7 @@ import {
  */
 
 import { getMemoryContextForAI } from './memory.service';
+import { buildReadingMemoryContext } from '../prompts/shared/reading-context';
 
 // ── Prompt Builders ──
 import { TEACHING_FORMAT } from '../prompts/shared/wise-mirror';
@@ -149,7 +150,11 @@ export class AIService {
             cardName, cardMeaning, cardReversed, isReversed, tone,
             theme: context?.theme, question: context?.question,
             empowermentCtx: ctx, manifestationCtx, compassionPrefix,
-            memoryCtx: getMemoryContextForAI(), chartCtx: buildChartNumerologyContext(),
+            memoryCtx: getMemoryContextForAI(),
+            // Only inject reading memory during active readings (context provided),
+            // not when browsing card library or tapping the daily card
+            readingMemoryCtx: context ? buildReadingMemoryContext(context.theme || 'general', context.question) : null,
+            chartCtx: buildChartNumerologyContext(),
         });
         return this.chat(system, user);
     }
@@ -184,7 +189,9 @@ export class AIService {
             })),
             spread, theme, tone, question,
             empowermentCtx: ctx, manifestationCtx, compassionPrefix,
-            memoryCtx: getMemoryContextForAI(), chartCtx: buildChartNumerologyContext(),
+            memoryCtx: getMemoryContextForAI(),
+            readingMemoryCtx: buildReadingMemoryContext(theme, question),
+            chartCtx: buildChartNumerologyContext(),
         });
 
         const cardCount = cards.length;

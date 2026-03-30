@@ -11,6 +11,8 @@ import { CareerLayout } from './CareerLayout';
 import CourageCard from './CourageCard';
 import { DeclarationCard } from './DeclarationCard';
 import { detectCrisisCards } from '../services/empowerment.service';
+import { saveReadingSnapshot, type ReadingSnapshot } from '../services/reading-memory.service';
+import { scoreSpreadEnergy, type DrawnCard } from '../prompts/shared/energy-scorer';
 
 interface ReadingResultProps {
     reading: Reading;
@@ -112,6 +114,7 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
     const [spreadInsightLoading, setSpreadInsightLoading] = React.useState(false);
     const [aiError, setAiError] = React.useState<string | null>(null);
     const [courageCardDismissed, setCourageCardDismissed] = React.useState(false);
+    const snapshotSavedRef = React.useRef(false);
     const isPremium = subscription === 'premium';
 
     // Detect crisis/challenge cards in this reading
@@ -160,6 +163,32 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
                     cardsContext, reading.spread, reading.theme, reading.question
                 );
                 setSpreadInsight(insight);
+
+                // Save reading snapshot with AI summary for Phase 4 memory
+                if (!snapshotSavedRef.current) {
+                    snapshotSavedRef.current = true;
+                    try {
+                        const drawnCards: DrawnCard[] = reading.cards.map((c, i) => ({
+                            card: c, position: positions[i] || `Card ${i + 1}`, isReversed: c.isReversed ?? false,
+                        }));
+                        const energy = scoreSpreadEnergy(drawnCards);
+                        const snapshot: ReadingSnapshot = {
+                            id: reading.id,
+                            date: new Date().toISOString(),
+                            spreadType: reading.spread,
+                            theme: reading.theme,
+                            question: reading.question?.slice(0, 200),
+                            cards: reading.cards.map((c, i) => ({
+                                name: c.name,
+                                position: positions[i] || `Card ${i + 1}`,
+                                isReversed: c.isReversed ?? false,
+                            })),
+                            energyScore: energy,
+                            aiSummary: insight.slice(0, 300),
+                        };
+                        saveReadingSnapshot(snapshot);
+                    } catch { /* snapshot save is non-critical */ }
+                }
             } catch (e: any) {
                 setAiError(e.message);
             } finally {
@@ -167,6 +196,32 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
             }
         })();
     }, [allRevealed]);
+
+    // Save snapshot for non-premium users (no AI interpretation available)
+    React.useEffect(() => {
+        if (!allRevealed || isPremium || snapshotSavedRef.current) return;
+        snapshotSavedRef.current = true;
+        try {
+            const drawnCards: DrawnCard[] = reading.cards.map((c, i) => ({
+                card: c, position: positions[i] || `Card ${i + 1}`, isReversed: c.isReversed ?? false,
+            }));
+            const energy = scoreSpreadEnergy(drawnCards);
+            const snapshot: ReadingSnapshot = {
+                id: reading.id,
+                date: new Date().toISOString(),
+                spreadType: reading.spread,
+                theme: reading.theme,
+                question: reading.question?.slice(0, 200),
+                cards: reading.cards.map((c, i) => ({
+                    name: c.name,
+                    position: positions[i] || `Card ${i + 1}`,
+                    isReversed: c.isReversed ?? false,
+                })),
+                energyScore: energy,
+            };
+            saveReadingSnapshot(snapshot);
+        } catch { /* snapshot save is non-critical */ }
+    }, [allRevealed, isPremium]);
 
     const handleSave = () => {
         const tarotService = new TarotService();

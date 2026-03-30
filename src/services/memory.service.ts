@@ -1,4 +1,5 @@
 import { safeStorage } from "./storage.service";
+import { clearReadingSnapshots } from './reading-memory.service';
 /**
  * Personal Memory Agent — localStorage-based user pattern tracking.
  * Learns reading themes, question keywords, and card patterns to
@@ -341,9 +342,11 @@ export function getMemoryStats(): MemoryStats {
 
 /**
  * Clear all memory data. Privacy control.
+ * Also clears reading snapshots (Phase 4) to prevent data leakage.
  */
 export function clearMemory(): void {
     safeStorage.removeItem(MEMORY_KEY);
+    clearReadingSnapshots();
 }
 
 // ── Phase 2: Pattern Analysis ──

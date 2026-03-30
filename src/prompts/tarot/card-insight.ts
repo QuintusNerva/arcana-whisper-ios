@@ -22,6 +22,7 @@ export interface CardInsightParams {
     manifestationCtx: string;
     compassionPrefix: string;
     memoryCtx: string | null;
+    readingMemoryCtx: string | null;
     chartCtx: string | null;
 }
 
@@ -66,6 +67,9 @@ ${isReversed ? `Upright meaning (for contrast): ${cardMeaning}` : `Reversed mean
     }
     if (memoryCtx) {
         user += `\n\n${memoryCtx}`;
+    }
+    if (params.readingMemoryCtx) {
+        user += params.readingMemoryCtx;
     }
     if (chartCtx) {
         user += chartCtx;
