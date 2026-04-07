@@ -13,6 +13,8 @@ export interface AngelNumberParams {
         personalYear?: number;
     };
     whereSpotted?: string;
+    /** Active manifestation intentions — for honest soft cross-reference only */
+    activeIntentions?: string[];
 }
 
 export function buildAngelNumberPrompt(params: AngelNumberParams): { system: string; user: string } {
@@ -41,7 +43,16 @@ FORMAT:
 - Then an italicized reflection question (use *asterisks*)
 - Then a blank line, then on its own line: "✦ [a manifestation seed — one specific, embodied action that channels this number's energy into the user's life, under 15 words. Frame as an intention they can carry forward. E.g. for 444: 'Place both feet on the ground and declare what you are building.' For 555: 'Name one thing you are ready to release — say it out loud, then let it go.' For 888: 'Write down the abundance you are calling in — be specific and bold.']"
 - Total: 180-250 words. Tight and powerful. No fluff.
-- No markdown headers (##), no bullet points, no bold markers.`;
+- No markdown headers (##), no bullet points, no bold markers.
+
+MANIFESTATION CROSS-REFERENCE (ONLY if activeIntentions provided):
+- Interpret the number's UNIVERSAL meaning FIRST. That is always the primary reading.
+- AFTER the full reading, consider whether the number's inherent meaning has a GENUINE, OBVIOUS thematic overlap with any of the user's active intentions.
+- A genuine overlap means the number's established spiritual meaning directly relates to the intention's domain. For example: 888 (abundance) genuinely relates to a money intention. 555 (change/release) does NOT naturally relate to a career promotion intention.
+- If there IS a genuine overlap: add ONE sentence noting the resonance. Frame it as an observation, not a promise. "This frequency naturally resonates with your intention around [X]." 
+- If there is NO natural connection: do NOT mention intentions at all. Silence is more honest than a forced connection.
+- NEVER claim the number appeared BECAUSE of an intention. That is dishonest.
+- Seeing an angel number does NOT automatically count as a 'sign' for any intention.`;
 
     let user = `Angel number seen: ${params.number}${params.whereSpotted ? `\nSpotted: ${params.whereSpotted}` : ''}
 
@@ -57,6 +68,10 @@ Give the universal spiritual meaning of ${params.number}. Break down its digit c
         if (parts.length > 0) {
             user += `\n\nTheir chart context: ${parts.join(' · ')}. ONLY weave this in if there is a genuinely interesting, specific resonance with the number ${params.number}. If not clearly relevant, skip it entirely.`;
         }
+    }
+
+    if (params.activeIntentions && params.activeIntentions.length > 0) {
+        user += `\n\nActive intentions: ${params.activeIntentions.map(i => `"${i}"`).join(', ')}. ONLY mention an intention if the number's meaning has a genuine, obvious thematic overlap. If no natural connection exists, do NOT mention intentions at all.`;
     }
 
     return { system, user };

@@ -13,6 +13,8 @@ import { DeclarationCard } from './DeclarationCard';
 import { detectCrisisCards } from '../services/empowerment.service';
 import { saveReadingSnapshot, type ReadingSnapshot } from '../services/reading-memory.service';
 import { scoreSpreadEnergy, type DrawnCard } from '../prompts/shared/energy-scorer';
+import { getActiveManifestations, linkReadingToManifestation } from '../services/manifestation.service';
+import { invalidateForgeCache } from '../services/forge.service';
 
 interface ReadingResultProps {
     reading: Reading;
@@ -101,6 +103,109 @@ const mutedTextStyle: React.CSSProperties = {
     fontFamily: 'var(--font-body)',
     fontWeight: 300,
 };
+
+/* ── Intention Linker — Post-Reading Bridge ── */
+
+function IntentionLinker({
+    readingId,
+    activeManifestations,
+}: {
+    readingId: string;
+    activeManifestations: Array<{ id: string; declaration: string }>;
+}) {
+    const [linked, setLinked] = React.useState<string | null>(null);
+    const [dismissed, setDismissed] = React.useState(false);
+
+    if (dismissed || linked) {
+        if (linked) {
+            const m = activeManifestations.find(m => m.id === linked);
+            return (
+                <div className="animate-fade-up" style={{
+                    background: 'rgba(61,29,90, 0.35)',
+                    border: '1px solid rgba(212,175,55, 0.15)',
+                    borderRadius: '16px',
+                    padding: '14px 16px',
+                    backdropFilter: 'blur(12px)',
+                }}>
+                    <p style={{
+                        fontFamily: 'var(--font-display)',
+                        color: 'var(--color-gold-200)',
+                        letterSpacing: '3px',
+                        textTransform: 'uppercase' as const,
+                        fontSize: '9px',
+                        marginBottom: '6px',
+                        opacity: 0.6,
+                    }}>✦ Reading Linked</p>
+                    <p style={{ ...mutedTextStyle, fontSize: '12px', color: 'rgba(226,232,240,0.7)' }}>
+                        Connected to: <span style={{ color: 'var(--color-gold-100)', fontStyle: 'italic' }}>
+                            "{m?.declaration?.slice(0, 60)}"
+                        </span>
+                    </p>
+                </div>
+            );
+        }
+        return null;
+    }
+
+    return (
+        <div className="animate-fade-up" style={{
+            background: 'rgba(61,29,90, 0.35)',
+            border: '1px solid rgba(212,175,55, 0.10)',
+            borderRadius: '16px',
+            padding: '14px 16px',
+            backdropFilter: 'blur(12px)',
+        }}>
+            <div className="flex items-center justify-between mb-3">
+                <p style={{
+                    fontFamily: 'var(--font-display)',
+                    color: 'var(--color-gold-200)',
+                    letterSpacing: '3px',
+                    textTransform: 'uppercase' as const,
+                    fontSize: '9px',
+                    opacity: 0.6,
+                }}>✦ Connect to Intention</p>
+                <button
+                    onClick={() => setDismissed(true)}
+                    style={{ ...mutedTextStyle, fontSize: '10px', opacity: 0.4 }}
+                >
+                    Skip
+                </button>
+            </div>
+            <p style={{ ...mutedTextStyle, fontSize: '11px', marginBottom: '10px', color: 'rgba(226,232,240,0.5)' }}>
+                Does this reading relate to something you're manifesting?
+            </p>
+            <div className="flex flex-wrap gap-2">
+                {activeManifestations.slice(0, 3).map(m => (
+                    <button
+                        key={m.id}
+                        onClick={() => {
+                            linkReadingToManifestation(m.id, readingId);
+                            invalidateForgeCache(m.id);
+                            setLinked(m.id);
+                        }}
+                        className="transition-all active:scale-[0.96]"
+                        style={{
+                            background: 'rgba(197,147,65, 0.08)',
+                            border: '1px solid rgba(197,147,65, 0.20)',
+                            borderRadius: '12px',
+                            padding: '8px 14px',
+                            color: 'var(--color-gold-200)',
+                            fontFamily: 'var(--font-display)',
+                            fontSize: '10px',
+                            letterSpacing: '1px',
+                            maxWidth: '200px',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap' as const,
+                        }}
+                    >
+                        {m.declaration.slice(0, 35)}{m.declaration.length > 35 ? '…' : ''}
+                    </button>
+                ))}
+            </div>
+        </div>
+    );
+}
 
 export function ReadingResult({ reading, onClose, onTabChange, subscription, onShowPremium }: ReadingResultProps) {
     const [revealedCards, setRevealedCards] = React.useState<Set<number>>(new Set());
@@ -655,6 +760,17 @@ export function ReadingResult({ reading, onClose, onTabChange, subscription, onS
                             positions={positions}
                             isPremium={isPremium}
                         />
+
+                        {/* Intention Linking — explicit user connection */}
+                        {(() => {
+                            const activeManifs = getActiveManifestations();
+                            if (activeManifs.length === 0) return null;
+
+                            return <IntentionLinker
+                                readingId={reading.id}
+                                activeManifestations={activeManifs}
+                            />;
+                        })()}
 
                         {/* Personalized memory banner — soft footer */}
                         {isPersonalized() && (() => {

@@ -12,6 +12,10 @@ import { safeStorage } from '../services/storage.service';
 import { BottomNav } from './BottomNav';
 import { VisionBoard, getVisionBoardItems, type VisionBoardItem } from './VisionBoard';
 import { PageHeader } from './PageHeader';
+import { ForgeCard } from './ForgeCard';
+import { WitnessCapture, WitnessTimeline } from './WitnessCapture';
+import { MorningAttunement, shouldShowAttunement } from './MorningAttunement';
+import { MomentumHeatmap } from './MomentumHeatmap';
 import {
     getAllManifestations,
     getActiveManifestations,
@@ -2028,6 +2032,11 @@ export function CreateTab({ onClose, onTabChange, subscription, onShowPremium }:
     const [showVisionBoard, setShowVisionBoard] = React.useState(false);
     const [showIntentions, setShowIntentions] = React.useState(false);
     const [visionItems, setVisionItems] = React.useState<VisionBoardItem[]>(() => getVisionBoardItems());
+    const [showWitnessCapture, setShowWitnessCapture] = React.useState(false);
+    const [showAttunement, setShowAttunement] = React.useState(() => shouldShowAttunement());
+    const [quickIntention, setQuickIntention] = React.useState('');
+    const [forgeIdx, setForgeIdx] = React.useState(0);
+    const [show369Expanded, setShow369Expanded] = React.useState(false);
 
     const lunarData = React.useMemo(() => getLunarData(), []);
 
@@ -2088,593 +2097,630 @@ export function CreateTab({ onClose, onTabChange, subscription, onShowPremium }:
                     <PageHeader title="MANIFEST" onClose={onClose} titleSize="lg" />
 
                     <div className="max-w-[500px] mx-auto px-4" style={{ position: 'relative', zIndex: 1 }}>
-                        {/* Hero — Sri Yantra Mandala (matching mockup) */}
-                        <div className="text-center animate-fade-up" style={{ padding: '20px 24px 4px' }}>
-                            <div className="relative mx-auto" style={{ width: '100px', height: '100px', marginBottom: '16px' }}>
-                                {/* Ambient glow */}
-                                <div className="absolute inset-0" style={{
-                                    background: 'radial-gradient(circle, rgba(212,175,55,0.2) 0%, rgba(212,175,55,0.05) 40%, transparent 70%)',
-                                    transform: 'scale(1.6)',
-                                    animation: 'pulse 4s ease-in-out infinite',
-                                }} />
-                                {/* Sacred Flower-Atom Mandala Glyph */}
-                                <svg viewBox="0 0 200 200" className="absolute inset-0 w-full h-full" style={{ filter: 'drop-shadow(0 0 14px rgba(212,175,55,0.35))' }}>
-                                    <defs>
-                                        <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                            <stop offset="0%" stopColor="#F9E491" />
-                                            <stop offset="50%" stopColor="#D4A94E" />
-                                            <stop offset="100%" stopColor="#C59341" />
-                                        </linearGradient>
-                                    </defs>
-                                    {/* Outer lotus flower petals (8 petals with cusp tips) */}
-                                    {[0, 45, 90, 135, 180, 225, 270, 315].map(deg => (
-                                        <g key={`petal-${deg}`} transform={`rotate(${deg} 100 100)`}>
-                                            {/* Each petal: two arcs creating a pointed leaf shape */}
-                                            <path
-                                                d="M100,12 Q125,40 100,55 Q75,40 100,12 Z"
-                                                stroke="url(#goldGrad)" fill="none" strokeWidth="1.8" opacity="0.75"
-                                            />
-                                        </g>
-                                    ))}
-                                    {/* Inner flower petals (8 smaller, rotated 22.5°) */}
-                                    {[22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5].map(deg => (
-                                        <g key={`inner-petal-${deg}`} transform={`rotate(${deg} 100 100)`}>
-                                            <path
-                                                d="M100,28 Q118,48 100,60 Q82,48 100,28 Z"
-                                                stroke="url(#goldGrad)" fill="none" strokeWidth="1.2" opacity="0.5"
-                                            />
-                                        </g>
-                                    ))}
-                                    {/* Orbital ellipses (atom-like rings) */}
-                                    <ellipse cx="100" cy="100" rx="58" ry="30"
-                                        transform="rotate(0 100 100)"
-                                        stroke="#d4af37" fill="none" strokeWidth="1.4" opacity="0.7" />
-                                    <ellipse cx="100" cy="100" rx="58" ry="30"
-                                        transform="rotate(60 100 100)"
-                                        stroke="#d4af37" fill="none" strokeWidth="1.4" opacity="0.7" />
-                                    <ellipse cx="100" cy="100" rx="58" ry="30"
-                                        transform="rotate(120 100 100)"
-                                        stroke="#d4af37" fill="none" strokeWidth="1.4" opacity="0.7" />
-                                    {/* Additional inner orbital ring */}
-                                    <ellipse cx="100" cy="100" rx="42" ry="22"
-                                        transform="rotate(30 100 100)"
-                                        stroke="#C59341" fill="none" strokeWidth="0.8" opacity="0.4" />
-                                    <ellipse cx="100" cy="100" rx="42" ry="22"
-                                        transform="rotate(90 100 100)"
-                                        stroke="#C59341" fill="none" strokeWidth="0.8" opacity="0.4" />
-                                    <ellipse cx="100" cy="100" rx="42" ry="22"
-                                        transform="rotate(150 100 100)"
-                                        stroke="#C59341" fill="none" strokeWidth="0.8" opacity="0.4" />
-                                    {/* Center atom cluster (3 circles + central dot) */}
-                                    <circle cx="100" cy="100" r="6" fill="#d4af37" opacity="0.85" />
-                                    <circle cx="92" cy="108" r="3.5" fill="#C59341" opacity="0.7" />
-                                    <circle cx="108" cy="108" r="3.5" fill="#C59341" opacity="0.7" />
-                                    <circle cx="100" cy="92" r="3.5" fill="#C59341" opacity="0.7" />
-                                    {/* Outer bounding circle */}
-                                    <circle cx="100" cy="100" r="88" stroke="#d4af37" fill="none" strokeWidth="0.6" opacity="0.2" />
-                                </svg>
-                            </div>
-                            <h2 className="font-display text-altar-gold"
-                                style={{ fontSize: '20px', fontWeight: 700, letterSpacing: '5px', textShadow: '0 0 30px rgba(212,175,55,0.2)', marginBottom: '6px' }}>
-                                Manifestation
-                            </h2>
-                            <p style={{ fontSize: '12px', color: '#94a3b8', letterSpacing: '0.5px', fontWeight: 300 }}>
-                                Your daily manifestation practice.
-                            </p>
-                        </div>
-
-                        {/* Single scroll manifestation content */}
-                        <div className="animate-fade-up space-y-4" style={{ animationDelay: '0.1s', opacity: 0 }}>
+                        {/* Ritual Command Center — achievement-first bento layout */}
+                        <div className="animate-fade-up" style={{ animationDelay: '0.05s', opacity: 0 }}>
 
 
-                            {/* ─── Sacred Script 369 Section ─── */}
-                            <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '16px', marginBottom: '24px' }}>
+                            {/* ─── THE FORGE: Hero Coaching Section ─── */}
+                            <div style={{ marginBottom: '24px' }}>
 
-                                {/* Today's Ritual Card OR Start flow */}
-                                {activeScript && scriptProgress ? (
-                                    <TodayRitualCard
-                                        script={activeScript}
-                                        progress={scriptProgress}
-                                        moonPhaseName={lunarData.currentPhase.name}
-                                        onOpenRitual={(tod) => setRitualModal({ open: true, timeOfDay: tod })}
-                                        onAbandon={() => {
-                                            pauseScript(activeScript.id);
-                                            refresh();
-                                        }}
-                                    />
+                                {active.length > 0 ? (
+                                    <>
+                                        {/* Forge Carousel: horizontal swipe */}
+                                        <div style={{ position: 'relative' as const }}>
+                                            {/* Swipe container */}
+                                            <div
+                                                style={{
+                                                    display: 'flex',
+                                                    overflow: 'hidden',
+                                                    scrollSnapType: 'x mandatory',
+                                                    WebkitOverflowScrolling: 'touch',
+                                                    paddingRight: active.length > 1 ? '40px' : '0',
+                                                }}
+                                                ref={(el) => {
+                                                    if (!el) return;
+                                                    const handleScroll = () => {
+                                                        const slideWidth = el.clientWidth - 40;
+                                                        const idx = Math.round(el.scrollLeft / slideWidth);
+                                                        setForgeIdx(Math.min(idx, active.length - 1));
+                                                    };
+                                                    el.onscroll = handleScroll;
+                                                    // Enable actual scrolling
+                                                    el.style.overflowX = 'auto';
+                                                    el.style.scrollbarWidth = 'none';
+                                                    (el.style as any).msOverflowStyle = 'none';
+                                                    (el.style as any).WebkitScrollbar = 'none';
+                                                }}
+                                            >
+                                                {active.map((m, idx) => {
+                                                    const isFocused = idx === forgeIdx;
+                                                    return (
+                                                    <div
+                                                        key={`forge-slide-${m.id}`}
+                                                        style={{
+                                                            flex: active.length > 1 ? `0 0 calc(100% - 40px)` : '0 0 100%',
+                                                            scrollSnapAlign: 'start',
+                                                            marginRight: idx < active.length - 1 ? '-12px' : '0',
+                                                            position: 'relative',
+                                                            zIndex: isFocused ? 10 : 5 - Math.abs(idx - forgeIdx),
+                                                            transform: isFocused ? 'scale(1)' : 'scale(0.96)',
+                                                            opacity: isFocused ? 1 : 0.7,
+                                                            transition: 'transform 0.3s ease, opacity 0.3s ease, max-height 0.4s ease',
+                                                            maxHeight: isFocused ? '1000px' : '320px',
+                                                            overflow: 'hidden',
+                                                        }}
+                                                    >
+                                                        {/* Only render ForgeCard for visible ± 1 neighbors (lazy) */}
+                                                        {Math.abs(idx - forgeIdx) <= 1 ? (
+                                                            <ForgeCard
+                                                                key={`forge-${m.id}-${tick}`}
+                                                                manifestationId={m.id}
+                                                                declaration={m.declaration}
+                                                                onRefresh={refresh}
+                                                            />
+                                                        ) : (
+                                                            <div style={{
+                                                                minHeight: '300px',
+                                                                borderRadius: '20px',
+                                                                background: 'linear-gradient(135deg, #1c1538 0%, #130f2e 50%, #0d0b22 100%)',
+                                                                border: '1px solid rgba(212,175,55,0.08)',
+                                                            }} />
+                                                        )}
+                                                        {/* Fade-out gradient for clipped non-focused cards */}
+                                                        {!isFocused && active.length > 1 && (
+                                                            <div style={{
+                                                                position: 'absolute',
+                                                                bottom: 0,
+                                                                left: 0,
+                                                                right: 0,
+                                                                height: '80px',
+                                                                background: 'linear-gradient(to top, #0d0b22 0%, transparent 100%)',
+                                                                borderRadius: '0 0 20px 20px',
+                                                                pointerEvents: 'none',
+                                                            }} />
+                                                        )}
+                                                    </div>
+                                                    );
+                                                })}
+                                            </div>
+
+                                            {/* Dot indicators */}
+                                            {active.length > 1 && (
+                                                <div className="flex justify-center gap-2" style={{ marginTop: '12px' }}>
+                                                    {active.map((_, i) => (
+                                                        <button
+                                                            key={`dot-${i}`}
+                                                            onClick={(e) => {
+                                                                const container = (e.target as HTMLElement).closest('[style*="margin-bottom"]')?.querySelector('[style*="scroll-snap-type"]') as HTMLElement;
+                                                                if (container) {
+                                                                    container.scrollTo({ left: i * container.clientWidth, behavior: 'smooth' });
+                                                                }
+                                                            }}
+                                                            style={{
+                                                                width: i === forgeIdx ? '18px' : '6px',
+                                                                height: '6px',
+                                                                borderRadius: '3px',
+                                                                background: i === forgeIdx
+                                                                    ? 'linear-gradient(90deg, #F9E491, #A67B2E)'
+                                                                    : 'rgba(255,255,255,0.12)',
+                                                                border: 'none',
+                                                                cursor: 'pointer',
+                                                                transition: 'all 0.3s ease',
+                                                                padding: 0,
+                                                            }}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+
+
+                                    </>
                                 ) : (
-                                    <StartSacredScript
-                                        manifestations={active.map(m => ({ id: m.id, declaration: m.declaration }))}
-                                        moonPhaseName={lunarData.currentPhase.name}
-                                        onStart={refresh}
-                                    />
-                                )}
+                                    /* ── FORGE EMPTY STATE: Embedded CTA ── */
+                                    <div style={{
+                                        padding: '32px 24px',
+                                        borderRadius: '20px',
+                                        background: 'linear-gradient(135deg, #1c1538 0%, #130f2e 50%, #0d0b22 100%)',
+                                        border: '1px solid rgba(212,175,55,0.12)',
+                                        boxShadow: '0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(212,175,55,0.06)',
+                                    }}>
+                                        <div className="flex items-center gap-2 mb-4">
+                                            <span style={{ fontSize: '18px' }}>⚒️</span>
+                                            <span style={{
+                                                fontFamily: 'var(--font-display)',
+                                                fontSize: '11px',
+                                                letterSpacing: '4px',
+                                                textTransform: 'uppercase' as const,
+                                                color: 'var(--color-gold-200)',
+                                            }}>The Forge</span>
+                                        </div>
 
-                                {/* Completed Sacred Texts */}
-                                <PastSacredTexts scripts={completedScripts} />
+                                        <p style={{
+                                            fontFamily: 'var(--font-display)',
+                                            fontSize: '16px',
+                                            color: 'var(--color-gold-100)',
+                                            fontWeight: 600,
+                                            letterSpacing: '2px',
+                                            marginBottom: '12px',
+                                        }}>
+                                            SET YOUR FIRST INTENTION
+                                        </p>
+
+                                        <p style={{
+                                            fontFamily: 'var(--font-body)',
+                                            fontSize: '13px',
+                                            color: 'rgba(226,232,240,0.6)',
+                                            fontWeight: 300,
+                                            lineHeight: '1.7',
+                                            marginBottom: '20px',
+                                        }}>
+                                            The Forge is your personal cosmic coach. It synthesizes your birth chart,
+                                            numerology, transits, and patterns to craft a personalized daily strategy
+                                            toward your goals.
+                                        </p>
+
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                value={quickIntention}
+                                                onChange={e => setQuickIntention(e.target.value)}
+                                                onKeyDown={e => {
+                                                    if (e.key === 'Enter' && quickIntention.trim()) {
+                                                        createManifestation(quickIntention.trim(), 'intention');
+                                                        setQuickIntention('');
+                                                        refresh();
+                                                    }
+                                                }}
+                                                placeholder="I am calling in..."
+                                                maxLength={200}
+                                                style={{
+                                                    flex: 1,
+                                                    background: 'rgba(13,11,34,0.5)',
+                                                    border: '1px solid rgba(255,255,255,0.08)',
+                                                    borderRadius: '12px',
+                                                    padding: '12px 16px',
+                                                    color: 'rgba(226,232,240,0.9)',
+                                                    fontFamily: 'var(--font-body)',
+                                                    fontSize: '14px',
+                                                    fontWeight: 300,
+                                                    fontStyle: 'italic',
+                                                    outline: 'none',
+                                                }}
+                                            />
+                                            <button
+                                                onClick={() => {
+                                                    if (!quickIntention.trim()) return;
+                                                    createManifestation(quickIntention.trim(), 'intention');
+                                                    setQuickIntention('');
+                                                    refresh();
+                                                }}
+                                                disabled={!quickIntention.trim()}
+                                                style={{
+                                                    position: 'relative' as const,
+                                                    overflow: 'hidden',
+                                                    padding: '12px 20px',
+                                                    borderRadius: '12px',
+                                                    background: quickIntention.trim()
+                                                        ? 'linear-gradient(180deg, #F9E491, #D4A94E 30%, #C59341 60%, #A67B2E)'
+                                                        : 'rgba(13,11,34,0.3)',
+                                                    border: quickIntention.trim()
+                                                        ? '2px solid rgba(212,175,55,0.6)'
+                                                        : '1px solid rgba(255,255,255,0.04)',
+                                                    color: quickIntention.trim() ? '#1a0f2e' : 'rgba(226,232,240,0.2)',
+                                                    fontFamily: 'var(--font-display)',
+                                                    fontSize: '11px',
+                                                    fontWeight: 800,
+                                                    letterSpacing: '3px',
+                                                    textTransform: 'uppercase' as const,
+                                                    boxShadow: quickIntention.trim()
+                                                        ? '0 2px 0 #8a6b25, 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.35)'
+                                                        : 'none',
+                                                    transition: 'all 0.2s',
+                                                }}
+                                            >
+                                                {quickIntention.trim() && (
+                                                    <span style={{ position: 'absolute', inset: 0, overflow: 'hidden', borderRadius: '12px' }}>
+                                                        <span style={{
+                                                            position: 'absolute', top: 0, left: '-100%', width: '60%', height: '100%',
+                                                            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent)',
+                                                            animation: 'shimmer 3s ease-in-out infinite',
+                                                        }} />
+                                                    </span>
+                                                )}
+                                                <span style={{ position: 'relative' }}>✦ Set</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
-                            {/* ─── Intentions Preview Card (Vision Board pattern) ─── */}
-                            {(active.length > 0 || pausedScriptsList.length > 0) && (
-                                <div
-                                    onClick={() => setShowIntentions(true)}
-                                    style={{
-                                        marginTop: '24px',
-                                        padding: '18px',
-                                        borderRadius: '18px',
-                                        background: 'linear-gradient(145deg, rgba(28,21,56,0.9) 0%, rgba(13,11,34,0.95) 100%)',
-                                        border: '1px solid rgba(212,175,55,0.15)',
-                                        backdropFilter: 'blur(12px)',
-                                        boxShadow: '0 4px 16px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.04)',
-                                        cursor: 'pointer',
-                                        transition: 'border-color 0.2s',
-                                    }}
-                                >
-                                    <p style={{
-                                        fontFamily: 'var(--font-display)',
-                                        fontSize: '10px',
-                                        letterSpacing: '5px',
-                                        textTransform: 'uppercase' as const,
-                                        color: '#D4A94E',
-                                        opacity: 0.7,
-                                        textShadow: '0 0 10px rgba(212,175,55,0.12)',
-                                        marginBottom: '14px',
-                                    }}>✦ Your Intentions</p>
-
-                                    <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '6px', marginBottom: '12px' }}>
-                                        {active.slice(0, 3).map(m => (
-                                            <p key={m.id} style={{
-                                                fontSize: '12px', color: 'rgba(226,232,240,0.65)',
-                                                fontStyle: 'italic', fontWeight: 300,
-                                                whiteSpace: 'nowrap' as const,
-                                                overflow: 'hidden', textOverflow: 'ellipsis',
-                                                paddingLeft: '8px',
-                                                borderLeft: '2px solid rgba(212,175,55,0.25)',
-                                            }}>"{m.declaration}"</p>
-                                        ))}
-                                        {active.length > 3 && (
-                                            <p style={{ fontSize: '10px', color: 'rgba(196,196,220,0.35)', paddingLeft: '8px' }}>
-                                                +{active.length - 3} more
-                                            </p>
-                                        )}
-                                    </div>
-
-                                    <p style={{
-                                        fontSize: '10px', color: 'rgba(196,196,220,0.45)',
-                                        fontStyle: 'italic', textAlign: 'center' as const,
-                                    }}>
-                                        {active.length} active{pausedScriptsList.length > 0 ? ` · ${pausedScriptsList.length} paused` : ''} · Tap to explore →
-                                    </p>
-                                </div>
-                            )}
-                            <div
-                                onClick={() => setShowVisionBoard(true)}
+                            {/* ─── JOURNAL: Full-width card above grid ─── */}
+                            <button
+                                onClick={() => setShowJournalPage(true)}
+                                className="animate-fade-up"
                                 style={{
-                                    marginTop: '24px',
-                                    padding: '18px',
+                                    width: '100%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '16px',
+                                    padding: '18px 20px',
+                                    marginTop: '20px',
                                     borderRadius: '18px',
-                                    background: 'linear-gradient(145deg, rgba(28,21,56,0.9) 0%, rgba(13,11,34,0.95) 100%)',
-                                    border: '1px solid rgba(212,175,55,0.15)',
+                                    background: 'linear-gradient(145deg, rgba(28,21,56,0.85) 0%, rgba(13,11,34,0.95) 100%)',
+                                    border: '1px solid rgba(255,255,255,0.07)',
                                     backdropFilter: 'blur(12px)',
                                     boxShadow: '0 4px 16px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.04)',
                                     cursor: 'pointer',
-                                    transition: 'border-color 0.2s',
+                                    transition: 'all 0.2s',
+                                    textAlign: 'left' as const,
+                                    animationDelay: '0.1s',
                                 }}
                             >
-                                <p style={{
-                                    fontFamily: 'var(--font-display)',
-                                    fontSize: '10px',
-                                    letterSpacing: '5px',
-                                    textTransform: 'uppercase' as const,
-                                    color: '#D4A94E',
-                                    opacity: 0.7,
-                                    textShadow: '0 0 10px rgba(212,175,55,0.12)',
-                                    marginBottom: '14px',
-                                }}>
-                                    ✧ Your Vision Board
-                                </p>
-
-                                {visionItems.length === 0 ? (
-                                    /* Empty state */
-                                    <div style={{ textAlign: 'center' as const, padding: '12px 0' }}>
-                                        <div style={{
-                                            width: '50px', height: '50px', borderRadius: '50%',
-                                            background: 'radial-gradient(circle, rgba(212,175,55,0.08) 0%, transparent 70%)',
-                                            border: '1.5px solid rgba(212,175,55,0.15)',
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            fontSize: '20px', margin: '0 auto 10px',
-                                        }}>✧</div>
-                                        <p style={{
-                                            fontSize: '12px', color: 'rgba(226,232,240,0.7)',
-                                            marginBottom: '4px',
-                                        }}>Start visualizing your future</p>
-                                        <p style={{
-                                            fontSize: '10px', color: 'rgba(210,210,230,0.75)',
-                                            fontStyle: 'italic',
-                                        }}>Tap to create your vision board →</p>
+                                <span style={{ fontSize: '28px', flexShrink: 0 }}>📔</span>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                    <div className="flex items-center justify-between" style={{ width: '100%' }}>
+                                        <span style={{
+                                            fontFamily: 'var(--font-display)',
+                                            fontSize: '12px',
+                                            color: 'var(--color-gold-100)',
+                                            letterSpacing: '1.5px',
+                                            fontWeight: 600,
+                                        }}>Manifest Journal</span>
+                                        {journalEntryCount > 0 && (
+                                            <span
+                                                onClick={(e) => { e.stopPropagation(); setShowJournalHistory(true); }}
+                                                style={{
+                                                    fontSize: '10px',
+                                                    color: 'rgba(178,190,205,0.6)',
+                                                    fontFamily: 'var(--font-display)',
+                                                    letterSpacing: '0.5px',
+                                                }}
+                                            >{journalEntryCount} entries →</span>
+                                        )}
                                     </div>
-                                ) : (
-                                    /* Thumbnail mosaic */
-                                    <>
-                                        <div style={{
-                                            display: 'grid',
-                                            gridTemplateColumns: 'repeat(3, 1fr)',
-                                            gap: '6px',
-                                            marginBottom: '12px',
+                                    <div className="flex items-center gap-2" style={{ marginTop: '6px' }}>
+                                        <span style={{
+                                            display: 'inline-block',
+                                            padding: '3px 8px', borderRadius: '12px',
+                                            fontSize: '9px', fontWeight: 600,
+                                            fontFamily: 'var(--font-display)',
+                                            letterSpacing: '1px', textTransform: 'uppercase' as const,
+                                            background: `${CATEGORY_META[todayJournal.category].color}18`,
+                                            color: CATEGORY_META[todayJournal.category].color,
                                         }}>
-                                            {visionItems.slice(0, 6).map(item => (
-                                                <div key={item.id} style={{
-                                                    aspectRatio: '1',
-                                                    borderRadius: '12px',
-                                                    overflow: 'hidden',
-                                                    /* Illuminated border — bright gold at top-right corner */
-                                                    background: item.type === 'image'
-                                                        ? 'transparent'
-                                                        : 'conic-gradient(from 225deg at 100% 0%, rgba(212,175,55,0.40) 0deg, rgba(212,175,55,0.15) 45deg, rgba(255,255,255,0.06) 120deg, rgba(255,255,255,0.03) 200deg, rgba(255,255,255,0.06) 300deg, rgba(212,175,55,0.25) 360deg)',
-                                                    padding: item.type === 'image' ? '0' : '1px',
-                                                }}>
-                                                    {item.type === 'image' ? (
-                                                        <img src={item.content} alt="" style={{
-                                                            width: '100%', height: '100%',
-                                                            objectFit: 'cover' as const,
-                                                            borderRadius: '12px',
-                                                        }} />
-                                                    ) : (
-                                                        <div style={{
-                                                            width: '100%', height: '100%',
-                                                            borderRadius: '11px',
-                                                            /* Corner glow from vertex */
-                                                            background: `
-                                                                radial-gradient(circle at 100% 0%, rgba(212,175,55,0.16) 0%, rgba(212,175,55,0.04) 30%, transparent 55%),
-                                                                linear-gradient(145deg, #1a1625 0%, #0a0a0c 100%)
-                                                            `,
-                                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                            padding: '6px',
-                                                        }}>
-                                                            <p style={{
-                                                                fontFamily: "var(--font-display)",
-                                                                fontSize: '10px', color: '#d4af37',
-                                                                fontStyle: 'italic', fontWeight: 500,
-                                                                textAlign: 'center' as const,
-                                                                overflow: 'hidden',
-                                                                display: '-webkit-box',
-                                                                WebkitLineClamp: 3,
-                                                                WebkitBoxOrient: 'vertical' as const,
-                                                                lineHeight: 1.4,
-                                                            }}>
-                                                                {item.type === 'goal' ? '🎯 ' : '"'}{item.content.slice(0, 50)}{item.type === 'text' ? '"' : ''}
-                                                            </p>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
-                                        <p style={{
-                                            fontSize: '10px', color: 'rgba(196,196,220,0.45)',
-                                            fontStyle: 'italic', textAlign: 'center' as const,
-                                        }}>
-                                            {visionItems.length} vision{visionItems.length === 1 ? '' : 's'} · Tap to explore →
-                                        </p>
-                                    </>
-                                )}
-                            </div>
-
-
-                            {/* ─── Manifest Journal Card ─── */}
-                            <div
-                                style={{
-                                    marginTop: '24px',
-                                    borderRadius: '22px',
-                                    background: 'linear-gradient(160deg, #1c1538 0%, #130f2e 55%, #0d0b22 100%)',
-                                    border: '1px solid rgba(255,255,255,0.07)',
-                                    boxShadow: '0 8px 28px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.08)',
-                                    padding: '24px 20px',
-                                    position: 'relative' as const,
-                                    overflow: 'hidden',
-                                }}
-                            >
-                                {/* Gold accent line */}
-                                <div style={{
-                                    position: 'absolute', top: 0, left: '20px', right: '20px', height: '1px',
-                                    background: 'linear-gradient(90deg, transparent, #C59341, transparent)',
-                                    opacity: 0.5,
-                                }} />
-
-                                {/* Header row */}
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                                            {CATEGORY_META[todayJournal.category].emoji} {CATEGORY_META[todayJournal.category].label}
+                                        </span>
+                                    </div>
                                     <p style={{
                                         fontFamily: 'var(--font-display)',
-                                        fontSize: '10px', fontWeight: 500,
-                                        letterSpacing: '5px', textTransform: 'uppercase' as const,
-                                        color: '#D4A94E', opacity: 0.8,
-                                        textShadow: '0 0 10px rgba(212,175,55,0.15)',
-                                    }}>Manifest Journal</p>
-                                    {journalEntryCount > 0 && (
-                                        <button
-                                            onClick={() => setShowJournalHistory(true)}
-                                            style={{
-                                                background: 'none', border: 'none', cursor: 'pointer',
-                                                fontSize: '10px', color: 'rgba(178,190,205,0.8)',
-                                                padding: '2px 6px',
-                                                fontFamily: 'var(--font-display)',
-                                                letterSpacing: '1px',
-                                            }}
-                                        >{journalEntryCount} {journalEntryCount === 1 ? 'entry' : 'entries'} →</button>
-                                    )}
+                                        fontSize: '11px', fontWeight: 400,
+                                        fontStyle: 'italic',
+                                        color: 'rgba(212,175,55,0.55)',
+                                        lineHeight: 1.5,
+                                        marginTop: '6px',
+                                        display: '-webkit-box',
+                                        WebkitLineClamp: 2,
+                                        WebkitBoxOrient: 'vertical' as const,
+                                        overflow: 'hidden',
+                                    }}>"{todayJournal.prompt}"</p>
                                 </div>
+                            </button>
 
-                                {/* Category pill */}
-                                <div style={{ marginBottom: '12px' }}>
-                                    <span style={{
-                                        display: 'inline-block',
-                                        padding: '4px 10px', borderRadius: '16px',
-                                        fontSize: '10px', fontWeight: 600,
-                                        fontFamily: 'var(--font-display)',
-                                        letterSpacing: '1.5px', textTransform: 'uppercase' as const,
-                                        background: `${CATEGORY_META[todayJournal.category].color}18`,
-                                        color: CATEGORY_META[todayJournal.category].color,
-                                    }}>
-                                        {CATEGORY_META[todayJournal.category].emoji} {CATEGORY_META[todayJournal.category].label}
-                                    </span>
-                                </div>
+                            {/* ─── BENTO GRID: Ritual Tools ─── */}
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: '1fr 1fr',
+                                gap: '14px',
+                                marginTop: '16px',
+                            }}>
 
-                                {/* Today's prompt */}
-                                <p style={{
-                                    fontFamily: "var(--font-display)",
-                                    fontSize: '14px', fontWeight: 500,
-                                    fontStyle: 'italic',
-                                    color: '#d4af37',
-                                    lineHeight: 1.65,
-                                    marginBottom: '16px',
-                                    display: '-webkit-box',
-                                    WebkitLineClamp: 3,
-                                    WebkitBoxOrient: 'vertical' as const,
-                                    overflow: 'hidden',
-                                }}>"{todayJournal.prompt}"</p>
-
-                                {/* Moon phase note */}
-                                <p style={{
-                                    fontSize: '10px', color: 'rgba(210,210,230,0.8)',
-                                    fontStyle: 'italic', fontWeight: 300, marginBottom: '16px',
-                                }}>{lunarData.currentPhase.emoji} {lunarData.currentPhase.name} energy guides today's reflection</p>
-
-                                {/* Write CTA */}
+                                {/* ── 369 Practice Cell ── */}
                                 <button
-                                    className="gold-shimmer"
-                                    onClick={() => setShowJournalPage(true)}
+                                    onClick={() => setShow369Expanded(true)}
                                     style={{
-                                        width: '100%', padding: '14px',
-                                        borderRadius: '14px',
-                                        border: '2px solid rgba(212,175,55,0.6)',
+                                        display: 'flex',
+                                        flexDirection: 'column' as const,
+                                        alignItems: 'flex-start',
+                                        gap: '10px',
+                                        padding: '16px',
+                                        borderRadius: '18px',
+                                        background: 'linear-gradient(145deg, rgba(28,21,56,0.85) 0%, rgba(13,11,34,0.95) 100%)',
+                                        border: '1px solid rgba(212,175,55,0.12)',
+                                        backdropFilter: 'blur(12px)',
+                                        boxShadow: '0 4px 16px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.04)',
                                         cursor: 'pointer',
-                                        fontFamily: 'var(--font-display)',
-                                        fontSize: '11px', fontWeight: 800,
-                                        letterSpacing: '3px', textTransform: 'uppercase' as const,
-                                        color: '#1a0f2e',
-                                        background: 'linear-gradient(180deg, #F9E491, #D4A94E 30%, #C59341 60%, #A67B2E)',
-                                        boxShadow: '0 2px 0 #8a6b25, 0 4px 12px rgba(0,0,0,0.5), 0 0 40px rgba(212,175,55,0.08), inset 0 1px 0 rgba(255,255,255,0.35)',
-                                        transition: 'all 0.2s ease',
+                                        transition: 'all 0.2s',
+                                        textAlign: 'left' as const,
+                                        animationDelay: '0.15s',
                                     }}
-                                >✦ Write Today's Entry</button>
+                                    className="animate-fade-up"
+                                >
+                                    <div className="flex items-center gap-2" style={{ width: '100%' }}>
+                                        <span style={{ fontSize: '20px' }}>🔮</span>
+                                        <span style={{
+                                            fontFamily: 'var(--font-display)',
+                                            fontSize: '11px',
+                                            color: 'var(--color-gold-100)',
+                                            letterSpacing: '1px',
+                                            fontWeight: 600,
+                                        }}>Sacred Script</span>
+                                    </div>
+                                    <p style={{
+                                        fontFamily: 'var(--font-body)',
+                                        fontSize: '10px',
+                                        color: 'rgba(226,232,240,0.4)',
+                                        fontWeight: 300,
+                                        lineHeight: 1.4,
+                                        margin: 0,
+                                    }}>369 Manifestation Method</p>
+                                    {activeScript && scriptProgress ? (
+                                        <span style={{
+                                            fontFamily: 'var(--font-body)',
+                                            fontSize: '11px',
+                                            color: 'rgba(226,232,240,0.5)',
+                                            fontWeight: 300,
+                                        }}>
+                                            Day {scriptProgress.dayNumber}/21
+                                            {scriptProgress.todayComplete ? ' ✓' : ''}
+                                        </span>
+                                    ) : (
+                                        <span style={{
+                                            fontFamily: 'var(--font-body)',
+                                            fontSize: '11px',
+                                            color: 'rgba(226,232,240,0.35)',
+                                            fontWeight: 300,
+                                        }}>Begin →</span>
+                                    )}
+                                    {completedScripts.length > 0 && (
+                                        <span style={{
+                                            fontSize: '9px',
+                                            color: 'rgba(212,175,55,0.5)',
+                                            fontFamily: 'var(--font-display)',
+                                            letterSpacing: '0.5px',
+                                        }}>{completedScripts.length} completed</span>
+                                    )}
+                                </button>
+
+                                {/* ── Witness Cell ── */}
+                                <button
+                                    onClick={() => setShowWitnessCapture(true)}
+                                    style={{
+                                        display: 'flex',
+                                        flexDirection: 'column' as const,
+                                        alignItems: 'flex-start',
+                                        gap: '10px',
+                                        padding: '16px',
+                                        borderRadius: '18px',
+                                        background: 'linear-gradient(145deg, rgba(28,21,56,0.85) 0%, rgba(13,11,34,0.95) 100%)',
+                                        border: '1px solid rgba(212,175,55,0.12)',
+                                        backdropFilter: 'blur(12px)',
+                                        boxShadow: '0 4px 16px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.04)',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s',
+                                        textAlign: 'left' as const,
+                                        animationDelay: '0.2s',
+                                    }}
+                                    className="animate-fade-up"
+                                >
+                                    <div className="flex items-center gap-2" style={{ width: '100%' }}>
+                                        <span style={{ fontSize: '20px' }}>👁️</span>
+                                        <span style={{
+                                            fontFamily: 'var(--font-display)',
+                                            fontSize: '11px',
+                                            color: 'var(--color-gold-100)',
+                                            letterSpacing: '1px',
+                                            fontWeight: 600,
+                                        }}>Witness</span>
+                                    </div>
+                                    <p style={{
+                                        fontFamily: 'var(--font-body)',
+                                        fontSize: '10px',
+                                        color: 'rgba(226,232,240,0.4)',
+                                        fontWeight: 300,
+                                        lineHeight: 1.4,
+                                        margin: 0,
+                                    }}>Capture signs & synchronicities</p>
+                                    <span style={{
+                                        fontSize: '11px', color: 'rgba(226,232,240,0.35)',
+                                        fontWeight: 300,
+                                    }}>Log a sign →</span>
+                                </button>
+
+                                {/* ── Vision Board Cell ── */}
+                                <button
+                                    onClick={() => setShowVisionBoard(true)}
+                                    style={{
+                                        display: 'flex',
+                                        flexDirection: 'column' as const,
+                                        alignItems: 'flex-start',
+                                        gap: '10px',
+                                        padding: '16px',
+                                        borderRadius: '18px',
+                                        background: 'linear-gradient(145deg, rgba(28,21,56,0.85) 0%, rgba(13,11,34,0.95) 100%)',
+                                        border: '1px solid rgba(212,175,55,0.12)',
+                                        backdropFilter: 'blur(12px)',
+                                        boxShadow: '0 4px 16px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.04)',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s',
+                                        textAlign: 'left' as const,
+                                        animationDelay: '0.25s',
+                                    }}
+                                    className="animate-fade-up"
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <span style={{ fontSize: '20px' }}>✧</span>
+                                        <span style={{
+                                            fontFamily: 'var(--font-display)',
+                                            fontSize: '11px',
+                                            color: 'var(--color-gold-100)',
+                                            letterSpacing: '1px',
+                                            fontWeight: 600,
+                                        }}>Vision Board</span>
+                                    </div>
+                                    <p style={{
+                                        fontFamily: 'var(--font-body)',
+                                        fontSize: '10px',
+                                        color: 'rgba(226,232,240,0.4)',
+                                        fontWeight: 300,
+                                        lineHeight: 1.4,
+                                        margin: 0,
+                                    }}>Visualize your future reality</p>
+                                    {visionItems.length > 0 ? (
+                                        <>
+                                            <div style={{
+                                                display: 'grid',
+                                                gridTemplateColumns: '1fr 1fr',
+                                                gap: '4px',
+                                                width: '100%',
+                                            }}>
+                                                {visionItems.slice(0, 4).map(item => (
+                                                    <div key={item.id} style={{
+                                                        aspectRatio: '1',
+                                                        borderRadius: '8px',
+                                                        overflow: 'hidden',
+                                                        background: item.type === 'image'
+                                                            ? 'transparent'
+                                                            : 'linear-gradient(145deg, #1a1625 0%, #0a0a0c 100%)',
+                                                        border: '1px solid rgba(255,255,255,0.04)',
+                                                    }}>
+                                                        {item.type === 'image' ? (
+                                                            <img src={item.content} alt="" style={{
+                                                                width: '100%', height: '100%',
+                                                                objectFit: 'cover' as const,
+                                                            }} />
+                                                        ) : (
+                                                            <div style={{
+                                                                width: '100%', height: '100%',
+                                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                padding: '4px',
+                                                            }}>
+                                                                <p style={{
+                                                                    fontSize: '7px', color: '#d4af37',
+                                                                    fontStyle: 'italic',
+                                                                    textAlign: 'center' as const,
+                                                                    overflow: 'hidden',
+                                                                    display: '-webkit-box',
+                                                                    WebkitLineClamp: 2,
+                                                                    WebkitBoxOrient: 'vertical' as const,
+                                                                }}>{item.content.slice(0, 30)}</p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <span style={{
+                                                fontSize: '9px', color: 'rgba(196,196,220,0.45)',
+                                                fontStyle: 'italic',
+                                            }}>{visionItems.length} vision{visionItems.length === 1 ? '' : 's'}</span>
+                                        </>
+                                    ) : (
+                                        <span style={{
+                                            fontSize: '11px', color: 'rgba(226,232,240,0.35)',
+                                            fontWeight: 300,
+                                        }}>Start visualizing →</span>
+                                    )}
+                                </button>
+
+                                {/* ── Intentions Cell ── */}
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        flexDirection: 'column' as const,
+                                        alignItems: 'flex-start',
+                                        gap: '8px',
+                                        padding: '16px',
+                                        borderRadius: '18px',
+                                        background: 'linear-gradient(145deg, rgba(28,21,56,0.85) 0%, rgba(13,11,34,0.95) 100%)',
+                                        border: '1px solid rgba(212,175,55,0.12)',
+                                        backdropFilter: 'blur(12px)',
+                                        boxShadow: '0 4px 16px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.04)',
+                                        animationDelay: '0.3s',
+                                    }}
+                                    className="animate-fade-up"
+                                >
+                                    <div
+                                        onClick={() => setShowIntentions(true)}
+                                        style={{ cursor: 'pointer', width: '100%' }}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <span style={{ fontSize: '20px' }}>✦</span>
+                                            <span style={{
+                                                fontFamily: 'var(--font-display)',
+                                                fontSize: '11px',
+                                                color: 'var(--color-gold-100)',
+                                                letterSpacing: '1px',
+                                                fontWeight: 600,
+                                            }}>Intentions</span>
+                                        </div>
+                                        {active.length > 0 ? (
+                                            <div style={{ marginTop: '6px' }}>
+                                                <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '4px', width: '100%' }}>
+                                                    {active.slice(0, 2).map(m => (
+                                                        <p key={m.id} style={{
+                                                            fontSize: '10px', color: 'rgba(226,232,240,0.55)',
+                                                            fontStyle: 'italic', fontWeight: 300,
+                                                            whiteSpace: 'nowrap' as const,
+                                                            overflow: 'hidden', textOverflow: 'ellipsis',
+                                                            paddingLeft: '6px',
+                                                            borderLeft: '2px solid rgba(212,175,55,0.20)',
+                                                        }}>"{m.declaration}"</p>
+                                                    ))}
+                                                </div>
+                                                <span style={{
+                                                    fontSize: '9px', color: 'rgba(196,196,220,0.45)',
+                                                    fontStyle: 'italic', marginTop: '4px', display: 'inline-block',
+                                                }}>
+                                                    {active.length} active{pausedScriptsList.length > 0 ? ` · ${pausedScriptsList.length} paused` : ''}
+                                                </span>
+                                            </div>
+                                        ) : (
+                                            <p style={{
+                                                fontSize: '10px', color: 'rgba(226,232,240,0.35)',
+                                                fontWeight: 300, margin: '4px 0 0',
+                                            }}>Declare what you're calling in</p>
+                                        )}
+                                    </div>
+                                    {/* Quick-add intention input */}
+                                    <div style={{ width: '100%', marginTop: '2px' }}>
+                                        <input
+                                            type="text"
+                                            value={quickIntention}
+                                            onChange={e => setQuickIntention(e.target.value)}
+                                            onKeyDown={e => {
+                                                if (e.key === 'Enter' && quickIntention.trim()) {
+                                                    createManifestation(quickIntention.trim(), 'intention');
+                                                    setQuickIntention('');
+                                                    refresh();
+                                                }
+                                            }}
+                                            placeholder="+ Add intention..."
+                                            maxLength={200}
+                                            style={{
+                                                width: '100%',
+                                                background: 'rgba(13,11,34,0.5)',
+                                                border: '1px solid rgba(255,255,255,0.06)',
+                                                borderRadius: '8px',
+                                                padding: '7px 10px',
+                                                color: 'rgba(226,232,240,0.9)',
+                                                fontFamily: 'var(--font-body)',
+                                                fontSize: '11px',
+                                                fontWeight: 300,
+                                                fontStyle: 'italic',
+                                                outline: 'none',
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+
                             </div>
 
 
-                            {/* Cosmic timing — Cosmic Shelf */}
-                            {transitWindows.length > 0 && (() => {
-                                const nowWindows = transitWindows.filter(h => !h.isApplying);
-                                const comingWindows = transitWindows.filter(h => h.isApplying);
-
-                                return (
-                                    <div style={{ marginTop: '24px' }}>
-                                        <p style={{
-                                            fontFamily: 'var(--font-display)',
-                                            fontSize: '10px',
-                                            letterSpacing: '5px',
-                                            textTransform: 'uppercase' as const,
-                                            color: '#D4A94E',
-                                            opacity: 0.7,
-                                            textShadow: '0 0 10px rgba(212,175,55,0.12)',
-                                            marginBottom: '12px',
-                                        }}>
-                                            ⚡ Cosmic Timing
-                                        </p>
-
-                                        {/* ─── NOW Hero Cards ─── */}
-                                        {nowWindows.map((hit, i) => {
-                                            const wInfo = WINDOW_PLANET_MSG[hit.transitPlanet.id];
-                                            if (!wInfo) return null;
-                                            return (
-                                                <div key={`now-${i}`} style={{
-                                                    position: 'relative' as const,
-                                                    padding: '18px 18px',
-                                                    borderRadius: '18px',
-                                                    background: 'linear-gradient(135deg, rgba(197,147,65,0.10) 0%, rgba(28,21,56,0.95) 40%, rgba(13,11,34,0.98) 100%)',
-                                                    border: '1px solid rgba(212,175,55,0.30)',
-                                                    backdropFilter: 'blur(16px)',
-                                                    boxShadow: '0 0 24px rgba(212,175,55,0.08), 0 4px 16px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.06)',
-                                                    marginBottom: comingWindows.length > 0 ? '4px' : '0',
-                                                    zIndex: 10,
-                                                }}>
-                                                    {/* Ambient glow */}
-                                                    <div style={{
-                                                        position: 'absolute', inset: '-8px',
-                                                        background: 'radial-gradient(ellipse at 30% 50%, rgba(212,175,55,0.06) 0%, transparent 60%)',
-                                                        pointerEvents: 'none', borderRadius: '26px',
-                                                    }} />
-
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px', position: 'relative' as const }}>
-                                                        {/* Planet glyph — enlarged */}
-                                                        <div style={{
-                                                            width: '46px', height: '46px', borderRadius: '50%', flexShrink: 0,
-                                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                            fontSize: '22px',
-                                                            border: '1.5px solid rgba(212,175,55,0.5)',
-                                                            background: 'radial-gradient(circle, rgba(212,175,55,0.14) 0%, rgba(212,175,55,0.03) 70%)',
-                                                            boxShadow: '0 0 16px rgba(212,175,55,0.12), 0 0 6px rgba(197,147,65,0.2)',
-                                                        }}>
-                                                            <span style={{ color: '#D4A94E' }}>{hit.transitPlanet.glyph}</span>
-                                                        </div>
-                                                        <div style={{ flex: 1, minWidth: 0 }}>
-                                                            <p style={{
-                                                                fontFamily: 'var(--font-display)',
-                                                                fontSize: '12px', fontWeight: 700,
-                                                                letterSpacing: '2px',
-                                                                textTransform: 'uppercase' as const,
-                                                                color: '#F9E491',
-                                                                marginBottom: '4px',
-                                                                textShadow: '0 0 12px rgba(212,175,55,0.15)',
-                                                            }}>
-                                                                ✨ {wInfo.title}
-                                                            </p>
-                                                            <p style={{
-                                                                fontSize: '11px',
-                                                                color: 'rgba(226,232,240,0.9)',
-                                                                fontWeight: 300, lineHeight: 1.5,
-                                                            }}>{wInfo.msg}</p>
-                                                        </div>
-                                                        {/* NOW pill */}
-                                                        <div style={{ flexShrink: 0 }}>
-                                                            <span style={{
-                                                                display: 'flex', alignItems: 'center', gap: '5px',
-                                                                fontFamily: 'var(--font-display)',
-                                                                fontSize: '10px', letterSpacing: '1.5px',
-                                                                textTransform: 'uppercase' as const,
-                                                                padding: '5px 12px', borderRadius: '20px',
-                                                                background: 'rgba(197,147,65,0.15)',
-                                                                color: '#D4A94E',
-                                                                border: '1px solid rgba(197,147,65,0.3)',
-                                                            }}>
-                                                                <span style={{
-                                                                    width: '6px', height: '6px', borderRadius: '50%',
-                                                                    background: '#D4A94E',
-                                                                    animation: 'livePulse 2s ease-in-out infinite',
-                                                                    boxShadow: '0 0 6px rgba(212,175,55,0.3)',
-                                                                }} />
-                                                                Now
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-
-                                        {/* ─── Coming Stack ─── */}
-                                        {comingWindows.length > 0 && (
-                                            <div
-                                                onClick={() => setStackExpanded(!stackExpanded)}
-                                                style={{ cursor: 'pointer', position: 'relative' as const }}
-                                            >
-                                                {comingWindows.map((hit, i) => {
-                                                    const wInfo = WINDOW_PLANET_MSG[hit.transitPlanet.id];
-                                                    if (!wInfo) return null;
-                                                    const opacityLevels = [0.8, 0.55, 0.35, 0.2];
-                                                    const collapsedOffset = (i + 1) * -38; // negative margin to stack
-                                                    const expandedOffset = 0;
-
-                                                    return (
-                                                        <div key={`coming-${i}`} style={{
-                                                            padding: stackExpanded ? '14px 16px' : '14px 16px',
-                                                            borderRadius: '16px',
-                                                            background: 'rgba(28,21,56,0.85)',
-                                                            border: '1px solid rgba(212,175,55,0.10)',
-                                                            backdropFilter: 'blur(12px)',
-                                                            boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
-                                                            marginTop: stackExpanded ? '8px' : `${collapsedOffset}px`,
-                                                            opacity: stackExpanded ? 1 : (opacityLevels[i] ?? 0.2),
-                                                            position: 'relative' as const,
-                                                            zIndex: stackExpanded ? 5 : (4 - i),
-                                                            transition: 'all 0.3s ease-out',
-                                                            transitionDelay: stackExpanded ? `${i * 50}ms` : '0ms',
-                                                            overflow: 'hidden',
-                                                            height: stackExpanded ? 'auto' : (i === 0 ? 'auto' : undefined),
-                                                        }}>
-                                                            <div style={{
-                                                                display: 'flex', alignItems: 'center', gap: '12px',
-                                                                opacity: stackExpanded ? 1 : (i === 0 ? 1 : 0),
-                                                                transition: 'opacity 0.2s ease',
-                                                                transitionDelay: stackExpanded ? `${i * 80 + 100}ms` : '0ms',
-                                                            }}>
-                                                                {/* Planet glyph */}
-                                                                <div style={{
-                                                                    width: '38px', height: '38px', borderRadius: '50%', flexShrink: 0,
-                                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                                    fontSize: '17px',
-                                                                    border: '1.5px solid rgba(197,147,65,0.3)',
-                                                                    background: 'radial-gradient(circle, rgba(197,147,65,0.06) 0%, transparent 70%)',
-                                                                }}>
-                                                                    <span style={{ color: '#C59341' }}>{hit.transitPlanet.glyph}</span>
-                                                                </div>
-                                                                <div style={{ flex: 1, minWidth: 0 }}>
-                                                                    <p style={{
-                                                                        fontFamily: 'var(--font-display)',
-                                                                        fontSize: '11px', fontWeight: 600,
-                                                                        letterSpacing: '2px',
-                                                                        textTransform: 'uppercase' as const,
-                                                                        color: 'rgba(226,232,240,0.85)',
-                                                                        marginBottom: '3px',
-                                                                    }}>
-                                                                        ✨ {wInfo.title}
-                                                                    </p>
-                                                                    <p style={{
-                                                                        fontSize: '11px',
-                                                                        color: 'rgba(196,196,220,0.6)',
-                                                                        fontWeight: 300, lineHeight: 1.45,
-                                                                        display: '-webkit-box',
-                                                                        WebkitLineClamp: 2,
-                                                                        WebkitBoxOrient: 'vertical' as const,
-                                                                        overflow: 'hidden',
-                                                                    }}>{wInfo.msg}</p>
-                                                                </div>
-                                                                {/* Date pill */}
-                                                                <div style={{ flexShrink: 0 }}>
-                                                                    <span style={{
-                                                                        fontFamily: 'var(--font-display)',
-                                                                        fontSize: '10px', letterSpacing: '1px',
-                                                                        textTransform: 'uppercase' as const,
-                                                                        padding: '4px 10px', borderRadius: '20px',
-                                                                        background: 'rgba(148,163,184,0.06)',
-                                                                        color: 'rgba(196,196,220,0.55)',
-                                                                        border: '1px solid rgba(255,255,255,0.08)',
-                                                                        whiteSpace: 'nowrap' as const,
-                                                                    }}>{(() => {
-                                                                        const d = new Date(hit.peakDate + 'T12:00:00');
-                                                                        return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-                                                                    })()}</span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                })}
-
-
-
-                                            </div>
-                                        )}
-
-                                        {/* No NOW cards — show first Coming as hero-style */}
-                                        {nowWindows.length === 0 && comingWindows.length > 0 && (() => {
-                                            const firstComing = comingWindows[0];
-                                            const wInfo = WINDOW_PLANET_MSG[firstComing.transitPlanet.id];
-                                            if (!wInfo) return null;
-                                            return (
-                                                <p style={{
-                                                    fontSize: '10px', color: 'rgba(210,210,230,0.8)',
-                                                    fontStyle: 'italic', textAlign: 'center' as const,
-                                                    marginTop: '6px',
-                                                }}>No active windows — {comingWindows.length} approaching</p>
-                                            );
-                                        })()}
-                                    </div>
-                                );
-                            })()}
 
                         </div>
 
-
-
                         <div className="h-10" />
                     </div>
-
                     {/* CSS Animations */}
                     <style>{`
                         @keyframes shimmer {
@@ -2762,8 +2808,16 @@ export function CreateTab({ onClose, onTabChange, subscription, onShowPremium }:
                                         const progress = linkedScript ? getScriptProgress(linkedScript.id) : null;
                                         const doneToday = progress?.todayComplete ?? false;
                                         return (
-                                            <button
+                                            <div
                                                 key={m.id}
+                                                style={{
+                                                    position: 'relative' as const,
+                                                    display: 'flex',
+                                                    alignItems: 'stretch',
+                                                    gap: '0',
+                                                }}
+                                            >
+                                            <button
                                                 onClick={() => {
                                                     if (linkedScript) {
                                                         if (linkedScript.status === 'paused') {
@@ -2777,15 +2831,17 @@ export function CreateTab({ onClose, onTabChange, subscription, onShowPremium }:
                                                     refresh();
                                                 }}
                                                 style={{
-                                                    width: '100%', textAlign: 'left' as const,
+                                                    flex: 1,
+                                                    textAlign: 'left' as const,
                                                     padding: '16px 18px',
-                                                    borderRadius: '16px',
+                                                    borderRadius: '16px 0 0 16px',
                                                     background: isCurrentlyActive
                                                         ? 'linear-gradient(145deg, rgba(212,175,55,0.08) 0%, rgba(28,21,56,0.95) 100%)'
                                                         : 'rgba(255,255,255,0.02)',
                                                     border: isCurrentlyActive
                                                         ? '1px solid rgba(212,175,55,0.25)'
                                                         : '1px solid rgba(255,255,255,0.06)',
+                                                    borderRight: 'none',
                                                     cursor: linkedScript ? 'pointer' : 'default',
                                                     transition: 'all 0.2s',
                                                 }}
@@ -2826,6 +2882,35 @@ export function CreateTab({ onClose, onTabChange, subscription, onShowPremium }:
                                                     </p>
                                                 )}
                                             </button>
+                                            {/* Delete button */}
+                                            <button
+                                                onClick={() => {
+                                                    if (confirm(`Remove "${m.declaration.slice(0, 40)}"? This cannot be undone.`)) {
+                                                        deleteManifestation(m.id);
+                                                        refresh();
+                                                    }
+                                                }}
+                                                style={{
+                                                    padding: '0 14px',
+                                                    borderRadius: '0 16px 16px 0',
+                                                    background: 'rgba(220,38,38,0.08)',
+                                                    border: isCurrentlyActive
+                                                        ? '1px solid rgba(212,175,55,0.25)'
+                                                        : '1px solid rgba(255,255,255,0.06)',
+                                                    borderLeft: '1px solid rgba(220,38,38,0.15)',
+                                                    color: 'rgba(248,113,113,0.5)',
+                                                    fontSize: '14px',
+                                                    cursor: 'pointer',
+                                                    transition: 'all 0.2s',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                }}
+                                                title="Delete intention"
+                                            >
+                                                ✕
+                                            </button>
+                                            </div>
                                         );
                                     })}
                                 </div>
@@ -2926,6 +3011,55 @@ export function CreateTab({ onClose, onTabChange, subscription, onShowPremium }:
                 </div>
             )}
 
+            {/* 369 Sacred Script full-page overlay */}
+            {show369Expanded && (
+                <div className="page-frame" style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'linear-gradient(180deg, #0d0b22 0%, #1a0f2e 50%, #0d0b22 100%)' }}>
+                    <div className="page-scroll" style={{ position: 'relative' }}>
+                        <PageHeader title="369 PRACTICE" onClose={() => setShow369Expanded(false)} titleSize="lg" />
+                        <div className="max-w-[500px] mx-auto px-4 animate-fade-up" style={{ paddingTop: '8px' }}>
+                            {activeScript && scriptProgress ? (
+                                <TodayRitualCard
+                                    script={activeScript}
+                                    progress={scriptProgress}
+                                    moonPhaseName={lunarData.currentPhase.name}
+                                    onOpenRitual={(tod) => setRitualModal({ open: true, timeOfDay: tod })}
+                                    onAbandon={() => {
+                                        pauseScript(activeScript.id);
+                                        refresh();
+                                    }}
+                                />
+                            ) : (
+                                <StartSacredScript
+                                    manifestations={active.map(m => ({ id: m.id, declaration: m.declaration }))}
+                                    moonPhaseName={lunarData.currentPhase.name}
+                                    onStart={refresh}
+                                />
+                            )}
+                            {completedScripts.length > 0 && (
+                                <div style={{ marginTop: '16px' }}>
+                                    <PastSacredTexts scripts={completedScripts} />
+                                </div>
+                            )}
+                            <div className="h-10" />
+
+                            {/* Momentum Heatmap */}
+                            <div style={{
+                                marginTop: '8px',
+                                padding: '20px',
+                                borderRadius: '16px',
+                                background: 'linear-gradient(135deg, #1c1538 0%, #130f2e 50%, #0d0b22 100%)',
+                                border: '1px solid rgba(255,255,255,0.06)',
+                                boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+                            }}>
+                                <MomentumHeatmap />
+                            </div>
+
+                            <div className="h-10" />
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Manifest Journal full-page overlay */}
             {showJournalPage && (
                 <ManifestJournalPage
@@ -2938,6 +3072,49 @@ export function CreateTab({ onClose, onTabChange, subscription, onShowPremium }:
             {/* Journal history overlay */}
             {showJournalHistory && (
                 <JournalHistoryView onClose={() => setShowJournalHistory(false)} />
+            )}
+
+            {/* Witness Capture — full overlay outside scroll container */}
+            {showWitnessCapture && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        inset: 0,
+                        zIndex: 9999,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: 'rgba(0,0,0,0.65)',
+                    }}
+                    onClick={(e) => {
+                        if (e.target === e.currentTarget) {
+                            setShowWitnessCapture(false);
+                            refresh();
+                        }
+                    }}
+                >
+                    <div
+                        className="animate-fade-up"
+                        style={{
+                            width: 'calc(100% - 32px)',
+                            maxWidth: '500px',
+                            background: 'linear-gradient(135deg, #1c1538 0%, #130f2e 50%, #0d0b22 100%)',
+                            borderRadius: '24px',
+                            padding: '24px 20px 28px',
+                            maxHeight: '80vh',
+                            overflowY: 'auto' as const,
+                            border: '1px solid rgba(212,175,55,0.10)',
+                            boxShadow: '0 8px 40px rgba(0,0,0,0.6)',
+                        }}
+                    >
+                        <WitnessCapture
+                            onClose={() => { setShowWitnessCapture(false); refresh(); }}
+                        />
+                    </div>
+                </div>
+            )}
+            {showAttunement && (
+                <MorningAttunement onDismiss={() => setShowAttunement(false)} />
             )}
         </>
     );

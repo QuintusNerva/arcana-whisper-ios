@@ -148,18 +148,37 @@ export function DeclarationCard({ reading, spreadInsight, positions, isPremium }
                                         disabled={saved}
                                         className="flex-1 py-2.5 text-xs tracking-wide transition-all active:scale-[0.97] flex items-center justify-center gap-2"
                                         style={{
+                                            position: 'relative' as const,
+                                            overflow: 'hidden',
                                             background: saved
                                                 ? 'rgba(74,222,128,0.1)'
-                                                : 'linear-gradient(135deg, rgba(212,175,55,0.15) 0%, rgba(184,134,11,0.08) 100%)',
+                                                : 'linear-gradient(180deg, #F9E491, #D4A94E 30%, #C59341 60%, #A67B2E)',
                                             border: saved
                                                 ? '1px solid rgba(74,222,128,0.3)'
-                                                : '1px solid var(--color-gold-glow-med)',
+                                                : '2px solid rgba(212,175,55,0.6)',
                                             borderRadius: '12px',
-                                            color: saved ? '#4ade80' : 'var(--color-gold-100)',
+                                            color: saved ? '#4ade80' : '#1a0f2e',
                                             fontFamily: 'var(--font-display)',
+                                            fontWeight: 800,
+                                            letterSpacing: '3px',
+                                            textTransform: 'uppercase' as const,
+                                            boxShadow: saved
+                                                ? 'none'
+                                                : '0 2px 0 #8a6b25, 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.35)',
                                         }}
                                     >
-                                        {saved ? '✅ Saved to Manifestations' : '✨ Save to Manifestations'}
+                                        {!saved && (
+                                            <span style={{ position: 'absolute', inset: 0, overflow: 'hidden', borderRadius: '12px' }}>
+                                                <span style={{
+                                                    position: 'absolute', top: 0, left: '-100%', width: '60%', height: '100%',
+                                                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent)',
+                                                    animation: 'shimmer 3s ease-in-out infinite',
+                                                }} />
+                                            </span>
+                                        )}
+                                        <span style={{ position: 'relative' }}>
+                                            {saved ? '✅ Saved to Manifestations' : '✨ Save to Manifestations'}
+                                        </span>
                                     </button>
 
                                     {!saved && (

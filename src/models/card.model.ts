@@ -27,6 +27,9 @@ export interface Reading {
   theme: string;
   energyScore?: SpreadEnergy;     // Wise Mirror energy classification
   aiInterpretation?: string;      // Stored AI reading text (for Reading Memory Layer)
+
+  // ── Active Manifest extension (v2) ──
+  linkedManifestationId?: string;  // Explicit user link: "this reading relates to this intention"
 }
 
 export interface SpreadType {

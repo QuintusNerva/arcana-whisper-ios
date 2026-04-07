@@ -2,7 +2,9 @@ import React from 'react';
 import { safeStorage } from '../services/storage.service';
 import { AIService } from '../services/ai.service';
 import { getBirthData, getNatalTriad, getLifePathNumber, getCurrentPersonalYear } from '../services/astrology.service';
-import { createManifestation } from '../services/manifestation.service';
+import { createManifestation, getActiveManifestations, linkWitnessEvent } from '../services/manifestation.service';
+import { saveWitnessEvent } from '../services/witness.service';
+import { invalidateForgeCache } from '../services/forge.service';
 
 const ANGEL_LOG_KEY = 'arcana_angel_log';
 const ANGEL_MEANING_CACHE_KEY = 'arcana_angel_meanings';
@@ -123,7 +125,9 @@ export function AngelNumbersSection() {
                 };
             }
 
-            const raw = await ai.getAngelNumberMeaning(num, chartContext, whereSpotted || undefined);
+            // Pass active intentions for soft cross-reference
+            const activeIntentions = getActiveManifestations().map(m => m.declaration);
+            const raw = await ai.getAngelNumberMeaning(num, chartContext, whereSpotted || undefined, activeIntentions.length > 0 ? activeIntentions : undefined);
             const updated = { ...getMeaningCache(), [num]: raw };
             saveMeaningCache(updated);
             setMeaning(parseMeaning(raw));
@@ -167,6 +171,17 @@ export function AngelNumbersSection() {
         const updated = [entry, ...getLog()].slice(0, 50);
         saveLog(updated);
         setLog(updated);
+
+        // Bridge: also save as WitnessEvent
+        saveWitnessEvent({
+            type: 'angel_number',
+            description: whereSpotted
+                ? `Saw ${selected} on ${whereSpotted}`
+                : `Spotted angel number ${selected}`,
+            note: note || undefined,
+            angelNumber: selected,
+        });
+
         setSelected(null);
         setMeaning(null);
         setNote('');
@@ -459,7 +474,15 @@ export function AngelNumbersSection() {
                                     <button
                                         onClick={() => {
                                             if (!meaning.ritual || ritualSaved) return;
-                                            createManifestation(meaning.ritual, 'intention', `Angel Number ${selected}`);
+                                            const manif = createManifestation(meaning.ritual, 'intention', `Angel Number ${selected}`);
+                                            // Bridge: save witness event linked to the new manifestation
+                                            const witnessEvt = saveWitnessEvent({
+                                                type: 'angel_number',
+                                                description: `Angel Number ${selected} appeared — created intention`,
+                                                linkedManifestationId: manif.id,
+                                                angelNumber: selected || undefined,
+                                            });
+                                            linkWitnessEvent(manif.id, witnessEvt.id);
                                             setRitualSaved(true);
                                         }}
                                         disabled={ritualSaved}

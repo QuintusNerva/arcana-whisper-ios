@@ -52,6 +52,7 @@ import type { Card } from '../models/card.model';
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const MODEL = 'anthropic/claude-haiku-4.5';
 const PREMIUM_MODEL = 'anthropic/claude-haiku-4.5';
+const LITE_MODEL = 'google/gemini-2.5-flash-lite';  // Cost-efficient model for structured/simple outputs
 const STORAGE_KEY = 'openrouter_api_key';
 
 // ── Caching ──
@@ -156,7 +157,7 @@ export class AIService {
             readingMemoryCtx: context ? buildReadingMemoryContext(context.theme || 'general', context.question) : null,
             chartCtx: buildChartNumerologyContext(),
         });
-        return this.chat(system, user);
+        return this.chatLite(system, user);
     }
 
     /**
@@ -195,7 +196,7 @@ export class AIService {
         });
 
         const cardCount = cards.length;
-        const tokenBudget = cardCount >= 10 ? 3000 : cardCount >= 7 ? 2500 : cardCount >= 4 ? 2000 : cardCount >= 3 ? 1200 : 600;
+        const tokenBudget = cardCount >= 10 ? 5000 : cardCount >= 7 ? 4000 : cardCount >= 4 ? 3000 : cardCount >= 3 ? 1500 : 800;
         return this.chat(system, user, tokenBudget);
     }
 
@@ -214,7 +215,7 @@ export class AIService {
         const { system, user } = buildEnergyReadingPrompt({
             cards: cardData, chartCtx: buildChartNumerologyContext(),
         });
-        return this.chat(system, user);
+        return this.chatLite(system, user);
     }
 
     /**
@@ -232,7 +233,7 @@ export class AIService {
         }));
         const tone = scoreSpreadEnergy(drawnCards);
         const { system, user } = buildDeclarationPrompt({ ...params, tone });
-        return this.chat(system, user);
+        return this.chatLite(system, user);
     }
 
     /**
@@ -240,7 +241,7 @@ export class AIService {
      */
     async getRitualFollowUp(userQuestion: string): Promise<string> {
         const { system, user } = buildRitualFollowUpPrompt({ userQuestion });
-        return this.chat(system, user, 80);
+        return this.chatLite(system, user, 80);
     }
 
     /**
@@ -250,7 +251,7 @@ export class AIService {
         question: string, followUpAnswer?: string,
     ): Promise<{ spreadId: string; theme: string; explanation: string }> {
         const { system, user } = buildRitualRecommendationPrompt({ question, followUpAnswer });
-        const raw = await this.chat(system, user, 120);
+        const raw = await this.chatLite(system, user, 120);
         try {
             const jsonMatch = raw.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
@@ -337,7 +338,7 @@ export class AIService {
         const { system, user } = buildTransitPrompt({
             transitPlanet, natalPlanet, aspect, orb, isApplying, triadContext, lifePath, personalYear,
         });
-        return this.chat(system, user, 200);
+        return this.chatLite(system, user, 200);
     }
 
     /**
@@ -499,8 +500,9 @@ export class AIService {
             lifePath?: number; personalYear?: number;
         },
         whereSpotted?: string,
+        activeIntentions?: string[],
     ): Promise<string> {
-        const { system, user } = buildAngelNumberPrompt({ number, chartContext, whereSpotted });
+        const { system, user } = buildAngelNumberPrompt({ number, chartContext, whereSpotted, activeIntentions });
         return this.chat(system, user, 400);
     }
 
@@ -599,6 +601,72 @@ export class AIService {
         const content = data.choices?.[0]?.message?.content;
         if (!content) throw new Error('No response from AI. Please try again.');
         return content.trim();
+    }
+
+    /**
+     * LITE tier — uses Gemini 2.5 Flash Lite for cost-efficient, structured outputs.
+     * Used for: card insights, energy readings, declarations, ritual follow-ups,
+     * spread recommendations, transit interpretations.
+     * Falls back to standard MODEL on failure.
+     */
+    async chatLite(systemPrompt: string, userPrompt: string, maxTokens = 600): Promise<string> {
+        if (!this.apiKey) {
+            throw new Error('No API key configured. Add your OpenRouter key in Settings.');
+        }
+        if (!navigator.onLine) {
+            throw new Error('You appear to be offline. AI insights require an internet connection. Tarot, astrology, and numerology still work offline!');
+        }
+        try {
+            const raw = safeStorage.getItem('ai_consent');
+            if (raw) {
+                const consent = JSON.parse(raw);
+                if (consent.consented === false) {
+                    throw new Error('AI features are disabled. You can enable them in Settings.');
+                }
+            }
+        } catch (e) {
+            if (e instanceof Error && e.message.includes('AI features are disabled')) throw e;
+            throw new Error('AI features are disabled. You can enable them in Settings.');
+        }
+
+        try {
+            const response = await fetch(OPENROUTER_URL, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${this.apiKey}`,
+                    'Content-Type': 'application/json',
+                    'HTTP-Referer': window.location.origin,
+                    'X-Title': 'Arcana Whisper',
+                },
+                body: JSON.stringify({
+                    model: LITE_MODEL,
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        { role: 'user', content: userPrompt },
+                    ],
+                    max_tokens: maxTokens,
+                    temperature: 0.8,
+                }),
+                signal: AbortSignal.timeout(30000),
+            });
+
+            if (!response.ok) {
+                if (import.meta.env.DEV) console.warn('[AI] Lite model failed, falling back to standard:', response.status);
+                return this.chat(systemPrompt, userPrompt, maxTokens);
+            }
+
+            const data = await response.json();
+            const content = data.choices?.[0]?.message?.content;
+            if (!content) {
+                // Fallback to standard model
+                return this.chat(systemPrompt, userPrompt, maxTokens);
+            }
+            return content.trim();
+        } catch (error) {
+            // Network or other error — fall back to standard model
+            if (import.meta.env.DEV) console.warn('[AI] Lite model error, falling back:', error);
+            return this.chat(systemPrompt, userPrompt, maxTokens);
+        }
     }
 }
 
